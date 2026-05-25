@@ -3,6 +3,8 @@ import { useMemo, useState } from 'react'
 import { Route as rootRoute } from './__root'
 import { decodeVector } from '../lib/quiz'
 import { getRecommendationSlots, type ScoredBeer } from '../lib/scoring'
+import { RatingPrompt } from '../components/RatingPrompt'
+import { FLAVOR_VECTOR_DIMENSIONS } from '@beerolog/types'
 
 export const Route = createRoute({
   getParentRoute: () => rootRoute,
@@ -67,6 +69,7 @@ function ResultsPage() {
   const { v } = Route.useSearch()
   const vector = useMemo(() => decodeVector(v), [v])
   const [excluded, setExcluded] = useState<string[]>([])
+  const [ratingBeer, setRatingBeer] = useState<ScoredBeer | null>(null)
 
   const { best, backup, adventurous } = useMemo(
     () => getRecommendationSlots(vector, undefined, excluded),
@@ -74,6 +77,7 @@ function ResultsPage() {
   )
 
   return (
+    <>
     <main className="flex min-h-screen flex-col items-center justify-start p-6 pt-10 bg-gradient-to-b from-amber-50 to-white">
       <div className="w-full max-w-sm flex flex-col gap-6">
 
@@ -110,7 +114,27 @@ function ResultsPage() {
           </Link>
         </div>
 
+        <button
+          onClick={() => setRatingBeer(best)}
+          className="text-center text-xs text-neutral-400 underline hover:text-neutral-600"
+        >
+          Rate your beer →
+        </button>
+
       </div>
     </main>
+
+    {ratingBeer && (
+      <RatingPrompt
+        beer={{
+          id: ratingBeer.name,
+          name: ratingBeer.name,
+          style: ratingBeer.style,
+          flavor_vector: FLAVOR_VECTOR_DIMENSIONS.map((d) => ratingBeer.fv[FLAVOR_VECTOR_DIMENSIONS.indexOf(d)] ?? 0.5),
+        }}
+        onDismiss={() => setRatingBeer(null)}
+      />
+    )}
+    </>
   )
 }
