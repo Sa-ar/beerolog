@@ -1,16 +1,21 @@
-from pydantic_settings import BaseSettings
+from functools import lru_cache
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    database_url: str
-    openai_api_key: str
-    cognito_user_pool_id: str
-    cognito_client_id: str
-    cognito_region: str = "us-east-1"
-    api_secret: str
+    model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8')
 
-    class Config:
-        env_file = ".env"
+    database_url: str = ''
+    openai_api_key: str = ''
+    cognito_user_pool_id: str = ''
+    cognito_client_id: str = ''
+    cognito_region: str = 'us-east-1'
+    api_secret: str = 'dev-secret'
 
 
-settings = Settings()  # type: ignore[call-arg]
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()
+
+
+settings = get_settings()

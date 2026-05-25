@@ -1,7 +1,9 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from app.models.flavor import FlavorVector
 from app.services.recommendation_service import score_beers
+from app.services.explanation_service import generate_explanations
+from app.dependencies import get_llm_client
 
 router = APIRouter(prefix="/recommendations", tags=["recommendations"])
 
@@ -28,7 +30,7 @@ class RecommendationResponse(BaseModel):
 
 
 @router.post("/")
-async def recommend(req: RecommendationRequest) -> RecommendationResponse:
+async def recommend(req: RecommendationRequest, llm=Depends(get_llm_client)) -> RecommendationResponse:
     if not req.beers:
         raise HTTPException(status_code=422, detail="No beers provided")
 
@@ -44,10 +46,12 @@ async def recommend(req: RecommendationRequest) -> RecommendationResponse:
     backup = BeerInput(**{k: v for k, v in scored[1].items() if k != "score"}) if len(scored) > 1 else None
     adventurous = BeerInput(**{k: v for k, v in scored[-1].items() if k != "score"}) if len(scored) > 2 else None
 
-    # TODO: call LLM for explanations (slice 5 wires this up)
-    explanations = {
-        best.id: f"A strong match for your taste profile.",
-    }
+    top_beers = [b for b in [best, backup, adventurous] if b is not None]
+    explanations = await generate_explanations(
+        req.taste_vector,
+        [b.model_dump() for b in top_beers],
+        llm,
+    )
 
     return RecommendationResponse(
         best=best,
