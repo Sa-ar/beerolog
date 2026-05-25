@@ -1,5 +1,10 @@
 import { createRouter as createTanStackRouter } from '@tanstack/react-router'
-import { routeTree } from './routeTree.gen'
+import { Route as rootRoute } from './routes/__root'
+import { Route as IndexRoute } from './routes/index'
+import { Route as QuizRoute } from './routes/quiz'
+import { Route as ResultsRoute } from './routes/results'
+
+const routeTree = rootRoute.addChildren([IndexRoute, QuizRoute, ResultsRoute])
 
 export function createRouter() {
   return createTanStackRouter({
