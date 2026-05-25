@@ -28,10 +28,11 @@ pnpm dev
 pnpm dev
 ```
 
-## Typecheck
+## Quality checks
 
 ```bash
 pnpm typecheck
+pnpm lint
 ```
 
 ## Environment variables

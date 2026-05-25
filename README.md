@@ -52,9 +52,7 @@ cp apps/web/.env.local.example apps/web/.env.local
 
 # 4. Set up the API Python environment
 cd apps/api
-python3.12 -m venv .venv
-source .venv/bin/activate
-pip install -e ".[dev]"
+uv sync --extra dev
 cd ../..
 
 # 5. Run migrations
@@ -63,7 +61,15 @@ pnpm db:migrate
 # 6. Start everything
 pnpm dev          # web app (http://localhost:3000)
 # In a separate terminal:
-cd apps/api && source .venv/bin/activate && uvicorn app.main:app --reload
+cd apps/api && uv run uvicorn app.main:app --reload
+```
+
+## Verification
+
+```bash
+pnpm typecheck
+pnpm lint
+pnpm test
 ```
 
 ## Further reading

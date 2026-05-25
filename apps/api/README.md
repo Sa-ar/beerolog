@@ -9,9 +9,7 @@ Python FastAPI backend. Handles recommendations, user profiles, venues, group se
 ## Setup
 
 ```bash
-python3.12 -m venv .venv
-source .venv/bin/activate        # Windows: .venv\Scripts\activate
-pip install -e ".[dev]"
+uv sync --extra dev
 cp .env.example .env
 # Fill in .env — see env var table below
 ```
@@ -19,17 +17,17 @@ cp .env.example .env
 ## Running
 
 ```bash
-source .venv/bin/activate
-uvicorn app.main:app --reload
+uv run uvicorn app.main:app --reload
 # API at http://localhost:8000
 # OpenAPI docs at http://localhost:8000/docs
 ```
 
-## Tests
+## Quality checks
 
 ```bash
-source .venv/bin/activate
-pytest
+uv run ruff check .
+uv run ruff format --check .
+uv run pytest tests/ -v
 ```
 
 Tests never hit a real database — every service has an `InMemory*Repo` used via FastAPI `dependency_overrides`. Safe to run without any services configured.
