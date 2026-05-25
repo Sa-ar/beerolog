@@ -2,7 +2,7 @@ import { createRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { Route as rootRoute } from './__root'
 import { getUser, clearToken } from '../lib/auth'
-import { getMyHistory, getMyPersona } from '../lib/api'
+import { getMyHistory, getMyPersona, createChallenge } from '../lib/api'
 import type { PersonaData } from '../lib/api'
 import { BEER_SEEDS } from '../data/beers'
 import { PersonaCard } from '../components/PersonaCard'
@@ -28,6 +28,17 @@ function ProfilePage() {
     void getMyHistory().then(setHistory).catch(() => setHistory([]))
     void getMyPersona().then((p) => { if (p) setPersona(p) })
   }, [])
+
+  const [challengeLink, setChallengeLink] = useState<string | null>(null)
+
+  async function handleCreateChallenge() {
+    try {
+      const { token } = await createChallenge()
+      const url = `${window.location.origin}/challenge/${token}`
+      setChallengeLink(url)
+      void navigator.clipboard.writeText(url)
+    } catch { /* not signed in or API down */ }
+  }
 
   function handleShare() {
     if (!persona) return
@@ -61,6 +72,17 @@ function ProfilePage() {
             >
               📲 Share my persona
             </button>
+            <button
+              onClick={() => void handleCreateChallenge()}
+              className="rounded-xl border border-neutral-200 bg-white py-2.5 text-sm font-semibold text-neutral-700 hover:bg-neutral-50"
+            >
+              🤚 Challenge a friend
+            </button>
+            {challengeLink && (
+              <p className="rounded-xl bg-neutral-50 border border-neutral-200 p-3 text-xs font-mono text-neutral-500 break-all">
+                {challengeLink} — copied!
+              </p>
+            )}
           </div>
         )}
 
