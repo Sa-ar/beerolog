@@ -74,3 +74,59 @@ export async function getMyHistory(): Promise<Array<{ beer_id: string; rating: s
   const data = res.json() as Promise<{ entries: Array<{ beer_id: string; rating: string | null; tried_at: string }> }>
   return (await data).entries
 }
+
+// ── Group sessions ────────────────────────────────────────────────────────
+
+export type SessionStatus = {
+  session_id: string
+  total: number
+  completed: number
+  participants: Array<{ id: string; name: string; submitted: boolean }>
+}
+
+export type GroupRecommendation = {
+  group_vector: number[]
+  high_variance: boolean
+}
+
+export async function createSession(hostId: string): Promise<{ session_id: string; expires_at: string }> {
+  const res = await fetch(`${API_URL}/sessions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ host_id: hostId }),
+  })
+  if (!res.ok) throw new Error('Failed to create session')
+  return res.json() as Promise<{ session_id: string; expires_at: string }>
+}
+
+export async function joinSession(sessionId: string, name: string): Promise<{ participant_id: string }> {
+  const res = await fetch(`${API_URL}/sessions/${sessionId}/join`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name }),
+  })
+  if (res.status === 410) throw new Error('Session has expired')
+  if (!res.ok) throw new Error('Failed to join session')
+  return res.json() as Promise<{ participant_id: string }>
+}
+
+export async function submitVector(sessionId: string, participantId: string, vector: number[]): Promise<void> {
+  const res = await fetch(`${API_URL}/sessions/${sessionId}/submit`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ participant_id: participantId, vector }),
+  })
+  if (!res.ok) throw new Error('Failed to submit vector')
+}
+
+export async function getSessionStatus(sessionId: string): Promise<SessionStatus> {
+  const res = await fetch(`${API_URL}/sessions/${sessionId}/status`)
+  if (!res.ok) throw new Error('Session not found')
+  return res.json() as Promise<SessionStatus>
+}
+
+export async function getGroupRecommendation(sessionId: string): Promise<GroupRecommendation> {
+  const res = await fetch(`${API_URL}/sessions/${sessionId}/recommend`)
+  if (!res.ok) throw new Error('Failed to get recommendation')
+  return res.json() as Promise<GroupRecommendation>
+}
