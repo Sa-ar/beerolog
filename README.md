@@ -72,6 +72,12 @@ pnpm lint
 pnpm test
 ```
 
+## Supported MVP After Cleanup
+
+- Canonical supported journey: signed-in, profile-centered solo flow
+- Authoritative recommendation path: API `/recommendations`
+- Deferred from the cleaned MVP: venue/scan, group, and challenge surfaces
+
 ## Further reading
 
 - [API setup](apps/api/README.md)
