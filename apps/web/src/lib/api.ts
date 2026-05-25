@@ -2,6 +2,40 @@ import { authHeaders } from './auth'
 
 const API_URL = (import.meta.env['VITE_API_URL'] as string | undefined) ?? 'http://localhost:8000'
 
+export type TapListResponse = {
+  venue_id: string
+  beer_ids: string[]
+}
+
+export type ScanResultItem = {
+  raw_text: string
+  matched_id: string | null
+  confidence: number
+  needs_review: boolean
+}
+
+export async function getTapList(venueId: string): Promise<TapListResponse> {
+  const res = await fetch(`${API_URL}/venues/${venueId}/tap-list`)
+  if (!res.ok) throw new Error('Failed to fetch tap list')
+  return res.json() as Promise<TapListResponse>
+}
+
+export async function setTapList(venueId: string, beerIds: string[]): Promise<TapListResponse> {
+  const res = await fetch(`${API_URL}/venues/${venueId}/tap-list`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ beer_ids: beerIds }),
+  })
+  if (!res.ok) throw new Error('Failed to update tap list')
+  return res.json() as Promise<TapListResponse>
+}
+
+export async function resolveQRToken(token: string): Promise<TapListResponse> {
+  const res = await fetch(`${API_URL}/scan/${token}`)
+  if (!res.ok) throw new Error('Invalid or expired QR code')
+  return res.json() as Promise<TapListResponse>
+}
+
 // ── User profile ─────────────────────────────────────────────────────────────
 
 export async function saveProfile(vector: number[]): Promise<void> {
@@ -129,4 +163,37 @@ export async function getGroupRecommendation(sessionId: string): Promise<GroupRe
   const res = await fetch(`${API_URL}/sessions/${sessionId}/recommend`)
   if (!res.ok) throw new Error('Failed to get recommendation')
   return res.json() as Promise<GroupRecommendation>
+}
+
+export type LeaderboardEntry = {
+  user_id: string
+  username: string
+  persona_icon: string
+  recommendation_count: number
+  rank: number
+}
+
+export type LeaderboardResponse = {
+  entries: LeaderboardEntry[]
+  viewer_rank: number | null
+}
+
+export async function getLeaderboard(venueId: string): Promise<LeaderboardResponse> {
+  const res = await fetch(`${API_URL}/venues/${venueId}/leaderboard`, { headers: authHeaders() })
+  if (!res.ok) throw new Error('Failed to fetch leaderboard')
+  return res.json() as Promise<LeaderboardResponse>
+}
+
+export async function scanMenuImage(
+  venueId: string,
+  imageBase64: string,
+  catalog: Array<{ id: string; name: string; brewery: string }>,
+): Promise<ScanResultItem[]> {
+  const res = await fetch(`${API_URL}/venues/${venueId}/scan`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ image_base64: imageBase64, catalog }),
+  })
+  if (!res.ok) throw new Error('Scan failed')
+  return res.json() as Promise<ScanResultItem[]>
 }
