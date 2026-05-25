@@ -1,8 +1,7 @@
 import { createRoute, Link } from '@tanstack/react-router'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Route as rootRoute } from './__root'
 import { resolveQRToken } from '../lib/api'
-import { getRecommendationSlots } from '../lib/scoring'
 import { BEER_SEEDS } from '../data/beers'
 
 export const Route = createRoute({
@@ -46,7 +45,6 @@ function ScanLandingPage() {
 
   const { venueId, beerIds } = state
   const tapBeers = BEER_SEEDS.filter((b) => beerIds.includes(b.name))
-  const slots = tapBeers.length > 0 ? getRecommendationSlots(undefined as never, tapBeers) : null
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-start p-6 pt-10 bg-gradient-to-b from-amber-50 to-white">

@@ -22,12 +22,10 @@ const SLOT_LABELS = {
 function BeerCard({
   beer,
   slot,
-  excluded,
   onSkip,
 }: {
   beer: ScoredBeer
   slot: keyof typeof SLOT_LABELS
-  excluded: string[]
   onSkip?: () => void
 }) {
   const { label, emoji, color } = SLOT_LABELS[slot]
@@ -89,16 +87,15 @@ function ResultsPage() {
         <BeerCard
           beer={best}
           slot="best"
-          excluded={excluded}
           onSkip={() => setExcluded((e) => [...e, best.name])}
         />
 
         {backup && (
-          <BeerCard beer={backup} slot="backup" excluded={excluded} />
+          <BeerCard beer={backup} slot="backup" />
         )}
 
         {adventurous && adventurous.name !== best.name && adventurous.name !== backup?.name && (
-          <BeerCard beer={adventurous} slot="adventurous" excluded={excluded} />
+          <BeerCard beer={adventurous} slot="adventurous" />
         )}
 
         <div className="flex gap-3">

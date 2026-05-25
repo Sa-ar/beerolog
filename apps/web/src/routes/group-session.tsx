@@ -1,8 +1,8 @@
-import { createRoute, useNavigate } from '@tanstack/react-router'
+import { createRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Route as rootRoute } from './__root'
 import { joinSession, submitVector } from '../lib/api'
-import { computeFlavorVector, encodeVector, getNextQuestion, type QuizAnswers } from '../lib/quiz'
+import { computeFlavorVector, getNextQuestion, type QuizAnswers } from '../lib/quiz'
 
 export const Route = createRoute({
   getParentRoute: () => rootRoute,
@@ -12,7 +12,6 @@ export const Route = createRoute({
 
 function GroupJoinPage() {
   const { sessionId } = Route.useParams()
-  const navigate = useNavigate()
 
   const [step, setStep] = useState<'join' | 'quiz' | 'done' | 'error'>('join')
   const [name, setName] = useState('')

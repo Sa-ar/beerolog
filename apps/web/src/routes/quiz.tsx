@@ -2,7 +2,6 @@ import { createRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Route as rootRoute } from './__root'
 import {
-  QUIZ_QUESTIONS,
   getNextQuestion,
   getActiveQuestions,
   computeFlavorVector,

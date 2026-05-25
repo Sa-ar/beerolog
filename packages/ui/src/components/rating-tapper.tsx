@@ -4,8 +4,8 @@ import { cn } from '../lib/utils'
 
 const OPTIONS: { value: Rating; label: string; emoji: string }[] = [
   { value: 'loved', label: 'Loved it', emoji: '❤️' },
-  { value: 'fine', label: 'It was fine', emoji: '\U0001f44d' },
-  { value: 'disliked', label: 'Not for me', emoji: '\U0001f937' },
+  { value: 'fine', label: 'It was fine', emoji: '👍' },
+  { value: 'disliked', label: 'Not for me', emoji: '🤷' },
 ]
 
 interface RatingTapperProps {

@@ -1,5 +1,4 @@
 import type { ComparisonResult } from '../lib/api'
-import { FLAVOR_VECTOR_DIMENSIONS } from '@beerolog/types'
 
 const DIM_LABELS: Record<string, string> = {
   bitterness: 'Bitterness', sweetness: 'Sweetness', fruitiness: 'Fruitiness',
