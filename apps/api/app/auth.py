@@ -1,9 +1,12 @@
 """Cognito JWT validation middleware."""
-import httpx
+
 from functools import lru_cache
+
+import httpx
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from jose import jwt, JWTError
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from jose import JWTError, jwt
+
 from app.config import settings
 
 bearer = HTTPBearer(auto_error=False)

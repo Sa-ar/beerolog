@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import health, recommendations, venues, sessions, users, challenges, leaderboard
+
+from app.routes import challenges, health, leaderboard, recommendations, sessions, users, venues
 
 app = FastAPI(title="Beerolog API", version="0.0.1")
 

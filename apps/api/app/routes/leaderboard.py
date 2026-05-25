@@ -5,7 +5,7 @@ from app.auth import get_current_user
 from app.dependencies import get_leaderboard_repo
 from app.services.leaderboard import get_leaderboard
 
-router = APIRouter(tags=['leaderboard'])
+router = APIRouter(tags=["leaderboard"])
 
 
 class LeaderboardEntryResponse(BaseModel):
@@ -21,7 +21,7 @@ class LeaderboardResponse(BaseModel):
     viewer_rank: int | None
 
 
-@router.get('/venues/{venue_id}/leaderboard', response_model=LeaderboardResponse)
+@router.get("/venues/{venue_id}/leaderboard", response_model=LeaderboardResponse)
 async def venue_leaderboard(
     venue_id: str,
     repo=Depends(get_leaderboard_repo),
@@ -29,7 +29,7 @@ async def venue_leaderboard(
 ) -> LeaderboardResponse:
     result = await get_leaderboard(
         venue_id=venue_id,
-        viewer_id=current_user['sub'],
+        viewer_id=current_user["sub"],
         repo=repo,
     )
     return LeaderboardResponse(
@@ -41,7 +41,7 @@ async def venue_leaderboard(
                 recommendation_count=e.recommendation_count,
                 rank=e.rank,
             )
-            for e in result['entries']
+            for e in result["entries"]
         ],
-        viewer_rank=result['viewer_rank'],
+        viewer_rank=result["viewer_rank"],
     )

@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from .fuzzy_matcher import CatalogEntry, MatchResult, fuzzy_match
+
+from .fuzzy_matcher import CatalogEntry, fuzzy_match
 
 
 @dataclass
@@ -21,17 +22,21 @@ async def scan_menu(
         matches = fuzzy_match(name, catalog)
         if matches:
             best = matches[0]
-            results.append(ScanResult(
-                raw_text=name,
-                match=best.entry,
-                confidence=best.score,
-                needs_review=best.score < 0.85,
-            ))
+            results.append(
+                ScanResult(
+                    raw_text=name,
+                    match=best.entry,
+                    confidence=best.score,
+                    needs_review=best.score < 0.85,
+                )
+            )
         else:
-            results.append(ScanResult(
-                raw_text=name,
-                match=None,
-                confidence=0.0,
-                needs_review=True,
-            ))
+            results.append(
+                ScanResult(
+                    raw_text=name,
+                    match=None,
+                    confidence=0.0,
+                    needs_review=True,
+                )
+            )
     return results

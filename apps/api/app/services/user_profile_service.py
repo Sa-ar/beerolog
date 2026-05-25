@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Protocol
 
 
@@ -30,7 +29,7 @@ class InMemoryUserProfileRepo:
         return self._history.get(user_id, [])
 
     async def add_to_history(self, user_id: str, beer_id: str, rating: str | None) -> None:
-        entry = {'beer_id': beer_id, 'rating': rating, 'tried_at': datetime.now(timezone.utc).isoformat()}
+        entry = {"beer_id": beer_id, "rating": rating, "tried_at": datetime.now(UTC).isoformat()}
         self._history.setdefault(user_id, []).append(entry)
 
     async def get_suppressions(self, user_id: str) -> dict[str, int]:

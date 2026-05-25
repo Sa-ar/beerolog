@@ -1,6 +1,8 @@
 """Hybrid recommendation: cosine scoring on 7-dim vectors + LLM explanation."""
+
 import math
-from app.models.flavor import FlavorVector, FLAVOR_VECTOR_DIMENSIONS
+
+from app.models.flavor import FLAVOR_VECTOR_DIMENSIONS, FlavorVector
 
 
 def _cosine_similarity(a: list[float], b: list[float]) -> float:

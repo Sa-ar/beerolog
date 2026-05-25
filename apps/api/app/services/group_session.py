@@ -2,11 +2,12 @@ from __future__ import annotations
 
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Protocol
 
-from .recommendation_service import aggregate_group_vectors
 from app.models.flavor import FlavorVector
+
+from .recommendation_service import aggregate_group_vectors
 
 SESSION_TTL_HOURS = 4
 
@@ -24,7 +25,7 @@ class SessionParticipant:
     id: str
     name: str
     vector: list[float] | None = None
-    joined_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    joined_at: datetime = field(default_factory=lambda: datetime.now(UTC))
 
 
 @dataclass
@@ -57,7 +58,7 @@ class InMemorySessionRepo:
 
 
 async def create_session(repo: SessionRepo, host_id: str) -> GroupSession:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     session = GroupSession(
         id=str(uuid.uuid4()),
         host_id=host_id,
@@ -73,7 +74,7 @@ async def join_session(repo: SessionRepo, session_id: str, name: str) -> Session
     session = await repo.get(session_id)
     if session is None:
         raise SessionNotFoundError(session_id)
-    if datetime.now(timezone.utc) > session.expires_at:
+    if datetime.now(UTC) > session.expires_at:
         raise SessionExpiredError(session_id)
     participant = SessionParticipant(id=str(uuid.uuid4()), name=name)
     session.participants.append(participant)
@@ -81,7 +82,9 @@ async def join_session(repo: SessionRepo, session_id: str, name: str) -> Session
     return participant
 
 
-async def submit_vector(repo: SessionRepo, session_id: str, participant_id: str, vector: list[float]) -> None:
+async def submit_vector(
+    repo: SessionRepo, session_id: str, participant_id: str, vector: list[float]
+) -> None:
     session = await repo.get(session_id)
     if session is None:
         raise SessionNotFoundError(session_id)
@@ -99,10 +102,13 @@ async def get_status(repo: SessionRepo, session_id: str) -> dict:
     total = len(session.participants)
     completed = sum(1 for p in session.participants if p.vector is not None)
     return {
-        'session_id': session_id,
-        'total': total,
-        'completed': completed,
-        'participants': [{'id': p.id, 'name': p.name, 'submitted': p.vector is not None} for p in session.participants],
+        "session_id": session_id,
+        "total": total,
+        "completed": completed,
+        "participants": [
+            {"id": p.id, "name": p.name, "submitted": p.vector is not None}
+            for p in session.participants
+        ],
     }
 
 
@@ -111,9 +117,7 @@ async def get_group_recommendation(repo: SessionRepo, session_id: str, beers: li
     if session is None:
         raise SessionNotFoundError(session_id)
     submitted = [
-        FlavorVector.from_list(p.vector)
-        for p in session.participants
-        if p.vector is not None
+        FlavorVector.from_list(p.vector) for p in session.participants if p.vector is not None
     ]
     group_vector, high_variance = aggregate_group_vectors(submitted)
-    return {'group_vector': group_vector.to_list(), 'high_variance': high_variance}
+    return {"group_vector": group_vector.to_list(), "high_variance": high_variance}

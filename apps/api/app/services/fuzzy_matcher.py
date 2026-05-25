@@ -13,7 +13,7 @@ class CatalogEntry:
 class MatchResult:
     entry: CatalogEntry
     score: float
-    matched_on: Literal['exact', 'fuzzy', 'brewery+name']
+    matched_on: Literal["exact", "fuzzy", "brewery+name"]
 
 
 def _edit_distance(a: str, b: str) -> int:
@@ -50,12 +50,14 @@ def fuzzy_match(
     results = []
     for entry in catalog:
         name_score = _similarity(query, entry.name)
-        brewery_name_score = _similarity(query, f'{entry.brewery} {entry.name}')
+        brewery_name_score = _similarity(query, f"{entry.brewery} {entry.name}")
         score = max(name_score, brewery_name_score)
-        matched_on: Literal['exact', 'fuzzy', 'brewery+name'] = (
-            'exact' if name_score == 1.0
-            else 'brewery+name' if brewery_name_score > name_score
-            else 'fuzzy'
+        matched_on: Literal["exact", "fuzzy", "brewery+name"] = (
+            "exact"
+            if name_score == 1.0
+            else "brewery+name"
+            if brewery_name_score > name_score
+            else "fuzzy"
         )
         if score >= threshold:
             results.append(MatchResult(entry=entry, score=score, matched_on=matched_on))

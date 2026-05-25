@@ -4,14 +4,14 @@ import math
 import time
 from dataclasses import dataclass
 
-from jose import jwt, JWTError
+from jose import JWTError, jwt
 
-from app.models.flavor import FlavorVector, FLAVOR_VECTOR_DIMENSIONS
+from app.models.flavor import FLAVOR_VECTOR_DIMENSIONS, FlavorVector
 
-ALGORITHM = 'HS256'
+ALGORITHM = "HS256"
 DEFAULT_TTL = 7 * 24 * 3600  # 7 days
-DIFF_THRESHOLD = 0.3          # abs difference to flag as notable
-AGREE_THRESHOLD = 0.35        # both below this = shared low; both above (1 - this) = shared high
+DIFF_THRESHOLD = 0.3  # abs difference to flag as notable
+AGREE_THRESHOLD = 0.35  # both below this = shared low; both above (1 - this) = shared high
 
 
 class ChallengeExpiredError(Exception):
@@ -19,16 +19,16 @@ class ChallengeExpiredError(Exception):
 
 
 def create_challenge_token(challenger_id: str, secret: str, ttl_seconds: int = DEFAULT_TTL) -> str:
-    payload = {'challenger_id': challenger_id, 'exp': int(time.time()) + ttl_seconds}
+    payload = {"challenger_id": challenger_id, "exp": int(time.time()) + ttl_seconds}
     return jwt.encode(payload, secret, algorithm=ALGORITHM)
 
 
 def resolve_challenge_token(token: str, secret: str) -> str:
     try:
         payload = jwt.decode(token, secret, algorithms=[ALGORITHM])
-        return payload['challenger_id']
+        return payload["challenger_id"]
     except (JWTError, KeyError) as exc:
-        raise ChallengeExpiredError('Invalid or expired challenge token') from exc
+        raise ChallengeExpiredError("Invalid or expired challenge token") from exc
 
 
 @dataclass
@@ -58,8 +58,9 @@ def compare_vectors(a: FlavorVector, b: FlavorVector) -> VectorComparison:
         diff = abs(ai - bi)
         if diff >= DIFF_THRESHOLD:
             different.append(dim)
-        elif (ai <= AGREE_THRESHOLD and bi <= AGREE_THRESHOLD) or \
-             (ai >= 1 - AGREE_THRESHOLD and bi >= 1 - AGREE_THRESHOLD):
+        elif (ai <= AGREE_THRESHOLD and bi <= AGREE_THRESHOLD) or (
+            ai >= 1 - AGREE_THRESHOLD and bi >= 1 - AGREE_THRESHOLD
+        ):
             shared.append(dim)
 
     return VectorComparison(similarity=similarity, shared=shared, different=different)
