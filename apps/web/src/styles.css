@@ -1,0 +1,17 @@
+@import 'tailwindcss';
+
+:root {
+  --brand-50: 38 92% 96%;
+  --brand-100: 38 92% 90%;
+  --brand-500: 25 85% 50%;
+  --brand-600: 25 85% 43%;
+  --brand-900: 25 50% 15%;
+  --radius: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+}
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
