@@ -1,5 +1,5 @@
 import { createRoute, useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Route as rootRoute } from './__root'
 import {
   getNextQuestion,
@@ -8,6 +8,7 @@ import {
   encodeVector,
   type QuizAnswers,
 } from '../lib/quiz'
+import { getUser } from '../lib/auth'
 
 export const Route = createRoute({
   getParentRoute: () => rootRoute,
@@ -18,12 +19,27 @@ export const Route = createRoute({
 function QuizPage() {
   const navigate = useNavigate()
   const [answers, setAnswers] = useState<QuizAnswers>({})
+  const user = getUser()
+
+  useEffect(() => {
+    if (!user) {
+      void navigate({ to: '/signin', search: { next: '/quiz' } })
+    }
+  }, [navigate, user])
 
   const currentQuestion = getNextQuestion(answers)
   const activeQuestions = getActiveQuestions(answers)
   const answeredCount = Object.keys(answers).length
   const totalCount = activeQuestions.length
   const progress = totalCount > 0 ? (answeredCount / totalCount) * 100 : 0
+
+  if (!user) {
+    return (
+      <main className="flex min-h-screen items-center justify-center p-6 bg-gradient-to-b from-amber-50 to-white">
+        <p className="text-sm text-neutral-400 animate-pulse">Redirecting to sign in…</p>
+      </main>
+    )
+  }
 
   function handleAnswer(optionId: string) {
     if (!currentQuestion) return

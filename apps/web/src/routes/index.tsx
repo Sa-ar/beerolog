@@ -1,6 +1,7 @@
 import { createRoute, Link } from '@tanstack/react-router'
 import { Route as rootRoute } from './__root'
 import { Button, Card, CardContent, CardHeader } from '@beerolog/ui'
+import { getUser } from '../lib/auth'
 
 export const Route = createRoute({
   getParentRoute: () => rootRoute,
@@ -9,6 +10,8 @@ export const Route = createRoute({
 })
 
 function HomePage() {
+  const user = getUser()
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-8 p-6 bg-gradient-to-b from-amber-50 to-white">
       <div className="text-center">
@@ -20,15 +23,30 @@ function HomePage() {
 
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <h2 className="text-xl font-semibold text-neutral-900">Ready to find your beer?</h2>
-          <p className="text-sm text-neutral-500">6 quick questions. No beer knowledge required.</p>
+          <h2 className="text-xl font-semibold text-neutral-900">
+            {user ? 'Pick up where you left off' : 'Ready to find your beer?'}
+          </h2>
+          <p className="text-sm text-neutral-500">
+            {user
+              ? 'Head to your profile or retake the taste quiz for fresh recommendations.'
+              : '6 quick questions. Sign in to save your taste profile and recommendations.'}
+          </p>
         </CardHeader>
         <CardContent>
-          <Link to="/quiz">
-            <Button className="w-full" size="lg">
-              Start the quiz →
-            </Button>
-          </Link>
+          <div className="flex flex-col gap-3">
+            {user && (
+              <Link to="/profile">
+                <Button className="w-full" size="lg">
+                  Open my profile →
+                </Button>
+              </Link>
+            )}
+            <Link to="/quiz">
+              <Button className="w-full" size={user ? 'md' : 'lg'} variant={user ? 'outline' : 'default'}>
+                {user ? 'Retake the quiz' : 'Start the quiz →'}
+              </Button>
+            </Link>
+          </div>
         </CardContent>
       </Card>
     </main>

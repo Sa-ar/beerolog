@@ -5,20 +5,25 @@ import { getCognitoSignInUrl } from '../lib/auth'
 export const Route = createRoute({
   getParentRoute: () => rootRoute,
   path: '/signin',
+  validateSearch: (search: Record<string, unknown>) => ({
+    next: typeof search['next'] === 'string' ? search['next'] : '/profile',
+  }),
   component: SignInPage,
 })
 
 function SignInPage() {
+  const { next } = Route.useSearch()
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-8 p-6 bg-gradient-to-b from-amber-50 to-white">
       <div className="text-center">
         <h1 className="text-4xl font-bold text-neutral-900">🍻 Beerolog</h1>
-        <p className="mt-2 text-neutral-500">Save your taste profile and track your beer history.</p>
+        <p className="mt-2 text-neutral-500">Sign in to save your taste profile and get your API-backed beer picks.</p>
       </div>
 
       <div className="w-full max-w-xs flex flex-col gap-3">
         <a
-          href={getCognitoSignInUrl()}
+          href={getCognitoSignInUrl(next)}
           className="flex items-center justify-center gap-3 rounded-2xl border border-neutral-200 bg-white py-4 text-base font-semibold text-neutral-800 shadow-sm hover:bg-neutral-50"
         >
           <svg className="h-5 w-5" viewBox="0 0 24 24">
@@ -31,7 +36,7 @@ function SignInPage() {
         </a>
 
         <a
-          href={getCognitoSignInUrl()}
+          href={getCognitoSignInUrl(next)}
           className="flex items-center justify-center gap-3 rounded-2xl bg-black py-4 text-base font-semibold text-white hover:bg-neutral-900"
         >
           <svg className="h-5 w-5 fill-white" viewBox="0 0 24 24">

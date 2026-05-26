@@ -38,9 +38,10 @@ export function authHeaders(): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {}
 }
 
-export function getCognitoSignInUrl(): string {
+export function getCognitoSignInUrl(nextPath = '/profile'): string {
   const domain = (import.meta.env['VITE_COGNITO_DOMAIN'] as string | undefined) ?? ''
   const clientId = (import.meta.env['VITE_COGNITO_CLIENT_ID'] as string | undefined) ?? ''
   const redirect = encodeURIComponent(`${window.location.origin}/auth/callback`)
-  return `${domain}/oauth2/authorize?client_id=${clientId}&response_type=token&scope=openid+email+profile&redirect_uri=${redirect}`
+  const state = encodeURIComponent(nextPath)
+  return `${domain}/oauth2/authorize?client_id=${clientId}&response_type=token&scope=openid+email+profile&redirect_uri=${redirect}&state=${state}`
 }

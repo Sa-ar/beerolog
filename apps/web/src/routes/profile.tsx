@@ -3,8 +3,8 @@ import { useEffect, useState } from 'react'
 import { Route as rootRoute } from './__root'
 import { getUser, clearToken } from '../lib/auth'
 import { getMyHistory, getMyPersona, createChallenge } from '../lib/api'
-import type { PersonaData } from '../lib/api'
-import { BEER_SEEDS } from '../data/beers'
+import type { HistoryEntry, PersonaData } from '../lib/api'
+import { BEER_METADATA_BY_ID } from '../lib/catalog'
 import { PersonaCard } from '../components/PersonaCard'
 
 export const Route = createRoute({
@@ -17,12 +17,12 @@ function ProfilePage() {
   const navigate = useNavigate()
   const user = getUser()
 
-  const [history, setHistory] = useState<Array<{ beer_id: string; rating: string | null; tried_at: string }> | null>(null)
+  const [history, setHistory] = useState<HistoryEntry[] | null>(null)
   const [persona, setPersona] = useState<PersonaData | null>(null)
 
   useEffect(() => {
     if (!user) {
-      void navigate({ to: '/signin' })
+      void navigate({ to: '/signin', search: { next: '/profile' } })
       return
     }
     void getMyHistory().then(setHistory).catch(() => setHistory([]))
@@ -57,7 +57,6 @@ function ProfilePage() {
 
   if (!user) return null
 
-  const beerMap = Object.fromEntries(BEER_SEEDS.map((b) => [b.name, b]))
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-start p-6 pt-10 bg-gradient-to-b from-amber-50 to-white">
@@ -106,7 +105,7 @@ function ProfilePage() {
             <p className="text-sm text-neutral-400">No beers logged yet. Take the quiz to get started.</p>
           )}
           {history?.map((entry, i) => {
-            const beer = beerMap[entry.beer_id]
+            const beer = BEER_METADATA_BY_ID[entry.beer_id]
             return (
               <div key={i} className="rounded-xl border border-neutral-200 bg-white p-4 flex items-center justify-between">
                 <div>
@@ -124,7 +123,7 @@ function ProfilePage() {
         <div className="flex gap-3">
           <Link to="/quiz" className="flex-1">
             <button className="w-full rounded-xl border border-neutral-200 bg-white py-3 text-sm font-medium text-neutral-700 hover:bg-neutral-50">
-              Retake quiz
+              Get fresh picks
             </button>
           </Link>
           <Link to="/" className="flex-1">

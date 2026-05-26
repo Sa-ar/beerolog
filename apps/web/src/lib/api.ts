@@ -10,6 +10,8 @@ export type GroupRecommendation = components['schemas']['GroupRecommendationResp
 export type LeaderboardEntry = components['schemas']['LeaderboardEntryResponse']
 export type LeaderboardResponse = components['schemas']['LeaderboardResponse']
 export type HistoryEntry = components['schemas']['HistoryEntry']
+export type RecommendationBeer = components['schemas']['BeerPayload']
+export type RecommendationResult = components['schemas']['RecommendationResponse']
 
 type RatedBeerInput = components['schemas']['RatedBeerInput']
 type RatingValue = components['schemas']['RatingValue']
@@ -60,6 +62,29 @@ export async function saveProfile(vector: number[]): Promise<void> {
       body: { vector },
     }),
     'Failed to save profile',
+  )
+}
+
+export async function recommendBeers(
+  vector: number[],
+  beers: RecommendationBeer[],
+): Promise<RecommendationResult> {
+  return requireData(
+    apiClient.POST('/recommendations/', {
+      body: {
+        taste_vector: {
+          bitterness: vector[0] ?? 0.5,
+          sweetness: vector[1] ?? 0.5,
+          fruitiness: vector[2] ?? 0.5,
+          roast: vector[3] ?? 0.5,
+          sourness: vector[4] ?? 0.5,
+          body: vector[5] ?? 0.5,
+          adventure: vector[6] ?? 0.5,
+        },
+        beers,
+      },
+    }),
+    'Failed to fetch recommendations',
   )
 }
 

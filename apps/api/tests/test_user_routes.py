@@ -50,3 +50,16 @@ def test_get_history_returns_entries():
     entries = resp.json()["entries"]
     assert len(entries) == 1
     assert entries[0]["beer_id"] == "b1"
+
+
+def test_get_persona_returns_summary_after_profile_saved():
+    client, _ = make_client()
+    client.put("/users/me/profile", json={"vector": VECTOR})
+
+    resp = client.get("/users/me/persona")
+    assert resp.status_code == 200
+    persona = resp.json()["persona"]
+    assert persona is not None
+    assert persona["id"]
+    assert persona["name"]
+    assert persona["icon"]
