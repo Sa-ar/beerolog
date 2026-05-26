@@ -102,16 +102,16 @@ export type Rating = 'loved' | 'fine' | 'disliked'
 // =============================================================================
 
 export type PersonaId =
-  | 'hop_head'
-  | 'dark_side_explorer'
   | 'easy_sipper'
+  | 'hop_head'
+  | 'dark_side'
   | 'sour_seeker'
-  | 'malt_lover'
-  | 'wheat_wanderer'
-  | 'session_king'
-  | 'bold_adventurer'
-  | 'crisp_purist'
-  | 'roast_devotee'
+  | 'sweet_tooth'
+  | 'balanced'
+  | 'adventurer'
+  | 'classic'
+  | 'roast_master'
+  | 'fruit_stand'
 
 export type Persona = {
   id: PersonaId

@@ -1,8 +1,11 @@
 from enum import StrEnum
+from typing import Annotated
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.models.flavor import FlavorVector
+
+FlavorVectorList = Annotated[list[float], Field(min_length=7, max_length=7)]
 
 
 class RatingValue(StrEnum):
@@ -15,7 +18,7 @@ class BeerPayload(BaseModel):
     id: str
     name: str
     style: str
-    flavor_vector: list[float]
+    flavor_vector: FlavorVectorList
     brewery: str | None = None
     description: str | None = None
 
@@ -65,7 +68,7 @@ class ProfileResponse(BaseModel):
 
 
 class SaveProfileRequest(BaseModel):
-    vector: list[float]
+    vector: FlavorVectorList
 
 
 class HistoryEntry(BaseModel):
@@ -98,7 +101,7 @@ class RatedBeerInput(BaseModel):
     id: str
     name: str
     style: str
-    flavor_vector: list[float]
+    flavor_vector: FlavorVectorList
     brewery: str | None = None
     description: str | None = None
 

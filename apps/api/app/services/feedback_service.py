@@ -23,6 +23,7 @@ async def apply_rating(
     alpha: float = ALPHA,
 ) -> list[float] | None:
     current = await repo.get_profile(user_id)
+    updated = current
 
     if current is not None and rating != "fine":
         beer_fv = beer["flavor_vector"]
@@ -36,4 +37,4 @@ async def apply_rating(
         await repo.set_suppressions(user_id, suppressions)
 
     await repo.add_to_history(user_id, beer["id"], rating)
-    return current  # None for anonymous users (no profile)
+    return updated  # None for anonymous users (no profile)

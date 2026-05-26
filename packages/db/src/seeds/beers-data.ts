@@ -4,6 +4,7 @@ import type { BeerStyle } from '@beerolog/types'
 type FV = [number, number, number, number, number, number, number]
 
 type BeerSeed = {
+  id: string
   name: string
   brewery: string
   style: BeerStyle
@@ -13,10 +14,17 @@ type BeerSeed = {
   tags: string[]
 }
 
+function toBeerId(brewery: string, name: string): string {
+  return `${brewery}-${name}`
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
 const b = (
   name: string, brewery: string, style: BeerStyle, abv: number,
   fv: FV, tags: string[], description = ''
-): BeerSeed => ({ name, brewery, style, abv, description, fv, tags })
+): BeerSeed => ({ id: toBeerId(brewery, name), name, brewery, style, abv, description, fv, tags })
 
 export const BEER_SEEDS: BeerSeed[] = [
   // ── Lager / Pilsner ──────────────────────────────────────────────────────
@@ -143,6 +151,7 @@ export const BEER_SEEDS: BeerSeed[] = [
 
 export function beerSeedToDbRow(beer: BeerSeed) {
   return {
+    id: beer.id,
     name: beer.name,
     brewery: beer.brewery,
     style: beer.style,

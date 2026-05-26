@@ -3,6 +3,7 @@ from pathlib import Path
 
 from app.main import app
 from app.models.flavor import FLAVOR_VECTOR_DIMENSIONS, FLAVOR_VECTOR_SCHEMA_VERSION
+from app.services.persona_service import PERSONAS
 
 
 def test_openapi_exposes_stable_contract_shapes():
@@ -52,3 +53,23 @@ def test_typescript_contract_constants_match_api_flavor_model():
     rating_match = re.search(r"export type Rating = ([^\n]+)", text)
     assert rating_match is not None
     assert re.findall(r"'([^']+)'", rating_match.group(1)) == ["loved", "fine", "disliked"]
+
+
+def test_typescript_persona_ids_match_api_personas():
+    source = Path(__file__).resolve().parents[3] / "packages/types/src/index.ts"
+    text = source.read_text()
+
+    persona_match = re.search(
+        r"export type PersonaId =\n((?:\s+\| '[^']+'\n)+)",
+        text,
+    )
+    assert persona_match is not None
+    persona_ids = re.findall(r"'([^']+)'", persona_match.group(1))
+    assert persona_ids == [persona.id for persona in PERSONAS]
+
+
+def test_web_catalog_uses_seed_defined_beer_ids():
+    source = Path(__file__).resolve().parents[3] / "apps/web/src/lib/catalog.ts"
+    text = source.read_text()
+
+    assert "return beer.id" in text

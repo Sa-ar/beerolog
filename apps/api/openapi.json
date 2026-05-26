@@ -52,6 +52,8 @@
             "items": {
               "type": "number"
             },
+            "maxItems": 7,
+            "minItems": 7,
             "title": "Flavor Vector",
             "type": "array"
           },
@@ -329,6 +331,8 @@
             "items": {
               "type": "number"
             },
+            "maxItems": 7,
+            "minItems": 7,
             "title": "Flavor Vector",
             "type": "array"
           },
@@ -431,6 +435,8 @@
             "items": {
               "type": "number"
             },
+            "maxItems": 7,
+            "minItems": 7,
             "title": "Vector",
             "type": "array"
           }

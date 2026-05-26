@@ -39,6 +39,12 @@ def test_put_profile_saves_vector():
     assert resp.json()["vector"] == VECTOR
 
 
+def test_put_profile_rejects_wrong_vector_length():
+    client, _ = make_client()
+    resp = client.put("/users/me/profile", json={"vector": VECTOR[:-1]})
+    assert resp.status_code == 422
+
+
 def test_get_history_returns_entries():
     import asyncio
 
@@ -63,3 +69,44 @@ def test_get_persona_returns_summary_after_profile_saved():
     assert persona["id"]
     assert persona["name"]
     assert persona["icon"]
+
+
+def test_rate_beer_rejects_wrong_vector_length():
+    client, _ = make_client()
+    resp = client.post(
+        "/users/me/rate",
+        json={
+            "beer": {
+                "id": "beer-1",
+                "name": "Beer 1",
+                "style": "lager",
+                "flavor_vector": VECTOR[:-1],
+            },
+            "rating": "loved",
+        },
+    )
+    assert resp.status_code == 422
+
+
+def test_rate_beer_returns_updated_vector():
+    import asyncio
+
+    repo = InMemoryUserProfileRepo()
+    asyncio.run(repo.save_profile("user-123", VECTOR))
+    client, _ = make_client(repo=repo)
+
+    resp = client.post(
+        "/users/me/rate",
+        json={
+            "beer": {
+                "id": "beer-1",
+                "name": "Beer 1",
+                "style": "stout",
+                "flavor_vector": [0.4, 0.3, 0.1, 0.9, 0.0, 0.8, 0.3],
+            },
+            "rating": "loved",
+        },
+    )
+
+    assert resp.status_code == 200
+    assert resp.json()["updated_vector"] == asyncio.run(repo.get_profile("user-123"))

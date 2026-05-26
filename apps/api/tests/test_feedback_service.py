@@ -21,10 +21,11 @@ async def repo_with_profile():
 
 @pytest.mark.asyncio
 async def test_loved_nudges_vector_toward_beer(repo_with_profile):
-    await apply_rating(repo_with_profile, "user-1", STOUT_BEER, "loved")
+    returned = await apply_rating(repo_with_profile, "user-1", STOUT_BEER, "loved")
     updated = await repo_with_profile.get_profile("user-1")
     # Each dim should move toward stout values (e.g. roast: 0.0 → closer to 0.9)
     assert updated is not None
+    assert returned == updated
     assert updated[3] > LAGER_PROFILE[3]  # roast moved up
 
 

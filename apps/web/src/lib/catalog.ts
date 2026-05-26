@@ -4,7 +4,7 @@ import type { RecommendationBeer } from './api'
 export type CatalogBeer = (typeof BEER_SEEDS)[number]
 
 export function getBeerId(beer: CatalogBeer): string {
-  return beer.name
+  return beer.id
 }
 
 export function toRecommendationBeer(beer: CatalogBeer): RecommendationBeer {
