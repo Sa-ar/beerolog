@@ -29,3 +29,17 @@ For each ticket file in the sequence:
 2. **Red State:** Write an isolated failing test matching the feature slice requirements. Run the local test runner (`npm test`, `vitest`, etc.) and verify it fails.
 3. **Green State:** Write the absolute minimum production code required to satisfy that specific test. Run the runner to verify passing status.
 4. **Refactor State:** Run the `/improve-codebase-architecture` skill. Clean up abstractions, identify deep modules versus shallow interfaces, and clean up code slop before moving to the next ticket.
+
+## Agent skills
+
+### Issue tracker
+
+Beerolog uses local markdown artifacts instead of GitHub issues for planning work: write PRDs to `docs/prds/<feature-slug>.md` and approved slices to `docs/issues/<feature-slug>/`. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+For local markdown workflow artifacts, record triage state in document metadata (`Status:` and, when relevant, `Type:`) instead of assuming GitHub labels. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Beerolog is a single-context repo with shared vocabulary in `CONTEXT.md` and durable decisions in `docs/adr/`. See `docs/agents/domain.md`.

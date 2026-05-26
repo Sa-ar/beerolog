@@ -1,6 +1,6 @@
 ---
 name: to-issues
-description: Break a plan, spec, or PRD into independently-grabbable issues on the project issue tracker using tracer-bullet vertical slices. Use when user wants to convert a plan into issues, create implementation tickets, or break down work into issues.
+description: Break a plan, spec, or PRD into independently-grabbable vertical slices using the repo's configured planning workflow. Use when user wants to convert a plan into issues, create implementation tickets, or break down work into issues.
 ---
 
 # To Issues
@@ -9,11 +9,13 @@ Break a plan into independently-grabbable issues using vertical slices (tracer b
 
 The issue tracker and triage label vocabulary should have been provided to you — run `/setup-matt-pocock-skills` if not.
 
+If `docs/agents/issue-tracker.md` or `docs/agents/triage-labels.md` exists, follow those repo-specific instructions when deciding where to write the slices and how to record readiness state.
+
 ## Process
 
 ### 1. Gather context
 
-Work from whatever is already in the conversation context. If the user passes an issue reference (issue number, URL, or path) as an argument, fetch it from the issue tracker and read its full body and comments.
+Work from whatever is already in the conversation context. If the user passes an issue reference (issue number, URL, or path) as an argument, fetch it from the configured workflow location and read its full body and comments or notes.
 
 ### 2. Explore the codebase (optional)
 
@@ -49,16 +51,16 @@ Ask the user:
 
 Iterate until the user approves the breakdown.
 
-### 5. Publish the issues to the issue tracker
+### 5. Publish the slices using the configured workflow
 
-For each approved slice, publish a new issue to the issue tracker. Use the issue body template below. These issues are considered ready for AFK agents, so publish them with the correct triage label unless instructed otherwise.
+For each approved slice, publish a new issue or local markdown artifact using the configured workflow. Use the issue body template below. These slices are considered ready for AFK agents, so record the correct triage state using the configured label or metadata convention unless instructed otherwise.
 
-Publish issues in dependency order (blockers first) so you can reference real issue identifiers in the "Blocked by" field.
+Publish slices in dependency order (blockers first) so you can reference real identifiers or file paths in the "Blocked by" field.
 
 <issue-template>
 ## Parent
 
-A reference to the parent issue on the issue tracker (if the source was an existing issue, otherwise omit this section).
+A reference to the parent issue or PRD artifact (if the source was an existing issue or local PRD, otherwise omit this section).
 
 ## What to build
 
@@ -74,10 +76,10 @@ Avoid specific file paths or code snippets — they go stale fast. Exception: if
 
 ## Blocked by
 
-- A reference to the blocking ticket (if any)
+- A reference to the blocking ticket or slice path (if any)
 
 Or "None - can start immediately" if no blockers.
 
 </issue-template>
 
-Do NOT close or modify any parent issue.
+Do NOT close or modify any parent issue or PRD artifact.
