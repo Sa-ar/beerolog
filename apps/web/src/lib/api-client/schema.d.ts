@@ -72,23 +72,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/scan/{token}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Resolve Qr */
-        get: operations["resolveQrToken"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/sessions": {
         parameters: {
             query?: never;
@@ -244,58 +227,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/venues/{venue_id}/leaderboard": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Venue Leaderboard */
-        get: operations["getVenueLeaderboard"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/venues/{venue_id}/scan": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Scan Venue Menu */
-        post: operations["scanVenueMenu"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/venues/{venue_id}/tap-list": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get Tap List */
-        get: operations["getTapList"];
-        /** Set Tap List */
-        put: operations["setTapList"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -411,26 +342,6 @@ export interface components {
             /** Participant Id */
             participant_id: string;
         };
-        /** LeaderboardEntryResponse */
-        LeaderboardEntryResponse: {
-            /** Persona Icon */
-            persona_icon: string;
-            /** Rank */
-            rank: number;
-            /** Recommendation Count */
-            recommendation_count: number;
-            /** User Id */
-            user_id: string;
-            /** Username */
-            username: string;
-        };
-        /** LeaderboardResponse */
-        LeaderboardResponse: {
-            /** Entries */
-            entries: components["schemas"]["LeaderboardEntryResponse"][];
-            /** Viewer Rank */
-            viewer_rank: number | null;
-        };
         /** OkResponse */
         OkResponse: {
             /** Ok */
@@ -504,33 +415,6 @@ export interface components {
             /** Vector */
             vector: number[];
         };
-        /** ScanCatalogEntry */
-        ScanCatalogEntry: {
-            /** Brewery */
-            brewery: string;
-            /** Id */
-            id: string;
-            /** Name */
-            name: string;
-        };
-        /** ScanMenuRequest */
-        ScanMenuRequest: {
-            /** Catalog */
-            catalog: components["schemas"]["ScanCatalogEntry"][];
-            /** Image Base64 */
-            image_base64: string;
-        };
-        /** ScanResultItem */
-        ScanResultItem: {
-            /** Confidence */
-            confidence: number;
-            /** Matched Id */
-            matched_id: string | null;
-            /** Needs Review */
-            needs_review: boolean;
-            /** Raw Text */
-            raw_text: string;
-        };
         /** SessionParticipantStatus */
         SessionParticipantStatus: {
             /** Id */
@@ -557,18 +441,6 @@ export interface components {
             participant_id: string;
             /** Vector */
             vector: number[];
-        };
-        /** TapListRequest */
-        TapListRequest: {
-            /** Beer Ids */
-            beer_ids: string[];
-        };
-        /** TapListResponse */
-        TapListResponse: {
-            /** Beer Ids */
-            beer_ids: string[];
-            /** Venue Id */
-            venue_id: string;
         };
         /** UpdatedVectorResponse */
         UpdatedVectorResponse: {
@@ -692,37 +564,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RecommendationResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    resolveQrToken: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                token: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TapListResponse"];
                 };
             };
             /** @description Validation Error */
@@ -1047,138 +888,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UpdatedVectorResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    getVenueLeaderboard: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                venue_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["LeaderboardResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    scanVenueMenu: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                venue_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ScanMenuRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ScanResultItem"][];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    getTapList: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                venue_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TapListResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    setTapList: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                venue_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["TapListRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TapListResponse"];
                 };
             };
             /** @description Validation Error */

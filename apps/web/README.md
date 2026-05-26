@@ -59,11 +59,9 @@ See [docs/services/vercel.md](../../docs/services/vercel.md) for Vercel project 
 | `/profile` | User taste profile + persona |
 | `/signin` | Cognito sign-in redirect |
 | `/auth/callback` | Cognito OAuth callback |
-| `/venues/:venueId/tap-list` | Venue tap list view |
-| `/venues/:venueId/manage` | Venue management (tap list editor) |
-| `/venues/:venueId/leaderboard` | Venue recommendation leaderboard |
-| `/scan/:token` | QR code resolver |
 | `/group` | Start a group session |
 | `/group/:sessionId` | Join / participate in group session |
 | `/group/:sessionId/result` | Group recommendation result |
 | `/challenge/:token` | Friend taste challenge |
+
+Venue and scan routes are intentionally deferred from the supported MVP and are not mounted in the current app router.

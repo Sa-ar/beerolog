@@ -1,6 +1,6 @@
 # Beerolog API
 
-Python FastAPI backend. Handles recommendations, user profiles, venues, group sessions, and social features.
+Python FastAPI backend. Handles recommendations, user profiles, group sessions, and social features for the cleaned MVP. Venue/scan endpoints remain deferred future work and are not part of the supported API surface.
 
 ## Requirements
 
@@ -21,6 +21,11 @@ uv run uvicorn app.main:app --reload
 # API at http://localhost:8000
 # OpenAPI docs at http://localhost:8000/docs
 ```
+
+## Deferred surfaces
+
+- Venue tap-list management, QR scan, and venue leaderboard routes are intentionally deferred from the supported MVP.
+- The supporting modules remain in the repo as follow-on work, but they are not mounted in the current FastAPI app.
 
 ## Quality checks
 
@@ -51,11 +56,6 @@ Tests never hit a real database — every service has an `InMemory*Repo` used vi
 |---|---|---|
 | `GET` | `/health` | Health check |
 | `POST` | `/recommendations` | Get beer recommendations for a flavor vector |
-| `PUT` | `/venues/{id}/tap-list` | Set venue tap list |
-| `GET` | `/venues/{id}/tap-list` | Get venue tap list |
-| `POST` | `/venues/{id}/scan` | Scan menu image for beers |
-| `GET` | `/scan/{token}` | Resolve QR token to tap list |
-| `GET` | `/venues/{id}/leaderboard` | Venue recommendation leaderboard |
 | `POST` | `/sessions` | Create group session |
 | `POST` | `/sessions/{id}/join` | Join group session |
 | `POST` | `/sessions/{id}/submit` | Submit flavor vector |

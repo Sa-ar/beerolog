@@ -17,12 +17,6 @@ def test_openapi_exposes_stable_contract_shapes():
     rate_request = schema["components"]["schemas"]["RateBeerRequest"]
     assert rate_request["properties"]["beer"]["$ref"] == "#/components/schemas/RatedBeerInput"
 
-    scan_request = schema["components"]["schemas"]["ScanMenuRequest"]
-    assert (
-        scan_request["properties"]["catalog"]["items"]["$ref"]
-        == "#/components/schemas/ScanCatalogEntry"
-    )
-
     rating_value = schema["components"]["schemas"]["RatingValue"]
     assert rating_value["enum"] == ["loved", "fine", "disliked"]
 
@@ -30,6 +24,11 @@ def test_openapi_exposes_stable_contract_shapes():
         "content"
     ]["application/json"]["schema"]["$ref"]
     assert compare_response == "#/components/schemas/ChallengeComparisonResponse"
+
+    assert "/venues/{venue_id}/tap-list" not in schema["paths"]
+    assert "/venues/{venue_id}/scan" not in schema["paths"]
+    assert "/scan/{token}" not in schema["paths"]
+    assert "/venues/{venue_id}/leaderboard" not in schema["paths"]
 
 
 def test_typescript_contract_constants_match_api_flavor_model():

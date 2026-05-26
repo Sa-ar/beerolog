@@ -1,21 +1,16 @@
 import type { components } from './api-client/schema'
 import { apiClient } from './api-client/client'
 
-export type TapListResponse = components['schemas']['TapListResponse']
-export type ScanResultItem = components['schemas']['ScanResultItem']
 export type PersonaData = components['schemas']['PersonaSummary']
 export type ComparisonResult = components['schemas']['ChallengeComparisonResponse']
 export type SessionStatus = components['schemas']['SessionStatusResponse']
 export type GroupRecommendation = components['schemas']['GroupRecommendationResponse']
-export type LeaderboardEntry = components['schemas']['LeaderboardEntryResponse']
-export type LeaderboardResponse = components['schemas']['LeaderboardResponse']
 export type HistoryEntry = components['schemas']['HistoryEntry']
 export type RecommendationBeer = components['schemas']['BeerPayload']
 export type RecommendationResult = components['schemas']['RecommendationResponse']
 
 type RatedBeerInput = components['schemas']['RatedBeerInput']
 type RatingValue = components['schemas']['RatingValue']
-type ScanCatalogEntry = components['schemas']['ScanCatalogEntry']
 
 async function requireData<T>(
   request: Promise<{ data?: T; error?: unknown }>,
@@ -26,34 +21,6 @@ async function requireData<T>(
     throw new Error(message)
   }
   return data
-}
-
-export async function getTapList(venueId: string): Promise<TapListResponse> {
-  return requireData(
-    apiClient.GET('/venues/{venue_id}/tap-list', {
-      params: { path: { venue_id: venueId } },
-    }),
-    'Failed to fetch tap list',
-  )
-}
-
-export async function setTapList(venueId: string, beerIds: string[]): Promise<TapListResponse> {
-  return requireData(
-    apiClient.PUT('/venues/{venue_id}/tap-list', {
-      params: { path: { venue_id: venueId } },
-      body: { beer_ids: beerIds },
-    }),
-    'Failed to save tap list',
-  )
-}
-
-export async function resolveQRToken(token: string): Promise<TapListResponse> {
-  return requireData(
-    apiClient.GET('/scan/{token}', {
-      params: { path: { token } },
-    }),
-    'Invalid or expired QR code',
-  )
 }
 
 export async function saveProfile(vector: number[]): Promise<void> {
@@ -181,28 +148,5 @@ export async function getGroupRecommendation(sessionId: string): Promise<GroupRe
       params: { path: { session_id: sessionId } },
     }),
     'Failed to get recommendation',
-  )
-}
-
-export async function getLeaderboard(venueId: string): Promise<LeaderboardResponse> {
-  return requireData(
-    apiClient.GET('/venues/{venue_id}/leaderboard', {
-      params: { path: { venue_id: venueId } },
-    }),
-    'Failed to fetch leaderboard',
-  )
-}
-
-export async function scanMenuImage(
-  venueId: string,
-  imageBase64: string,
-  catalog: ScanCatalogEntry[],
-): Promise<ScanResultItem[]> {
-  return requireData(
-    apiClient.POST('/venues/{venue_id}/scan', {
-      params: { path: { venue_id: venueId } },
-      body: { image_base64: imageBase64, catalog },
-    }),
-    'Scan failed',
   )
 }

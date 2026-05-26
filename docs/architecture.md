@@ -22,6 +22,10 @@ The FlavorVector is the core data type. It represents a user's (or beer's) taste
 
 ---
 
+## Deferred surfaces
+
+Venue/scan remains deferred after cleanup. The related services, tables, and token utilities below are documented as follow-on work, not as part of the supported MVP runtime surface.
+
 ## Service modules
 
 All services live in `apps/api/app/services/`. Each is a pure module: no global state, dependencies injected as arguments.
@@ -33,14 +37,14 @@ All services live in `apps/api/app/services/`. Each is a pure module: no global 
 | `feedback_service` | Applies a rating (loved/fine/disliked) to nudge a user’s flavor vector; tracks style suppressions |
 | `persona_service` | Classifies a flavor vector into one of 10 personas via cosine similarity to centroid vectors |
 | `user_profile_service` | Persists and retrieves user flavor vectors and beer history |
-| `menu_scanner` | Accepts a base64 image, calls GPT-4o to extract beer names, fuzzy-matches against catalog |
+| `menu_scanner` | Deferred venue/scan helper: accepts a base64 image, calls GPT-4o to extract beer names, fuzzy-matches against catalog |
 | `fuzzy_matcher` | Levenshtein-based name matching against a beer catalog; threshold 0.6 |
-| `qr_token` | Generates and decodes HS256 JWTs encoding a venue ID; 24h TTL |
+| `qr_token` | Deferred venue/scan helper: generates and decodes HS256 JWTs encoding a venue ID; 24h TTL |
 | `group_session` | Manages group quiz sessions: create, join, submit vector, aggregate group vector, recommend |
 | `challenge_service` | Generates and resolves HS256 friend-challenge tokens (7-day TTL); compares two flavor vectors |
 | `badge_engine` | Pure functions: checks milestone badges for bar exploration, expert recommendations, taste evolution |
-| `social_proof` | Venue-scoped friend recommendations: counts friends who positively rated a beer at a venue |
-| `leaderboard` | Ranks users by positive recommendation count at a venue; respects privacy flags |
+| `social_proof` | Deferred venue-facing social proof: counts friends who positively rated a beer at a venue |
+| `leaderboard` | Deferred venue-facing leaderboard: ranks users by positive recommendation count at a venue; respects privacy flags |
 
 ---
 
@@ -83,12 +87,14 @@ pgvector HNSW indexes use `vector_cosine_ops` for approximate nearest-neighbor s
 
 ## Key flows
 
-### QR scan
+### Deferred QR scan flow
+
+This flow is intentionally deferred from the supported MVP. The related modules remain in the repo as future work, but the public routes are not mounted in the current application surface.
 
 1. Venue manager generates a QR code: API signs a JWT encoding `venue_id` with `API_SECRET` (24h TTL)
-2. Customer scans the QR code; browser hits `GET /scan/{token}`
+2. Customer scans the QR code; browser would hit `GET /scan/{token}`
 3. API decodes and validates the JWT, returns the venue’s active tap list
-4. Frontend shows beers on tap; customer can run quiz filtered to that tap list
+4. Frontend would show beers on tap and let the customer run a filtered quiz
 
 ### Group session
 
