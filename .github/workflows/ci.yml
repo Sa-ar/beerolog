@@ -24,7 +24,7 @@ jobs:
 
       - run: pnpm typecheck
 
-      - run: pnpm lint
+      - run: pnpm lint:js
 
   db-schema:
     name: Drizzle migration check
@@ -42,10 +42,11 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - name: Check migrations are up to date
-        working-directory: packages/db
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/beerolog_test
-        run: pnpm db:generate -- --check
+        run: |
+          pnpm --dir packages/db db:generate
+          git diff --exit-code -- packages/db/migrations
 
   python:
     name: Python (lint, test)
