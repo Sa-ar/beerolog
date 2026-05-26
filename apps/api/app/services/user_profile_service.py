@@ -1,14 +1,18 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import Protocol
+from typing import Literal, Protocol
+
+RatingValue = Literal["loved", "fine", "disliked"]
 
 
 class UserProfileRepo(Protocol):
     async def get_profile(self, user_id: str) -> list[float] | None: ...
     async def save_profile(self, user_id: str, vector: list[float]) -> None: ...
     async def get_history(self, user_id: str) -> list[dict]: ...
-    async def add_to_history(self, user_id: str, beer_id: str, rating: str | None) -> None: ...
+    async def add_to_history(
+        self, user_id: str, beer_id: str, rating: RatingValue | None
+    ) -> None: ...
     async def get_suppressions(self, user_id: str) -> dict[str, int]: ...
     async def set_suppressions(self, user_id: str, suppressions: dict[str, int]) -> None: ...
 
@@ -28,7 +32,7 @@ class InMemoryUserProfileRepo:
     async def get_history(self, user_id: str) -> list[dict]:
         return self._history.get(user_id, [])
 
-    async def add_to_history(self, user_id: str, beer_id: str, rating: str | None) -> None:
+    async def add_to_history(self, user_id: str, beer_id: str, rating: RatingValue | None) -> None:
         entry = {"beer_id": beer_id, "rating": rating, "tried_at": datetime.now(UTC).isoformat()}
         self._history.setdefault(user_id, []).append(entry)
 
@@ -55,6 +59,6 @@ async def add_to_history(
     repo: UserProfileRepo,
     user_id: str,
     beer_id: str,
-    rating: str | None = None,
+    rating: RatingValue | None = None,
 ) -> None:
     await repo.add_to_history(user_id, beer_id, rating)

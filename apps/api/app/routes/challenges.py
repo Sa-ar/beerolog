@@ -1,6 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
 
+from app.api_contracts import (
+    ChallengeComparisonResponse,
+    ChallengeTokenResponse,
+    ChallengeVectorRequest,
+    PersonaSummary,
+)
 from app.auth import get_current_user
 from app.config import settings
 from app.dependencies import get_user_profile_repo
@@ -17,25 +22,28 @@ from app.services.user_profile_service import get_profile
 router = APIRouter(prefix="/challenges", tags=["challenges"])
 
 
-@router.post("")
+@router.post(
+    "",
+    response_model=ChallengeTokenResponse,
+    operation_id="createChallenge",
+)
 async def create_challenge(
     user: dict = Depends(get_current_user),
-    repo=Depends(get_user_profile_repo),
-) -> dict:
+) -> ChallengeTokenResponse:
     token = create_challenge_token(user["sub"], settings.api_secret)
-    return {"token": token}
+    return ChallengeTokenResponse(token=token)
 
 
-class FriendVector(BaseModel):
-    vector: list[float]
-
-
-@router.post("/{token}/compare")
+@router.post(
+    "/{token}/compare",
+    response_model=ChallengeComparisonResponse,
+    operation_id="compareChallenge",
+)
 async def compare(
     token: str,
-    body: FriendVector,
+    body: ChallengeVectorRequest,
     repo=Depends(get_user_profile_repo),
-) -> dict:
+) -> ChallengeComparisonResponse:
     try:
         challenger_id = resolve_challenge_token(token, settings.api_secret)
     except ChallengeExpiredError:
@@ -52,18 +60,18 @@ async def compare(
     challenger_persona = classify_persona(challenger_fv)
     friend_persona = classify_persona(friend_fv)
 
-    return {
-        "similarity": comparison.similarity,
-        "shared": comparison.shared,
-        "different": comparison.different,
-        "challenger_persona": {
-            "id": challenger_persona.id,
-            "name": challenger_persona.name,
-            "icon": challenger_persona.icon,
-        },
-        "friend_persona": {
-            "id": friend_persona.id,
-            "name": friend_persona.name,
-            "icon": friend_persona.icon,
-        },
-    }
+    return ChallengeComparisonResponse(
+        similarity=comparison.similarity,
+        shared=comparison.shared,
+        different=comparison.different,
+        challenger_persona=PersonaSummary(
+            id=challenger_persona.id,
+            name=challenger_persona.name,
+            icon=challenger_persona.icon,
+        ),
+        friend_persona=PersonaSummary(
+            id=friend_persona.id,
+            name=friend_persona.name,
+            icon=friend_persona.icon,
+        ),
+    )

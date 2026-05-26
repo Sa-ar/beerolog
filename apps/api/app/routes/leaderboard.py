@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
-from pydantic import BaseModel
 
+from app.api_contracts import LeaderboardEntryResponse, LeaderboardResponse
 from app.auth import get_current_user
 from app.dependencies import get_leaderboard_repo
 from app.services.leaderboard import get_leaderboard
@@ -8,20 +8,11 @@ from app.services.leaderboard import get_leaderboard
 router = APIRouter(tags=["leaderboard"])
 
 
-class LeaderboardEntryResponse(BaseModel):
-    user_id: str
-    username: str
-    persona_icon: str
-    recommendation_count: int
-    rank: int
-
-
-class LeaderboardResponse(BaseModel):
-    entries: list[LeaderboardEntryResponse]
-    viewer_rank: int | None
-
-
-@router.get("/venues/{venue_id}/leaderboard", response_model=LeaderboardResponse)
+@router.get(
+    "/venues/{venue_id}/leaderboard",
+    response_model=LeaderboardResponse,
+    operation_id="getVenueLeaderboard",
+)
 async def venue_leaderboard(
     venue_id: str,
     repo=Depends(get_leaderboard_repo),

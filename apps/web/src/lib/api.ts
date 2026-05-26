@@ -1,199 +1,183 @@
-import { authHeaders } from './auth'
+import type { components } from './api-client/schema'
+import { apiClient } from './api-client/client'
 
-const API_URL = (import.meta.env['VITE_API_URL'] as string | undefined) ?? 'http://localhost:8000'
+export type TapListResponse = components['schemas']['TapListResponse']
+export type ScanResultItem = components['schemas']['ScanResultItem']
+export type PersonaData = components['schemas']['PersonaSummary']
+export type ComparisonResult = components['schemas']['ChallengeComparisonResponse']
+export type SessionStatus = components['schemas']['SessionStatusResponse']
+export type GroupRecommendation = components['schemas']['GroupRecommendationResponse']
+export type LeaderboardEntry = components['schemas']['LeaderboardEntryResponse']
+export type LeaderboardResponse = components['schemas']['LeaderboardResponse']
+export type HistoryEntry = components['schemas']['HistoryEntry']
 
-export type TapListResponse = {
-  venue_id: string
-  beer_ids: string[]
-}
+type RatedBeerInput = components['schemas']['RatedBeerInput']
+type RatingValue = components['schemas']['RatingValue']
+type ScanCatalogEntry = components['schemas']['ScanCatalogEntry']
 
-export type ScanResultItem = {
-  raw_text: string
-  matched_id: string | null
-  confidence: number
-  needs_review: boolean
+async function requireData<T>(
+  request: Promise<{ data?: T; error?: unknown }>,
+  message: string,
+): Promise<T> {
+  const { data, error } = await request
+  if (error || data === undefined) {
+    throw new Error(message)
+  }
+  return data
 }
 
 export async function getTapList(venueId: string): Promise<TapListResponse> {
-  const res = await fetch(`${API_URL}/venues/${venueId}/tap-list`)
-  if (!res.ok) throw new Error('Failed to fetch tap list')
-  return res.json() as Promise<TapListResponse>
+  return requireData(
+    apiClient.GET('/venues/{venue_id}/tap-list', {
+      params: { path: { venue_id: venueId } },
+    }),
+    'Failed to fetch tap list',
+  )
 }
 
 export async function setTapList(venueId: string, beerIds: string[]): Promise<TapListResponse> {
-  const res = await fetch(`${API_URL}/venues/${venueId}/tap-list`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ beer_ids: beerIds }),
-  })
-  if (!res.ok) throw new Error('Failed to update tap list')
-  return res.json() as Promise<TapListResponse>
+  return requireData(
+    apiClient.PUT('/venues/{venue_id}/tap-list', {
+      params: { path: { venue_id: venueId } },
+      body: { beer_ids: beerIds },
+    }),
+    'Failed to save tap list',
+  )
 }
 
 export async function resolveQRToken(token: string): Promise<TapListResponse> {
-  const res = await fetch(`${API_URL}/scan/${token}`)
-  if (!res.ok) throw new Error('Invalid or expired QR code')
-  return res.json() as Promise<TapListResponse>
+  return requireData(
+    apiClient.GET('/scan/{token}', {
+      params: { path: { token } },
+    }),
+    'Invalid or expired QR code',
+  )
 }
-
-// ── User profile ─────────────────────────────────────────────────────────────
 
 export async function saveProfile(vector: number[]): Promise<void> {
-  const res = await fetch(`${API_URL}/users/me/profile`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json', ...authHeaders() },
-    body: JSON.stringify({ vector }),
-  })
-  if (!res.ok) throw new Error('Failed to save profile')
+  await requireData(
+    apiClient.PUT('/users/me/profile', {
+      body: { vector },
+    }),
+    'Failed to save profile',
+  )
 }
 
-export type PersonaData = {
-  id: string
-  name: string
-  icon: string
-  description: string
-}
-
-// ── Friend challenge ──────────────────────────────────────────────────────────────
-
-export type ComparisonResult = {
-  similarity: number
-  shared: string[]
-  different: string[]
-  challenger_persona: { id: string; name: string; icon: string }
-  friend_persona: { id: string; name: string; icon: string }
-}
-
-export async function createChallenge(): Promise<{ token: string }> {
-  const res = await fetch(`${API_URL}/challenges`, {
-    method: 'POST',
-    headers: authHeaders(),
-  })
-  if (!res.ok) throw new Error('Failed to create challenge')
-  return res.json() as Promise<{ token: string }>
+export async function createChallenge(): Promise<components['schemas']['ChallengeTokenResponse']> {
+  return requireData(
+    apiClient.POST('/challenges'),
+    'Failed to create challenge',
+  )
 }
 
 export async function compareChallenge(token: string, vector: number[]): Promise<ComparisonResult> {
-  const res = await fetch(`${API_URL}/challenges/${token}/compare`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ vector }),
-  })
-  if (res.status === 410) throw new Error('Challenge link has expired')
-  if (!res.ok) throw new Error('Comparison failed')
-  return res.json() as Promise<ComparisonResult>
+  return requireData(
+    apiClient.POST('/challenges/{token}/compare', {
+      params: { path: { token } },
+      body: { vector },
+    }),
+    'Failed to compare challenge',
+  )
 }
 
 export async function getMyPersona(): Promise<PersonaData | null> {
-  const res = await fetch(`${API_URL}/users/me/persona`, { headers: authHeaders() })
-  if (!res.ok) return null
-  const data = res.json() as Promise<{ persona: PersonaData | null }>
-  return (await data).persona
+  const { data } = await apiClient.GET('/users/me/persona')
+  return data?.persona ?? null
 }
 
 export async function rateBeer(
-  beer: { id: string; name: string; style: string; flavor_vector: number[] },
-  rating: 'loved' | 'fine' | 'disliked',
+  beer: RatedBeerInput,
+  rating: RatingValue,
 ): Promise<void> {
-  await fetch(`${API_URL}/users/me/rate`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...authHeaders() },
-    body: JSON.stringify({ beer, rating }),
-  })
+  await requireData(
+    apiClient.POST('/users/me/rate', {
+      body: { beer, rating },
+    }),
+    'Failed to rate beer',
+  )
 }
 
-export async function getMyHistory(): Promise<Array<{ beer_id: string; rating: string | null; tried_at: string }>> {
-  const res = await fetch(`${API_URL}/users/me/history`, { headers: authHeaders() })
-  if (!res.ok) throw new Error('Failed to fetch history')
-  const data = res.json() as Promise<{ entries: Array<{ beer_id: string; rating: string | null; tried_at: string }> }>
-  return (await data).entries
+export async function getMyHistory(): Promise<HistoryEntry[]> {
+  const data = await requireData(
+    apiClient.GET('/users/me/history'),
+    'Failed to fetch history',
+  )
+  return data.entries
 }
 
-// ── Group sessions ────────────────────────────────────────────────────────
-
-export type SessionStatus = {
-  session_id: string
-  total: number
-  completed: number
-  participants: Array<{ id: string; name: string; submitted: boolean }>
+export async function createSession(hostId: string): Promise<components['schemas']['CreateSessionResponse']> {
+  return requireData(
+    apiClient.POST('/sessions', {
+      body: { host_id: hostId },
+    }),
+    'Failed to create session',
+  )
 }
 
-export type GroupRecommendation = {
-  group_vector: number[]
-  high_variance: boolean
+export async function joinSession(
+  sessionId: string,
+  name: string,
+): Promise<components['schemas']['JoinSessionResponse']> {
+  return requireData(
+    apiClient.POST('/sessions/{session_id}/join', {
+      params: { path: { session_id: sessionId } },
+      body: { name },
+    }),
+    'Failed to join session',
+  )
 }
 
-export async function createSession(hostId: string): Promise<{ session_id: string; expires_at: string }> {
-  const res = await fetch(`${API_URL}/sessions`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ host_id: hostId }),
-  })
-  if (!res.ok) throw new Error('Failed to create session')
-  return res.json() as Promise<{ session_id: string; expires_at: string }>
-}
-
-export async function joinSession(sessionId: string, name: string): Promise<{ participant_id: string }> {
-  const res = await fetch(`${API_URL}/sessions/${sessionId}/join`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name }),
-  })
-  if (res.status === 410) throw new Error('Session has expired')
-  if (!res.ok) throw new Error('Failed to join session')
-  return res.json() as Promise<{ participant_id: string }>
-}
-
-export async function submitVector(sessionId: string, participantId: string, vector: number[]): Promise<void> {
-  const res = await fetch(`${API_URL}/sessions/${sessionId}/submit`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ participant_id: participantId, vector }),
-  })
-  if (!res.ok) throw new Error('Failed to submit vector')
+export async function submitVector(
+  sessionId: string,
+  participantId: string,
+  vector: number[],
+): Promise<void> {
+  await requireData(
+    apiClient.POST('/sessions/{session_id}/submit', {
+      params: { path: { session_id: sessionId } },
+      body: { participant_id: participantId, vector },
+    }),
+    'Failed to submit vector',
+  )
 }
 
 export async function getSessionStatus(sessionId: string): Promise<SessionStatus> {
-  const res = await fetch(`${API_URL}/sessions/${sessionId}/status`)
-  if (!res.ok) throw new Error('Session not found')
-  return res.json() as Promise<SessionStatus>
+  return requireData(
+    apiClient.GET('/sessions/{session_id}/status', {
+      params: { path: { session_id: sessionId } },
+    }),
+    'Session not found',
+  )
 }
 
 export async function getGroupRecommendation(sessionId: string): Promise<GroupRecommendation> {
-  const res = await fetch(`${API_URL}/sessions/${sessionId}/recommend`)
-  if (!res.ok) throw new Error('Failed to get recommendation')
-  return res.json() as Promise<GroupRecommendation>
-}
-
-export type LeaderboardEntry = {
-  user_id: string
-  username: string
-  persona_icon: string
-  recommendation_count: number
-  rank: number
-}
-
-export type LeaderboardResponse = {
-  entries: LeaderboardEntry[]
-  viewer_rank: number | null
+  return requireData(
+    apiClient.GET('/sessions/{session_id}/recommend', {
+      params: { path: { session_id: sessionId } },
+    }),
+    'Failed to get recommendation',
+  )
 }
 
 export async function getLeaderboard(venueId: string): Promise<LeaderboardResponse> {
-  const res = await fetch(`${API_URL}/venues/${venueId}/leaderboard`, { headers: authHeaders() })
-  if (!res.ok) throw new Error('Failed to fetch leaderboard')
-  return res.json() as Promise<LeaderboardResponse>
+  return requireData(
+    apiClient.GET('/venues/{venue_id}/leaderboard', {
+      params: { path: { venue_id: venueId } },
+    }),
+    'Failed to fetch leaderboard',
+  )
 }
 
 export async function scanMenuImage(
   venueId: string,
   imageBase64: string,
-  catalog: Array<{ id: string; name: string; brewery: string }>,
+  catalog: ScanCatalogEntry[],
 ): Promise<ScanResultItem[]> {
-  const res = await fetch(`${API_URL}/venues/${venueId}/scan`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ image_base64: imageBase64, catalog }),
-  })
-  if (!res.ok) throw new Error('Scan failed')
-  return res.json() as Promise<ScanResultItem[]>
+  return requireData(
+    apiClient.POST('/venues/{venue_id}/scan', {
+      params: { path: { venue_id: venueId } },
+      body: { image_base64: imageBase64, catalog },
+    }),
+    'Scan failed',
+  )
 }

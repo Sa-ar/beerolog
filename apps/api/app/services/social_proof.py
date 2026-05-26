@@ -22,7 +22,7 @@ class InMemorySocialRepo:
             r["user_id"] == user_id
             and r["beer_id"] == beer_id
             and r["venue_id"] == venue_id
-            and r["rating"] == "liked"
+            and r["rating"] == "loved"
             and r["visible"]
             for r in self._ratings
         )
@@ -53,7 +53,7 @@ async def get_friend_recommendations(
     friends = await repo.get_friends(user_id)
     recommenders: list[str] = []
     for friend in friends:
-        liked = await repo.get_positive_ratings(friend["id"], beer_id, venue_id)
-        if liked:
+        loved = await repo.get_positive_ratings(friend["id"], beer_id, venue_id)
+        if loved:
             recommenders.append(friend["name"])
     return {"count": len(recommenders), "names": recommenders}

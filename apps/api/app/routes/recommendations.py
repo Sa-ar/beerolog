@@ -1,36 +1,18 @@
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
 
+from app.api_contracts import BeerPayload, RecommendationRequest, RecommendationResponse
 from app.dependencies import get_llm_client
-from app.models.flavor import FlavorVector
 from app.services.explanation_service import generate_explanations
 from app.services.recommendation_service import score_beers
 
 router = APIRouter(prefix="/recommendations", tags=["recommendations"])
 
 
-class BeerInput(BaseModel):
-    id: str
-    name: str
-    brewery: str
-    style: str
-    flavor_vector: list[float]
-    description: str | None = None
-
-
-class RecommendationRequest(BaseModel):
-    taste_vector: FlavorVector
-    beers: list[BeerInput]
-
-
-class RecommendationResponse(BaseModel):
-    best: BeerInput
-    backup: BeerInput | None
-    adventurous: BeerInput | None
-    explanations: dict[str, str]  # beer_id -> explanation
-
-
-@router.post("/")
+@router.post(
+    "/",
+    response_model=RecommendationResponse,
+    operation_id="recommendBeers",
+)
 async def recommend(
     req: RecommendationRequest, llm=Depends(get_llm_client)
 ) -> RecommendationResponse:
@@ -45,14 +27,14 @@ async def recommend(
     )
 
     # Slots: best = #1, backup = #2, adventurous = highest outlier not in top 2
-    best = BeerInput(**{k: v for k, v in scored[0].items() if k != "score"})
+    best = BeerPayload(**{k: v for k, v in scored[0].items() if k != "score"})
     backup = (
-        BeerInput(**{k: v for k, v in scored[1].items() if k != "score"})
+        BeerPayload(**{k: v for k, v in scored[1].items() if k != "score"})
         if len(scored) > 1
         else None
     )
     adventurous = (
-        BeerInput(**{k: v for k, v in scored[-1].items() if k != "score"})
+        BeerPayload(**{k: v for k, v in scored[-1].items() if k != "score"})
         if len(scored) > 2
         else None
     )

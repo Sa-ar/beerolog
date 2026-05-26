@@ -43,7 +43,7 @@ def test_get_history_returns_entries():
     import asyncio
 
     repo = InMemoryUserProfileRepo()
-    asyncio.run(repo.add_to_history("user-123", "b1", "liked"))
+    asyncio.run(repo.add_to_history("user-123", "b1", "loved"))
     client, _ = make_client(repo=repo)
     resp = client.get("/users/me/history")
     assert resp.status_code == 200

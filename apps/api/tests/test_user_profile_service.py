@@ -31,11 +31,11 @@ async def test_save_and_get_profile_round_trips_vector(repo):
 
 @pytest.mark.asyncio
 async def test_add_and_get_history_returns_entry(repo):
-    await add_to_history(repo, "user-1", beer_id="b1", rating="liked")
+    await add_to_history(repo, "user-1", beer_id="b1", rating="loved")
     history = await get_history(repo, "user-1")
     assert len(history) == 1
     assert history[0]["beer_id"] == "b1"
-    assert history[0]["rating"] == "liked"
+    assert history[0]["rating"] == "loved"
 
 
 @pytest.mark.asyncio

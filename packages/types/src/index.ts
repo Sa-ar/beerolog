@@ -68,6 +68,10 @@ export const NEUTRAL_FLAVOR_VECTOR: FlavorVector = {
 
 // =============================================================================
 // Beer & Catalog
+//
+// Wire-level API DTOs now come from the generated OpenAPI client in apps/web.
+// Keep this package focused on shared domain primitives used outside the HTTP
+// contract surface.
 // =============================================================================
 
 export type BeerStyle =
@@ -86,35 +90,6 @@ export type BeerStyle =
   | 'dunkel'
   | 'vienna_lager'
   | 'other'
-
-export type Beer = {
-  id: string
-  name: string
-  brewery: string
-  style: BeerStyle
-  abv: number
-  description: string
-  flavorVector: FlavorVector
-  styleTags: string[]
-}
-
-// =============================================================================
-// Recommendation
-// =============================================================================
-
-export type RecommendationSlot = 'best' | 'backup' | 'adventurous'
-
-export type BeerRecommendation = {
-  beer: Beer
-  slot: RecommendationSlot
-  score: number
-  explanation: string
-}
-
-export type RecommendationResult = {
-  recommendations: BeerRecommendation[]
-  groupVarianceHigh: boolean
-}
 
 // =============================================================================
 // Ratings & Feedback
