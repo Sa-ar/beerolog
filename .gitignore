@@ -25,3 +25,6 @@ __pycache__/
 # editor
 .idea/
 .vscode/settings.json
+
+# local worktrees
+.worktrees/
