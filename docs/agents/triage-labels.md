@@ -1,22 +1,22 @@
 # Triage Labels
 
-Beerolog's local planning workflow uses markdown metadata instead of GitHub labels.
+Beerolog currently records issue readiness and category directly in GitHub issue bodies instead of relying on a fixed label set.
 
 ## Category roles
 
-| Role in mattpocock/skills | Local metadata |
+| Role in mattpocock/skills | GitHub representation |
 | --- | --- |
-| `bug` | `Type: bug` |
-| `enhancement` | `Type: enhancement` |
+| `bug` | `## Type` section set to `bug` |
+| `enhancement` | `## Type` section set to `enhancement` |
 
 ## State roles
 
-| Role in mattpocock/skills | Local metadata | Meaning |
+| Role in mattpocock/skills | GitHub representation | Meaning |
 | --- | --- | --- |
-| `needs-triage` | `Status: needs-triage` | Maintainer needs to evaluate this item |
-| `needs-info` | `Status: needs-info` | Waiting on reporter or maintainer follow-up |
-| `ready-for-agent` | `Status: ready-for-agent` | Fully specified and ready for execution |
-| `ready-for-human` | `Status: ready-for-human` | Needs human implementation or decision-making |
-| `wontfix` | `Status: wontfix` | Will not be actioned |
+| `needs-triage` | `## Current intended status` set to `needs-triage` | Maintainer needs to evaluate this item |
+| `needs-info` | `## Current intended status` set to `needs-info` | Waiting on reporter or maintainer follow-up |
+| `ready-for-agent` | `## Current intended status` set to `ready-for-agent` | Fully specified and ready for execution |
+| `ready-for-human` | `## Current intended status` set to `ready-for-human` | Needs human implementation or decision-making |
+| `wontfix` | `## Current intended status` set to `wontfix` | Will not be actioned |
 
-When a skill says to apply, remove, or inspect a label, edit or read these metadata lines in the local markdown file instead.
+When a skill says to apply, remove, or inspect a label, update or read the `Type` and `Current intended status` sections on the GitHub issue unless the repo later adopts a formal label taxonomy.

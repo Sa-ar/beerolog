@@ -1,28 +1,18 @@
-# Issue slices
+# Issue tracker
 
-Issue docs turn an approved PRD into small local execution slices. The PRD itself captures requirements; the follow-on slicing work happens here.
+GitHub Issues are Beerolog's source of truth for execution tracking.
 
-## File layout
+This directory no longer stores active slice files. Keep execution tickets in GitHub and keep PRDs in `docs/prds/`.
 
-- After PRD approval, store slices under `docs/issues/<feature-slug>/`
-- Number files in execution order: `01-...md`, `02-...md`, `03-...md`
-- Keep slices local-first unless a later workflow adds tracker sync
+## Canonical locations
 
-## Slice format
-
-Each slice should contain:
-
-- `Title` as the document H1
-- `What to build`
-- `Acceptance criteria`
-- `Blocked by`
-- `Notes`
+- PRDs live in `docs/prds/<feature-slug>.md`
+- Active execution slices live in GitHub Issues
 
 ## Working rules
 
-- Prefer vertical slices that produce visible progress
-- Avoid layer-only tasks that split frontend, backend, and data work apart without user value
-- Keep dependencies explicit in `Blocked by`
-- Make acceptance criteria concrete enough to verify locally
+- Create new execution slices in GitHub, not as markdown files under `docs/issues/`
+- Keep dependencies explicit in the GitHub issue body under `Blocked by`
+- Keep acceptance criteria concrete enough to verify locally
 - Preserve the launch-first boundary: supported solo flow first, deferred surfaces clearly marked as deferred
-- Keep environment matrices, operator checklists, and release evidence under `docs/ops/`, not in issue-slice directories
+- Keep environment matrices, operator checklists, and release evidence under `docs/ops/`, not in this directory

@@ -20,11 +20,11 @@ Before drafting code or proposing an architecture:
 ### Phase 5: /to-issues (Vertical Slicing)
 - Run `/to-issues` directly on the local PRD markdown file.
 - Automatically break down the monolithic plan into a sequence of atomic, vertical slices (Schema -> API -> UI Components -> Integration Tests).
-- Output the tickets sequentially inside `docs/issues/[feature-name]/`.
+- Publish the approved slices as GitHub issues, with each issue linking back to its parent PRD.
 - Print the task list and ask: *"Do you approve this slice execution plan?"*
 
 ### Phase 6 & 7: /tdd & /improve-codebase-architecture (Execution & Clean Architecture)
-For each ticket file in the sequence:
+For each ticket in the sequence:
 1. Initialize the `/tdd` skill wrapper.
 2. **Red State:** Write an isolated failing test matching the feature slice requirements. Run the local test runner (`npm test`, `vitest`, etc.) and verify it fails.
 3. **Green State:** Write the absolute minimum production code required to satisfy that specific test. Run the runner to verify passing status.
@@ -34,11 +34,11 @@ For each ticket file in the sequence:
 
 ### Issue tracker
 
-Beerolog uses local markdown artifacts instead of GitHub issues for planning work: write PRDs to `docs/prds/<feature-slug>.md` and approved slices to `docs/issues/<feature-slug>/`. See `docs/agents/issue-tracker.md`.
+Beerolog uses GitHub issues as the source of truth for planning work. Store PRDs in `docs/prds/<feature-slug>.md` and publish approved slices as GitHub issues. See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 
-For local markdown workflow artifacts, record triage state in document metadata (`Status:` and, when relevant, `Type:`) instead of assuming GitHub labels. See `docs/agents/triage-labels.md`.
+Record triage category and readiness in the GitHub issue body (`Type` and `Current intended status`) unless the repo later adopts formal GitHub labels. See `docs/agents/triage-labels.md`.
 
 ### Domain docs
 

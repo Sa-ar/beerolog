@@ -21,7 +21,7 @@ PRDs capture durable feature intent before implementation starts.
 ## Working rules
 
 - Write the PRD before issue slicing begins
-- The PRD itself does not perform slicing; once approved, create local vertical slices under `docs/issues/<feature-slug>/`
+- The PRD itself does not perform slicing; once approved, publish vertical slices to GitHub Issues and link the parent PRD in each issue body
 - Keep the current supported MVP boundary explicit
 - Record testing intent up front, not after code exists
 - Reference relevant ADRs when a feature depends on a prior decision
