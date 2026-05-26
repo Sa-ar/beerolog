@@ -12,6 +12,7 @@ Python FastAPI backend. Handles recommendations and user profiles for the cleane
 uv sync --extra dev
 cp .env.example .env
 # Fill in .env — see env var table below
+pnpm db:migrate
 ```
 
 ## Running
@@ -36,17 +37,20 @@ uv run ruff format --check .
 uv run pytest tests/ -v
 ```
 
-Tests never hit a real database — every service has an `InMemory*Repo` used via FastAPI `dependency_overrides`. Safe to run without any services configured.
+Tests still use in-memory overrides via FastAPI `dependency_overrides`, but the supported runtime now expects a real `DATABASE_URL`, `OPENAI_API_KEY`, and Cognito configuration for the signed-in solo flow.
 
 ## Environment variables
 
 | Variable | Required | Default | Description |
 |---|---|---|---|
-| `DATABASE_URL` | yes | — | Neon PostgreSQL connection string |
-| `OPENAI_API_KEY` | yes | — | OpenAI secret key |
+| `APP_ENV` | no | `development` | Runtime environment for logging and production warnings (`development`, `preview`, `production`) |
+| `DATABASE_URL` | yes | — | Neon PostgreSQL connection string for the supported runtime persistence layer |
+| `OPENAI_API_KEY` | yes | — | OpenAI secret key for recommendation explanations |
 | `COGNITO_USER_POOL_ID` | yes | — | e.g. `us-east-1_abc123` |
 | `COGNITO_CLIENT_ID` | yes | — | App client ID (not the secret) |
 | `COGNITO_REGION` | no | `us-east-1` | Region where user pool was created |
+| `CORS_ALLOWED_ORIGINS` | no | `http://localhost:3000` | Comma-separated browser origins allowed to call the API |
+| `LOG_LEVEL` | no | `INFO` | Python log level for request logs and startup warnings |
 | `API_SECRET` | no | `dev-secret` | HS256 secret for deferred QR and challenge tokens |
 
 > **Production**: `API_SECRET` defaults to `dev-secret`. This **must** be set to a random secret in Railway before going live. See [docs/services/railway.md](../../docs/services/railway.md).
@@ -63,3 +67,9 @@ Tests never hit a real database — every service has an `InMemory*Repo` used vi
 | `POST` | `/users/me/history` | Add to history |
 | `GET` | `/users/me/persona` | Get persona classification |
 | `POST` | `/users/me/rate` | Rate a beer (loved / fine / disliked) |
+
+## Runtime operations
+
+- `GET /health` is the deploy health check.
+- Every API response includes `X-Request-ID`; unhandled `500` responses return the same `request_id` in JSON for support/debugging.
+- Request logs include method, path, status code, duration, and request ID.

@@ -8,16 +8,6 @@
 4. Region: closest to Railway region (e.g. `us-east-1`)
 5. **Create project**
 
-## Enable pgvector
-
-In the Neon SQL editor (or via any Postgres client):
-
-```sql
-CREATE EXTENSION IF NOT EXISTS vector;
-```
-
-This only needs to be run once per database.
-
 ## Get the connection string
 
 Neon dashboard → Connection details → copy the **pooled connection string** (uses PgBouncer, better for serverless):
@@ -40,7 +30,7 @@ pnpm db:migrate    # apply pending migrations to the database
 Run `db:migrate` whenever:
 - Setting up a fresh database
 - After pulling changes that modified `packages/db/src/schema.ts`
-- After bumping `FLAVOR_VECTOR_SCHEMA_VERSION` (also requires a re-embedding job)
+- After changing the supported MVP persistence tables (`users`, `user_profiles`, `beer_ratings`, `user_style_suppressions`)
 
 ## Branches (optional)
 

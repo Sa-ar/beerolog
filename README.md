@@ -9,9 +9,9 @@ graph TD
   Browser([Browser])
   Vercel[Vercel — web app<br/>TanStack Start / React]
   Railway[Railway — API<br/>Python FastAPI]
-  Neon[(Neon PostgreSQL<br/>+ pgvector)]
+  Neon[(Neon PostgreSQL)]
   Cognito[AWS Cognito<br/>Auth]
-  OpenAI[OpenAI<br/>Embeddings + GPT-4o]
+  OpenAI[OpenAI<br/>Recommendation explanations]
 
   Browser --> Vercel
   Vercel --> Railway
@@ -44,7 +44,7 @@ pnpm install
 
 # 2. Configure the API
 cp apps/api/.env.example apps/api/.env
-# Edit apps/api/.env and fill in all required values
+# Edit apps/api/.env and fill in the required values for DB, OpenAI, Cognito, and CORS
 
 # 3. Configure the web app
 cp apps/web/.env.local.example apps/web/.env.local
@@ -56,7 +56,7 @@ uv sync --extra dev
 cd ../..
 
 # 5. Run migrations
-pnpm db:migrate
+pnpm db:migrate   # provisions the supported MVP persistence tables
 
 # 6. Start everything
 pnpm dev          # web app (http://localhost:3000)
@@ -77,6 +77,7 @@ pnpm test
 - Canonical supported journey: signed-in, profile-centered solo flow
 - Authoritative recommendation path: API `/recommendations`
 - Deferred from the cleaned MVP: venue/scan, group, and challenge surfaces
+- Launch/runtime config: API CORS, log level, and environment are configured via `APP_ENV`, `CORS_ALLOWED_ORIGINS`, and `LOG_LEVEL`
 
 ## Further reading
 

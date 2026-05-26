@@ -21,10 +21,14 @@ Project settings → Environment variables → add for **Production**, **Preview
 
 ## Deploy
 
+Make sure the Railway API has `CORS_ALLOWED_ORIGINS` set to each Vercel origin you expect to use (production domain, and any preview domain you intentionally support).
+
+
 Vercel auto-deploys on every push to `main`. Preview deployments are created for every PR.
 
 ## After first deploy
 
 1. Copy the Vercel deployment URL (e.g. `https://beerolog.vercel.app`)
 2. Add it to Cognito allowed callback URLs: `https://beerolog.vercel.app/auth/callback` (see [cognito.md](cognito.md))
-3. Add it to Vercel `VITE_API_URL` if not already set
+3. Add it to Railway `CORS_ALLOWED_ORIGINS` if not already set there
+4. Add it to Vercel `VITE_API_URL` if not already set

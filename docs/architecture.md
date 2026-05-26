@@ -71,17 +71,11 @@ Managed with Drizzle ORM in `packages/db/src/schema.ts`. Run `pnpm db:generate &
 
 | Table | Key columns | Notes |
 |---|---|---|
-| `users` | `id`, `cognito_sub`, `email`, `display_name` | One row per Cognito user; `cognito_sub` is the JWT `sub` claim |
-| `user_profiles` | `user_id`, `flavor_vector real[]`, `embedding vector(1536)`, `schema_version`, `persona_id`, `ratings_visible_to_friends` | Taste profile; HNSW index on `embedding` |
-| `beers` | `id`, `name`, `brewery`, `style`, `abv`, `flavor_vector real[]`, `embedding vector(1536)` | Beer catalog; HNSW index on `embedding` |
-| `venues` | `id`, `name`, `address`, `qr_code_token` | `qr_code_token` is the signed JWT used in QR codes |
-| `venue_tap_list` | `venue_id`, `beer_id`, `active`, `added_at`, `removed_at` | Active tap list items; filtered by `active = true` |
-| `beer_ratings` | `user_id`, `beer_id`, `venue_id`, `rating` | `rating` enum: `loved`, `fine`, `disliked`; `venue_id` nullable (rated outside a venue) |
-| `group_sessions` | `id`, `host_user_id`, `venue_id`, `status`, `expires_at` | Deferred table for group-session state; status: `open`, `completed`, `expired`; 4-hour TTL |
-| `group_participants` | `session_id`, `user_id`, `display_name`, `flavor_vector real[]` | Deferred table for group-session participants; `user_id` nullable for anonymous guests |
-| `friendships` | `user_id`, `friend_id` | Directed edge; to check mutual friendship query both directions |
+| `users` | `id`, `email`, `display_name` | Supported runtime user identity; `id` is the Cognito `sub` stored directly |
+| `user_profiles` | `user_id`, `flavor_vector real[]`, `schema_version`, `updated_at` | Supported runtime profile storage for the signed-in solo flow |
+| `beer_ratings` | `user_id`, `beer_id`, `rating`, `created_at` | Supported runtime beer history and ratings; `beer_id` is the canonical shared seed ID |
+| `user_style_suppressions` | `user_id`, `style`, `remaining_count` | Supported runtime storage for disliked-style suppression TTLs |
 
-pgvector HNSW indexes use `vector_cosine_ops` for approximate nearest-neighbor search.
 
 ---
 

@@ -14,8 +14,8 @@
 10. Domain: choose a Cognito domain prefix, e.g. `beerolog-auth` → domain becomes `https://beerolog-auth.auth.us-east-1.amazoncognito.com`
 11. App type: **Single-page application (SPA)**
 12. App client name: `beerolog-web`
-13. Callback URLs: `http://localhost:3000/auth/callback` (add your Vercel URL too when deploying)
-14. Sign-out URLs: `http://localhost:3000`
+13. Callback URLs: `http://localhost:3000/auth/callback` (add each Vercel URL you intentionally support when deploying)
+14. Sign-out URLs: `http://localhost:3000` (and the matching deployed app origins)
 15. OAuth scopes: `openid`, `email`, `profile`
 16. **Create user pool**
 
