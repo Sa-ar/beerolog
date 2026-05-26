@@ -3,10 +3,6 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as IndexRoute } from './routes/index'
 import { Route as QuizRoute } from './routes/quiz'
 import { Route as ResultsRoute } from './routes/results'
-import { Route as GroupRoute } from './routes/group'
-import { Route as GroupSessionRoute } from './routes/group-session'
-import { Route as GroupResultRoute } from './routes/group-result'
-import { Route as ChallengeRoute } from './routes/challenge'
 import { Route as SignInRoute } from './routes/signin'
 import { Route as AuthCallbackRoute } from './routes/auth-callback'
 import { Route as ProfileRoute } from './routes/profile'
@@ -15,10 +11,6 @@ const routeTree = rootRoute.addChildren([
   IndexRoute,
   QuizRoute,
   ResultsRoute,
-  GroupRoute,
-  GroupSessionRoute,
-  GroupResultRoute,
-  ChallengeRoute,
   SignInRoute,
   AuthCallbackRoute,
   ProfileRoute,

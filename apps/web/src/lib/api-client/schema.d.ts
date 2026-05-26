@@ -4,40 +4,6 @@
  */
 
 export interface paths {
-    "/challenges": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Create Challenge */
-        post: operations["createChallenge"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/challenges/{token}/compare": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Compare */
-        post: operations["compareChallenge"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/health": {
         parameters: {
             query?: never;
@@ -66,91 +32,6 @@ export interface paths {
         put?: never;
         /** Recommend */
         post: operations["recommendBeers"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/sessions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Create */
-        post: operations["createSession"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/sessions/{session_id}/join": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Join */
-        post: operations["joinSession"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/sessions/{session_id}/recommend": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Recommend */
-        get: operations["getGroupRecommendation"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/sessions/{session_id}/status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Status */
-        get: operations["getSessionStatus"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/sessions/{session_id}/submit": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Submit */
-        post: operations["submitSessionVector"];
         delete?: never;
         options?: never;
         head?: never;
@@ -252,39 +133,6 @@ export interface components {
             /** Style */
             style: string;
         };
-        /** ChallengeComparisonResponse */
-        ChallengeComparisonResponse: {
-            challenger_persona: components["schemas"]["PersonaSummary"];
-            /** Different */
-            different: string[];
-            friend_persona: components["schemas"]["PersonaSummary"];
-            /** Shared */
-            shared: string[];
-            /** Similarity */
-            similarity: number;
-        };
-        /** ChallengeTokenResponse */
-        ChallengeTokenResponse: {
-            /** Token */
-            token: string;
-        };
-        /** ChallengeVectorRequest */
-        ChallengeVectorRequest: {
-            /** Vector */
-            vector: number[];
-        };
-        /** CreateSessionRequest */
-        CreateSessionRequest: {
-            /** Host Id */
-            host_id: string;
-        };
-        /** CreateSessionResponse */
-        CreateSessionResponse: {
-            /** Expires At */
-            expires_at: string;
-            /** Session Id */
-            session_id: string;
-        };
         /** FlavorVector */
         FlavorVector: {
             /** Adventure */
@@ -301,13 +149,6 @@ export interface components {
             sourness: number;
             /** Sweetness */
             sweetness: number;
-        };
-        /** GroupRecommendationResponse */
-        GroupRecommendationResponse: {
-            /** Group Vector */
-            group_vector: number[];
-            /** High Variance */
-            high_variance: boolean;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -331,16 +172,6 @@ export interface components {
         HistoryResponse: {
             /** Entries */
             entries: components["schemas"]["HistoryEntry"][];
-        };
-        /** JoinSessionRequest */
-        JoinSessionRequest: {
-            /** Name */
-            name: string;
-        };
-        /** JoinSessionResponse */
-        JoinSessionResponse: {
-            /** Participant Id */
-            participant_id: string;
         };
         /** OkResponse */
         OkResponse: {
@@ -415,33 +246,6 @@ export interface components {
             /** Vector */
             vector: number[];
         };
-        /** SessionParticipantStatus */
-        SessionParticipantStatus: {
-            /** Id */
-            id: string;
-            /** Name */
-            name: string;
-            /** Submitted */
-            submitted: boolean;
-        };
-        /** SessionStatusResponse */
-        SessionStatusResponse: {
-            /** Completed */
-            completed: number;
-            /** Participants */
-            participants: components["schemas"]["SessionParticipantStatus"][];
-            /** Session Id */
-            session_id: string;
-            /** Total */
-            total: number;
-        };
-        /** SubmitVectorRequest */
-        SubmitVectorRequest: {
-            /** Participant Id */
-            participant_id: string;
-            /** Vector */
-            vector: number[];
-        };
         /** UpdatedVectorResponse */
         UpdatedVectorResponse: {
             /** Updated Vector */
@@ -469,61 +273,6 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    createChallenge: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ChallengeTokenResponse"];
-                };
-            };
-        };
-    };
-    compareChallenge: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                token: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ChallengeVectorRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ChallengeComparisonResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
     getHealth: {
         parameters: {
             query?: never;
@@ -564,171 +313,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RecommendationResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    createSession: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateSessionRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CreateSessionResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    joinSession: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                session_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["JoinSessionRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["JoinSessionResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    getGroupRecommendation: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                session_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["GroupRecommendationResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    getSessionStatus: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                session_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SessionStatusResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    submitSessionVector: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                session_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SubmitVectorRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["OkResponse"];
                 };
             };
             /** @description Validation Error */

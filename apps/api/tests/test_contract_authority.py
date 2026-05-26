@@ -9,10 +9,6 @@ def test_openapi_exposes_stable_contract_shapes():
     schema = app.openapi()
 
     assert schema["paths"]["/users/me/rate"]["post"]["operationId"] == "rateMyBeer"
-    assert schema["paths"]["/sessions"]["post"]["operationId"] == "createSession"
-    assert (
-        schema["paths"]["/challenges/{token}/compare"]["post"]["operationId"] == "compareChallenge"
-    )
 
     rate_request = schema["components"]["schemas"]["RateBeerRequest"]
     assert rate_request["properties"]["beer"]["$ref"] == "#/components/schemas/RatedBeerInput"
@@ -20,15 +16,17 @@ def test_openapi_exposes_stable_contract_shapes():
     rating_value = schema["components"]["schemas"]["RatingValue"]
     assert rating_value["enum"] == ["loved", "fine", "disliked"]
 
-    compare_response = schema["paths"]["/challenges/{token}/compare"]["post"]["responses"]["200"][
-        "content"
-    ]["application/json"]["schema"]["$ref"]
-    assert compare_response == "#/components/schemas/ChallengeComparisonResponse"
-
     assert "/venues/{venue_id}/tap-list" not in schema["paths"]
     assert "/venues/{venue_id}/scan" not in schema["paths"]
     assert "/scan/{token}" not in schema["paths"]
     assert "/venues/{venue_id}/leaderboard" not in schema["paths"]
+    assert "/sessions" not in schema["paths"]
+    assert "/sessions/{session_id}/join" not in schema["paths"]
+    assert "/sessions/{session_id}/submit" not in schema["paths"]
+    assert "/sessions/{session_id}/status" not in schema["paths"]
+    assert "/sessions/{session_id}/recommend" not in schema["paths"]
+    assert "/challenges" not in schema["paths"]
+    assert "/challenges/{token}/compare" not in schema["paths"]
 
 
 def test_typescript_contract_constants_match_api_flavor_model():

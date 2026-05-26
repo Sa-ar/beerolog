@@ -1,6 +1,6 @@
 # Beerolog API
 
-Python FastAPI backend. Handles recommendations, user profiles, group sessions, and social features for the cleaned MVP. Venue/scan endpoints remain deferred future work and are not part of the supported API surface.
+Python FastAPI backend. Handles recommendations and user profiles for the cleaned MVP. Venue/scan and group/challenge endpoints remain deferred future work and are not part of the supported API surface.
 
 ## Requirements
 
@@ -25,6 +25,7 @@ uv run uvicorn app.main:app --reload
 ## Deferred surfaces
 
 - Venue tap-list management, QR scan, and venue leaderboard routes are intentionally deferred from the supported MVP.
+- Group sessions and friend challenge routes are also intentionally deferred from the supported MVP.
 - The supporting modules remain in the repo as follow-on work, but they are not mounted in the current FastAPI app.
 
 ## Quality checks
@@ -46,7 +47,7 @@ Tests never hit a real database — every service has an `InMemory*Repo` used vi
 | `COGNITO_USER_POOL_ID` | yes | — | e.g. `us-east-1_abc123` |
 | `COGNITO_CLIENT_ID` | yes | — | App client ID (not the secret) |
 | `COGNITO_REGION` | no | `us-east-1` | Region where user pool was created |
-| `API_SECRET` | no | `dev-secret` | HS256 secret for QR and challenge tokens |
+| `API_SECRET` | no | `dev-secret` | HS256 secret for deferred QR and challenge tokens |
 
 > **Production**: `API_SECRET` defaults to `dev-secret`. This **must** be set to a random secret in Railway before going live. See [docs/services/railway.md](../../docs/services/railway.md).
 
@@ -56,16 +57,9 @@ Tests never hit a real database — every service has an `InMemory*Repo` used vi
 |---|---|---|
 | `GET` | `/health` | Health check |
 | `POST` | `/recommendations` | Get beer recommendations for a flavor vector |
-| `POST` | `/sessions` | Create group session |
-| `POST` | `/sessions/{id}/join` | Join group session |
-| `POST` | `/sessions/{id}/submit` | Submit flavor vector |
-| `GET` | `/sessions/{id}/status` | Session status |
-| `GET` | `/sessions/{id}/recommend` | Group recommendation |
 | `GET` | `/users/me/profile` | Get flavor vector profile |
 | `PUT` | `/users/me/profile` | Save flavor vector profile |
 | `GET` | `/users/me/history` | Beer history |
 | `POST` | `/users/me/history` | Add to history |
 | `GET` | `/users/me/persona` | Get persona classification |
 | `POST` | `/users/me/rate` | Rate a beer (loved / fine / disliked) |
-| `POST` | `/challenges` | Create friend challenge token |
-| `POST` | `/challenges/{token}/compare` | Compare flavor vectors |

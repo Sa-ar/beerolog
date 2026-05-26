@@ -43,7 +43,7 @@ pnpm lint
 | `VITE_COGNITO_DOMAIN` | yes | Cognito hosted UI domain (e.g. `https://beerolog.auth.us-east-1.amazoncognito.com`) |
 | `VITE_COGNITO_CLIENT_ID` | yes | Cognito app client ID |
 
-For local development, `VITE_API_URL=http://localhost:8000` is sufficient to work without Cognito — unauthenticated flows (quiz, recommendations, group sessions as guest) will still work.
+For local development, set `VITE_API_URL=http://localhost:8000` and configure the Cognito variables if you want to exercise the supported signed-in solo flow locally.
 
 ## Deployment
 
@@ -59,9 +59,5 @@ See [docs/services/vercel.md](../../docs/services/vercel.md) for Vercel project 
 | `/profile` | User taste profile + persona |
 | `/signin` | Cognito sign-in redirect |
 | `/auth/callback` | Cognito OAuth callback |
-| `/group` | Start a group session |
-| `/group/:sessionId` | Join / participate in group session |
-| `/group/:sessionId/result` | Group recommendation result |
-| `/challenge/:token` | Friend taste challenge |
 
-Venue and scan routes are intentionally deferred from the supported MVP and are not mounted in the current app router.
+Venue/scan and group/challenge routes are intentionally deferred from the supported MVP and are not mounted in the current app router.

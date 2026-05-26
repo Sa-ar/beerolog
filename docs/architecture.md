@@ -24,7 +24,7 @@ The FlavorVector is the core data type. It represents a user's (or beer's) taste
 
 ## Deferred surfaces
 
-Venue/scan remains deferred after cleanup. The related services, tables, and token utilities below are documented as follow-on work, not as part of the supported MVP runtime surface.
+Venue/scan and group/challenge remain deferred after cleanup. The related services, tables, and token utilities below are documented as follow-on work, not as part of the supported MVP runtime surface.
 
 ## Service modules
 
@@ -40,8 +40,8 @@ All services live in `apps/api/app/services/`. Each is a pure module: no global 
 | `menu_scanner` | Deferred venue/scan helper: accepts a base64 image, calls GPT-4o to extract beer names, fuzzy-matches against catalog |
 | `fuzzy_matcher` | Levenshtein-based name matching against a beer catalog; threshold 0.6 |
 | `qr_token` | Deferred venue/scan helper: generates and decodes HS256 JWTs encoding a venue ID; 24h TTL |
-| `group_session` | Manages group quiz sessions: create, join, submit vector, aggregate group vector, recommend |
-| `challenge_service` | Generates and resolves HS256 friend-challenge tokens (7-day TTL); compares two flavor vectors |
+| `group_session` | Deferred group surface: manages group quiz sessions, aggregation, and recommendation handoff |
+| `challenge_service` | Deferred challenge surface: generates and resolves friend-challenge tokens and compares two flavor vectors |
 | `badge_engine` | Pure functions: checks milestone badges for bar exploration, expert recommendations, taste evolution |
 | `social_proof` | Deferred venue-facing social proof: counts friends who positively rated a beer at a venue |
 | `leaderboard` | Deferred venue-facing leaderboard: ranks users by positive recommendation count at a venue; respects privacy flags |
@@ -77,8 +77,8 @@ Managed with Drizzle ORM in `packages/db/src/schema.ts`. Run `pnpm db:generate &
 | `venues` | `id`, `name`, `address`, `qr_code_token` | `qr_code_token` is the signed JWT used in QR codes |
 | `venue_tap_list` | `venue_id`, `beer_id`, `active`, `added_at`, `removed_at` | Active tap list items; filtered by `active = true` |
 | `beer_ratings` | `user_id`, `beer_id`, `venue_id`, `rating` | `rating` enum: `loved`, `fine`, `disliked`; `venue_id` nullable (rated outside a venue) |
-| `group_sessions` | `id`, `host_user_id`, `venue_id`, `status`, `expires_at` | Status: `open`, `completed`, `expired`; 4-hour TTL |
-| `group_participants` | `session_id`, `user_id`, `display_name`, `flavor_vector real[]` | `user_id` nullable for anonymous guests |
+| `group_sessions` | `id`, `host_user_id`, `venue_id`, `status`, `expires_at` | Deferred table for group-session state; status: `open`, `completed`, `expired`; 4-hour TTL |
+| `group_participants` | `session_id`, `user_id`, `display_name`, `flavor_vector real[]` | Deferred table for group-session participants; `user_id` nullable for anonymous guests |
 | `friendships` | `user_id`, `friend_id` | Directed edge; to check mutual friendship query both directions |
 
 pgvector HNSW indexes use `vector_cosine_ops` for approximate nearest-neighbor search.
@@ -96,13 +96,15 @@ This flow is intentionally deferred from the supported MVP. The related modules 
 3. API decodes and validates the JWT, returns the venue’s active tap list
 4. Frontend would show beers on tap and let the customer run a filtered quiz
 
-### Group session
+### Deferred group session flow
+
+This flow is intentionally deferred from the supported MVP. The supporting services and tables remain in the repo as future work, but the public routes are not mounted in the current application surface.
 
 1. Host creates a session: `POST /sessions` → session ID + 4h expiry
-2. Host shares session link; participants scan and `POST /sessions/{id}/join` with a display name
-3. Each participant takes the quiz and `POST /sessions/{id}/submit` with their flavor vector
-4. When all have submitted, any participant hits `GET /sessions/{id}/recommend`
-5. API aggregates vectors (per-dimension mean with variance check), runs recommendation, returns results
+2. Host shares session link; participants would `POST /sessions/{id}/join` with a display name
+3. Each participant would take the quiz and `POST /sessions/{id}/submit` with their flavor vector
+4. When enough participants have submitted, a client would hit `GET /sessions/{id}/recommend`
+5. API aggregates vectors (per-dimension mean with variance check), runs recommendation, and returns results
 6. If variance is high across any dimension, the response includes `group_variance_high: true`
 
 ### Taste feedback nudge
