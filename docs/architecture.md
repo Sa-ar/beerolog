@@ -24,7 +24,7 @@ The FlavorVector is the core data type. It represents a user's (or beer's) taste
 
 ## Deferred surfaces
 
-Venue/scan and group/challenge remain deferred after cleanup. The related services, tables, and token utilities below are documented as follow-on work, not as part of the supported MVP runtime surface.
+Venue/scan flows, group sessions, friend challenges, leaderboards/social proof, badges, and broader bar tooling/operator workflows remain deferred after cleanup. The related services, tables, and token utilities below are documented as follow-on work, not as part of the supported MVP runtime surface.
 
 ## Service modules
 
@@ -42,25 +42,28 @@ All services live in `apps/api/app/services/`. Each is a pure module: no global 
 | `qr_token` | Deferred venue/scan helper: generates and decodes HS256 JWTs encoding a venue ID; 24h TTL |
 | `group_session` | Deferred group surface: manages group quiz sessions, aggregation, and recommendation handoff |
 | `challenge_service` | Deferred challenge surface: generates and resolves friend-challenge tokens and compares two flavor vectors |
-| `badge_engine` | Pure functions: checks milestone badges for bar exploration, expert recommendations, taste evolution |
+| `badge_engine` | Deferred gamification helper: pure functions for milestone badges and taste-evolution follow-on work |
 | `social_proof` | Deferred venue-facing social proof: counts friends who positively rated a beer at a venue |
 | `leaderboard` | Deferred venue-facing leaderboard: ranks users by positive recommendation count at a venue; respects privacy flags |
 
 ---
 
-## In-memory repo pattern
+## Repository pattern
 
-Every service that needs persistence uses a `Protocol`-typed repository interface. For testing, an `InMemory*Repo` implementing that protocol is injected via FastAPI’s `dependency_overrides`. Production repos (not yet implemented) will use asyncpg against Neon.
+Persistence stays protocol-driven, but the supported MVP is no longer purely in-memory. Tests still inject `InMemory*Repo` implementations via FastAPI `dependency_overrides`, while the signed-in solo runtime now wires `get_user_profile_repo()` to `PostgresUserProfileRepo` against Neon/Postgres for profile, history, and suppression storage.
 
 This means:
-- Tests never touch a database
-- Services are fully testable in isolation
-- Adding a real DB repo later is a drop-in: implement the Protocol, wire up the dependency
+- The supported signed-in solo flow uses real Postgres-backed persistence in runtime
+- Tests can still isolate services with in-memory repos
+- Deferred venue, session, leaderboard, social, and other follow-on repos are still placeholders until those surfaces are explicitly implemented
 
 ```
-Service function(repo: SomeRepo) → business logic
-                ┘ InMemorySomeRepo (tests)
-                ┘ PgSomeRepo (production — not yet implemented)
+Service function(repo: UserProfileRepo) -> business logic
+                ┘ InMemoryUserProfileRepo (tests)
+                ┘ PostgresUserProfileRepo (supported runtime)
+
+VenueRepo / SessionRepo / Social repos
+                ┘ deferred placeholders only
 ```
 
 ---

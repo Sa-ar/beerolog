@@ -76,7 +76,7 @@ pnpm test
 
 - Canonical supported journey: signed-in, profile-centered solo flow
 - Authoritative recommendation path: API `/recommendations`
-- Deferred from the cleaned MVP: venue/scan, group, and challenge surfaces
+- Deferred from the cleaned MVP: venue/scan flows, group sessions, friend challenges, leaderboards/social proof, badges, and broader bar tooling/operator workflows
 - Launch/runtime config: API CORS, log level, and environment are configured via `APP_ENV`, `CORS_ALLOWED_ORIGINS`, and `LOG_LEVEL`
 
 ## Further reading
@@ -84,6 +84,7 @@ pnpm test
 - [API setup](apps/api/README.md)
 - [Web app setup](apps/web/README.md)
 - [Architecture](docs/architecture.md)
+- [Operational artifacts](docs/ops/README.md)
 - [AWS Cognito](docs/services/cognito.md)
 - [Neon PostgreSQL](docs/services/neon.md)
 - [OpenAI](docs/services/openai.md)
