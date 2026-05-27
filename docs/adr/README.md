@@ -22,3 +22,4 @@ Write or update an ADR when a decision changes product boundary, system shape, o
 ## Current ADRs
 
 - `0001-launch-first-product-boundary.md`
+- `0002-clerk-social-first-auth.md`
