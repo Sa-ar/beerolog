@@ -34,7 +34,7 @@ The persistence foundation should make launch behavior explicit without expandin
 - ADR 0001 and the launch scope freeze PRD remain the governing boundary for this work. `persistence-foundation` applies only to the supported signed-in solo MVP.
 - Launch persistence scope is limited to four supported runtime tables: `users`, `user_profiles`, `beer_ratings`, and `user_style_suppressions`.
 - PostgreSQL is the launch system of record for supported user persistence. In-memory repositories remain test infrastructure only and are never an acceptable production fallback.
-- The authenticated Cognito `sub` is the canonical persisted user identifier for launch. All supported persisted solo state is keyed from that identifier.
+- The authenticated Clerk user id is the canonical persisted user identifier for launch (see ADR 0002). All supported persisted solo state is keyed from that identifier. This replaces the previous Cognito `sub` assumption.
 - The `users` record is a lightweight identity anchor for the supported runtime, not a broader editable account-profile system. Launch persistence may snapshot available auth claims such as email and display name when they are present, but this feature does not introduce user-managed profile editing.
 - `user_profiles` stores the user's current `FlavorVector`, its schema version, and last update time as the authoritative saved taste profile for the signed-in solo journey.
 - `beer_ratings` is the authoritative history of supported solo feedback events. Each persisted entry records the user, the rated beer, the rating value when present, and the time of the event.

@@ -4,13 +4,13 @@
 
 Beerolog's supported MVP is the signed-in solo flow, but the exact local setup and walkthrough for exercising that MVP are still spread across multiple READMEs, service notes, and implementation details. A contributor can tell that the app needs web, API, auth, database, and model-provider wiring, yet still lose time figuring out which dependencies are actually required for a working local demo, which routes are authoritative, whether any data seeding is needed, and which deferred surfaces should be ignored.
 
-That gap creates three kinds of demo risk. First, a maintainer can waste time on repo archaeology or try to boot unsupported paths. Second, a local run can appear partially healthy while still being unable to complete the signed-in solo journey because Cognito, Neon, OpenAI, migrations, or CORS are not aligned. Third, different contributors can demo different flows and accidentally treat deferred venue, group, challenge, or social work as part of the supported local surface.
+That gap creates three kinds of demo risk. First, a maintainer can waste time on repo archaeology or try to boot unsupported paths. Second, a local run can appear partially healthy while still being unable to complete the signed-in solo journey because Clerk, Neon, OpenAI, migrations, or CORS are not aligned. Third, different contributors can demo different flows and accidentally treat deferred venue, group, challenge, or social work as part of the supported local surface.
 
 ## Solution
 
 Define one durable local-demo-flow PRD for the supported Beerolog MVP only. This PRD should state the minimum local setup needed to exercise the signed-in solo journey, the exact external services that must be configured, the local runtime commands that must be used, and the canonical manual walkthrough that proves the MVP is working end to end.
 
-The goal is not to redesign launch auth, runtime hardening, or deploy process. The goal is to make today's supported local demo explicit and repeatable. A contributor should be able to follow one documented path, start the local web and API runtimes, sign in through Cognito, complete the quiz, receive recommendations with explanations, rate a beer, and confirm that profile, persona, and history persist without needing extra repository archaeology.
+The goal is not to redesign launch auth, runtime hardening, or deploy process. The goal is to make today's supported local demo explicit and repeatable. A contributor should be able to follow one documented path, start the local web and API runtimes, sign in through Clerk (one of the supported social providers), complete the quiz, receive recommendations with explanations, rate a beer, and confirm that profile, persona, and history persist without needing extra repository archaeology.
 
 ## User Stories
 
@@ -32,12 +32,12 @@ The goal is not to redesign launch auth, runtime hardening, or deploy process. T
 
 - ADR 0001 remains the governing boundary for this PRD. `local-demo-flow` applies only to the supported signed-in solo MVP: sign-in, quiz, recommendations, persistent profile, ratings/history, and persona.
 - The authoritative local demo surface is limited to the current solo web journey and its supporting API endpoints. Deferred venue, scan, session, challenge, leaderboard, badge, and social routes are not part of the supported local walkthrough even if related code remains in the repository.
-- The minimum required local dependencies are Node and pnpm for the web and workspace tooling, Python and `uv` for the API runtime, one Cognito user pool with hosted UI enabled, one Neon PostgreSQL database, and one OpenAI API key.
+- The minimum required local dependencies are Node and pnpm for the web and workspace tooling, Python and `uv` for the API runtime, a Clerk development instance (free tier), one Neon PostgreSQL database, and one OpenAI API key.
 - Local setup must include installing workspace dependencies, creating the API and web environment files from the checked-in examples, synchronizing the API Python environment, and applying database migrations before the walkthrough begins.
-- The required local runtime contract is explicit: the web app uses the local API base URL plus Cognito hosted UI settings, and the API uses database, OpenAI, Cognito, log-level, and allowed-origin settings aligned to `http://localhost:3000`.
+- The required local runtime contract is explicit: the web app uses the local API base URL plus the Clerk publishable key for the development instance, and the API uses database, OpenAI, Clerk secret key, log-level, and allowed-origin settings aligned to `http://localhost:3000`.
 - The supported local dev startup sequence is: install dependencies once, run database migrations, start the web dev server from the monorepo root, and start the FastAPI server separately from the API app directory.
-- Local demo auth depends on a real Cognito-hosted sign-in flow, not a mocked or bypassed session. The local callback URL and sign-out URL must include the localhost web origin used by the demo.
-- The supported local sign-in contract is Cognito hosted UI email-based sign-in with at least one working demo account available before the walkthrough starts. Social-provider branding or future auth-hardening work does not change the local demo prerequisite.
+- Local demo auth depends on a real Clerk-hosted sign-in flow, not a mocked or bypassed session. The Clerk development instance handles shared OAuth credentials so no provider app credentials are required locally.
+- The supported local sign-in contract is Clerk development instance sign-in. Because Clerk development instances use shared OAuth credentials, any social provider can be used for local demo without registering separate OAuth app credentials.
 - This PRD documents the current supported local auth behavior rather than waiting for future auth-session hardening. A local demo is acceptable when the existing browser-to-API auth contract successfully supports the signed-in solo journey end to end.
 - Real database-backed persistence is required for the local demo. The walkthrough is not considered supported if profile, rating, persona, and history behavior run only through in-memory test doubles or manual data patching.
 - OpenAI configuration is required for the supported local demo because recommendation requests depend on the explanation path being configured. A local run with missing model-provider configuration is not a passing signed-in solo demo.
@@ -45,7 +45,7 @@ The goal is not to redesign launch auth, runtime hardening, or deploy process. T
 - The canonical local demo walkthrough is:
   1. Confirm the API health endpoint responds successfully from the local API runtime.
   2. Open the local web app and start from the signed-out home or protected-route redirect path.
-  3. Sign in through Cognito and return to the intended local Beerolog route.
+  3. Sign in through Clerk (any supported social provider) and return to the intended local Beerolog route.
   4. Complete the quiz and land on recommendations.
   5. Verify that profile save succeeds and that three recommendation slots load with explanation copy.
   6. Open the profile view and confirm persona loads for the signed-in user.
@@ -59,7 +59,7 @@ The goal is not to redesign launch auth, runtime hardening, or deploy process. T
 
 - A good test for this PRD verifies externally visible demo behavior: whether a contributor can set up the supported local stack and successfully complete the signed-in solo walkthrough without hidden setup steps or unsupported shortcuts.
 - Automated verification should continue to use the existing repository baseline for local confidence: type checking, linting, API tests, and contract synchronization checks. These checks are supporting evidence, not a replacement for the walkthrough itself.
-- Manual verification is authoritative for this PRD because the supported local demo crosses real Cognito auth, real database persistence, browser redirect behavior, local CORS, and the live explanation dependency.
+- Manual verification is authoritative for this PRD because the supported local demo crosses real Clerk auth, real database persistence, browser redirect behavior, local CORS, and the live explanation dependency.
 - The local manual smoke flow should verify at least: API health, sign-in redirect and callback success, quiz completion, saved recommendations with explanation text, profile/persona retrieval, beer rating submission, history persistence, and successful refresh or re-entry on the signed-in profile path.
 - Existing route, service, configuration, and contract checks are prior art for this work. New test coverage is valuable only when it reduces ambiguity in the supported local demo contract rather than restating implementation details.
 - Test and smoke guidance for this PRD must stay scoped to the signed-in solo MVP. Deferred venue, scan, session, challenge, leaderboard, badge, and social flows are not part of local-demo verification.

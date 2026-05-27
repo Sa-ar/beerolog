@@ -44,9 +44,9 @@ This PRD is intentionally release-focused, not expansion-focused. It does not ad
 - The authoritative recommendation flow remains the solo signed-in path backed by the existing recommendation endpoint and current taste-profile model. Launch readiness does not require a broader discovery surface or additional recommendation modes.
 - Recommendation explanations are part of the supported MVP experience and therefore part of the launch gate. If explanations are unavailable or materially broken in the supported flow, launch readiness is not met.
 - Persistence is part of the launch gate. Launch readiness requires production-backed storage for users, profiles, ratings/history, and profile evolution behavior, not only in-memory development overrides.
-- Runtime readiness requires production configuration for the web deployment, API deployment, database connection, Cognito integration, and OpenAI access. Local defaults and placeholder secrets do not satisfy the launch gate.
+- Runtime readiness requires production configuration for the web deployment, API deployment, database connection, Clerk integration, and OpenAI access. Local defaults and placeholder secrets do not satisfy the launch gate.
 - `API_SECRET` must be set to a strong non-default value before launch. Default development values are never acceptable for a live release.
-- Production auth readiness requires the supported sign-in callback URLs, sign-out URLs, Cognito domain, client ID, region, and API-side Cognito settings to be aligned with the live web origin.
+- Production auth readiness requires the supported social provider OAuth credentials, Clerk publishable key, Clerk secret key, and API-side Clerk token verification settings to be aligned with the live web origin (see `docs/prds/clerk-social-auth-foundation.md`).
 - Production API readiness requires the launch database to be migrated before release and the API health endpoint to return a healthy response from the deployed environment.
 - Cross-origin readiness is part of launch readiness. The allowed browser origins configured for the API must match the web origins that the team intentionally supports for launch.
 - Contract integrity is part of launch readiness. The OpenAPI description and generated web client schema must be in sync at release time so the documented API surface matches the shipped frontend expectations.

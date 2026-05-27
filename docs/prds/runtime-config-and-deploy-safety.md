@@ -4,7 +4,7 @@
 
 Beerolog now has an explicit launch boundary and an explicit launch definition of done, but the runtime configuration needed to operate that supported MVP is still spread across code defaults, setup READMEs, and provider-specific notes. There is not yet one durable feature artifact that defines what runtime values must exist, how non-development deploys should behave when configuration is unsafe, and what deploy checks are required before the signed-in solo flow can be considered safe to launch.
 
-That gap creates launch risk even if the supported product flow is otherwise implemented. A deploy can look healthy in local development but still fail in preview or production because web, API, Cognito, Neon, Railway, Vercel, and OpenAI settings are misaligned. Unsafe defaults can slip through. Auth callback URLs, API CORS origins, and live web origins can drift apart. Database migrations can be skipped. Operators can be left with partial logs and no clear release checklist. For a launch-first MVP whose supported surface is intentionally narrow, that kind of runtime drift can break the entire supported user journey at once.
+That gap creates launch risk even if the supported product flow is otherwise implemented. A deploy can look healthy in local development but still fail in preview or production because web, API, Clerk, Neon, Railway, Vercel, and OpenAI settings are misaligned. Unsafe defaults can slip through. Auth callback URLs, API CORS origins, and live web origins can drift apart. Database migrations can be skipped. Operators can be left with partial logs and no clear release checklist. For a launch-first MVP whose supported surface is intentionally narrow, that kind of runtime drift can break the entire supported user journey at once.
 
 ## Solution
 
@@ -16,7 +16,7 @@ The feature should stay focused on reliable launch of the existing signed-in sol
 
 1. As a roadmap owner, I want runtime configuration and deploy safety defined as a launch feature, so that release readiness is not left to scattered docs and memory.
 2. As a maintainer, I want the signed-in solo flow to remain the only supported launch surface for this work, so that runtime-hardening effort does not drift into deferred venue, group, or social features.
-3. As an operator, I want one authoritative runtime contract for the web app, API, Cognito, Neon, Railway, Vercel, and OpenAI, so that I know exactly what must be configured before launch.
+3. As an operator, I want one authoritative runtime contract for the web app, API, Clerk, Neon, Railway, Vercel, and OpenAI, so that I know exactly what must be configured before launch.
 4. As a developer, I want local development to remain straightforward while preview and production deployments become stricter, so that I can move quickly locally without normalizing unsafe live defaults.
 5. As a release manager, I want production deploys to fail early when critical configuration is missing or clearly unsafe, so that broken launches are caught before users hit them.
 6. As a signed-in user, I want auth redirects, callback handling, and API access to agree on the same live origins, so that sign-in works reliably in the deployed app.
@@ -35,12 +35,12 @@ The feature should stay focused on reliable launch of the existing signed-in sol
 - Deferred venue, scan, group, challenge, leaderboard, badge, and social surfaces remain out of scope for runtime-launch requirements even if related code or documentation exists elsewhere.
 - Runtime configuration for launch should be treated as one cross-system contract, not as separate ad hoc provider setups. The launch contract covers four linked planes: web runtime values, API runtime values, provider configuration, and release/deploy procedure.
 - The environment model remains `development`, `preview`, and `production`. `development` may keep local-friendly defaults, but `preview` and `production` are deploy environments and must use explicit non-placeholder configuration.
-- Non-development API startup should fail closed when critical runtime configuration is missing. At minimum, live deploys must not start successfully without a real database connection, an OpenAI key, Cognito identifiers, and an explicit non-default application secret.
+- Non-development API startup should fail closed when critical runtime configuration is missing. At minimum, live deploys must not start successfully without a real database connection, an OpenAI key, Clerk credentials, and an explicit non-default application secret.
 - `API_SECRET` must never use the development default in `preview` or `production`. Unsafe placeholder secrets are launch blockers even if the most visible user flow does not exercise every tokenized path directly.
 - Non-development API configuration must require an explicit origin allowlist. Allowed browser origins should be exact supported origins rather than wildcards or implicit broad matching.
-- The web runtime contract for deploys includes an explicit API base URL, Cognito hosted UI domain, and Cognito client ID for each supported environment. Those values must align with the same environment's API and Cognito setup.
-- Cognito callback URLs and sign-out URLs are part of the runtime contract, not optional setup detail. Every intentionally supported deployed web origin must be registered there, and unsupported origins should not be added speculatively.
-- The launch runtime contract should keep the API and web aligned to the same supported origin set. A deploy is not safe if the web origin, API CORS allowlist, and Cognito redirect configuration describe different environments.
+- The web runtime contract for deploys includes an explicit API base URL and Clerk publishable key for each supported environment. Those values must align with the same environment's API and Clerk setup.
+- Clerk allowed origins and OAuth provider redirect URIs are part of the runtime contract, not optional setup detail. Every intentionally supported deployed web origin must be registered in the Clerk dashboard, and unsupported origins should not be added speculatively.
+- The launch runtime contract should keep the API and web aligned to the same supported origin set. A deploy is not safe if the web origin, API CORS allowlist, and Clerk allowed-origin configuration describe different environments.
 - Deployed runtime behavior for the supported MVP must use real persistence. Test overrides and in-memory substitutes remain acceptable only for tests and local development, not for preview or production launch paths.
 - Database migration status is a deploy-safety concern. A launch is not safe unless the target database has the required schema for the supported MVP before the deployed flow is exercised.
 - Deploy safety should include a single durable environment matrix in `docs/ops/environment-matrix.md` that names required variables, allowed values or formats, provider ownership, and where each value must be configured. The matrix should describe secrets without storing the secret values themselves.
@@ -49,7 +49,7 @@ The feature should stay focused on reliable launch of the existing signed-in sol
 - Runtime observability for launch has a minimum floor: health checks, request logging, request identifiers, and startup/runtime signals that reveal whether critical subsystems are configured without leaking secrets.
 - Contract integrity is part of deploy safety. The API description and generated or consumed web contract artifacts must remain synchronized at release time, and contract drift is a launch blocker.
 - Documentation for runtime config and deploy safety should be authoritative enough that a future maintainer can perform a safe launch without recovering hidden context from chat history.
-- This PRD hardens the current deployment model built around Vercel, Railway, Cognito, Neon, and OpenAI. It does not require adopting new platforms, new observability vendors, or a broader infrastructure rewrite before launch.
+- This PRD hardens the current deployment model built around Vercel, Railway, Clerk, Neon, and OpenAI. It does not require adopting new platforms, new observability vendors, or a broader infrastructure rewrite before launch.
 
 ## Testing Decisions
 
@@ -68,7 +68,7 @@ The feature should stay focused on reliable launch of the existing signed-in sol
 - Adding new product functionality to the supported MVP
 - Reopening deferred venue, scan, group, challenge, leaderboard, badge, or social surfaces
 - Rewriting the launch roadmap or changing the accepted MVP boundary
-- Replacing Vercel, Railway, Cognito, Neon, or OpenAI with different providers as part of this feature
+- Replacing Vercel, Railway, Clerk, Neon, or OpenAI with different providers as part of this feature
 - Designing a full CI/CD platform overhaul beyond the deploy-safety checks needed for launch
 - Introducing broad new observability products or advanced production tooling that are not necessary for launch-safe operation
 - Defining long-term multi-region, high-availability, or post-scale infrastructure strategy

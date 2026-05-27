@@ -74,7 +74,7 @@ Managed with Drizzle ORM in `packages/db/src/schema.ts`. Run `pnpm db:generate &
 
 | Table | Key columns | Notes |
 |---|---|---|
-| `users` | `id`, `email`, `display_name` | Supported runtime user identity; `id` is the Cognito `sub` stored directly |
+| `users` | `id`, `email`, `display_name` | Supported runtime user identity; `id` is the Clerk user id stored directly (see ADR 0002) |
 | `user_profiles` | `user_id`, `flavor_vector real[]`, `schema_version`, `updated_at` | Supported runtime profile storage for the signed-in solo flow |
 | `beer_ratings` | `user_id`, `beer_id`, `rating`, `created_at` | Supported runtime beer history and ratings; `beer_id` is the canonical shared seed ID |
 | `user_style_suppressions` | `user_id`, `style`, `remaining_count` | Supported runtime storage for disliked-style suppression TTLs |
