@@ -18,9 +18,8 @@ Service settings → Variables:
 | `APP_ENV` | `production` |
 | `DATABASE_URL` | Neon pooled connection string |
 | `OPENAI_API_KEY` | OpenAI secret key |
-| `COGNITO_USER_POOL_ID` | e.g. `us-east-1_abc123` |
-| `COGNITO_CLIENT_ID` | Cognito app client ID |
-| `COGNITO_REGION` | e.g. `us-east-1` |
+| `CLERK_SECRET_KEY` | Clerk secret key for this environment (e.g. `sk_live_...`) |
+| `CLERK_PUBLISHABLE_KEY` | Clerk publishable key (used to derive the JWKS URL for token verification) |
 | `CORS_ALLOWED_ORIGINS` | Comma-separated Vercel origins allowed to call the API |
 | `LOG_LEVEL` | `INFO` (or `DEBUG` temporarily while debugging) |
 | `API_SECRET` | **A random secret — do not use the default** |

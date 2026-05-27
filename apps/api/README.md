@@ -37,7 +37,7 @@ uv run ruff format --check .
 uv run pytest tests/ -v
 ```
 
-Tests still use in-memory overrides via FastAPI `dependency_overrides`, but the supported runtime now expects a real `DATABASE_URL`, `OPENAI_API_KEY`, and Cognito configuration for the signed-in solo flow.
+Tests still use in-memory overrides via FastAPI `dependency_overrides`, but the supported runtime now expects a real `DATABASE_URL`, `OPENAI_API_KEY`, and Clerk configuration for the signed-in solo flow.
 
 ## Environment variables
 
@@ -46,9 +46,8 @@ Tests still use in-memory overrides via FastAPI `dependency_overrides`, but the 
 | `APP_ENV` | no | `development` | Runtime environment for logging and production warnings (`development`, `preview`, `production`) |
 | `DATABASE_URL` | yes | — | Neon PostgreSQL connection string for the supported runtime persistence layer |
 | `OPENAI_API_KEY` | yes | — | OpenAI secret key for recommendation explanations |
-| `COGNITO_USER_POOL_ID` | yes | — | e.g. `us-east-1_abc123` |
-| `COGNITO_CLIENT_ID` | yes | — | App client ID (not the secret) |
-| `COGNITO_REGION` | no | `us-east-1` | Region where user pool was created |
+| `CLERK_SECRET_KEY` | yes | — | Clerk secret key (`sk_test_...` for dev, `sk_live_...` for prod) |
+| `CLERK_PUBLISHABLE_KEY` | yes | — | Clerk publishable key; used to derive the JWKS URL for bearer token verification |
 | `CORS_ALLOWED_ORIGINS` | no | `http://localhost:3000` | Comma-separated browser origins allowed to call the API |
 | `LOG_LEVEL` | no | `INFO` | Python log level for request logs and startup warnings |
 | `API_SECRET` | no | `dev-secret` | HS256 secret for deferred QR and challenge tokens |

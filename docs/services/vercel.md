@@ -16,8 +16,7 @@ Project settings → Environment variables → add for **Production**, **Preview
 | Variable | Value |
 |---|---|
 | `VITE_API_URL` | Railway API URL, e.g. `https://beerolog-api.up.railway.app` |
-| `VITE_COGNITO_DOMAIN` | Cognito hosted UI domain URL |
-| `VITE_COGNITO_CLIENT_ID` | Cognito app client ID |
+| `VITE_CLERK_PUBLISHABLE_KEY` | Clerk publishable key for this environment (e.g. `pk_live_...`) |
 
 ## Deploy
 
@@ -29,6 +28,6 @@ Vercel auto-deploys on every push to `main`. Preview deployments are created for
 ## After first deploy
 
 1. Copy the Vercel deployment URL (e.g. `https://beerolog.vercel.app`)
-2. Add it to Cognito allowed callback URLs: `https://beerolog.vercel.app/auth/callback` (see [cognito.md](cognito.md))
+2. Add it to the Clerk dashboard → Domains → Allowed origins (see [clerk.md](clerk.md))
 3. Add it to Railway `CORS_ALLOWED_ORIGINS` if not already set there
 4. Add it to Vercel `VITE_API_URL` if not already set

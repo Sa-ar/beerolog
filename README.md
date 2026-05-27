@@ -10,13 +10,14 @@ graph TD
   Vercel[Vercel — web app<br/>TanStack Start / React]
   Railway[Railway — API<br/>Python FastAPI]
   Neon[(Neon PostgreSQL)]
-  Cognito[AWS Cognito<br/>Auth]
+  Clerk[Clerk<br/>Auth]
   OpenAI[OpenAI<br/>Recommendation explanations]
 
   Browser --> Vercel
   Vercel --> Railway
   Railway --> Neon
-  Railway --> Cognito
+  Vercel --> Clerk
+  Railway --> Clerk
   Railway --> OpenAI
 ```
 
@@ -44,7 +45,7 @@ pnpm install
 
 # 2. Configure the API
 cp apps/api/.env.example apps/api/.env
-# Edit apps/api/.env and fill in the required values for DB, OpenAI, Cognito, and CORS
+# Edit apps/api/.env and fill in the required values for DB, OpenAI, Clerk, and CORS
 
 # 3. Configure the web app
 cp apps/web/.env.local.example apps/web/.env.local
@@ -85,7 +86,7 @@ pnpm test
 - [Web app setup](apps/web/README.md)
 - [Architecture](docs/architecture.md)
 - [Operational artifacts](docs/ops/README.md)
-- [AWS Cognito](docs/services/cognito.md)
+- [Clerk (authentication)](docs/services/clerk.md)
 - [Neon PostgreSQL](docs/services/neon.md)
 - [OpenAI](docs/services/openai.md)
 - [Railway (API deployment)](docs/services/railway.md)

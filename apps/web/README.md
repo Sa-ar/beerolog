@@ -40,10 +40,9 @@ pnpm lint
 | Variable | Required | Description |
 |---|---|---|
 | `VITE_API_URL` | yes | API base URL. Local: `http://localhost:8000`. Prod: Railway URL. |
-| `VITE_COGNITO_DOMAIN` | yes | Cognito hosted UI domain (e.g. `https://beerolog.auth.us-east-1.amazoncognito.com`) |
-| `VITE_COGNITO_CLIENT_ID` | yes | Cognito app client ID |
+| `VITE_CLERK_PUBLISHABLE_KEY` | yes | Clerk publishable key (e.g. `pk_test_...` for dev, `pk_live_...` for prod) |
 
-For local development, set `VITE_API_URL=http://localhost:8000` and configure the Cognito variables if you want to exercise the supported signed-in solo flow locally.
+For local development, set `VITE_API_URL=http://localhost:8000` and set `VITE_CLERK_PUBLISHABLE_KEY` to your Clerk development instance publishable key. See [docs/services/clerk.md](../../docs/services/clerk.md).
 
 ## Deployment
 
@@ -57,7 +56,7 @@ See [docs/services/vercel.md](../../docs/services/vercel.md) for Vercel project 
 | `/quiz` | Flavor quiz |
 | `/results` | Recommendation results |
 | `/profile` | User taste profile + persona |
-| `/signin` | Cognito sign-in redirect |
-| `/auth/callback` | Cognito OAuth callback |
+| `/signin` | Clerk sign-in page |
+| `/auth/callback` | Clerk OAuth callback |
 
 Venue/scan and group/challenge routes are intentionally deferred from the supported MVP and are not mounted in the current app router.
