@@ -1,5 +1,7 @@
 # PRD: Auth Session Hardening
 
+> **Status: Superseded.** This PRD is retained as historical context only. It has been superseded by `docs/prds/clerk-social-auth-foundation.md` and ADR 0002 (`docs/adr/0002-clerk-social-first-auth.md`). Do not use this document to guide new implementation work.
+
 ## Problem Statement
 
 Beerolog's supported MVP is the signed-in solo flow, which means launch readiness depends on authentication and session handling being dependable rather than merely functional. The current implementation is enough to demonstrate the flow locally, but it still behaves like a thin prototype in several launch-critical places. The browser treats a locally stored Cognito token as the session boundary, protected routes mostly infer "signed in" from whether that token decodes, the callback trusts redirect state too loosely, and sign-out only clears local browser state.

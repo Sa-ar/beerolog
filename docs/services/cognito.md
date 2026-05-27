@@ -1,3 +1,6 @@
+
+> **Status: Historical reference only.** Cognito is no longer Beerolog's launch auth provider. See ADR 0002 (`docs/adr/0002-clerk-social-first-auth.md`) and `docs/services/clerk.md` for the current auth setup.
+
 # AWS Cognito
 
 ## Create a user pool
