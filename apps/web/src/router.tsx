@@ -1,30 +1,16 @@
-import { createRouter as createTanStackRouter } from '@tanstack/react-router'
-import { Route as rootRoute } from './routes/__root'
-import { Route as IndexRoute } from './routes/index'
-import { Route as QuizRoute } from './routes/quiz'
-import { Route as ResultsRoute } from './routes/results'
-import { Route as SignInRoute } from './routes/signin'
-import { Route as AuthCallbackRoute } from './routes/auth-callback'
-import { Route as ProfileRoute } from './routes/profile'
+import { createRouter } from '@tanstack/react-router'
+import { routeTree } from './routeTree.gen'
 
-const routeTree = rootRoute.addChildren([
-  IndexRoute,
-  QuizRoute,
-  ResultsRoute,
-  SignInRoute,
-  AuthCallbackRoute,
-  ProfileRoute,
-])
-
-export function createRouter() {
-  return createTanStackRouter({
+export function getRouter() {
+  return createRouter({
     routeTree,
     defaultPreload: 'intent',
+    scrollRestoration: true,
   })
 }
 
 declare module '@tanstack/react-router' {
   interface Register {
-    router: ReturnType<typeof createRouter>
+    router: ReturnType<typeof getRouter>
   }
 }

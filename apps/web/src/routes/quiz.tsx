@@ -1,6 +1,5 @@
-import { createRoute, useNavigate } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
-import { Route as rootRoute } from './__root'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useState } from 'react'
 import {
   getNextQuestion,
   getActiveQuestions,
@@ -8,24 +7,16 @@ import {
   encodeVector,
   type QuizAnswers,
 } from '../lib/quiz'
-import { getUser } from '../lib/auth'
+import { useRequireAuth } from '../lib/require-auth'
 
-export const Route = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/quiz',
+export const Route = createFileRoute('/quiz')({
   component: QuizPage,
 })
 
 function QuizPage() {
   const navigate = useNavigate()
   const [answers, setAnswers] = useState<QuizAnswers>({})
-  const user = getUser()
-
-  useEffect(() => {
-    if (!user) {
-      void navigate({ to: '/signin', search: { next: '/quiz' } })
-    }
-  }, [navigate, user])
+  const { isLoaded, isSignedIn } = useRequireAuth('/quiz')
 
   const currentQuestion = getNextQuestion(answers)
   const activeQuestions = getActiveQuestions(answers)
@@ -33,10 +24,10 @@ function QuizPage() {
   const totalCount = activeQuestions.length
   const progress = totalCount > 0 ? (answeredCount / totalCount) * 100 : 0
 
-  if (!user) {
+  if (!isLoaded || !isSignedIn) {
     return (
-      <main className="flex min-h-screen items-center justify-center p-6 bg-gradient-to-b from-amber-50 to-white">
-        <p className="text-sm text-neutral-400 animate-pulse">Redirecting to sign in…</p>
+      <main className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center p-6">
+        <p className="animate-pulse text-sm text-neutral-400">Redirecting to sign in…</p>
       </main>
     )
   }

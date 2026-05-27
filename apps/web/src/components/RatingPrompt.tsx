@@ -1,6 +1,7 @@
+import { useUser } from '@clerk/tanstack-react-start'
+import { Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { rateBeer } from '../lib/api'
-import { getUser } from '../lib/auth'
 
 type Props = {
   beer: { id: string; name: string; style: string; flavor_vector: number[] }
@@ -15,10 +16,10 @@ const RATINGS = [
 
 export function RatingPrompt({ beer, onDismiss }: Props) {
   const [submitted, setSubmitted] = useState(false)
-  const user = getUser()
+  const { isSignedIn } = useUser()
 
   async function handleRate(rating: 'loved' | 'fine' | 'disliked') {
-    if (user) {
+    if (isSignedIn) {
       await rateBeer(beer, rating)
     }
     setSubmitted(true)
@@ -48,9 +49,12 @@ export function RatingPrompt({ beer, onDismiss }: Props) {
                 </button>
               ))}
             </div>
-            {!user && (
+            {!isSignedIn && (
               <p className="mt-3 text-center text-xs text-neutral-400">
-                <a href="/signin" className="underline">Sign in</a> to save your rating and improve your profile.
+                <Link to="/signin" search={{ next: '/results' }} className="underline">
+                  Sign in
+                </Link>{' '}
+                to save your rating and improve your profile.
               </p>
             )}
           </>

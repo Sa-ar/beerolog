@@ -57,6 +57,5 @@ See [docs/services/vercel.md](../../docs/services/vercel.md) for Vercel project 
 | `/results` | Recommendation results |
 | `/profile` | User taste profile + persona |
 | `/signin` | Clerk sign-in page |
-| `/auth/callback` | Clerk OAuth callback |
 
 Venue/scan and group/challenge routes are intentionally deferred from the supported MVP and are not mounted in the current app router.

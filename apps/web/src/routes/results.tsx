@@ -1,6 +1,5 @@
-import { createRoute, Link, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useEffect, useMemo, useState } from 'react'
-import { Route as rootRoute } from './__root'
 import { decodeVector } from '../lib/quiz'
 import {
   type RecommendationBeer,
@@ -9,14 +8,12 @@ import {
   saveProfile,
 } from '../lib/api'
 import { RatingPrompt } from '../components/RatingPrompt'
-import { getUser } from '../lib/auth'
+import { useRequireAuth } from '../lib/require-auth'
 import { BEER_METADATA_BY_ID, SOLO_RECOMMENDATION_CATALOG } from '../lib/catalog'
 import type { FlavorVector } from '@beerolog/types'
 import { serializeFlavorVector } from '@beerolog/types'
 
-export const Route = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/results',
+export const Route = createFileRoute("/results")({
   validateSearch: (s: Record<string, unknown>) => ({ v: String(s['v'] ?? '') }),
   component: ResultsPage,
 })
@@ -94,7 +91,7 @@ function BeerCard({
 function ResultsPage() {
   const navigate = useNavigate()
   const { v } = Route.useSearch()
-  const user = getUser()
+  const { isLoaded, isSignedIn } = useRequireAuth("/results")
   const vector = useMemo(() => decodeVector(v), [v])
   const vectorList = useMemo(() => serializeFlavorVector(vector as FlavorVector), [vector])
   const [result, setResult] = useState<RecommendationResult | null>(null)
@@ -104,7 +101,7 @@ function ResultsPage() {
   const [requestKey, setRequestKey] = useState(0)
 
   useEffect(() => {
-    if (!user) {
+    if (!isLoaded || !isSignedIn) {
       void navigate({
         to: '/signin',
         search: { next: getResultsRedirect(v) },
@@ -139,9 +136,9 @@ function ResultsPage() {
     return () => {
       cancelled = true
     }
-  }, [navigate, requestKey, user, v, vectorList])
+  }, [navigate, requestKey, isSignedIn, v, vectorList])
 
-  if (!user) {
+  if (!isLoaded || !isSignedIn) {
     return (
       <main className="flex min-h-screen items-center justify-center p-6 bg-gradient-to-b from-amber-50 to-white">
         <p className="text-sm text-neutral-400 animate-pulse">Redirecting to sign in…</p>
