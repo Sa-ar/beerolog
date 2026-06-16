@@ -6,6 +6,7 @@
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
+import { apiFetch } from '../lib/api-fetch'
 
 export const Route = createFileRoute('/onboarding')({
   component: OnboardingPage,
@@ -85,9 +86,8 @@ function OnboardingPage() {
     setSubmitting(true)
     setError(null)
     try {
-      const res = await fetch('/api/onboarding', {
+      const res = await apiFetch('/onboarding', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(a),
       })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)

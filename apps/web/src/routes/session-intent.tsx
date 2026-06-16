@@ -13,6 +13,7 @@
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
+import { apiFetch } from '../lib/api-fetch'
 
 type Baseline = {
   bubbles: number
@@ -55,7 +56,7 @@ function SessionIntentPage() {
     let cancelled = false
     void (async () => {
       try {
-        const res = await fetch('/api/me/baseline-taste')
+        const res = await apiFetch('/me/baseline-taste')
         if (res.status === 404) {
           if (!cancelled) navigate({ to: '/onboarding' })
           return
@@ -84,9 +85,8 @@ function SessionIntentPage() {
         baseline,
         session: { vibe, abv_intent: abv, free_text: freeText },
       }
-      const res = await fetch('/api/recommendations', {
+      const res = await apiFetch('/recommendations', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
