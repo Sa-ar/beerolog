@@ -9,7 +9,7 @@ production. Stop at any step that fails — do not skip ahead.
 - Railway project linked, env vars populated from `docs/ops/environment-matrix.md`
 - Neon database provisioned with the `vector` extension enabled
 - Clerk instance provisioned per `docs/services/clerk.md`
-- Vercel + Railway + Clerk origin alignment confirmed (see #65 / `docs/ops/checklists/origin-alignment.md`)
+- Vercel + Railway + Clerk origin alignment confirmed (`docs/ops/checklists/origin-alignment.md`)
 
 ## 1. Environment review (before merge)
 
