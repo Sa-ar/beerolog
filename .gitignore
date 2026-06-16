@@ -28,3 +28,10 @@ __pycache__/
 
 # local worktrees
 .worktrees/
+.gstack/
+
+# editor/tool sidecar dirs
+.superset/
+
+# vinxi build artifacts
+apps/web/app.config.timestamp_*.js
