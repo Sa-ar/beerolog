@@ -72,6 +72,10 @@ class AsyncpgRatingsRepo:
             RETURNING id, created_at
         """
         async with self._pool.acquire() as conn:
+            await conn.execute(
+                "INSERT INTO users (id) VALUES ($1) ON CONFLICT (id) DO NOTHING",
+                user_id,
+            )
             row = await conn.fetchrow(sql, user_id, beer_id, rating, note)
             beer = await conn.fetchrow("SELECT name, brewery FROM beers WHERE id = $1", beer_id)
             assert beer is not None  # caller validates first via beer_exists

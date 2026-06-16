@@ -99,6 +99,12 @@ class AsyncpgBaselineTasteRepo:
             RETURNING embedding_fresh_at, updated_at
         """
         async with self._pool.acquire() as conn:
+            # Clerk subject is the FK; provision the users row JIT so the
+            # first authenticated write doesn't fail on the missing parent.
+            await conn.execute(
+                "INSERT INTO users (id) VALUES ($1) ON CONFLICT (id) DO NOTHING",
+                user_id,
+            )
             row = await conn.fetchrow(
                 sql,
                 user_id,
