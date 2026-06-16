@@ -24,8 +24,11 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
         bool(settings.database_url),
         bool(settings.openai_api_key),
     )
-    if settings.app_env != "development" and settings.api_secret == "dev-secret":
-        logger.warning("API_SECRET is still using the development default in %s", settings.app_env)
+    # Fail fast on missing / unsafe configuration in preview and production.
+    # Development keeps the warning-only behaviour.
+    from app.startup_checks import enforce_non_development_safety
+
+    enforce_non_development_safety(settings)
     try:
         yield
     finally:
