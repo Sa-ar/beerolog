@@ -22,6 +22,12 @@ class Settings(BaseSettings):
     cors_allowed_origins: list[str] = ["http://localhost:3000"]
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
 
+    # Taste-profile matcher knobs (PRD: taste-profile-matcher.md)
+    match_alpha: float = 0.6
+    match_beta: float = 0.3
+    baseline_staleness_days: int = 7
+    embedding_model: str = "text-embedding-3-large"
+
     @field_validator("cors_allowed_origins", mode="before")
     @classmethod
     def parse_cors_allowed_origins(cls, value: str | list[str]) -> list[str]:

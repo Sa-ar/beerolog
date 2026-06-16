@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.db import close_pool
 from app.observability import configure_logging, instrument_requests, logger
-from app.routes import health, menu, recommendations, users
+from app.routes import debug, health, recommendations
 
 configure_logging(settings.log_level)
 
@@ -42,6 +42,5 @@ app.add_middleware(
 )
 
 app.include_router(health.router)
-app.include_router(menu.router)
 app.include_router(recommendations.router)
-app.include_router(users.router)
+app.include_router(debug.router)

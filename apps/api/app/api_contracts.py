@@ -1,196 +1,148 @@
 from enum import StrEnum
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field
 
-from app.models.flavor import FlavorVector
-
-FlavorVectorList = Annotated[list[float], Field(min_length=7, max_length=7)]
-
-
-class RatingValue(StrEnum):
-    loved = "loved"
-    fine = "fine"
-    disliked = "disliked"
-
-
-class BeerPayload(BaseModel):
-    id: str
-    name: str
-    style: str
-    flavor_vector: FlavorVectorList
-    brewery: str | None = None
-    description: str | None = None
-
-
-class RecommendationRequest(BaseModel):
-    taste_vector: FlavorVector
-    beers: list[BeerPayload]
-
-
-class RecommendationResponse(BaseModel):
-    best: BeerPayload
-    backup: BeerPayload | None
-    adventurous: BeerPayload | None
-    explanations: dict[str, str]
-
-
-class TapListRequest(BaseModel):
-    beer_ids: list[str]
-
-
-class TapListResponse(BaseModel):
-    venue_id: str
-    beer_ids: list[str]
-
-
-class ScanCatalogEntry(BaseModel):
-    id: str
-    name: str
-    brewery: str
-
-
-class ScanMenuRequest(BaseModel):
-    image_base64: str
-    catalog: list[ScanCatalogEntry]
-
-
-class MenuScanRequest(BaseModel):
-    image_base64: str
-
-
-class ScanResultItem(BaseModel):
-    raw_text: str
-    matched_id: str | None
-    confidence: float
-    needs_review: bool
-
-
-class ProfileResponse(BaseModel):
-    user_id: str
-    vector: list[float] | None
-
-
-class SaveProfileRequest(BaseModel):
-    vector: FlavorVectorList
-
-
-class HistoryEntry(BaseModel):
-    beer_id: str
-    rating: RatingValue | None
-    tried_at: str
-
-
-class HistoryResponse(BaseModel):
-    entries: list[HistoryEntry]
-
-
-class AddHistoryRequest(BaseModel):
-    beer_id: str
-    rating: RatingValue | None = None
-
-
-class PersonaSummary(BaseModel):
-    id: str
-    name: str
-    icon: str
-    description: str | None = None
-
-
-class PersonaResponse(BaseModel):
-    persona: PersonaSummary | None
-
-
-class RatedBeerInput(BaseModel):
-    id: str
-    name: str
-    style: str
-    flavor_vector: FlavorVectorList
-    brewery: str | None = None
-    description: str | None = None
-
-
-class RateBeerRequest(BaseModel):
-    beer: RatedBeerInput
-    rating: RatingValue
-
-
-class UpdatedVectorResponse(BaseModel):
-    updated_vector: list[float] | None
-
-
-class ChallengeTokenResponse(BaseModel):
-    token: str
-
-
-class ChallengeVectorRequest(BaseModel):
-    vector: list[float]
-
-
-class ChallengeComparisonResponse(BaseModel):
-    similarity: float
-    shared: list[str]
-    different: list[str]
-    challenger_persona: PersonaSummary
-    friend_persona: PersonaSummary
-
-
-class CreateSessionRequest(BaseModel):
-    host_id: str
-
-
-class CreateSessionResponse(BaseModel):
-    session_id: str
-    expires_at: str
-
-
-class JoinSessionRequest(BaseModel):
-    name: str
-
-
-class JoinSessionResponse(BaseModel):
-    participant_id: str
-
-
-class SubmitVectorRequest(BaseModel):
-    participant_id: str
-    vector: list[float]
-
-
-class OkResponse(BaseModel):
-    ok: bool
-
-
-class SessionParticipantStatus(BaseModel):
-    id: str
-    name: str
-    submitted: bool
-
-
-class SessionStatusResponse(BaseModel):
-    session_id: str
-    total: int
-    completed: int
-    participants: list[SessionParticipantStatus]
-
-
-class GroupRecommendationResponse(BaseModel):
-    group_vector: list[float]
-    high_variance: bool
-
-
-class LeaderboardEntryResponse(BaseModel):
-    user_id: str
-    username: str
-    persona_icon: str
-    recommendation_count: int
-    rank: int
-
-
-class LeaderboardResponse(BaseModel):
-    entries: list[LeaderboardEntryResponse]
-    viewer_rank: int | None
+# ---------------------------------------------------------------------------
+# Health
+# ---------------------------------------------------------------------------
 
 
 class HealthResponse(BaseModel):
-    status: str
+    status: Literal["ok"]
+
+
+# ---------------------------------------------------------------------------
+# Onboarding / BaselineTaste
+# ---------------------------------------------------------------------------
+
+
+class CoffeeStyle(StrEnum):
+    black = "black"
+    espresso = "espresso"
+    hafuch = "hafuch"
+    iced_sweet = "iced_sweet"
+    none = "none"
+
+
+class Carbonation(StrEnum):
+    still = "still"
+    light = "light"
+    strong = "strong"
+
+
+class SnackPick(StrEnum):
+    dark_chocolate = "dark_chocolate"
+    halva = "halva"
+    fresh_fruit = "fresh_fruit"
+    milk_chocolate = "milk_chocolate"
+
+
+class LovePref(StrEnum):
+    love = "love"
+    okay = "okay"
+    avoid = "avoid"
+
+
+class CitrusPick(StrEnum):
+    grapefruit = "grapefruit"
+    orange = "orange"
+    lemonade = "lemonade"
+    none = "none"
+
+
+class OnboardingAnswers(BaseModel):
+    coffee: CoffeeStyle
+    water: Carbonation
+    novelty_seeking: bool
+    snack: SnackPick
+    sour_foods: LovePref
+    citrus: CitrusPick
+    smoked_foods: LovePref
+
+
+class BaselineTasteDials(BaseModel):
+    """User-facing, editable taste dials derived from onboarding answers."""
+
+    bubbles: Annotated[float, Field(ge=0.0, le=1.0)]
+    bitterness: Annotated[float, Field(ge=0.0, le=1.0)]
+    flavor_family: dict[str, Annotated[float, Field(ge=0.0, le=1.0)]]
+    # Keys: malty, hoppy, roasty, fruity, sour, smoky
+    novelty_affinity: Annotated[float, Field(ge=0.0, le=1.0)]
+
+
+# ---------------------------------------------------------------------------
+# SessionIntent
+# ---------------------------------------------------------------------------
+
+
+class Vibe(StrEnum):
+    refreshing = "refreshing"
+    cozy = "cozy"
+    adventurous = "adventurous"
+    familiar = "familiar"
+
+
+class AbvIntent(StrEnum):
+    low = "low"
+    medium = "medium"
+    high = "high"
+    any = "any"
+
+
+class SessionIntent(BaseModel):
+    vibe: Vibe
+    abv_intent: AbvIntent
+    free_text: str = ""
+
+
+# ---------------------------------------------------------------------------
+# Recommendations
+# ---------------------------------------------------------------------------
+
+
+class DominantComponent(StrEnum):
+    baseline = "baseline"
+    session = "session"
+    novelty_positive = "novelty_positive"
+    novelty_negative = "novelty_negative"
+
+
+class ScoreBreakdown(BaseModel):
+    baseline_score: float
+    session_score: float
+    novelty_score: float
+    total_score: float
+    dominant_component: DominantComponent
+
+
+class RecommendedBeer(BaseModel):
+    id: str
+    name: str
+    brewery: str
+    style: str
+    abv: float
+    market_tier: Literal["mainstream", "craft", "import"]
+    image_url: str | None = None
+    why_line: str
+    breakdown: ScoreBreakdown
+
+
+class RecommendationsRequest(BaseModel):
+    """Debug-style request: caller supplies the dials + intent directly.
+
+    Slice #76 introduces persisted BaselineTaste; this slice posts the
+    answers inline to keep the smoke test independent of user persistence.
+    """
+
+    baseline: BaselineTasteDials
+    session: SessionIntent | None = None
+    alpha: float | None = None
+    beta: float | None = None
+    top_k: int = 5
+
+
+class RecommendationsResponse(BaseModel):
+    results: list[RecommendedBeer]
+    alpha: float
+    beta: float

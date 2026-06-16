@@ -1,33 +1,37 @@
-from openai import AsyncOpenAI
+"""Embedding service: wraps text-embedding-3-large.
+
+Kept narrow on purpose. The whole match pipeline depends on `embed`
+producing a 1536-D vector for an arbitrary string. Tests mock this call.
+"""
+
+from __future__ import annotations
+
+from typing import Protocol
 
 from app.config import settings
 
-_client: AsyncOpenAI | None = None
-
-EMBEDDING_MODEL = "text-embedding-3-small"
-EMBEDDING_DIMENSIONS = 1536
+EMBEDDING_DIM = 1536
 
 
-def get_client() -> AsyncOpenAI:
-    global _client
-    if _client is None:
-        _client = AsyncOpenAI(api_key=settings.openai_api_key)
-    return _client
+class EmbeddingClient(Protocol):
+    async def embed(self, text: str) -> list[float]: ...
 
 
-async def embed(text: str) -> list[float]:
-    response = await get_client().embeddings.create(
-        model=EMBEDDING_MODEL,
-        input=text,
-        dimensions=EMBEDDING_DIMENSIONS,
+class OpenAIEmbeddingClient:
+    def __init__(self, api_key: str, model: str) -> None:
+        # Lazy-import openai so tests can run without the package installed
+        from openai import AsyncOpenAI  # type: ignore[import-not-found]
+
+        self._client = AsyncOpenAI(api_key=api_key)
+        self._model = model
+
+    async def embed(self, text: str) -> list[float]:
+        resp = await self._client.embeddings.create(model=self._model, input=text)
+        return list(resp.data[0].embedding)
+
+
+def get_embedding_client() -> EmbeddingClient:
+    return OpenAIEmbeddingClient(
+        api_key=settings.openai_api_key,
+        model=settings.embedding_model,
     )
-    return response.data[0].embedding
-
-
-async def embed_batch(texts: list[str]) -> list[list[float]]:
-    response = await get_client().embeddings.create(
-        model=EMBEDDING_MODEL,
-        input=texts,
-        dimensions=EMBEDDING_DIMENSIONS,
-    )
-    return [item.embedding for item in sorted(response.data, key=lambda x: x.index)]

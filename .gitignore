@@ -35,3 +35,7 @@ __pycache__/
 
 # vinxi build artifacts
 apps/web/app.config.timestamp_*.js
+
+# python venvs
+.venv/
+apps/api/.venv/
