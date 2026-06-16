@@ -26,31 +26,17 @@ function HomePage() {
           </h2>
           <p className="text-sm text-neutral-500">
             {signedIn
-              ? 'Scan the menu, take the quiz, and get picks from beers actually available to you.'
-              : 'Sign in, scan your menu, answer a few questions, and get picks from what\'s on tap.'}
+              ? 'Tell us the vibe and get a pick that fits your taste.'
+              : 'Sign in to find a beer matched to your taste.'}
           </p>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-3">
-            {signedIn && (
-              <Link to="/profile">
-                <Button className="w-full" size="lg">
-                  Open my profile →
-                </Button>
-              </Link>
-            )}
-            <Link to="/menu">
-              <Button className="w-full" size={signedIn ? 'lg' : 'lg'} variant="default">
-                {signedIn ? 'Scan your menu →' : 'Sign in to scan your menu →'}
+            <Link to="/session-intent">
+              <Button className="w-full" size="lg" variant="default">
+                {signedIn ? 'Find a beer →' : 'Sign in to find a beer →'}
               </Button>
             </Link>
-            {signedIn && (
-              <Link to="/quiz">
-                <Button className="w-full" size="md" variant="outline">
-                  Retake the quiz
-                </Button>
-              </Link>
-            )}
           </div>
         </CardContent>
       </Card>

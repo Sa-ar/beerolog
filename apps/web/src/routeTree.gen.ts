@@ -10,10 +10,8 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SigninRouteImport } from './routes/signin'
-import { Route as ResultsRouteImport } from './routes/results'
-import { Route as QuizRouteImport } from './routes/quiz'
-import { Route as ProfileRouteImport } from './routes/profile'
-import { Route as MenuRouteImport } from './routes/menu'
+import { Route as SessionIntentRouteImport } from './routes/session-intent'
+import { Route as RecommendationsV2RouteImport } from './routes/recommendations-v2'
 import { Route as IndexRouteImport } from './routes/index'
 
 const SigninRoute = SigninRouteImport.update({
@@ -21,24 +19,14 @@ const SigninRoute = SigninRouteImport.update({
   path: '/signin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ResultsRoute = ResultsRouteImport.update({
-  id: '/results',
-  path: '/results',
+const SessionIntentRoute = SessionIntentRouteImport.update({
+  id: '/session-intent',
+  path: '/session-intent',
   getParentRoute: () => rootRouteImport,
 } as any)
-const QuizRoute = QuizRouteImport.update({
-  id: '/quiz',
-  path: '/quiz',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProfileRoute = ProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MenuRoute = MenuRouteImport.update({
-  id: '/menu',
-  path: '/menu',
+const RecommendationsV2Route = RecommendationsV2RouteImport.update({
+  id: '/recommendations-v2',
+  path: '/recommendations-v2',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -49,43 +37,35 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/menu': typeof MenuRoute
-  '/profile': typeof ProfileRoute
-  '/quiz': typeof QuizRoute
-  '/results': typeof ResultsRoute
+  '/recommendations-v2': typeof RecommendationsV2Route
+  '/session-intent': typeof SessionIntentRoute
   '/signin': typeof SigninRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/menu': typeof MenuRoute
-  '/profile': typeof ProfileRoute
-  '/quiz': typeof QuizRoute
-  '/results': typeof ResultsRoute
+  '/recommendations-v2': typeof RecommendationsV2Route
+  '/session-intent': typeof SessionIntentRoute
   '/signin': typeof SigninRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/menu': typeof MenuRoute
-  '/profile': typeof ProfileRoute
-  '/quiz': typeof QuizRoute
-  '/results': typeof ResultsRoute
+  '/recommendations-v2': typeof RecommendationsV2Route
+  '/session-intent': typeof SessionIntentRoute
   '/signin': typeof SigninRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/menu' | '/profile' | '/quiz' | '/results' | '/signin'
+  fullPaths: '/' | '/recommendations-v2' | '/session-intent' | '/signin'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/menu' | '/profile' | '/quiz' | '/results' | '/signin'
-  id: '__root__' | '/' | '/menu' | '/profile' | '/quiz' | '/results' | '/signin'
+  to: '/' | '/recommendations-v2' | '/session-intent' | '/signin'
+  id: '__root__' | '/' | '/recommendations-v2' | '/session-intent' | '/signin'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  MenuRoute: typeof MenuRoute
-  ProfileRoute: typeof ProfileRoute
-  QuizRoute: typeof QuizRoute
-  ResultsRoute: typeof ResultsRoute
+  RecommendationsV2Route: typeof RecommendationsV2Route
+  SessionIntentRoute: typeof SessionIntentRoute
   SigninRoute: typeof SigninRoute
 }
 
@@ -98,32 +78,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SigninRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/results': {
-      id: '/results'
-      path: '/results'
-      fullPath: '/results'
-      preLoaderRoute: typeof ResultsRouteImport
+    '/session-intent': {
+      id: '/session-intent'
+      path: '/session-intent'
+      fullPath: '/session-intent'
+      preLoaderRoute: typeof SessionIntentRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/quiz': {
-      id: '/quiz'
-      path: '/quiz'
-      fullPath: '/quiz'
-      preLoaderRoute: typeof QuizRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/profile': {
-      id: '/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof ProfileRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/menu': {
-      id: '/menu'
-      path: '/menu'
-      fullPath: '/menu'
-      preLoaderRoute: typeof MenuRouteImport
+    '/recommendations-v2': {
+      id: '/recommendations-v2'
+      path: '/recommendations-v2'
+      fullPath: '/recommendations-v2'
+      preLoaderRoute: typeof RecommendationsV2RouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -138,10 +104,8 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  MenuRoute: MenuRoute,
-  ProfileRoute: ProfileRoute,
-  QuizRoute: QuizRoute,
-  ResultsRoute: ResultsRoute,
+  RecommendationsV2Route: RecommendationsV2Route,
+  SessionIntentRoute: SessionIntentRoute,
   SigninRoute: SigninRoute,
 }
 export const routeTree = rootRouteImport

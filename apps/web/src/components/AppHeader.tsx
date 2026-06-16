@@ -9,16 +9,10 @@ export function AppHeader() {
       </Link>
       <nav className="flex items-center gap-4">
         <Link
-          to="/quiz"
+          to="/session-intent"
           className="text-sm font-medium text-neutral-600 hover:text-neutral-900 [&.active]:text-amber-800"
         >
-          Quiz
-        </Link>
-        <Link
-          to="/profile"
-          className="text-sm font-medium text-neutral-600 hover:text-neutral-900 [&.active]:text-amber-800"
-        >
-          Profile
+          Find a beer
         </Link>
         <AuthControls />
       </nav>
