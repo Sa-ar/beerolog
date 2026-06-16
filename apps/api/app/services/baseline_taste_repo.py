@@ -40,6 +40,15 @@ class BaselineTasteRepo(Protocol):
     ) -> BaselineTasteSnapshot: ...
 
 
+def _parse_pgvector(value: object) -> list[float]:
+    """asyncpg returns pgvector as a string like '[v1,v2,...]'."""
+    if isinstance(value, list):
+        return [float(v) for v in value]
+    if isinstance(value, str):
+        return [float(v) for v in value.strip("[]").split(",") if v]
+    raise TypeError(f"Unsupported pgvector type: {type(value).__name__}")
+
+
 class AsyncpgBaselineTasteRepo:
     """DB-backed implementation. Exercised by integration tests against a live DB."""
 
@@ -67,7 +76,7 @@ class AsyncpgBaselineTasteRepo:
                 if isinstance(row["flavor_family"], dict)
                 else json.loads(row["flavor_family"]),
                 novelty_affinity=row["novelty_affinity"],
-                embedding=list(row["embedding"]),
+                embedding=_parse_pgvector(row["embedding"]),
                 embedding_fresh_at=row["embedding_fresh_at"].isoformat(),
                 updated_at=row["updated_at"].isoformat(),
             )
@@ -84,10 +93,13 @@ class AsyncpgBaselineTasteRepo:
     ) -> BaselineTasteSnapshot:
         import json
 
+        # asyncpg can't natively bind a Python list to pgvector — encode as the
+        # textual form '[v1,v2,...]' and cast in SQL.
+        embedding_text = "[" + ",".join(repr(float(v)) for v in embedding) + "]"
         sql = """
             INSERT INTO user_baseline_taste
               (user_id, bubbles, bitterness, flavor_family, novelty_affinity, embedding)
-            VALUES ($1, $2, $3, $4::jsonb, $5, $6)
+            VALUES ($1, $2, $3, $4::jsonb, $5, $6::vector)
             ON CONFLICT (user_id) DO UPDATE SET
               bubbles = EXCLUDED.bubbles,
               bitterness = EXCLUDED.bitterness,
@@ -112,7 +124,7 @@ class AsyncpgBaselineTasteRepo:
                 bitterness,
                 json.dumps(flavor_family),
                 novelty_affinity,
-                embedding,
+                embedding_text,
             )
             return BaselineTasteSnapshot(
                 user_id=user_id,
