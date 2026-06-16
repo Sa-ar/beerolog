@@ -10,7 +10,7 @@ from app.config import settings
 from app.db import close_pool
 from app.errors import BeerologError
 from app.observability import configure_logging, instrument_requests, logger
-from app.routes import debug, health, recommendations
+from app.routes import debug, health, ratings, recommendations
 
 configure_logging(settings.log_level)
 
@@ -46,6 +46,7 @@ app.add_middleware(
 
 app.include_router(health.router)
 app.include_router(recommendations.router)
+app.include_router(ratings.router)
 app.include_router(debug.router)
 
 

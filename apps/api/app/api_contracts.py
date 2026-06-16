@@ -165,3 +165,33 @@ class RecommendationsResponse(BaseModel):
     results: list[RecommendedBeer]
     alpha: float
     beta: float
+
+
+# ---------------------------------------------------------------------------
+# Ratings (slice #78)
+# ---------------------------------------------------------------------------
+
+
+RatingValue = Annotated[int, Field(ge=1, le=5)]
+
+
+class CreateRatingRequest(BaseModel):
+    beer_id: str
+    rating: RatingValue
+    note: str | None = None
+
+
+class RatingRecord(BaseModel):
+    id: str
+    beer_id: str
+    beer_name: str
+    beer_brewery: str
+    rating: int
+    note: str | None
+    created_at: str  # ISO-8601
+
+
+class RatingsHistoryResponse(BaseModel):
+    ratings: list[RatingRecord]
+    page: int
+    page_size: int
