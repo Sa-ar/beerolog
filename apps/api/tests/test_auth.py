@@ -20,6 +20,17 @@ def test_clerk_jwks_url_derived_from_publishable_key():
     assert clerk_jwks_url(publishable_key) == "https://example.accounts.dev/.well-known/jwks.json"
 
 
+def test_clerk_frontend_api_url_handles_unpadded_publishable_key():
+    # Real Clerk keys often encode to a length that is not a multiple of 4 and
+    # arrive without '=' padding (Clerk strips it). b64decode rejects that
+    # without manual repadding.
+    publishable_key = "pk_test_aW50ZWdyYWwtZmVycmV0LTI2LmNsZXJrLmFjY291bnRzLmRldiQ"
+
+    assert (
+        clerk_frontend_api_url(publishable_key) == "https://integral-ferret-26.clerk.accounts.dev"
+    )
+
+
 def test_get_current_user_raises_401_when_credentials_missing():
     with pytest.raises(HTTPException) as exc:
         get_current_user(None)

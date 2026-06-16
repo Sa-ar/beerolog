@@ -18,6 +18,7 @@ _jwks_cache: dict | None = None
 def clerk_frontend_api_url(publishable_key: str) -> str:
     """Derive the Clerk Frontend API URL from a publishable key."""
     encoded = re.sub(r"^pk_(test|live)_", "", publishable_key)
+    encoded += "=" * (-len(encoded) % 4)
     domain = base64.b64decode(encoded).decode("utf-8").removesuffix("$")
     return f"https://{domain}"
 
