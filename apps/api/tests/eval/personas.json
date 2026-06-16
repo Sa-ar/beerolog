@@ -1,0 +1,38 @@
+{
+  "$schema": "./personas.schema.json",
+  "_comment": "Hand-authored personas for the matcher validation harness. Slice #79 ships one example persona; the remaining 5 are HITL pickups by the maintainer who has beer-domain knowledge. See README.md.",
+  "personas": [
+    {
+      "id": "hop-head-ipa-enthusiast",
+      "description": "High bitterness tolerance, novelty-seeking craft drinker. Should match IPAs.",
+      "onboarding": {
+        "coffee": "black",
+        "water": "strong",
+        "novelty_seeking": true,
+        "snack": "dark_chocolate",
+        "sour_foods": "okay",
+        "citrus": "grapefruit",
+        "smoked_foods": "okay"
+      },
+      "session": {
+        "vibe": "adventurous",
+        "abv_intent": "medium",
+        "free_text": ""
+      },
+      "expected_top_5": [
+        "alexander-blazer",
+        "alexander-green",
+        "schnitt-pale",
+        "herzl-saison",
+        "beerbazaar-gose"
+      ]
+    }
+  ],
+  "_hitl_todo": [
+    "Add: mainstream-comfort-drinker (Goldstar/Maccabee leaning; low novelty; low bitterness)",
+    "Add: dark-malt-fan (Stout/Porter; medium bitterness; sweet/roasty)",
+    "Add: sour-and-funky-craft-nerd (high novelty; sour-leaning)",
+    "Add: sessionable-wheat-or-lager-drinker (low ABV intent; medium body)",
+    "Add: adventurous-omnivore (high novelty across styles; no strong axis)"
+  ]
+}
