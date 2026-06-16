@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   getNextQuestion,
   getActiveQuestions,
@@ -7,6 +7,7 @@ import {
   encodeVector,
   type QuizAnswers,
 } from '../lib/quiz'
+import { hasEnoughMenuBeers } from '../lib/menu-context'
 import { useRequireAuth } from '../lib/require-auth'
 
 export const Route = createFileRoute('/quiz')({
@@ -17,6 +18,13 @@ function QuizPage() {
   const navigate = useNavigate()
   const [answers, setAnswers] = useState<QuizAnswers>({})
   const { isLoaded, isSignedIn } = useRequireAuth('/quiz')
+
+  useEffect(() => {
+    if (!isLoaded || !isSignedIn) return
+    if (!hasEnoughMenuBeers()) {
+      void navigate({ to: '/menu' })
+    }
+  }, [isLoaded, isSignedIn, navigate])
 
   const currentQuestion = getNextQuestion(answers)
   const activeQuestions = getActiveQuestions(answers)

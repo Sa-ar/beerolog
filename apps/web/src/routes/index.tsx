@@ -7,7 +7,7 @@ export const Route = createFileRoute('/')({
 })
 
 function HomePage() {
-  const { isLoaded, isSignedIn, user } = useUser()
+  const { isLoaded, isSignedIn } = useUser()
   const signedIn = isLoaded && isSignedIn
 
   return (
@@ -26,8 +26,8 @@ function HomePage() {
           </h2>
           <p className="text-sm text-neutral-500">
             {signedIn
-              ? 'Head to your profile or retake the taste quiz for fresh recommendations.'
-              : '6 quick questions. Sign in to save your taste profile and recommendations.'}
+              ? 'Scan the menu, take the quiz, and get picks from beers actually available to you.'
+              : 'Sign in, scan your menu, answer a few questions, and get picks from what\'s on tap.'}
           </p>
         </CardHeader>
         <CardContent>
@@ -39,11 +39,18 @@ function HomePage() {
                 </Button>
               </Link>
             )}
-            <Link to="/quiz">
-              <Button className="w-full" size={signedIn ? 'md' : 'lg'} variant={signedIn ? 'outline' : 'default'}>
-                {signedIn ? 'Retake the quiz' : 'Start the quiz →'}
+            <Link to="/menu">
+              <Button className="w-full" size={signedIn ? 'lg' : 'lg'} variant="default">
+                {signedIn ? 'Scan your menu →' : 'Sign in to scan your menu →'}
               </Button>
             </Link>
+            {signedIn && (
+              <Link to="/quiz">
+                <Button className="w-full" size="md" variant="outline">
+                  Retake the quiz
+                </Button>
+              </Link>
+            )}
           </div>
         </CardContent>
       </Card>

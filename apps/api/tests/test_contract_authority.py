@@ -28,6 +28,7 @@ def test_openapi_exposes_stable_contract_shapes():
     assert "/sessions/{session_id}/recommend" not in schema["paths"]
     assert "/challenges" not in schema["paths"]
     assert "/challenges/{token}/compare" not in schema["paths"]
+    assert schema["paths"]["/menu/scan"]["post"]["operationId"] == "scanMenu"
 
 
 def test_typescript_contract_constants_match_api_flavor_model():

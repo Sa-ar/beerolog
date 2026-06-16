@@ -6,6 +6,7 @@ from app.config import settings
 from app.db import get_pool
 from app.postgres_user_profile_repo import PostgresUserProfileRepo
 from app.services.embedding_service import get_client as get_openai_client
+from app.services.vision_service import OpenAILLMClient
 
 
 class VenueRepo(Protocol):
@@ -28,7 +29,7 @@ async def get_llm_client() -> LLMClient:
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="OPENAI_API_KEY is not configured",
         )
-    return get_openai_client()
+    return OpenAILLMClient(get_openai_client())
 
 
 async def get_session_repo():

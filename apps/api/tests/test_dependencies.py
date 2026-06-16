@@ -1,4 +1,4 @@
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest  # type: ignore[import-not-found]
 from fastapi import HTTPException  # type: ignore[import-not-found]
@@ -10,11 +10,13 @@ from app.postgres_user_profile_repo import PostgresUserProfileRepo
 
 @pytest.mark.asyncio
 async def test_get_llm_client_returns_configured_openai_client(monkeypatch):
-    client = object()
+    openai_client = MagicMock()
     monkeypatch.setattr(settings, "openai_api_key", "test-key")
-    monkeypatch.setattr("app.dependencies.get_openai_client", lambda: client)
+    monkeypatch.setattr("app.dependencies.get_openai_client", lambda: openai_client)
 
-    assert await get_llm_client() is client
+    client = await get_llm_client()
+
+    assert client._client is openai_client
 
 
 @pytest.mark.asyncio

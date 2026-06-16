@@ -55,6 +55,10 @@ class ScanMenuRequest(BaseModel):
     catalog: list[ScanCatalogEntry]
 
 
+class MenuScanRequest(BaseModel):
+    image_base64: str
+
+
 class ScanResultItem(BaseModel):
     raw_text: str
     matched_id: str | None

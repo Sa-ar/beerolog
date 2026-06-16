@@ -53,6 +53,7 @@ See [docs/services/vercel.md](../../docs/services/vercel.md) for Vercel project 
 | Path | Description |
 |---|---|
 | `/` | Home / landing |
+| `/menu` | Menu photo scan and beer confirmation |
 | `/quiz` | Flavor quiz |
 | `/results` | Recommendation results |
 | `/profile` | User taste profile + persona |

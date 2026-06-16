@@ -21,6 +21,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/menu/scan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Scan Menu Image */
+        post: operations["scanMenu"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/recommendations/": {
         parameters: {
             query?: never;
@@ -173,6 +190,11 @@ export interface components {
             /** Entries */
             entries: components["schemas"]["HistoryEntry"][];
         };
+        /** MenuScanRequest */
+        MenuScanRequest: {
+            /** Image Base64 */
+            image_base64: string;
+        };
         /** OkResponse */
         OkResponse: {
             /** Ok */
@@ -246,6 +268,17 @@ export interface components {
             /** Vector */
             vector: number[];
         };
+        /** ScanResultItem */
+        ScanResultItem: {
+            /** Confidence */
+            confidence: number;
+            /** Matched Id */
+            matched_id: string | null;
+            /** Needs Review */
+            needs_review: boolean;
+            /** Raw Text */
+            raw_text: string;
+        };
         /** UpdatedVectorResponse */
         UpdatedVectorResponse: {
             /** Updated Vector */
@@ -289,6 +322,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HealthResponse"];
+                };
+            };
+        };
+    };
+    scanMenu: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MenuScanRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScanResultItem"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

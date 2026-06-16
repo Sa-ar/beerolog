@@ -6,14 +6,18 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        enable_decoding=False,
+        extra="ignore",
+    )
 
     app_env: Literal["development", "preview", "production"] = "development"
     database_url: str = ""
     openai_api_key: str = ""
-    cognito_user_pool_id: str = ""
-    cognito_client_id: str = ""
-    cognito_region: str = "us-east-1"
+    clerk_secret_key: str = ""
+    clerk_publishable_key: str = ""
     api_secret: str = "dev-secret"
     cors_allowed_origins: list[str] = ["http://localhost:3000"]
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"

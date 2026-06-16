@@ -10,6 +10,7 @@ import {
 import { RatingPrompt } from '../components/RatingPrompt'
 import { useRequireAuth } from '../lib/require-auth'
 import { BEER_METADATA_BY_ID, SOLO_RECOMMENDATION_CATALOG } from '../lib/catalog'
+import { filterCatalogByMenuIds, getMenuBeerIds } from '../lib/menu-context'
 import type { FlavorVector } from '@beerolog/types'
 import { serializeFlavorVector } from '@beerolog/types'
 
@@ -94,10 +95,16 @@ function ResultsPage() {
   const { isLoaded, isSignedIn } = useRequireAuth("/results")
   const vector = useMemo(() => decodeVector(v), [v])
   const vectorList = useMemo(() => serializeFlavorVector(vector as FlavorVector), [vector])
+  const menuIds = useMemo(() => getMenuBeerIds(), [])
+  const menuCatalog = useMemo(
+    () => filterCatalogByMenuIds(SOLO_RECOMMENDATION_CATALOG, menuIds),
+    [menuIds],
+  )
   const [result, setResult] = useState<RecommendationResult | null>(null)
   const [ratingBeer, setRatingBeer] = useState<RecommendationBeer | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [profileWarning, setProfileWarning] = useState<string | null>(null)
   const [requestKey, setRequestKey] = useState(0)
 
   useEffect(() => {
@@ -109,20 +116,42 @@ function ResultsPage() {
       return
     }
 
+    if (menuCatalog.length < 3) {
+      void navigate({ to: '/menu' })
+      return
+    }
+
     let cancelled = false
 
     async function loadRecommendations() {
       setLoading(true)
       setError(null)
+      setProfileWarning(null)
+
       try {
-        await saveProfile(vectorList)
-        const recommendations = await recommendBeers(vectorList, SOLO_RECOMMENDATION_CATALOG)
+        try {
+          await saveProfile(vectorList)
+        } catch (profileError) {
+          if (!cancelled) {
+            const message =
+              profileError instanceof Error
+                ? profileError.message
+                : 'Could not save your taste profile.'
+            setProfileWarning(message)
+          }
+        }
+
+        const recommendations = await recommendBeers(vectorList, menuCatalog)
         if (!cancelled) {
           setResult(recommendations)
         }
-      } catch {
+      } catch (recommendError) {
         if (!cancelled) {
-          setError('Could not load your recommendations right now. Please try again.')
+          const message =
+            recommendError instanceof Error
+              ? recommendError.message
+              : 'Could not load your recommendations right now.'
+          setError(message)
         }
       } finally {
         if (!cancelled) {
@@ -136,7 +165,7 @@ function ResultsPage() {
     return () => {
       cancelled = true
     }
-  }, [navigate, requestKey, isSignedIn, v, vectorList])
+  }, [isLoaded, isSignedIn, menuCatalog, navigate, requestKey, v, vectorList])
 
   if (!isLoaded || !isSignedIn) {
     return (
@@ -167,6 +196,11 @@ function ResultsPage() {
             >
               Try again
             </button>
+            <Link to="/menu">
+              <button className="w-full rounded-xl border border-neutral-200 bg-white py-3 text-sm font-medium text-neutral-700 hover:bg-neutral-50">
+                Back to menu scan
+              </button>
+            </Link>
             <Link to="/quiz">
               <button className="w-full rounded-xl border border-neutral-200 bg-white py-3 text-sm font-medium text-neutral-700 hover:bg-neutral-50">
                 Back to quiz
@@ -190,8 +224,16 @@ function ResultsPage() {
         <div className="w-full max-w-sm flex flex-col gap-6">
           <div className="text-center">
             <h1 className="text-3xl font-bold text-neutral-900">Your beer matches</h1>
-            <p className="mt-1 text-sm text-neutral-500">Saved to your profile and ranked by the API recommendation engine.</p>
+            <p className="mt-1 text-sm text-neutral-500">
+              Picks from your menu ({menuIds.length} beers) — ranked by the recommendation engine.
+            </p>
           </div>
+
+          {profileWarning && (
+            <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+              Couldn't save your profile: {profileWarning}. Your picks are still shown below.
+            </div>
+          )}
 
           {recommendations.map(({ slot, beer }) => (
             <BeerCard

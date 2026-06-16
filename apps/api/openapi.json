@@ -193,6 +193,19 @@
         "title": "HistoryResponse",
         "type": "object"
       },
+      "MenuScanRequest": {
+        "properties": {
+          "image_base64": {
+            "title": "Image Base64",
+            "type": "string"
+          }
+        },
+        "required": [
+          "image_base64"
+        ],
+        "title": "MenuScanRequest",
+        "type": "object"
+      },
       "OkResponse": {
         "properties": {
           "ok": {
@@ -447,6 +460,41 @@
         "title": "SaveProfileRequest",
         "type": "object"
       },
+      "ScanResultItem": {
+        "properties": {
+          "confidence": {
+            "title": "Confidence",
+            "type": "number"
+          },
+          "matched_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Matched Id"
+          },
+          "needs_review": {
+            "title": "Needs Review",
+            "type": "boolean"
+          },
+          "raw_text": {
+            "title": "Raw Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "raw_text",
+          "matched_id",
+          "confidence",
+          "needs_review"
+        ],
+        "title": "ScanResultItem",
+        "type": "object"
+      },
       "UpdatedVectorResponse": {
         "properties": {
           "updated_vector": {
@@ -540,6 +588,56 @@
           }
         },
         "summary": "Health"
+      }
+    },
+    "/menu/scan": {
+      "post": {
+        "operationId": "scanMenu",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MenuScanRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ScanResultItem"
+                  },
+                  "title": "Response Scanmenu",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Scan Menu Image",
+        "tags": [
+          "menu"
+        ]
       }
     },
     "/recommendations/": {
