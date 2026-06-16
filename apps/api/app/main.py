@@ -1,11 +1,14 @@
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
+from app.api_contracts import TypedError
 from app.config import settings
 from app.db import close_pool
+from app.errors import BeerologError
 from app.observability import configure_logging, instrument_requests, logger
 from app.routes import debug, health, recommendations
 
@@ -44,3 +47,17 @@ app.add_middleware(
 app.include_router(health.router)
 app.include_router(recommendations.router)
 app.include_router(debug.router)
+
+
+@app.exception_handler(BeerologError)
+async def handle_beerolog_error(request: Request, exc: BeerologError) -> JSONResponse:
+    """Maps typed app errors to distinct response shapes.
+
+    Operators correlate via `request_id` (set by instrument_requests on every
+    response). `error_type` lets logs and dashboards bucket failures into
+    auth / validation / config / dependency without parsing free-text details.
+    """
+
+    request_id = request.headers.get("X-Request-ID")
+    body = TypedError(error_type=exc.error_type, detail=exc.detail, request_id=request_id)
+    return JSONResponse(status_code=exc.status_code, content=body.model_dump())

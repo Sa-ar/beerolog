@@ -12,6 +12,25 @@ class HealthResponse(BaseModel):
     status: Literal["ok"]
 
 
+class ComponentStatus(BaseModel):
+    name: Literal["process", "config", "database", "embedding_provider"]
+    status: Literal["ok", "degraded", "down"]
+    detail: str | None = None
+
+
+class ReadinessResponse(BaseModel):
+    status: Literal["ready", "not_ready"]
+    components: list[ComponentStatus]
+
+
+class TypedError(BaseModel):
+    """Distinct shape for expected failures — not a generic 500."""
+
+    error_type: Literal["auth", "validation", "config", "dependency"]
+    detail: str
+    request_id: str | None = None
+
+
 # ---------------------------------------------------------------------------
 # Onboarding / BaselineTaste
 # ---------------------------------------------------------------------------
