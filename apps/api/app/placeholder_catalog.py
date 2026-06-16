@@ -13,7 +13,36 @@ Layout (axis index → meaning):
 
 from __future__ import annotations
 
+from dataclasses import replace
+
+from app.services.embedding_service import EmbeddingClient
 from app.services.match_engine import BeerCandidate
+
+# Cache: beer id -> 1536-D embedding. Populated lazily on first request after
+# server start so /recommendations actually produces meaningful cosine scores
+# against the user's OpenAI baseline embedding. Slice 75 replaces this with a
+# real seeded catalog.
+_embedding_cache: dict[str, list[float]] = {}
+
+
+def _beer_to_embedding_text(beer: BeerCandidate) -> str:
+    return (
+        f"{beer.name} by {beer.brewery}. Style: {beer.style}. "
+        f"ABV {beer.abv}%. Market tier: {beer.market_tier}."
+    )
+
+
+async def get_embedded_catalog(client: EmbeddingClient) -> list[BeerCandidate]:
+    """Return the placeholder catalog with real 1536-D embeddings, cached."""
+    out: list[BeerCandidate] = []
+    for beer in PLACEHOLDER_CATALOG:
+        embedding = _embedding_cache.get(beer.id)
+        if embedding is None:
+            embedding = await client.embed(_beer_to_embedding_text(beer))
+            _embedding_cache[beer.id] = embedding
+        out.append(replace(beer, embedding=embedding))
+    return out
+
 
 PLACEHOLDER_CATALOG: list[BeerCandidate] = [
     BeerCandidate(

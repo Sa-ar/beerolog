@@ -15,7 +15,7 @@ from app.api_contracts import (
     ScoreBreakdown,
 )
 from app.config import settings
-from app.placeholder_catalog import PLACEHOLDER_CATALOG
+from app.placeholder_catalog import get_embedded_catalog
 from app.services import session_intent, why_line
 from app.services.embedding_service import EmbeddingClient, get_embedding_client
 from app.services.match_engine import rank
@@ -53,11 +53,12 @@ async def post_recommendations(
     alpha = body.alpha if body.alpha is not None else settings.match_alpha
     beta = body.beta if body.beta is not None else settings.match_beta
 
+    catalog = await get_embedded_catalog(client)
     results = rank(
         baseline_embedding=baseline_vec,
         session_embedding=session_vec,
         novelty_affinity=body.baseline.novelty_affinity,
-        catalog=PLACEHOLDER_CATALOG,
+        catalog=catalog,
         alpha=alpha,
         beta=beta,
         top_k=body.top_k,
