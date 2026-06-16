@@ -7,10 +7,12 @@ from fastapi.responses import JSONResponse
 
 from app.api_contracts import TypedError
 from app.config import settings
-from app.db import close_pool
+from app.db import close_pool, get_pool
 from app.errors import BeerologError
 from app.observability import configure_logging, instrument_requests, logger
 from app.routes import debug, health, onboarding, ratings, recommendations
+from app.services.baseline_taste_repo import AsyncpgBaselineTasteRepo
+from app.services.ratings_repo import AsyncpgRatingsRepo
 
 configure_logging(settings.log_level)
 
@@ -29,6 +31,14 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     from app.startup_checks import enforce_non_development_safety
 
     enforce_non_development_safety(settings)
+
+    if settings.database_url:
+        pool = await get_pool()
+        app.dependency_overrides[onboarding.get_baseline_taste_repo] = lambda: (
+            AsyncpgBaselineTasteRepo(pool)
+        )
+        app.dependency_overrides[ratings.get_ratings_repo] = lambda: AsyncpgRatingsRepo(pool)
+
     try:
         yield
     finally:
