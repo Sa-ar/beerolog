@@ -90,6 +90,25 @@ class BaselineTasteDials(BaseModel):
     novelty_affinity: Annotated[float, Field(ge=0.0, le=1.0)]
 
 
+class BaselineTasteRecord(BaseModel):
+    """Persisted BaselineTaste returned by /me/baseline-taste."""
+
+    user_id: str
+    bubbles: float
+    bitterness: float
+    flavor_family: dict[str, float]
+    novelty_affinity: float
+    embedding_fresh_at: str  # ISO-8601
+    updated_at: str  # ISO-8601
+
+
+class PatchBaselineTasteRequest(BaseModel):
+    bubbles: Annotated[float, Field(ge=0.0, le=1.0)] | None = None
+    bitterness: Annotated[float, Field(ge=0.0, le=1.0)] | None = None
+    flavor_family: dict[str, Annotated[float, Field(ge=0.0, le=1.0)]] | None = None
+    novelty_affinity: Annotated[float, Field(ge=0.0, le=1.0)] | None = None
+
+
 # ---------------------------------------------------------------------------
 # SessionIntent
 # ---------------------------------------------------------------------------
