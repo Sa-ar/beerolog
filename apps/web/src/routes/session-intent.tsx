@@ -12,7 +12,14 @@
  */
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+
+type Baseline = {
+  bubbles: number
+  bitterness: number
+  flavor_family: Record<string, number>
+  novelty_affinity: number
+}
 
 export const Route = createFileRoute('/session-intent')({
   component: SessionIntentPage,
@@ -42,25 +49,39 @@ function SessionIntentPage() {
   const [freeText, setFreeText] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [baseline, setBaseline] = useState<Baseline | null>(null)
 
-  const canSubmit = vibe !== null && abv !== null && !submitting
+  useEffect(() => {
+    let cancelled = false
+    void (async () => {
+      try {
+        const res = await fetch('/api/me/baseline-taste')
+        if (res.status === 404) {
+          if (!cancelled) navigate({ to: '/onboarding' })
+          return
+        }
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        const data = (await res.json()) as Baseline
+        if (!cancelled) setBaseline(data)
+      } catch (e) {
+        if (!cancelled)
+          setError(e instanceof Error ? e.message : 'Failed to load your taste profile')
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [navigate])
+
+  const canSubmit = vibe !== null && abv !== null && !submitting && baseline !== null
 
   async function submit() {
     if (!canSubmit) return
     setSubmitting(true)
     setError(null)
     try {
-      // Placeholder baseline until slice #76 onboarding is wired to web.
-      // The synthetic profile here is the "hop-head" persona from #79.
       const payload = {
-        baseline: {
-          bubbles: 0.8,
-          bitterness: 0.85,
-          flavor_family: {
-            malty: 0.3, hoppy: 0.9, roasty: 0.5, fruity: 0.7, sour: 0.4, smoky: 0.1,
-          },
-          novelty_affinity: 0.85,
-        },
+        baseline,
         session: { vibe, abv_intent: abv, free_text: freeText },
       }
       const res = await fetch('/api/recommendations', {

@@ -32,6 +32,13 @@ function HomePage() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-3">
+            {signedIn && (
+              <Link to="/onboarding">
+                <Button className="w-full" size="md" variant="outline">
+                  Set up my taste profile
+                </Button>
+              </Link>
+            )}
             <Link to="/session-intent">
               <Button className="w-full" size="lg" variant="default">
                 {signedIn ? 'Find a beer →' : 'Sign in to find a beer →'}
