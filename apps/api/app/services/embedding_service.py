@@ -26,7 +26,11 @@ class OpenAIEmbeddingClient:
         self._model = model
 
     async def embed(self, text: str) -> list[float]:
-        resp = await self._client.embeddings.create(model=self._model, input=text)
+        # text-embedding-3-large returns 3072 dims by default; the schema is
+        # vector(1536), so request the truncated form explicitly.
+        resp = await self._client.embeddings.create(
+            model=self._model, input=text, dimensions=EMBEDDING_DIM
+        )
         return list(resp.data[0].embedding)
 
 
