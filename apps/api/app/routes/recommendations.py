@@ -15,8 +15,10 @@ from app.api_contracts import (
     ScoreBreakdown,
 )
 from app.config import settings
+from app.db import get_pool
 from app.placeholder_catalog import get_embedded_catalog
 from app.services import session_intent, why_line
+from app.services.catalog_repo import fetch_catalog
 from app.services.embedding_service import EmbeddingClient, get_embedding_client
 from app.services.match_engine import rank
 
@@ -53,7 +55,16 @@ async def post_recommendations(
     alpha = body.alpha if body.alpha is not None else settings.match_alpha
     beta = body.beta if body.beta is not None else settings.match_beta
 
-    catalog = await get_embedded_catalog(client)
+    catalog: list = []
+    if settings.database_url:
+        try:
+            pool = await get_pool()
+            catalog = await fetch_catalog(pool)
+        except Exception:
+            # DB unreachable (e.g. test harness without a live db) — fall back.
+            catalog = []
+    if not catalog:
+        catalog = await get_embedded_catalog(client)
     results = rank(
         baseline_embedding=baseline_vec,
         session_embedding=session_vec,
