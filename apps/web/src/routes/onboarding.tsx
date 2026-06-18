@@ -10,6 +10,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from '@beerolog/ui'
 import { apiFetch } from '../lib/api-fetch'
+import { QuizChips } from '../components/QuizChips'
 import { onboardingSaveErrorMessage } from '../lib/user-facing-errors'
 
 export const Route = createFileRoute('/onboarding')({
@@ -100,14 +101,14 @@ function OnboardingForm() {
       <h1>{t('onboarding.title')}</h1>
       <p style={{ color: '#666' }}>{t('onboarding.intro')}</p>
 
-      <Chips
+      <QuizChips
         title={t('onboarding.questions.coffee')}
         group="coffee"
         options={COFFEE_OPTS}
         value={a.coffee}
         onChange={(v) => setA({ ...a, coffee: v })}
       />
-      <Chips
+      <QuizChips
         title={t('onboarding.questions.water')}
         group="water"
         options={WATER_OPTS}
@@ -119,28 +120,28 @@ function OnboardingForm() {
         value={a.novelty_seeking}
         onChange={(v) => setA({ ...a, novelty_seeking: v })}
       />
-      <Chips
+      <QuizChips
         title={t('onboarding.questions.snack')}
         group="snack"
         options={SNACK_OPTS}
         value={a.snack}
         onChange={(v) => setA({ ...a, snack: v })}
       />
-      <Chips
+      <QuizChips
         title={t('onboarding.questions.sour')}
         group="love"
         options={LOVE_OPTS}
         value={a.sour_foods}
         onChange={(v) => setA({ ...a, sour_foods: v })}
       />
-      <Chips
+      <QuizChips
         title={t('onboarding.questions.citrus')}
         group="citrus"
         options={CITRUS_OPTS}
         value={a.citrus}
         onChange={(v) => setA({ ...a, citrus: v })}
       />
-      <Chips
+      <QuizChips
         title={t('onboarding.questions.smoked')}
         group="love"
         options={LOVE_OPTS}
@@ -175,48 +176,6 @@ function OnboardingForm() {
   )
 }
 
-function Chips<T extends string>({
-  title,
-  group,
-  options,
-  value,
-  onChange,
-}: {
-  title: string
-  group: string
-  options: T[]
-  value: T | null
-  onChange: (v: T) => void
-}) {
-  const { t } = useTranslation()
-  return (
-    <section style={{ marginTop: 24 }}>
-      <h2 style={{ fontSize: 18, marginBottom: 8 }}>{title}</h2>
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        {options.map((opt) => {
-          const selected = value === opt
-          return (
-            <button
-              key={opt}
-              type="button"
-              onClick={() => onChange(opt)}
-              style={{
-                padding: '8px 14px',
-                borderRadius: 999,
-                border: selected ? '2px solid #0a7' : '1px solid #ccc',
-                background: selected ? '#e6f7f0' : 'white',
-                cursor: 'pointer',
-              }}
-            >
-              {t(`enums.${group}.${opt}`)}
-            </button>
-          )
-        })}
-      </div>
-    </section>
-  )
-}
-
 function YesNo({
   title,
   value,
@@ -227,7 +186,7 @@ function YesNo({
   onChange: (v: boolean) => void
 }) {
   return (
-    <Chips
+    <QuizChips
       title={title}
       group="common"
       options={['yes', 'no']}
