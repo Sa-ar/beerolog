@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { CatalogIcon } from '@beerolog/icons'
 import { Button } from '@beerolog/ui'
 import type { BaselineTaste } from '../lib/baseline-taste'
@@ -28,6 +29,7 @@ function toSessionBaseline(baseline: BaselineTaste): SessionBaseline {
 
 export function SessionQuickPick({ baseline }: SessionQuickPickProps) {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [vibe, setVibe] = useState<SessionVibe | null>(null)
   const [abv, setAbv] = useState<AbvIntent | null>(null)
   const [freeText, setFreeText] = useState('')
@@ -48,25 +50,23 @@ export function SessionQuickPick({ baseline }: SessionQuickPickProps) {
   return (
     <div className="space-y-5">
       <div className="space-y-1">
-        <h2 className="text-lg font-semibold text-neutral-900">Start a session</h2>
-        <p className="text-sm text-neutral-600">
-          Pick tonight&apos;s vibe and ABV — optionally add a few words about the moment.
-        </p>
+        <h2 className="text-lg font-semibold text-neutral-900">{t('session.start')}</h2>
+        <p className="text-sm text-neutral-600">{t('session.intro')}</p>
       </div>
 
       <fieldset className="space-y-2">
         <legend className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
-          Vibe
+          {t('session.vibeLegend')}
         </legend>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {VIBE_OPTIONS.map((opt) => (
             <OptionChip
-              key={opt.value}
-              selected={vibe === opt.value}
-              label={opt.label}
-              hint={opt.hint}
-              onClick={() => setVibe(opt.value)}
-              icon={<CatalogIcon group="session.vibe" iconKey={opt.value} className="h-8 w-8 shrink-0" />}
+              key={opt}
+              selected={vibe === opt}
+              label={t(`enums.vibe.${opt}.label`)}
+              hint={t(`enums.vibe.${opt}.hint`)}
+              onClick={() => setVibe(opt)}
+              icon={<CatalogIcon group="session.vibe" iconKey={opt} className="h-8 w-8 shrink-0" />}
             />
           ))}
         </div>
@@ -74,17 +74,17 @@ export function SessionQuickPick({ baseline }: SessionQuickPickProps) {
 
       <fieldset className="space-y-2">
         <legend className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
-          ABV
+          {t('session.abvLegend')}
         </legend>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {ABV_OPTIONS.map((opt) => (
             <OptionChip
-              key={opt.value}
-              selected={abv === opt.value}
-              label={opt.label}
-              hint={opt.hint}
-              onClick={() => setAbv(opt.value)}
-              icon={<CatalogIcon group="session.abv" iconKey={opt.value} className="h-8 w-8 shrink-0" />}
+              key={opt}
+              selected={abv === opt}
+              label={t(`enums.abv.${opt}.label`)}
+              hint={t(`enums.abv.${opt}.hint`)}
+              onClick={() => setAbv(opt)}
+              icon={<CatalogIcon group="session.abv" iconKey={opt} className="h-8 w-8 shrink-0" />}
             />
           ))}
         </div>
@@ -95,7 +95,8 @@ export function SessionQuickPick({ baseline }: SessionQuickPickProps) {
           htmlFor="session-free-text"
           className="text-xs font-semibold uppercase tracking-wide text-neutral-500"
         >
-          Tell us more <span className="font-normal normal-case text-neutral-400">(optional)</span>
+          {t('session.tellMore')}{' '}
+          <span className="font-normal normal-case text-neutral-400">{t('session.optional')}</span>
         </label>
         <textarea
           id="session-free-text"
@@ -103,7 +104,7 @@ export function SessionQuickPick({ baseline }: SessionQuickPickProps) {
           onChange={(e) => setFreeText(e.target.value)}
           rows={3}
           maxLength={500}
-          placeholder="Hot evening, sharing a platter, want something crisp…"
+          placeholder={t('session.placeholder')}
           className="w-full resize-none rounded-xl border border-neutral-200 bg-neutral-50/80 px-3 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-400 transition-colors focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/30"
         />
       </div>
@@ -114,7 +115,7 @@ export function SessionQuickPick({ baseline }: SessionQuickPickProps) {
         disabled={!canSubmit}
         onClick={handleSubmit}
       >
-        Get my top 5 →
+        {t('session.submit')}
       </Button>
     </div>
   )

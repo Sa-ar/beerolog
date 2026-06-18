@@ -185,16 +185,29 @@ class ScoreBreakdown(BaseModel):
     dominant_component: DominantComponent
 
 
+class WhyLine(BaseModel):
+    """Language-neutral recommendation explanation.
+
+    The API picks the code + params; the frontend renders the localized
+    sentence (key why.<code>). Keeps copy in one place and the embedding
+    templates English-only.
+    """
+
+    code: str
+    params: dict[str, str] = Field(default_factory=dict)
+
+
 class RecommendedBeer(BaseModel):
     id: str
     name: str
+    name_hebrew: str | None = None
     brewery: str
     style: str
     abv: float
     market_tier: Literal["mainstream", "craft", "import"]
     color: Literal["pale", "gold", "amber", "brown", "dark"]
     image_url: str | None = None
-    why_line: str
+    why: WhyLine
     breakdown: ScoreBreakdown
 
 

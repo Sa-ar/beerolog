@@ -71,7 +71,7 @@
   {
     "id": "alexander-israeli-golden-ale",
     "name": "Israeli Golden Ale",
-    "nameHebrew": null,
+    "nameHebrew": "אייל זהוב ישראלי",
     "brewery": "Alexander (אלכסנדר)",
     "breweryCountry": "IL",
     "style": "Blonde / Golden Ale - Other",
@@ -577,7 +577,7 @@
   {
     "id": "beerd-brewing-company-wanderlust-2021-israel",
     "name": "Wanderlust 2021 Israel",
-    "nameHebrew": null,
+    "nameHebrew": "וונדרלאסט 2021 ישראל",
     "brewery": "Beer’d Brewing Company",
     "breweryCountry": "IL",
     "style": "Red Ale - American Amber / Red",
@@ -899,7 +899,7 @@
   {
     "id": "breakside-brewery-israeli-table-beer",
     "name": "Israeli Table Beer",
-    "nameHebrew": null,
+    "nameHebrew": "בירת שולחן ישראלית",
     "brewery": "Breakside Brewery",
     "breweryCountry": "US",
     "style": "Farmhouse Ale - Saison",
@@ -1704,7 +1704,7 @@
   {
     "id": "carlsberg-group-tuborg-guld-gold",
     "name": "Tuborg Guld/Gold",
-    "nameHebrew": null,
+    "nameHebrew": "טובורג גולד",
     "brewery": "Carlsberg Group",
     "breweryCountry": "DK",
     "style": "Lager - Pale",
@@ -2003,7 +2003,7 @@
   {
     "id": "green-coast-israel-green-coast-blonde",
     "name": "Green Coast Blonde",
-    "nameHebrew": null,
+    "nameHebrew": "גרין קוסט בלונד",
     "brewery": "Green Coast Israel",
     "breweryCountry": "IL",
     "style": "Blonde / Golden Ale - Other",
@@ -2118,7 +2118,7 @@
   {
     "id": "guinness-guinness-original-extra-stout-europe",
     "name": "Guinness Original Extra Stout (Europe)",
-    "nameHebrew": null,
+    "nameHebrew": "גינס אוריג'ינל אקסטרה סטאוט (אירופה)",
     "brewery": "Guinness",
     "breweryCountry": "IE",
     "style": "Stout - Irish Dry",
@@ -2486,7 +2486,7 @@
   {
     "id": "hopsters-brewing-company-brew-israel-fund",
     "name": "Brew Israel Fund",
-    "nameHebrew": null,
+    "nameHebrew": "ברו ישראל פאנד",
     "brewery": "Hopsters Brewing Company",
     "breweryCountry": "US",
     "style": "Belgian Blonde",
@@ -2923,7 +2923,7 @@
   {
     "id": "israel-beer-breweries-best-brew",
     "name": "Best Brew",
-    "nameHebrew": null,
+    "nameHebrew": "בסט ברו",
     "brewery": "Israel Beer Breweries Ltd. (IBBL)",
     "breweryCountry": "IL",
     "style": "Non-Alcoholic - Other Beer",
@@ -2946,7 +2946,7 @@
   {
     "id": "israel-beer-breweries-carlsberg-luma",
     "name": "Carlsberg Luma",
-    "nameHebrew": null,
+    "nameHebrew": "קרלסברג לומה",
     "brewery": "Israel Beer Breweries Ltd. (IBBL)",
     "breweryCountry": "IL",
     "style": "Lager - IPL (India Pale Lager)",
@@ -2969,7 +2969,7 @@
   {
     "id": "israel-beer-breweries-diet-malty",
     "name": "Diet Malty",
-    "nameHebrew": null,
+    "nameHebrew": "דיאט מאלטי",
     "brewery": "Israel Beer Breweries Ltd. (IBBL)",
     "breweryCountry": "IL",
     "style": "Non-Alcoholic - Other Beer",
@@ -3015,7 +3015,7 @@
   {
     "id": "israel-beer-breweries-layla-dirty-blonde-lager",
     "name": "Layla Dirty Blonde Lager",
-    "nameHebrew": null,
+    "nameHebrew": "ליילה דרטי בלונד לאגר",
     "brewery": "Israel Beer Breweries Ltd. (IBBL)",
     "breweryCountry": "IL",
     "style": "Lager - American",
@@ -3084,7 +3084,7 @@
   {
     "id": "israel-beer-breweries-tuborg-6-7-6-8-6-9-blue-bottle",
     "name": "Tuborg 6.7/6.8 /6.9 (Blue bottle)",
-    "nameHebrew": null,
+    "nameHebrew": "טובורג (בקבוק כחול)",
     "brewery": "Israel Beer Breweries Ltd. (IBBL)",
     "breweryCountry": "IL",
     "style": "Lager - Vienna",
@@ -3107,7 +3107,7 @@
   {
     "id": "israel-beer-breweries-tuborg-black-israel",
     "name": "Tuborg Black (Israel)",
-    "nameHebrew": null,
+    "nameHebrew": "טובורג בלאק (ישראל)",
     "brewery": "Israel Beer Breweries Ltd. (IBBL)",
     "breweryCountry": "IL",
     "style": "Lager - Strong",
@@ -3130,7 +3130,7 @@
   {
     "id": "israel-beer-breweries-tuborg-malt",
     "name": "Tuborg Malt",
-    "nameHebrew": null,
+    "nameHebrew": "טובורג מאלט",
     "brewery": "Israel Beer Breweries Ltd. (IBBL)",
     "breweryCountry": "IL",
     "style": "Malt Beer",
@@ -3153,7 +3153,7 @@
   {
     "id": "israel-beer-breweries-tuborg-red-israel",
     "name": "Tuborg Red (Israel)",
-    "nameHebrew": null,
+    "nameHebrew": "טובורג רד (ישראל)",
     "brewery": "Israel Beer Breweries Ltd. (IBBL)",
     "breweryCountry": "IL",
     "style": "Lager - Vienna",
@@ -3176,7 +3176,7 @@
   {
     "id": "israel-beer-breweries-tuborg-red-israel-unfiltered",
     "name": "Tuborg Red (Israel) Unfiltered",
-    "nameHebrew": null,
+    "nameHebrew": "טובורג רד (ישראל) לא מסונן",
     "brewery": "Israel Beer Breweries Ltd. (IBBL)",
     "breweryCountry": "IL",
     "style": "Lager - Vienna",
@@ -3199,7 +3199,7 @@
   {
     "id": "israel-beer-breweries-tuborg-special-edition-6-0",
     "name": "Tuborg Special Edition 6.0%",
-    "nameHebrew": null,
+    "nameHebrew": "טובורג מהדורה מיוחדת 6.0%",
     "brewery": "Israel Beer Breweries Ltd. (IBBL)",
     "breweryCountry": "IL",
     "style": "Lager - Vienna",
@@ -3222,7 +3222,7 @@
   {
     "id": "jem-s-beer-factory-ipa",
     "name": "IPA",
-    "nameHebrew": null,
+    "nameHebrew": "ג'מס IPA",
     "brewery": "Jem's Beer Factory",
     "breweryCountry": "IL",
     "style": "IPA - American",
@@ -3245,7 +3245,7 @@
   {
     "id": "jem-s-beer-factory-pils",
     "name": "Pils",
-    "nameHebrew": null,
+    "nameHebrew": "ג'מס פילס",
     "brewery": "Jem's Beer Factory",
     "breweryCountry": "IL",
     "style": "Pilsner - Czech / Bohemian",
@@ -3268,7 +3268,7 @@
   {
     "id": "kaplan-beer-israeli-wheat",
     "name": "חיטה ישראלית (Israeli Wheat)",
-    "nameHebrew": null,
+    "nameHebrew": "חיטה ישראלית",
     "brewery": "Kaplan Beer (בירה קפלן)",
     "breweryCountry": "IL",
     "style": "Wheat Beer - Witbier / Blanche",
@@ -3705,7 +3705,7 @@
   {
     "id": "malka-malka-admonit",
     "name": "Malka Admonit",
-    "nameHebrew": null,
+    "nameHebrew": "מלכה אדמונית",
     "brewery": "Malka (מלכה)",
     "breweryCountry": "IL",
     "style": "Pale Ale - English",
@@ -3797,7 +3797,7 @@
   {
     "id": "mosco-b-12-meat-station",
     "name": "B-12 Meat Station",
-    "nameHebrew": null,
+    "nameHebrew": "מוסקו B-12 תחנת הבשר",
     "brewery": "Mosco (מוסקו) / פפא",
     "breweryCountry": "IL",
     "style": "Blonde / Golden Ale - Other",
@@ -3820,7 +3820,7 @@
   {
     "id": "mosco-beersky-batch-2",
     "name": "Beersky (Batch 2)",
-    "nameHebrew": null,
+    "nameHebrew": "מוסקו בירסקי (מנה 2)",
     "brewery": "Mosco (מוסקו) / פפא",
     "breweryCountry": "IL",
     "style": "Red Ale - Other",
@@ -3843,7 +3843,7 @@
   {
     "id": "mosco-juicy",
     "name": "Juicy",
-    "nameHebrew": null,
+    "nameHebrew": "מוסקו ג'וסי",
     "brewery": "Mosco (מוסקו) / פפא",
     "breweryCountry": "IL",
     "style": "IPA - New England / Hazy",
@@ -3981,7 +3981,7 @@
   {
     "id": "mosco-stern-white-star",
     "name": "Stern White Star",
-    "nameHebrew": null,
+    "nameHebrew": "מוסקו כוכב לבן",
     "brewery": "Mosco (מוסקו) / פפא",
     "breweryCountry": "IL",
     "style": "Pale Ale - English",
@@ -4004,7 +4004,7 @@
   {
     "id": "mosco-stout",
     "name": "Stout",
-    "nameHebrew": null,
+    "nameHebrew": "מוסקו סטאוט",
     "brewery": "Mosco (מוסקו) / פפא",
     "breweryCountry": "IL",
     "style": "Stout - Other",
@@ -4027,7 +4027,7 @@
   {
     "id": "mosco-summer-ale",
     "name": "Summer Ale",
-    "nameHebrew": null,
+    "nameHebrew": "מוסקו אייל קיץ",
     "brewery": "Mosco (מוסקו) / פפא",
     "breweryCountry": "IL",
     "style": "Pale Ale - English",
@@ -4372,7 +4372,7 @@
   {
     "id": "new-pioneer-brewing-co-made-in-israel",
     "name": "Made In Israel",
-    "nameHebrew": null,
+    "nameHebrew": "מייד אין ישראל",
     "brewery": "New Pioneer Brewing Co - חלוץ חדש",
     "breweryCountry": "IL",
     "style": "IPA - American",
@@ -4464,7 +4464,7 @@
   {
     "id": "obolon-zhygulivske",
     "name": "Жигулівське (Zhygulivske)",
-    "nameHebrew": null,
+    "nameHebrew": "ז'יגוליבסקה",
     "brewery": "Obolon (Оболонь)",
     "breweryCountry": "UA",
     "style": "Lager - Pale",
@@ -4947,7 +4947,7 @@
   {
     "id": "schnitt-attali-s-goes-med",
     "name": "Attali's Goes Med",
-    "nameHebrew": null,
+    "nameHebrew": "אטאלי גואס מד",
     "brewery": "Schnitt",
     "breweryCountry": "IL",
     "style": "Session NEIPA",
@@ -5016,7 +5016,7 @@
   {
     "id": "schnitt-cheers-alenbeer",
     "name": "Cheers Alenbeer",
-    "nameHebrew": null,
+    "nameHebrew": "צ'ירס אלנביר",
     "brewery": "Schnitt",
     "breweryCountry": "IL",
     "style": "Session IPA",
@@ -5085,7 +5085,7 @@
   {
     "id": "schnitt-double-trouble",
     "name": "Double Trouble",
-    "nameHebrew": null,
+    "nameHebrew": "דאבל טראבל",
     "brewery": "Schnitt",
     "breweryCountry": "IL",
     "style": "Double IPA",
@@ -5200,7 +5200,7 @@
   {
     "id": "schnitt-float",
     "name": "Float",
-    "nameHebrew": null,
+    "nameHebrew": "פלואוט",
     "brewery": "Schnitt",
     "breweryCountry": "IL",
     "style": "Hazy IPA",
@@ -5223,7 +5223,7 @@
   {
     "id": "schnitt-flu-fighters",
     "name": "Flu Fighters",
-    "nameHebrew": null,
+    "nameHebrew": "פלו פייטרס",
     "brewery": "Schnitt",
     "breweryCountry": "IL",
     "style": "Spiced Ale",
@@ -5246,7 +5246,7 @@
   {
     "id": "schnitt-gordi",
     "name": "Gordi",
-    "nameHebrew": null,
+    "nameHebrew": "גורדי",
     "brewery": "Schnitt",
     "breweryCountry": "IL",
     "style": "Grodziskie",
@@ -5269,7 +5269,7 @@
   {
     "id": "schnitt-guava-island",
     "name": "Guava Island",
-    "nameHebrew": null,
+    "nameHebrew": "גואבה איילנד",
     "brewery": "Schnitt",
     "breweryCountry": "IL",
     "style": "Fruited NEIPA",
@@ -5407,7 +5407,7 @@
   {
     "id": "schnitt-jaffa",
     "name": "Jaffa",
-    "nameHebrew": null,
+    "nameHebrew": "יפו",
     "brewery": "Schnitt",
     "breweryCountry": "IL",
     "style": "American IPA",
@@ -5430,7 +5430,7 @@
   {
     "id": "schnitt-kashmir",
     "name": "Kashmir",
-    "nameHebrew": null,
+    "nameHebrew": "קשמיר",
     "brewery": "Schnitt",
     "breweryCountry": "IL",
     "style": "Hoppy Lager",
@@ -5453,7 +5453,7 @@
   {
     "id": "schnitt-koresh",
     "name": "Koresh",
-    "nameHebrew": null,
+    "nameHebrew": "כורש",
     "brewery": "Schnitt",
     "breweryCountry": "IL",
     "style": "Smoked Blonde Ale",
@@ -5775,7 +5775,7 @@
   {
     "id": "schnitt-tea-party-masala",
     "name": "Tea Party: Masala",
-    "nameHebrew": null,
+    "nameHebrew": "מסיבת תה: מסאלה",
     "brewery": "Schnitt",
     "breweryCountry": "IL",
     "style": "Pale Ale",
@@ -5798,7 +5798,7 @@
   {
     "id": "schnitt-twist-stout",
     "name": "Twist & Stout",
-    "nameHebrew": null,
+    "nameHebrew": "טוויסט אנד סטאוט",
     "brewery": "Schnitt",
     "breweryCountry": "IL",
     "style": "Dry Stout",
@@ -5821,7 +5821,7 @@
   {
     "id": "schnitt-what-was-was",
     "name": "What Was Was",
-    "nameHebrew": null,
+    "nameHebrew": "מה שהיה היה",
     "brewery": "Schnitt",
     "breweryCountry": "IL",
     "style": "Hazy IPA",
@@ -5844,7 +5844,7 @@
   {
     "id": "schnitt-why-like-this",
     "name": "Why Like This",
-    "nameHebrew": null,
+    "nameHebrew": "למה ככה",
     "brewery": "Schnitt",
     "breweryCountry": "IL",
     "style": "Blonde Ale",
@@ -5867,7 +5867,7 @@
   {
     "id": "schnitt-wit-win",
     "name": "Wit Win",
-    "nameHebrew": null,
+    "nameHebrew": "ויט וין",
     "brewery": "Schnitt",
     "breweryCountry": "IL",
     "style": "Witbier",
@@ -5890,7 +5890,7 @@
   {
     "id": "schnitt-world-cup-2026",
     "name": "World Cup 2026",
-    "nameHebrew": null,
+    "nameHebrew": "מונדיאל 2026",
     "brewery": "Schnitt",
     "breweryCountry": "IL",
     "style": "Session IPA",
@@ -5913,7 +5913,7 @@
   {
     "id": "schnitt-yes-yes-no-no",
     "name": "Yes Yes No No",
-    "nameHebrew": null,
+    "nameHebrew": "כן כן לא לא",
     "brewery": "Schnitt",
     "breweryCountry": "IL",
     "style": "Hefeweizen",
@@ -6373,7 +6373,7 @@
   {
     "id": "shufersal-crafty-israeli-strong-ale",
     "name": "Crafty Israeli Strong Ale",
-    "nameHebrew": null,
+    "nameHebrew": "אייל ישראלי חזק",
     "brewery": "Shufersal (שופרסל)",
     "breweryCountry": "IL",
     "style": "Belgian Tripel",
@@ -7661,7 +7661,7 @@
   {
     "id": "isralambic-pear",
     "name": "Isralambic-pear",
-    "nameHebrew": null,
+    "nameHebrew": "ישרלמביק אגס",
     "brewery": "מבשלת הכפר",
     "breweryCountry": "IL",
     "style": "Lambic - Fruit",

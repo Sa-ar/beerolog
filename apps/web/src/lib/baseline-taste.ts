@@ -1,3 +1,4 @@
+import type { TFunction } from 'i18next'
 import type { TasteProfileIcons } from '@beerolog/icons'
 
 export type BaselineTaste = {
@@ -9,20 +10,11 @@ export type BaselineTaste = {
   icons?: TasteProfileIcons | null
 }
 
-const FLAVOR_LABELS: Record<string, string> = {
-  malty: 'Malty',
-  hoppy: 'Hoppy',
-  roasty: 'Roasty',
-  fruity: 'Fruity',
-  sour: 'Sour',
-  smoky: 'Smoky',
-}
-
-export function timeAwareGreeting(firstName?: string | null): string {
+export function timeAwareGreeting(t: TFunction, firstName?: string | null): string {
   const hour = new Date().getHours()
-  const time =
-    hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
-  return firstName ? `${time}, ${firstName}` : time
+  const timeKey = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening'
+  const time = t(`greeting.${timeKey}`)
+  return firstName ? t('greeting.named', { greeting: time, name: firstName }) : time
 }
 
 export function dominantFlavorKey(baseline: BaselineTaste): string {
@@ -30,20 +22,22 @@ export function dominantFlavorKey(baseline: BaselineTaste): string {
   return top ?? 'default'
 }
 
-export function noveltyLabel(baseline: BaselineTaste): string {
-  return baseline.novelty_affinity > 0.5 ? 'Flavor explorer' : 'Comfort seeker'
+export function noveltyLabel(t: TFunction, baseline: BaselineTaste): string {
+  return baseline.novelty_affinity > 0.5
+    ? t('profile.novelty.explorer')
+    : t('profile.novelty.comfort')
 }
 
-export function flavorTitle(baseline: BaselineTaste): string | null {
+export function flavorTitle(t: TFunction, baseline: BaselineTaste): string | null {
   const topFlavors = Object.entries(baseline.flavor_family)
     .sort(([, a], [, b]) => b - a)
     .slice(0, 2)
-    .map(([key]) => flavorLabel(key))
+    .map(([key]) => flavorLabel(t, key))
   return topFlavors.length > 0 ? topFlavors.join(' & ') : null
 }
 
-export function flavorLabel(key: string): string {
-  return FLAVOR_LABELS[key] ?? key
+export function flavorLabel(t: TFunction, key: string): string {
+  return t(`flavors.${key}`, { defaultValue: key })
 }
 
 export function dialDescriptor(value: number, low: string, mid: string, high: string): string {
@@ -52,18 +46,19 @@ export function dialDescriptor(value: number, low: string, mid: string, high: st
   return mid
 }
 
-export function profileHeadline(baseline: BaselineTaste): string {
-  const title = flavorTitle(baseline)
-  const novelty = noveltyLabel(baseline)
+export function profileHeadline(t: TFunction, baseline: BaselineTaste): string {
+  const title = flavorTitle(t, baseline)
+  const novelty = noveltyLabel(t, baseline)
   return title ? `${title} · ${novelty}` : novelty
 }
 
 export function topFlavorFamilies(
+  t: TFunction,
   baseline: BaselineTaste,
   limit = 4,
 ): { key: string; label: string; value: number }[] {
   return Object.entries(baseline.flavor_family)
     .sort(([, a], [, b]) => b - a)
     .slice(0, limit)
-    .map(([key, value]) => ({ key, label: flavorLabel(key), value }))
+    .map(([key, value]) => ({ key, label: flavorLabel(t, key), value }))
 }

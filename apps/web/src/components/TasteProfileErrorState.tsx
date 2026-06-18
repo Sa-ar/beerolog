@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Button } from '@beerolog/ui'
 import type { BaselineLoadErrorReason } from '../lib/user-facing-errors'
 import { describeBaselineLoadError } from '../lib/user-facing-errors'
@@ -14,7 +15,8 @@ export function TasteProfileErrorState({
   reason,
   onRetry,
 }: TasteProfileErrorStateProps) {
-  const { title, message } = describeBaselineLoadError(reason)
+  const { t } = useTranslation()
+  const { title, message } = describeBaselineLoadError(t, reason)
 
   return (
     <div className="flex flex-col gap-8">
@@ -23,7 +25,7 @@ export function TasteProfileErrorState({
           {greeting}
         </p>
         <h1 className="text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
-          Your taste profile
+          {t('profile.title')}
         </h1>
       </section>
 
@@ -33,7 +35,7 @@ export function TasteProfileErrorState({
         description={message}
         action={
           <Button className="w-full max-w-xs" size="lg" onClick={onRetry}>
-            Try again
+            {t('common.tryAgain')}
           </Button>
         }
       />

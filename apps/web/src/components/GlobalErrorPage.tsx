@@ -1,15 +1,17 @@
 import { Link } from '@tanstack/react-router'
 import type { ErrorComponentProps } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@beerolog/ui'
 import { StatusCard } from './StatusCard'
 import { globalErrorMessage } from '../lib/user-facing-errors'
 
 export function GlobalErrorPage({ error, reset }: ErrorComponentProps) {
+  const { t } = useTranslation()
   if (import.meta.env.DEV) {
     console.error('[GlobalErrorPage]', error)
   }
 
-  const { title, message } = globalErrorMessage()
+  const { title, message } = globalErrorMessage(t)
 
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-4 py-12 sm:px-6 sm:py-16">
@@ -20,11 +22,11 @@ export function GlobalErrorPage({ error, reset }: ErrorComponentProps) {
         action={
           <div className="flex w-full max-w-xs flex-col gap-3">
             <Button className="w-full" size="lg" onClick={reset}>
-              Try again
+              {t('common.tryAgain')}
             </Button>
             <Link to="/" className="w-full">
               <Button className="w-full" size="lg" variant="outline">
-                Back to home
+                {t('common.backToHome')}
               </Button>
             </Link>
           </div>

@@ -6,6 +6,7 @@
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Alert } from '@beerolog/ui'
 import { apiFetch } from '../lib/api-fetch'
 import { onboardingSaveErrorMessage } from '../lib/user-facing-errors'
@@ -30,38 +31,17 @@ type Answers = {
   smoked_foods: Love | null
 }
 
-const COFFEE_OPTS: { value: Coffee; label: string }[] = [
-  { value: 'black', label: 'Black' },
-  { value: 'espresso', label: 'Espresso' },
-  { value: 'hafuch', label: 'Hafuch' },
-  { value: 'iced_sweet', label: 'Iced & sweet' },
-  { value: 'none', label: "Don't drink coffee" },
-]
-const WATER_OPTS: { value: Water; label: string }[] = [
-  { value: 'still', label: 'Still' },
-  { value: 'light', label: 'Lightly fizzy' },
-  { value: 'strong', label: 'Strongly fizzy' },
-]
-const SNACK_OPTS: { value: Snack; label: string }[] = [
-  { value: 'dark_chocolate', label: 'Dark chocolate' },
-  { value: 'halva', label: 'Halva' },
-  { value: 'fresh_fruit', label: 'Fresh fruit' },
-  { value: 'milk_chocolate', label: 'Milk chocolate' },
-]
-const LOVE_OPTS: { value: Love; label: string }[] = [
-  { value: 'love', label: 'Love them' },
-  { value: 'okay', label: "They're okay" },
-  { value: 'avoid', label: 'Avoid them' },
-]
-const CITRUS_OPTS: { value: Citrus; label: string }[] = [
-  { value: 'grapefruit', label: 'Grapefruit' },
-  { value: 'orange', label: 'Orange' },
-  { value: 'lemonade', label: 'Lemonade' },
-  { value: 'none', label: 'None of those' },
-]
+// Values mirror the API enums (app/api_contracts.py); labels come from
+// enums.<group>.<value> translation keys — never translate the wire value.
+const COFFEE_OPTS: Coffee[] = ['black', 'espresso', 'hafuch', 'iced_sweet', 'none']
+const WATER_OPTS: Water[] = ['still', 'light', 'strong']
+const SNACK_OPTS: Snack[] = ['dark_chocolate', 'halva', 'fresh_fruit', 'milk_chocolate']
+const LOVE_OPTS: Love[] = ['love', 'okay', 'avoid']
+const CITRUS_OPTS: Citrus[] = ['grapefruit', 'orange', 'lemonade', 'none']
 
 function OnboardingPage() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [a, setA] = useState<Answers>({
     coffee: null,
     water: null,
@@ -95,7 +75,7 @@ function OnboardingPage() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       navigate({ to: '/' })
     } catch (e) {
-      setError(onboardingSaveErrorMessage(e))
+      setError(onboardingSaveErrorMessage(t, e))
     } finally {
       setSubmitting(false)
     }
@@ -103,49 +83,52 @@ function OnboardingPage() {
 
   return (
     <div style={{ maxWidth: 640, margin: '2rem auto', padding: '0 1rem' }}>
-      <h1>Tell us how you taste</h1>
-      <p style={{ color: '#666' }}>
-        Seven quick picks. We use these to model your baseline so every session
-        recommendation lands closer to what you actually enjoy.
-      </p>
+      <h1>{t('onboarding.title')}</h1>
+      <p style={{ color: '#666' }}>{t('onboarding.intro')}</p>
 
       <Chips
-        title="How do you take coffee?"
+        title={t('onboarding.questions.coffee')}
+        group="coffee"
         options={COFFEE_OPTS}
         value={a.coffee}
         onChange={(v) => setA({ ...a, coffee: v })}
       />
       <Chips
-        title="Water style?"
+        title={t('onboarding.questions.water')}
+        group="water"
         options={WATER_OPTS}
         value={a.water}
         onChange={(v) => setA({ ...a, water: v })}
       />
       <YesNo
-        title="Do you like trying things you haven’t had before?"
+        title={t('onboarding.questions.novelty')}
         value={a.novelty_seeking}
         onChange={(v) => setA({ ...a, novelty_seeking: v })}
       />
       <Chips
-        title="Pick a snack"
+        title={t('onboarding.questions.snack')}
+        group="snack"
         options={SNACK_OPTS}
         value={a.snack}
         onChange={(v) => setA({ ...a, snack: v })}
       />
       <Chips
-        title="Sour foods (pickles, kimchi, yogurt)?"
+        title={t('onboarding.questions.sour')}
+        group="love"
         options={LOVE_OPTS}
         value={a.sour_foods}
         onChange={(v) => setA({ ...a, sour_foods: v })}
       />
       <Chips
-        title="Pick a citrus"
+        title={t('onboarding.questions.citrus')}
+        group="citrus"
         options={CITRUS_OPTS}
         value={a.citrus}
         onChange={(v) => setA({ ...a, citrus: v })}
       />
       <Chips
-        title="Smoked foods (brisket, smoked cheese)?"
+        title={t('onboarding.questions.smoked')}
+        group="love"
         options={LOVE_OPTS}
         value={a.smoked_foods}
         onChange={(v) => setA({ ...a, smoked_foods: v })}
@@ -172,7 +155,7 @@ function OnboardingPage() {
           cursor: complete && !submitting ? 'pointer' : 'not-allowed',
         }}
       >
-        {submitting ? 'Saving…' : 'Save my taste profile →'}
+        {submitting ? t('onboarding.saving') : t('onboarding.save')}
       </button>
     </div>
   )
@@ -180,26 +163,29 @@ function OnboardingPage() {
 
 function Chips<T extends string>({
   title,
+  group,
   options,
   value,
   onChange,
 }: {
   title: string
-  options: { value: T; label: string }[]
+  group: string
+  options: T[]
   value: T | null
   onChange: (v: T) => void
 }) {
+  const { t } = useTranslation()
   return (
     <section style={{ marginTop: 24 }}>
       <h2 style={{ fontSize: 18, marginBottom: 8 }}>{title}</h2>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         {options.map((opt) => {
-          const selected = value === opt.value
+          const selected = value === opt
           return (
             <button
-              key={opt.value}
+              key={opt}
               type="button"
-              onClick={() => onChange(opt.value)}
+              onClick={() => onChange(opt)}
               style={{
                 padding: '8px 14px',
                 borderRadius: 999,
@@ -208,7 +194,7 @@ function Chips<T extends string>({
                 cursor: 'pointer',
               }}
             >
-              {opt.label}
+              {t(`enums.${group}.${opt}`)}
             </button>
           )
         })}
@@ -229,10 +215,8 @@ function YesNo({
   return (
     <Chips
       title={title}
-      options={[
-        { value: 'yes', label: 'Yes' },
-        { value: 'no', label: 'No' },
-      ]}
+      group="common"
+      options={['yes', 'no']}
       value={value === null ? null : value ? 'yes' : 'no'}
       onChange={(v) => onChange(v === 'yes')}
     />
