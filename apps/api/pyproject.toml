@@ -35,5 +35,9 @@ ignore = ["E501"]
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 
+[tool.vercel]
+entrypoint = "app.main:app"
+
+
 [tool.uv.sources]
 beerolog-icon-service = { path = "../../packages/icon-service", editable = true }

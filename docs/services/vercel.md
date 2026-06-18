@@ -15,12 +15,12 @@ Project settings → Environment variables → add for **Production**, **Preview
 
 | Variable | Value |
 |---|---|
-| `VITE_API_URL` | Railway API URL, e.g. `https://beerolog-api.up.railway.app` |
+| `VITE_API_URL` | Vercel API URL, e.g. `https://beerolog-api.vercel.app` |
 | `VITE_CLERK_PUBLISHABLE_KEY` | Clerk publishable key for this environment (e.g. `pk_live_...`) |
 
 ## Deploy
 
-Make sure the Railway API has `CORS_ALLOWED_ORIGINS` set to each Vercel origin you expect to use (production domain, and any preview domain you intentionally support).
+Make sure the Vercel API project has `CORS_ALLOWED_ORIGINS` set to each web origin you expect to use (production domain, and any preview domain you intentionally support). See [vercel-api.md](vercel-api.md).
 
 
 Vercel auto-deploys on every push to `main`. Preview deployments are created for every PR.
@@ -29,5 +29,5 @@ Vercel auto-deploys on every push to `main`. Preview deployments are created for
 
 1. Copy the Vercel deployment URL (e.g. `https://beerolog.vercel.app`)
 2. Add it to the Clerk dashboard → Domains → Allowed origins (see [clerk.md](clerk.md))
-3. Add it to Railway `CORS_ALLOWED_ORIGINS` if not already set there
-4. Add it to Vercel `VITE_API_URL` if not already set
+3. Add it to the API `CORS_ALLOWED_ORIGINS` on the `beerolog-api` Vercel project if not already set there
+4. Set `VITE_API_URL` on the web Vercel project to `https://beerolog-api.vercel.app` and redeploy
