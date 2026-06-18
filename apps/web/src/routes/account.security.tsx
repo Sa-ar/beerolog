@@ -1,0 +1,175 @@
+import { useReverification, useSession, useUser } from '@clerk/tanstack-react-start'
+import { Button, Card, CardContent } from '@beerolog/ui'
+import { createFileRoute } from '@tanstack/react-router'
+import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { clerkErrorMessage } from '../lib/clerkError'
+
+export const Route = createFileRoute('/account/security')({
+  component: SecurityPage,
+})
+
+const inputClass =
+  'w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-brand-500'
+
+// Loosely typed view of Clerk's SessionWithActivities (avoids importing an
+// internal type path that shifts between versions).
+type ActiveSession = {
+  id: string
+  revoke: () => Promise<unknown>
+  latestActivity?: {
+    deviceType?: string | null
+    browserName?: string | null
+    city?: string | null
+    country?: string | null
+  } | null
+}
+
+function SecurityPage() {
+  const { t } = useTranslation()
+  const { isLoaded, user } = useUser()
+  const { session: currentSession } = useSession()
+  const [pwd, setPwd] = useState({ current: '', next: '', signOutOthers: false })
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [sessions, setSessions] = useState<ActiveSession[]>([])
+
+  const updatePassword = useReverification(
+    (params: { currentPassword?: string; newPassword: string; signOutOfOtherSessions?: boolean }) =>
+      user!.updatePassword(params),
+  )
+  const revokeSession = useReverification((s: ActiveSession) => s.revoke())
+
+  async function loadSessions() {
+    if (!user) return
+    const list = (await user.getSessions()) as unknown as ActiveSession[]
+    setSessions(list)
+  }
+
+  useEffect(() => {
+    void loadSessions()
+  }, [user?.id])
+
+  if (!isLoaded || !user) return null
+
+  async function onChangePassword(e: React.FormEvent) {
+    e.preventDefault()
+    setSaving(true)
+    setSaved(false)
+    setError(null)
+    try {
+      const params: {
+        currentPassword?: string
+        newPassword: string
+        signOutOfOtherSessions?: boolean
+      } = { newPassword: pwd.next, signOutOfOtherSessions: pwd.signOutOthers }
+      if (pwd.current) params.currentPassword = pwd.current
+      await updatePassword(params)
+      setSaved(true)
+      setPwd({ current: '', next: '', signOutOthers: false })
+      await loadSessions()
+    } catch (err) {
+      setError(clerkErrorMessage(err, t('account.security.error')))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function onRevoke(s: ActiveSession) {
+    setError(null)
+    try {
+      await revokeSession(s)
+      await loadSessions()
+    } catch (err) {
+      setError(clerkErrorMessage(err, t('account.security.error')))
+    }
+  }
+
+  function deviceLabel(s: ActiveSession): string {
+    const a = s.latestActivity
+    return [a?.browserName, a?.deviceType, a?.city ?? a?.country].filter(Boolean).join(' · ') || '—'
+  }
+
+  return (
+    <div className="flex flex-col gap-6">
+      <Card>
+        <CardContent className="pt-6">
+          <h2 className="mb-4 text-sm font-semibold text-neutral-700">
+            {t('account.security.passwordTitle')}
+          </h2>
+          <form onSubmit={onChangePassword} className="flex flex-col gap-4">
+            <label className="flex flex-col gap-1 text-sm font-medium text-neutral-700">
+              {t('account.security.currentPassword')}
+              <input
+                type="password"
+                autoComplete="current-password"
+                className={inputClass}
+                value={pwd.current}
+                onChange={(e) => setPwd((p) => ({ ...p, current: e.target.value }))}
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-sm font-medium text-neutral-700">
+              {t('account.security.newPassword')}
+              <input
+                type="password"
+                autoComplete="new-password"
+                className={inputClass}
+                value={pwd.next}
+                onChange={(e) => setPwd((p) => ({ ...p, next: e.target.value }))}
+              />
+            </label>
+            <label className="flex items-center gap-2 text-sm text-neutral-700">
+              <input
+                type="checkbox"
+                checked={pwd.signOutOthers}
+                onChange={(e) => setPwd((p) => ({ ...p, signOutOthers: e.target.checked }))}
+              />
+              {t('account.security.signOutOthers')}
+            </label>
+
+            {error && <p className="text-sm text-red-600">{error}</p>}
+            {saved && <p className="text-sm text-green-700">{t('account.security.saved')}</p>}
+
+            <div>
+              <Button type="submit" size="sm" disabled={saving || !pwd.next}>
+                {saving ? t('account.security.saving') : t('account.security.changePassword')}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="pt-6">
+          <h2 className="mb-4 text-sm font-semibold text-neutral-700">
+            {t('account.security.sessionsTitle')}
+          </h2>
+          <ul className="flex flex-col divide-y divide-neutral-100">
+            {sessions.map((s) => {
+              const isCurrent = s.id === currentSession?.id
+              return (
+                <li key={s.id} className="flex items-center justify-between gap-3 py-2">
+                  <span className="text-sm text-neutral-700">
+                    {deviceLabel(s)}
+                    {isCurrent && (
+                      <span className="ms-2 text-xs text-neutral-400">
+                        ({t('account.security.currentDevice')})
+                      </span>
+                    )}
+                  </span>
+                  {!isCurrent && (
+                    <Button type="button" variant="ghost" size="sm" onClick={() => onRevoke(s)}>
+                      {t('account.security.revoke')}
+                    </Button>
+                  )}
+                </li>
+              )
+            })}
+          </ul>
+          <p className="mt-4 text-xs text-neutral-400">{t('account.security.note')}</p>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}

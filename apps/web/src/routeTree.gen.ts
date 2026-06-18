@@ -9,22 +9,16 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SigninRouteImport } from './routes/signin'
-import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as RecommendationsRouteImport } from './routes/recommendations'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AccountIndexRouteImport } from './routes/account.index'
+import { Route as SigninSplatRouteImport } from './routes/signin.$'
+import { Route as AccountSettingsRouteImport } from './routes/account.settings'
+import { Route as AccountSecurityRouteImport } from './routes/account.security'
+import { Route as AccountProfileRouteImport } from './routes/account.profile'
 
-const SigninRoute = SigninRouteImport.update({
-  id: '/signin',
-  path: '/signin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SettingsRoute = SettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const RecommendationsRoute = RecommendationsRouteImport.update({
   id: '/recommendations',
   path: '/recommendations',
@@ -35,72 +29,120 @@ const OnboardingRoute = OnboardingRouteImport.update({
   path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AccountRoute = AccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AccountIndexRoute = AccountIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AccountRoute,
+} as any)
+const SigninSplatRoute = SigninSplatRouteImport.update({
+  id: '/signin/$',
+  path: '/signin/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountSettingsRoute = AccountSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AccountRoute,
+} as any)
+const AccountSecurityRoute = AccountSecurityRouteImport.update({
+  id: '/security',
+  path: '/security',
+  getParentRoute: () => AccountRoute,
+} as any)
+const AccountProfileRoute = AccountProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AccountRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/account': typeof AccountRouteWithChildren
   '/onboarding': typeof OnboardingRoute
   '/recommendations': typeof RecommendationsRoute
-  '/settings': typeof SettingsRoute
-  '/signin': typeof SigninRoute
+  '/account/profile': typeof AccountProfileRoute
+  '/account/security': typeof AccountSecurityRoute
+  '/account/settings': typeof AccountSettingsRoute
+  '/signin/$': typeof SigninSplatRoute
+  '/account/': typeof AccountIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/onboarding': typeof OnboardingRoute
   '/recommendations': typeof RecommendationsRoute
-  '/settings': typeof SettingsRoute
-  '/signin': typeof SigninRoute
+  '/account/profile': typeof AccountProfileRoute
+  '/account/security': typeof AccountSecurityRoute
+  '/account/settings': typeof AccountSettingsRoute
+  '/signin/$': typeof SigninSplatRoute
+  '/account': typeof AccountIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/account': typeof AccountRouteWithChildren
   '/onboarding': typeof OnboardingRoute
   '/recommendations': typeof RecommendationsRoute
-  '/settings': typeof SettingsRoute
-  '/signin': typeof SigninRoute
+  '/account/profile': typeof AccountProfileRoute
+  '/account/security': typeof AccountSecurityRoute
+  '/account/settings': typeof AccountSettingsRoute
+  '/signin/$': typeof SigninSplatRoute
+  '/account/': typeof AccountIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/onboarding' | '/recommendations' | '/settings' | '/signin'
+  fullPaths:
+    | '/'
+    | '/account'
+    | '/onboarding'
+    | '/recommendations'
+    | '/account/profile'
+    | '/account/security'
+    | '/account/settings'
+    | '/signin/$'
+    | '/account/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/onboarding' | '/recommendations' | '/settings' | '/signin'
-  id:
-    | '__root__'
+  to:
     | '/'
     | '/onboarding'
     | '/recommendations'
-    | '/settings'
-    | '/signin'
+    | '/account/profile'
+    | '/account/security'
+    | '/account/settings'
+    | '/signin/$'
+    | '/account'
+  id:
+    | '__root__'
+    | '/'
+    | '/account'
+    | '/onboarding'
+    | '/recommendations'
+    | '/account/profile'
+    | '/account/security'
+    | '/account/settings'
+    | '/signin/$'
+    | '/account/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AccountRoute: typeof AccountRouteWithChildren
   OnboardingRoute: typeof OnboardingRoute
   RecommendationsRoute: typeof RecommendationsRoute
-  SettingsRoute: typeof SettingsRoute
-  SigninRoute: typeof SigninRoute
+  SigninSplatRoute: typeof SigninSplatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/signin': {
-      id: '/signin'
-      path: '/signin'
-      fullPath: '/signin'
-      preLoaderRoute: typeof SigninRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/settings': {
-      id: '/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/recommendations': {
       id: '/recommendations'
       path: '/recommendations'
@@ -115,6 +157,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/account': {
+      id: '/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -122,15 +171,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/account/': {
+      id: '/account/'
+      path: '/'
+      fullPath: '/account/'
+      preLoaderRoute: typeof AccountIndexRouteImport
+      parentRoute: typeof AccountRoute
+    }
+    '/signin/$': {
+      id: '/signin/$'
+      path: '/signin/$'
+      fullPath: '/signin/$'
+      preLoaderRoute: typeof SigninSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account/settings': {
+      id: '/account/settings'
+      path: '/settings'
+      fullPath: '/account/settings'
+      preLoaderRoute: typeof AccountSettingsRouteImport
+      parentRoute: typeof AccountRoute
+    }
+    '/account/security': {
+      id: '/account/security'
+      path: '/security'
+      fullPath: '/account/security'
+      preLoaderRoute: typeof AccountSecurityRouteImport
+      parentRoute: typeof AccountRoute
+    }
+    '/account/profile': {
+      id: '/account/profile'
+      path: '/profile'
+      fullPath: '/account/profile'
+      preLoaderRoute: typeof AccountProfileRouteImport
+      parentRoute: typeof AccountRoute
+    }
   }
 }
 
+interface AccountRouteChildren {
+  AccountProfileRoute: typeof AccountProfileRoute
+  AccountSecurityRoute: typeof AccountSecurityRoute
+  AccountSettingsRoute: typeof AccountSettingsRoute
+  AccountIndexRoute: typeof AccountIndexRoute
+}
+
+const AccountRouteChildren: AccountRouteChildren = {
+  AccountProfileRoute: AccountProfileRoute,
+  AccountSecurityRoute: AccountSecurityRoute,
+  AccountSettingsRoute: AccountSettingsRoute,
+  AccountIndexRoute: AccountIndexRoute,
+}
+
+const AccountRouteWithChildren =
+  AccountRoute._addFileChildren(AccountRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AccountRoute: AccountRouteWithChildren,
   OnboardingRoute: OnboardingRoute,
   RecommendationsRoute: RecommendationsRoute,
-  SettingsRoute: SettingsRoute,
-  SigninRoute: SigninRoute,
+  SigninSplatRoute: SigninSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -7,6 +7,36 @@
   },
   "header": { "home": "Beerolog home" },
   "settings": { "title": "Settings", "language": "Language" },
+  "menu": { "account": "Account menu", "logout": "Log out" },
+  "account": {
+    "title": "Account",
+    "tabs": { "profile": "Profile", "security": "Security", "settings": "Settings" },
+    "profile": {
+      "firstName": "First name",
+      "lastName": "Last name",
+      "username": "Username",
+      "upload": "Upload",
+      "remove": "Remove",
+      "save": "Save changes",
+      "saving": "Saving…",
+      "saved": "Saved",
+      "error": "Could not save your profile. Please try again."
+    },
+    "security": {
+      "passwordTitle": "Password",
+      "currentPassword": "Current password",
+      "newPassword": "New password",
+      "signOutOthers": "Sign out of all other devices",
+      "changePassword": "Change password",
+      "saving": "Saving…",
+      "saved": "Password updated",
+      "sessionsTitle": "Active devices",
+      "currentDevice": "This device",
+      "revoke": "Sign out",
+      "note": "Email and two-factor settings aren't available here yet.",
+      "error": "Something went wrong. Please try again."
+    }
+  },
   "auth": { "signIn": "Sign in" },
   "signin": {
     "title": "Beerolog",
