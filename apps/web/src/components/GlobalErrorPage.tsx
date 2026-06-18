@@ -5,7 +5,7 @@ import { StatusCard } from './StatusCard'
 import { globalErrorMessage } from '../lib/user-facing-errors'
 
 export function GlobalErrorPage({ error, reset }: ErrorComponentProps) {
-  if (import.meta.env.MODE === 'development') {
+  if (import.meta.env.DEV) {
     console.error('[GlobalErrorPage]', error)
   }
 

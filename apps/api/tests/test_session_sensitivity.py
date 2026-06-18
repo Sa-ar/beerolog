@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from app.api_contracts import AbvIntent, DominantComponent, Vibe
+from app.api_contracts import AbvIntent, DominantComponent
 from app.services.match_engine import BeerCandidate, rank
 
 

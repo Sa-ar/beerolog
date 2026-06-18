@@ -31,8 +31,8 @@ from app.api_contracts import (
 from app.auth import get_current_user
 from app.config import settings
 from app.services import baseline_taste
-from app.services.baseline_taste_repo import BaselineTasteRepo, BaselineTasteSnapshot
 from app.services.baseline_dials_text import dials_to_text
+from app.services.baseline_taste_repo import BaselineTasteRepo, BaselineTasteSnapshot
 from app.services.embedding_service import EmbeddingClient, get_embedding_client
 
 logger = logging.getLogger(__name__)

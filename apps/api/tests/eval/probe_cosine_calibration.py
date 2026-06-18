@@ -11,7 +11,6 @@ Usage:
 from __future__ import annotations
 
 import asyncio
-import statistics
 import sys
 from pathlib import Path
 
@@ -113,7 +112,9 @@ async def main() -> int:
         print(f"FAIL: ceiling {ceiling} < max top match {max_top:.4f} — top picks clip at 100%")
         ok = False
     if _calibrated(max_top) < 65:
-        print(f"WARN: top calibrated match {_calibrated(max_top):.0f}% < 65 — consider raising ceiling")
+        print(
+            f"WARN: top calibrated match {_calibrated(max_top):.0f}% < 65 — consider raising ceiling"
+        )
     if ok:
         print("PASS: anchors bracket the live distribution.")
     return 0 if ok else 1

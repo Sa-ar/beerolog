@@ -4,9 +4,10 @@
 
 1. [railway.app](https://railway.app) → New project → **Deploy from GitHub repo**
 2. Select the `beerolog` repo
-3. Railway will detect the repo root. You need to set the root directory:
-   - Service settings → Source → **Root directory**: `apps/api`
-4. Start command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+3. **Root directory**: leave blank (repo root). The API lives in `apps/api`, but it depends on the local package `packages/icon-service`; narrowing the root to `apps/api` breaks the build.
+4. Build and start commands are defined in root `railway.toml`:
+   - Build: `uv sync --frozen --no-dev --directory apps/api`
+   - Start: `uv --directory apps/api run uvicorn app.main:app --host 0.0.0.0 --port $PORT`
 5. Health check path: `/health`
 
 ## Environment variables

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "pnpm --filter @beerolog/web exec vite build",
+  "devCommand": "pnpm --filter @beerolog/web dev",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "outputDirectory": "apps/web/.vercel/output/static",
+  "framework": null,
+  "functions": {
+    "api/index.mjs": {
+      "includeFiles": "apps/web/.nitro/**"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/api"
+    }
+  ]
+}

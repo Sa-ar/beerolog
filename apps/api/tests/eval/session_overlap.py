@@ -34,7 +34,6 @@ from app.services.catalog_repo import fetch_catalog  # noqa: E402
 from app.services.embedding_service import get_embedding_client  # noqa: E402
 from app.services.match_engine import rank  # noqa: E402
 
-
 NEUTRAL_DIALS = BaselineTasteDials(
     bubbles=0.5,
     bitterness=0.45,
@@ -63,7 +62,10 @@ async def main() -> int:
     pool = await get_pool()
     catalog = await fetch_catalog(pool)
     alpha = _resolve_alpha(
-        RecommendationsRequest(baseline=NEUTRAL_DIALS, session=SessionIntent(vibe=Vibe.refreshing, abv_intent=AbvIntent.low))
+        RecommendationsRequest(
+            baseline=NEUTRAL_DIALS,
+            session=SessionIntent(vibe=Vibe.refreshing, abv_intent=AbvIntent.low),
+        )
     )
 
     all_sets: list[set[str]] = []

@@ -114,7 +114,6 @@ class BaselineTasteRecord(BaseModel):
     icons: TasteProfileIcons | None = None
 
 
-
 class CatalogIconItem(BaseModel):
     key: str
     purpose: str

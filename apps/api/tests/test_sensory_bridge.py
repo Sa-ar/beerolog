@@ -17,10 +17,14 @@ def test_ipa_bridge_uses_cross_sensory_language() -> None:
 
 
 def test_lager_bridge_mentions_lemonade() -> None:
-    text = compose_beer_sensory_bridge(style="Lager", abv=5.0, ibu=12, hops=None, body="light", sweetness=None)
+    text = compose_beer_sensory_bridge(
+        style="Lager", abv=5.0, ibu=12, hops=None, body="light", sweetness=None
+    )
     assert "lemonade" in text
 
 
 def test_unknown_style_still_emits_ibu_bridge() -> None:
-    text = compose_beer_sensory_bridge(style="Other", abv=5.0, ibu=40, hops=None, body=None, sweetness=None)
+    text = compose_beer_sensory_bridge(
+        style="Other", abv=5.0, ibu=40, hops=None, body=None, sweetness=None
+    )
     assert "black coffee" in text

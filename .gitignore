@@ -5,6 +5,7 @@ node_modules/
 # build
 dist/
 .output/
+.nitro/
 .vinxi/
 .turbo/
 
@@ -42,3 +43,4 @@ apps/web/app.config.timestamp_*.js
 # python venvs
 .venv/
 apps/api/.venv/
+.vercel

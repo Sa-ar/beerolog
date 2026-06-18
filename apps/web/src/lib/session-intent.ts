@@ -94,7 +94,7 @@ export function readStoredRecommendations(): RecommendationsPayload | null {
       beta: parsed.beta ?? 0.3,
       calibration: parsed.calibration ?? DEFAULT_MATCH_CALIBRATION,
       results,
-      request,
+      ...(request ? { request } : {}),
     }
 
     if (request && !parsed.request) {

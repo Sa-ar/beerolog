@@ -93,9 +93,7 @@ def filter_seedable(rows: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], i
 
 def compose_beer_text(row: dict[str, Any]) -> str:
     """Mirror of packages/db/scripts/seed_catalog/compose_text.ts."""
-    parts: list[str] = [
-        f"{row['style']} from {row['brewery']}, {row['breweryCountry']}."
-    ]
+    parts: list[str] = [f"{row['style']} from {row['brewery']}, {row['breweryCountry']}."]
     if row.get("ibu") is not None:
         parts.append(f"{row['abv']}% ABV, IBU {row['ibu']}.")
     else:
@@ -173,7 +171,17 @@ def load_catalog(path: Path) -> list[dict[str, Any]]:
     rows = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(rows, list) or not rows:
         raise SystemExit(f"Catalog empty or invalid: {path}")
-    required = {"id", "name", "brewery", "breweryCountry", "style", "abv", "color", "marketTier", "adventurousness"}
+    required = {
+        "id",
+        "name",
+        "brewery",
+        "breweryCountry",
+        "style",
+        "abv",
+        "color",
+        "marketTier",
+        "adventurousness",
+    }
     for row in rows:
         missing = required - set(row)
         if missing:
