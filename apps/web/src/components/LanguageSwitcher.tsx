@@ -17,9 +17,10 @@ export function LanguageSwitcher({ className = '' }: { className?: string }) {
 
   return (
     <div
+      dir="ltr"
       role="group"
       aria-label={t('language.label')}
-      className={`inline-flex overflow-hidden rounded-lg border border-amber-200 text-sm ${className}`}
+      className={`inline-flex shrink-0 overflow-hidden rounded-lg border border-amber-200 text-sm ${className}`}
     >
       {LANGS.map((lang) => (
         <button
@@ -27,7 +28,7 @@ export function LanguageSwitcher({ className = '' }: { className?: string }) {
           type="button"
           onClick={() => switchTo(lang)}
           aria-pressed={current === lang}
-          className={`px-3 py-1.5 font-medium transition-colors ${
+          className={`min-w-[4.75rem] px-3 py-1.5 text-center font-medium transition-colors ${
             current === lang
               ? 'bg-amber-700 text-white'
               : 'bg-white text-amber-800 hover:bg-amber-50'
