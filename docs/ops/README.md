@@ -5,6 +5,7 @@
 ## Layout
 
 - `environment-matrix.md`: authoritative environment matrix for web, API, and provider configuration
+- `compliance-readiness.md`: sub-processor/DPA inventory, accessibility coordinator, and prelaunch legal-evidence template
 - `checklists/`: operator-facing runbooks and repeatable verification checklists
 - `releases/`: release evidence records for specific launch candidates or deployments
 
