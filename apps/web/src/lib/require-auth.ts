@@ -10,7 +10,8 @@ export function useRequireAuth(nextOverride?: string) {
   useEffect(() => {
     if (!isLoaded || isSignedIn) return
     void navigate({
-      to: '/signin',
+      to: '/signin/$',
+      params: { _splat: '' },
       search: { next: nextOverride ?? pathname },
     })
   }, [isLoaded, isSignedIn, navigate, nextOverride, pathname])

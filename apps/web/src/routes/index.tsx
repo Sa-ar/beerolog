@@ -149,7 +149,7 @@ function VisitorHome() {
       </section>
 
       <section className="flex flex-col gap-3 sm:mx-auto sm:max-w-md lg:max-w-lg">
-        <Link to="/signin" search={{ next: '/onboarding' }}>
+        <Link to="/signin/$" params={{ _splat: '' }} search={{ next: '/onboarding' }}>
           <Button className="w-full" size="lg">
             {t('home.cta')}
           </Button>

@@ -1,9 +1,6 @@
-import {
-  Show,
-  SignInButton,
-  UserButton,
-} from '@clerk/tanstack-react-start'
+import { Show, SignInButton } from '@clerk/tanstack-react-start'
 import { useTranslation } from 'react-i18next'
+import { UserMenu } from './UserMenu'
 
 export function AuthControls() {
   const { t } = useTranslation()
@@ -20,7 +17,7 @@ export function AuthControls() {
         </SignInButton>
       </Show>
       <Show when="signed-in">
-        <UserButton />
+        <UserMenu />
       </Show>
     </div>
   )

@@ -3,9 +3,11 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { PAGE_MAIN } from '../lib/page-shell'
 
-export const Route = createFileRoute('/signin')({
+// Splat route so Clerk's path routing can mount its sub-paths
+// (/signin/sso-callback, /signin/factor-one, reset, etc.) under /signin.
+export const Route = createFileRoute('/signin/$')({
   validateSearch: (search: Record<string, unknown>) => ({
-    next: typeof search['next'] === 'string' ? search['next'] : '/profile',
+    next: typeof search['next'] === 'string' ? search['next'] : '/',
   }),
   component: SignInPage,
 })

@@ -18,6 +18,36 @@
     "deniedBody": "יש להיות בן/בת 18 ומעלה כדי להשתמש באפליקציה. אנא סגרו את הדף."
   },
   "settings": { "title": "הגדרות", "language": "שפה" },
+  "menu": { "account": "תפריט חשבון", "logout": "התנתקות" },
+  "account": {
+    "title": "החשבון שלי",
+    "tabs": { "profile": "פרופיל", "security": "אבטחה", "settings": "הגדרות" },
+    "profile": {
+      "firstName": "שם פרטי",
+      "lastName": "שם משפחה",
+      "username": "שם משתמש",
+      "upload": "העלאה",
+      "remove": "הסרה",
+      "save": "שמירת שינויים",
+      "saving": "שומר…",
+      "saved": "נשמר",
+      "error": "לא הצלחנו לשמור את הפרופיל. נסו שוב."
+    },
+    "security": {
+      "passwordTitle": "סיסמה",
+      "currentPassword": "סיסמה נוכחית",
+      "newPassword": "סיסמה חדשה",
+      "signOutOthers": "התנתקות מכל המכשירים האחרים",
+      "changePassword": "שינוי סיסמה",
+      "saving": "שומר…",
+      "saved": "הסיסמה עודכנה",
+      "sessionsTitle": "מכשירים פעילים",
+      "currentDevice": "המכשיר הזה",
+      "revoke": "התנתקות",
+      "note": "הגדרות אימייל ואימות דו-שלבי עדיין לא זמינות כאן.",
+      "error": "משהו השתבש. נסו שוב."
+    }
+  },
   "auth": { "signIn": "התחברות" },
   "signin": {
     "title": "בירולוג",
