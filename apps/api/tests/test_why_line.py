@@ -24,3 +24,8 @@ def test_novelty_negative_signals_safety() -> None:
     assert "safe" in explain(
         DominantComponent.novelty_negative, session=None
     ) or "familiar" in explain(DominantComponent.novelty_negative, session=None)
+
+
+def test_abv_dominant_mentions_abv_intent() -> None:
+    session = SessionIntent(vibe=Vibe.refreshing, abv_intent=AbvIntent.low, free_text="")
+    assert "low" in explain(DominantComponent.abv, session=session)

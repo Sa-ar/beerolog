@@ -11,7 +11,11 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "ingest:catalog": "tsx scripts/seed_catalog/ingest_catalog.ts",
+    "merge:catalog": "python3 scripts/seed_catalog/merge_catalog_sources.py",
+    "validate:catalog": "python3 scripts/seed_catalog/validate_catalog.py",
+    "upload:catalog-images": "tsx scripts/seed_catalog/upload_images_to_blob.ts"
   },
   "dependencies": {
     "@beerolog/types": "workspace:*",
@@ -19,9 +23,10 @@
     "postgres": "^3.4.0"
   },
   "devDependencies": {
+    "@vercel/blob": "^0.27.3",
     "dotenv": "^17.4.2",
     "drizzle-kit": "^0.28.0",
-    "typescript": "^5.5.0",
-    "tsx": "^4.19.0"
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.0"
   }
 }

@@ -14,7 +14,9 @@
     "test:api": "uv --directory apps/api run pytest tests/ -v",
     "openapi:export": "uv --directory apps/api run python scripts/export_openapi.py",
     "contracts:generate": "pnpm openapi:export && pnpm --dir apps/web run api:generate",
-    "contracts:check": "pnpm contracts:generate && git diff --exit-code -- apps/api/openapi.json apps/web/src/lib/api-client/schema.d.ts"
+    "contracts:check": "pnpm contracts:generate && git diff --exit-code -- apps/api/openapi.json apps/web/src/lib/api-client/schema.d.ts",
+    "sync:api": "uv --directory apps/api sync --extra dev",
+    "dev:api": "pnpm sync:api && uv --directory apps/api run uvicorn app.main:app --reload --host 127.0.0.1 --port 8000"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

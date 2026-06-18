@@ -9,18 +9,28 @@ Python FastAPI backend. Handles recommendations and user profiles for the cleane
 ## Setup
 
 ```bash
+cd apps/api
 uv sync --extra dev
 cp .env.example .env
 # Fill in .env — see env var table below
+cd ../..
 pnpm db:migrate
 ```
 
+The API depends on the local workspace package `beerolog-icon-service` (`packages/icon-service`). If you see `ModuleNotFoundError: No module named 'beerolog_icon_service'`, run `uv sync --extra dev` from `apps/api` (or `pnpm sync:api` from the repo root).
+
 ## Running
 
+From the repo root:
+
 ```bash
-uv run uvicorn app.main:app --reload
-# API at http://localhost:8000
-# OpenAPI docs at http://localhost:8000/docs
+pnpm dev:api
+```
+
+Or from `apps/api`:
+
+```bash
+uv run uvicorn app.main:app --reload --port 8000
 ```
 
 ## Deferred surfaces

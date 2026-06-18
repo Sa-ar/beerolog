@@ -1,0 +1,44 @@
+Catalog spot-check — 334 beers
+
+Duplicate keys: 0
+
+Forbidden Untappd refs: 0
+
+breweryCountry=XX: 0
+
+Missing image: 33
+Missing IBU: 0
+Synthetic notes: 48
+No sourceUrl: 48
+
+ABV > 14%: 1
+  mosco-beersky-batch-2 (14.7%)
+ABV <= 0: 1
+
+imageUrl not on Vercel Blob: 0
+
+Likely bundle/spirit SKUs: 0
+
+Countries:
+  IL: 158
+  BE: 32
+  GB: 25
+  DE: 16
+  HU: 16
+  US: 12
+  UA: 12
+  LV: 9
+  CZ: 7
+  RU: 7
+  EE: 6
+  LT: 6
+  ES: 5
+  IN: 5
+  IE: 5
+  SE: 3
+  PS: 3
+  DK: 2
+  FI: 2
+  PL: 1
+  AT: 1
+  NL: 1

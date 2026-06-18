@@ -1,459 +1,127 @@
-"""Seed the `beers` table with a real Israeli-market catalog.
+"""Seed the `beers` table from packages/db/data/israel-catalog.json.
 
-Hand-curated literals (slice 75 framework left scrapers HITL). Each row
-goes through the same shape the scraper pipeline would have produced:
-ABV/IBU/hops/malts/yeast/color/body/sweetness/notes per style knowledge,
-adventurousness via the locked formula, and a real 1536-D OpenAI embedding.
+Each row is embedded with the locked composeBeerText template (mirrors
+packages/db/scripts/seed_catalog/compose_text.ts). Adventurousness comes
+from the catalog JSON (computed at merge time).
 
 Usage:
     uv --directory apps/api run python scripts/seed_real_catalog.py
+    uv --directory apps/api run python scripts/seed_real_catalog.py --reembed
 
-Idempotent: upserts on `id`. Skips re-embedding if the row already exists
-with a matching `notes_source` and `tasting_notes` (cheap dogfood path).
-Pass --reembed to force every row to re-embed.
+Idempotent: skips rows already in `beers` unless --reembed is passed.
 """
 
 from __future__ import annotations
 
 import argparse
 import asyncio
+import json
 import re
 import sys
-from dataclasses import dataclass
-from typing import Literal
+from pathlib import Path
+from typing import Any
+from urllib.parse import urlparse
 
 import asyncpg
 
-sys.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from app.config import settings  # noqa: E402
 from app.services.embedding_service import get_embedding_client  # noqa: E402
+from app.services.sensory_bridge import compose_beer_sensory_bridge_from_row  # noqa: E402
 
-Color = Literal["pale", "gold", "amber", "brown", "dark"]
-Body = Literal["light", "medium", "full"]
-Sweetness = Literal["dry", "balanced", "sweet"]
-MarketTier = Literal["mainstream", "craft", "import"]
-NotesLang = Literal["he", "en"]
-NotesSource = Literal["brewery", "aggregator", "synthetic"]
+REPO_ROOT = Path(__file__).resolve().parents[3]
+DEFAULT_CATALOG = REPO_ROOT / "packages/db/data/israel-catalog.json"
 
-
-@dataclass(frozen=True)
-class SeedBeer:
-    name: str
-    brewery: str
-    brewery_country: str  # ISO-2
-    style: str
-    abv: float
-    color: Color
-    market_tier: MarketTier
-    tasting_notes: str
-    name_hebrew: str | None = None
-    ibu: int | None = None
-    hops: tuple[str, ...] | None = None
-    malts: tuple[str, ...] | None = None
-    yeast: str | None = None
-    body: Body | None = None
-    sweetness: Sweetness | None = None
-    notes_lang: NotesLang = "en"
-    notes_source: NotesSource = "synthetic"
-    image_url: str | None = None
-    source_url: str | None = None
+FORBIDDEN_UNTAPPD = re.compile(r"untappd|assets\.untappd", re.I)
+APPROVED_SOURCE_HOSTS = ("beerandbeyond.com", "schnitt.co.il")
+BLOB_HOST = "blob.vercel-storage.com"
 
 
-# Mainstream Israeli, craft Israeli, and imports commonly available on tap or
-# in Israeli bottle shops. Tasting notes are short, style-faithful summaries.
-CATALOG: tuple[SeedBeer, ...] = (
-    # ----- Mainstream Israeli -----
-    SeedBeer(
-        name="Goldstar",
-        name_hebrew="גולדסטר",
-        brewery="Tempo",
-        brewery_country="IL",
-        style="Amber Lager",
-        abv=4.9,
-        ibu=20,
-        color="amber",
-        body="medium",
-        sweetness="balanced",
-        market_tier="mainstream",
-        tasting_notes="Israel's flagship amber lager. Bready malt up front, gentle caramel, a clean finish with low bitterness. Everyday session beer.",
-    ),
-    SeedBeer(
-        name="Maccabee Premium Lager",
-        name_hebrew="מכבי",
-        brewery="Tempo",
-        brewery_country="IL",
-        style="Pale Lager",
-        abv=4.9,
-        ibu=18,
-        color="gold",
-        body="light",
-        sweetness="dry",
-        market_tier="mainstream",
-        tasting_notes="Crisp pale lager, light grainy malt, faint floral hop, dry finish. The default Israeli table beer.",
-    ),
-    SeedBeer(
-        name="Carlsberg (IL)",
-        brewery="Israel Beer Breweries",
-        brewery_country="IL",
-        style="Pale Lager",
-        abv=5.0,
-        ibu=18,
-        color="gold",
-        body="light",
-        sweetness="dry",
-        market_tier="mainstream",
-        tasting_notes="Licensed Israeli brew of the Danish classic. Bright, clean, lightly hopped, crisp and refreshing.",
-    ),
-    SeedBeer(
-        name="Tuborg (IL)",
-        brewery="Israel Beer Breweries",
-        brewery_country="IL",
-        style="Pale Lager",
-        abv=5.0,
-        ibu=16,
-        color="gold",
-        body="light",
-        sweetness="balanced",
-        market_tier="mainstream",
-        tasting_notes="Easy-drinking pale lager with a touch of sweetness. Soft body, low bitterness, mass-market friendly.",
-    ),
-    SeedBeer(
-        name="Heineken (IL)",
-        brewery="Tempo",
-        brewery_country="IL",
-        style="Pale Lager",
-        abv=5.0,
-        ibu=23,
-        color="gold",
-        body="light",
-        sweetness="dry",
-        market_tier="mainstream",
-        tasting_notes="Locally brewed Heineken. Slight green-bottle hop bite over crisp pale malt; familiar everywhere.",
-    ),
-    # ----- Craft Israeli -----
-    SeedBeer(
-        name="Alexander Blazer",
-        brewery="Alexander",
-        brewery_country="IL",
-        style="American IPA",
-        abv=6.2,
-        ibu=60,
-        hops=("Citra", "Centennial", "Simcoe"),
-        color="amber",
-        body="medium",
-        sweetness="balanced",
-        market_tier="craft",
-        tasting_notes="Resinous American IPA. Pine and grapefruit pith over a caramel malt backbone, firm bitter finish.",
-    ),
-    SeedBeer(
-        name="Alexander Green",
-        brewery="Alexander",
-        brewery_country="IL",
-        style="Pale Ale",
-        abv=5.2,
-        ibu=35,
-        hops=("Cascade", "Citra"),
-        color="gold",
-        body="medium",
-        sweetness="balanced",
-        market_tier="craft",
-        tasting_notes="Approachable Israeli pale ale. Citrus and stone-fruit hop aroma, soft malt, light dry finish.",
-    ),
-    SeedBeer(
-        name="Alexander Black",
-        brewery="Alexander",
-        brewery_country="IL",
-        style="Belgian Strong Dark Ale",
-        abv=7.0,
-        color="dark",
-        body="full",
-        sweetness="sweet",
-        market_tier="craft",
-        tasting_notes="Belgian-style dark strong ale. Dark fruit, brown sugar, clove esters, warming finish.",
-    ),
-    SeedBeer(
-        name="Malka Stout",
-        brewery="Malka",
-        brewery_country="IL",
-        style="Stout",
-        abv=6.0,
-        ibu=35,
-        color="dark",
-        body="full",
-        sweetness="balanced",
-        market_tier="craft",
-        tasting_notes="Roasty Israeli stout. Coffee, dark chocolate, light molasses, smooth medium-full body.",
-    ),
-    SeedBeer(
-        name="Malka Bohemian",
-        brewery="Malka",
-        brewery_country="IL",
-        style="Czech Pilsner",
-        abv=4.7,
-        ibu=35,
-        hops=("Saaz",),
-        color="gold",
-        body="light",
-        sweetness="dry",
-        market_tier="craft",
-        tasting_notes="Saaz-driven Czech-style pilsner. Spicy floral hop, bready malt, snappy bitter finish.",
-    ),
-    SeedBeer(
-        name="Malka Pale Ale",
-        brewery="Malka",
-        brewery_country="IL",
-        style="Pale Ale",
-        abv=5.5,
-        ibu=40,
-        color="gold",
-        body="medium",
-        sweetness="balanced",
-        market_tier="craft",
-        tasting_notes="Balanced pale ale, biscuit malt with American hop citrus and a clean bitter close.",
-    ),
-    SeedBeer(
-        name="Herzl Saison",
-        brewery="Herzl",
-        brewery_country="IL",
-        style="Saison",
-        abv=6.5,
-        ibu=25,
-        yeast="Saison",
-        color="pale",
-        body="light",
-        sweetness="dry",
-        market_tier="craft",
-        tasting_notes="Dry Belgian-style saison. Peppery yeast, lemon zest, effervescent and quenching.",
-    ),
-    SeedBeer(
-        name="Herzl Stout",
-        brewery="Herzl",
-        brewery_country="IL",
-        style="Stout",
-        abv=5.8,
-        color="dark",
-        body="full",
-        sweetness="balanced",
-        market_tier="craft",
-        tasting_notes="Smooth Israeli stout with espresso bitterness, cocoa, and a slightly sweet finish.",
-    ),
-    SeedBeer(
-        name="BeerBazaar Gose",
-        brewery="BeerBazaar",
-        brewery_country="IL",
-        style="Gose",
-        abv=4.5,
-        color="pale",
-        body="light",
-        sweetness="dry",
-        market_tier="craft",
-        tasting_notes="Tart wheat gose with salt and coriander. Light, briny, lemony — patio sour.",
-    ),
-    SeedBeer(
-        name="BeerBazaar IPA",
-        brewery="BeerBazaar",
-        brewery_country="IL",
-        style="American IPA",
-        abv=6.5,
-        ibu=65,
-        hops=("Mosaic", "Citra"),
-        color="gold",
-        body="medium",
-        sweetness="balanced",
-        market_tier="craft",
-        tasting_notes="West-coast leaning IPA. Tropical mosaic + citra over light bready malt; firm bitterness.",
-    ),
-    SeedBeer(
-        name="Schnitt House Pale",
-        brewery="Schnitt",
-        brewery_country="IL",
-        style="Pale Ale",
-        abv=5.4,
-        ibu=35,
-        color="gold",
-        body="medium",
-        sweetness="balanced",
-        market_tier="craft",
-        tasting_notes="Schnitt's house pale ale. Floral hop nose, biscuit malt body, very drinkable.",
-    ),
-    SeedBeer(
-        name="Negev Alon",
-        brewery="Negev",
-        brewery_country="IL",
-        style="Amber Ale",
-        abv=5.6,
-        ibu=30,
-        color="amber",
-        body="medium",
-        sweetness="balanced",
-        market_tier="craft",
-        tasting_notes="Caramel-forward amber ale from the south. Toasted malt, mild earthy hop, easy long finish.",
-    ),
-    SeedBeer(
-        name="Negev Oasis",
-        brewery="Negev",
-        brewery_country="IL",
-        style="Wheat Beer",
-        abv=5.0,
-        color="pale",
-        body="light",
-        sweetness="balanced",
-        market_tier="craft",
-        tasting_notes="Hazy desert wheat beer. Banana esters, light citrus, soft cloudy body.",
-    ),
-    SeedBeer(
-        name="Shapiro Pils",
-        brewery="Shapiro",
-        brewery_country="IL",
-        style="German Pilsner",
-        abv=5.0,
-        ibu=32,
-        hops=("Hallertau",),
-        color="gold",
-        body="light",
-        sweetness="dry",
-        market_tier="craft",
-        tasting_notes="Crisp German-style pilsner brewed in Jerusalem. Noble hop, cracker malt, clean.",
-    ),
-    SeedBeer(
-        name="Shapiro Jem's Stout",
-        brewery="Shapiro",
-        brewery_country="IL",
-        style="Oatmeal Stout",
-        abv=6.0,
-        color="dark",
-        body="full",
-        sweetness="sweet",
-        market_tier="craft",
-        tasting_notes="Velvety oatmeal stout. Chocolate, mild roast, creamy mouthfeel from flaked oats.",
-    ),
-    # ----- Imports common in IL -----
-    SeedBeer(
-        name="Hoegaarden Witbier",
-        brewery="Hoegaarden",
-        brewery_country="BE",
-        style="Witbier",
-        abv=4.9,
-        color="pale",
-        body="light",
-        sweetness="balanced",
-        market_tier="import",
-        tasting_notes="Belgian witbier with coriander and curacao orange. Hazy, soft, slightly tart finish.",
-    ),
-    SeedBeer(
-        name="Leffe Blonde",
-        brewery="Leffe",
-        brewery_country="BE",
-        style="Belgian Blonde",
-        abv=6.6,
-        color="gold",
-        body="medium",
-        sweetness="sweet",
-        market_tier="import",
-        tasting_notes="Belgian abbey blonde. Honeyed malt, pear and clove esters, warming.",
-    ),
-    SeedBeer(
-        name="Erdinger Weissbier",
-        brewery="Erdinger",
-        brewery_country="DE",
-        style="Hefeweizen",
-        abv=5.3,
-        color="gold",
-        body="medium",
-        sweetness="balanced",
-        market_tier="import",
-        tasting_notes="Bavarian hefeweizen. Banana and clove from the yeast, fluffy wheat body, gentle finish.",
-    ),
-    SeedBeer(
-        name="Weihenstephaner Hefeweissbier",
-        brewery="Weihenstephan",
-        brewery_country="DE",
-        style="Hefeweizen",
-        abv=5.4,
-        color="gold",
-        body="medium",
-        sweetness="balanced",
-        market_tier="import",
-        tasting_notes="Benchmark Bavarian wheat beer. Bright banana, vanilla clove, lush wheat mouthfeel.",
-    ),
-    SeedBeer(
-        name="Guinness Draught",
-        brewery="Guinness",
-        brewery_country="IE",
-        style="Irish Stout",
-        abv=4.2,
-        ibu=45,
-        color="dark",
-        body="medium",
-        sweetness="dry",
-        market_tier="import",
-        tasting_notes="Iconic dry Irish stout. Coffee and cocoa, creamy nitro head, dry roasted finish.",
-    ),
-    SeedBeer(
-        name="Corona Extra",
-        brewery="Grupo Modelo",
-        brewery_country="MX",
-        style="Pale Lager",
-        abv=4.6,
-        ibu=18,
-        color="pale",
-        body="light",
-        sweetness="balanced",
-        market_tier="import",
-        tasting_notes="Light Mexican pale lager. Mild grainy malt, very low bitterness, designed for a lime wedge.",
-    ),
-)
+def _row_blob(row: dict[str, Any]) -> str:
+    return json.dumps(row, ensure_ascii=False)
 
 
-# --- Market-tier weight, mirror of packages/db/scripts/seed_catalog/adventurousness.ts ---
-_TIER_WEIGHT: dict[MarketTier, float] = {"mainstream": 0.0, "craft": 0.5, "import": 0.3}
+def assert_no_untappd(row: dict[str, Any]) -> None:
+    blob = _row_blob(row)
+    if FORBIDDEN_UNTAPPD.search(blob):
+        raise SystemExit(f"Catalog row {row.get('id')} contains forbidden Untappd reference")
 
 
-def _compute_style_rarity(catalog: tuple[SeedBeer, ...]) -> dict[str, float]:
-    counts: dict[str, int] = {}
-    for b in catalog:
-        counts[b.style] = counts.get(b.style, 0) + 1
-    total = len(catalog)
-    return {style: max(0.0, 1.0 - (n / total) * 3.0) for style, n in counts.items()}
+def is_seedable(row: dict[str, Any]) -> bool:
+    """Only seed rows with an approved retailer/brewery source (not Untappd lineage)."""
+    assert_no_untappd(row)
+    name = row.get("name", "")
+    he = row.get("nameHebrew")
+    if re.search(
+        r"\b6[\s-]?pack\b|\bbeer\s+set\b|\bcans?\s+case\b|\bmixed\b|\bicons\b|\btrio\b|"
+        r"\bkeg\b|3\+1|night\s+shift\s+mix|שישיית|מארז|ארגז|סט בירה|מיקס פחיות",
+        f"{name} {he or ''}",
+        re.I,
+    ):
+        return False
+    if re.search(
+        r"gin |ג'ין|beer spirit|ביר ספיריט|מזוקק|distilled|תזקיק",
+        f"{name} {he or ''}",
+        re.I,
+    ):
+        return False
+    src = row.get("sourceUrl") or ""
+    if not src:
+        return False
+    if FORBIDDEN_UNTAPPD.search(src):
+        return False
+    host = urlparse(src).netloc.lower().removeprefix("www.")
+    if not any(host == h or host.endswith("." + h) for h in APPROVED_SOURCE_HOSTS):
+        return False
+    img = row.get("imageUrl")
+    if not img or BLOB_HOST not in str(img):
+        return False
+    return True
 
 
-def _compute_adventurousness(beer: SeedBeer, rarity: dict[str, float]) -> float:
-    tier = _TIER_WEIGHT[beer.market_tier]
-    rare = rarity.get(beer.style, 0.0) * 0.3
-    abv = max(0.0, min(0.2, (beer.abv - 7.0) / 5.0))
-    return max(0.0, min(1.0, tier + rare + abv))
+def filter_seedable(rows: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], int]:
+    kept: list[dict[str, Any]] = []
+    skipped = 0
+    for row in rows:
+        if is_seedable(row):
+            kept.append(row)
+        else:
+            skipped += 1
+    return kept, skipped
 
 
-def _slug(value: str) -> str:
-    return re.sub(r"(^-|-$)", "", re.sub(r"[^a-z0-9]+", "-", value.lower()))
-
-
-def _beer_id(beer: SeedBeer) -> str:
-    return f"{_slug(beer.brewery)}-{_slug(beer.name)}"
-
-
-def _embedding_text(beer: SeedBeer) -> str:
+def compose_beer_text(row: dict[str, Any]) -> str:
+    """Mirror of packages/db/scripts/seed_catalog/compose_text.ts."""
     parts: list[str] = [
-        f"{beer.name} by {beer.brewery} ({beer.brewery_country}).",
-        f"Style: {beer.style}.",
-        f"ABV {beer.abv}%.",
+        f"{row['style']} from {row['brewery']}, {row['breweryCountry']}."
     ]
-    if beer.ibu is not None:
-        parts.append(f"IBU {beer.ibu}.")
-    if beer.hops:
-        parts.append(f"Hops: {', '.join(beer.hops)}.")
-    if beer.malts:
-        parts.append(f"Malts: {', '.join(beer.malts)}.")
-    if beer.yeast:
-        parts.append(f"Yeast: {beer.yeast}.")
-    parts.append(f"Color {beer.color}.")
-    if beer.body:
-        parts.append(f"Body {beer.body}.")
-    if beer.sweetness:
-        parts.append(f"Sweetness {beer.sweetness}.")
-    parts.append(f"Market tier: {beer.market_tier}.")
-    parts.append(beer.tasting_notes)
+    if row.get("ibu") is not None:
+        parts.append(f"{row['abv']}% ABV, IBU {row['ibu']}.")
+    else:
+        parts.append(f"{row['abv']}% ABV.")
+
+    hops = row.get("hops")
+    if hops:
+        parts.append(f"Hops: {', '.join(hops)}.")
+    malts = row.get("malts")
+    if malts:
+        parts.append(f"Malts: {', '.join(malts)}.")
+    if row.get("yeast"):
+        parts.append(f"{row['yeast']} yeast.")
+
+    color_part = f"{row['color']} colour"
+    body_part = f", {row['body']} body" if row.get("body") else ""
+    sweet_part = f", {row['sweetness']} finish" if row.get("sweetness") else ""
+    parts.append(f"{color_part}{body_part}{sweet_part}.")
+
+    if row.get("tastingNotes"):
+        parts.append(row["tastingNotes"])
+
+    sensory = compose_beer_sensory_bridge_from_row(row)
+    if sensory:
+        parts.append(sensory)
+
     return " ".join(parts)
 
 
@@ -499,57 +167,99 @@ def _vector_text(values: list[float]) -> str:
     return "[" + ",".join(repr(float(v)) for v in values) + "]"
 
 
-async def main(reembed: bool) -> None:
+def load_catalog(path: Path) -> list[dict[str, Any]]:
+    if not path.exists():
+        raise SystemExit(f"Catalog not found: {path}")
+    rows = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(rows, list) or not rows:
+        raise SystemExit(f"Catalog empty or invalid: {path}")
+    required = {"id", "name", "brewery", "breweryCountry", "style", "abv", "color", "marketTier", "adventurousness"}
+    for row in rows:
+        missing = required - set(row)
+        if missing:
+            raise SystemExit(f"Catalog row {row.get('id')} missing fields: {missing}")
+        assert_no_untappd(row)
+    if FORBIDDEN_UNTAPPD.search(path.read_text(encoding="utf-8")):
+        raise SystemExit("Catalog file contains forbidden Untappd references")
+    return rows
+
+
+async def main(reembed: bool, catalog_path: Path, limit: int | None) -> None:
     if not settings.database_url:
         raise SystemExit("DATABASE_URL not set")
     if not settings.openai_api_key:
         raise SystemExit("OPENAI_API_KEY not set")
 
-    rarity = _compute_style_rarity(CATALOG)
+    catalog = load_catalog(catalog_path)
+    catalog, excluded = filter_seedable(catalog)
+    print(f"Seedable rows: {len(catalog)} (excluded {excluded} without approved source / Untappd)")
+    if not catalog:
+        raise SystemExit("No seedable rows after Untappd / source filter")
+    if limit is not None:
+        catalog = catalog[:limit]
+
     client = get_embedding_client()
     pool = await asyncpg.create_pool(dsn=settings.database_url, min_size=1, max_size=4)
     assert pool is not None
+    seeded = 0
+    skipped = 0
     try:
         async with pool.acquire() as conn:
+            # Purge legacy / non-approved rows (Untappd lineage or old hand-seed)
+            deleted = await conn.execute(
+                """
+                DELETE FROM beers
+                WHERE source_url ILIKE '%untappd%'
+                   OR image_url ILIKE '%untappd%'
+                   OR source_url IS NULL
+                   OR (
+                     source_url NOT ILIKE '%beerandbeyond%'
+                     AND source_url NOT ILIKE '%schnitt%'
+                   )
+                """
+            )
+            if deleted and deleted != "DELETE 0":
+                print(f"Purged non-approved / Untappd-linked rows: {deleted}")
+
             existing_ids: set[str] = set()
             if not reembed:
                 rows = await conn.fetch("SELECT id FROM beers")
                 existing_ids = {r["id"] for r in rows}
 
-            for beer in CATALOG:
-                bid = _beer_id(beer)
-                if bid in existing_ids:
-                    print(f"  skip (exists): {bid}")
+            for row in catalog:
+                bid = row["id"]
+                if bid in existing_ids and not reembed:
+                    skipped += 1
                     continue
-                print(f"  embedding   : {bid}")
-                embedding = await client.embed(_embedding_text(beer))
-                adv = _compute_adventurousness(beer, rarity)
+                print(f"  embedding: {bid}")
+                embedding = await client.embed(compose_beer_text(row))
                 await conn.execute(
                     UPSERT_SQL,
                     bid,
-                    beer.name,
-                    beer.name_hebrew,
-                    beer.brewery,
-                    beer.brewery_country,
-                    beer.style,
-                    beer.abv,
-                    beer.ibu,
-                    list(beer.hops) if beer.hops else None,
-                    list(beer.malts) if beer.malts else None,
-                    beer.yeast,
-                    beer.color,
-                    beer.body,
-                    beer.sweetness,
-                    beer.market_tier,
-                    beer.tasting_notes,
-                    beer.notes_lang,
-                    beer.notes_source,
-                    adv,
+                    row["name"],
+                    row.get("nameHebrew"),
+                    row["brewery"],
+                    row["breweryCountry"],
+                    row["style"],
+                    float(row["abv"]),
+                    row.get("ibu"),
+                    row.get("hops"),
+                    row.get("malts"),
+                    row.get("yeast"),
+                    row["color"],
+                    row.get("body"),
+                    row.get("sweetness"),
+                    row["marketTier"],
+                    row.get("tastingNotes") or "",
+                    row.get("tastingNotesLang") or "en",
+                    row.get("notesSource") or "synthetic",
+                    float(row["adventurousness"]),
                     _vector_text(embedding),
-                    beer.image_url,
-                    beer.source_url,
+                    row.get("imageUrl"),
+                    row.get("sourceUrl"),
                 )
-        print(f"\nSeeded {len(CATALOG)} beers (reembed={reembed}).")
+                seeded += 1
+        print(f"\nSeeded {seeded} beers, skipped {skipped} (reembed={reembed}).")
     finally:
         await pool.close()
 
@@ -561,4 +271,17 @@ if __name__ == "__main__":
         action="store_true",
         help="Re-embed every beer (otherwise rows already present in `beers` are skipped).",
     )
-    asyncio.run(main(ap.parse_args().reembed))
+    ap.add_argument(
+        "--catalog",
+        type=Path,
+        default=DEFAULT_CATALOG,
+        help="Path to israel-catalog.json",
+    )
+    ap.add_argument(
+        "--limit",
+        type=int,
+        default=None,
+        help="Seed only the first N rows (smoke test).",
+    )
+    args = ap.parse_args()
+    asyncio.run(main(args.reembed, args.catalog, args.limit))

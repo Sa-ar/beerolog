@@ -4,7 +4,11 @@ from app.config import Settings
 def test_defaults_match_pivot_prd() -> None:
     s = Settings()
     assert s.match_alpha == 0.6
+    assert s.match_session_alpha == 0.4
     assert s.match_beta == 0.3
+    assert s.match_abv_weight == 0.15
+    assert s.match_cos_floor == 0.20
+    assert s.match_cos_ceiling == 0.50
     assert s.baseline_staleness_days == 7
     assert s.embedding_model == "text-embedding-3-large"
 

@@ -8,6 +8,7 @@
  */
 
 import type { NormalisedBeer } from './normalise_row'
+import { composeBeerSensoryBridge } from './sensory_bridge'
 
 export function composeBeerText(beer: NormalisedBeer): string {
   const parts: string[] = []
@@ -26,5 +27,16 @@ export function composeBeerText(beer: NormalisedBeer): string {
   parts.push(`${colorPart}${bodyPart}${sweetPart}.`)
 
   if (beer.tastingNotes) parts.push(beer.tastingNotes)
+
+  const sensory = composeBeerSensoryBridge({
+    style: beer.style,
+    abv: beer.abv,
+    ibu: beer.ibu,
+    hops: beer.hops,
+    body: beer.body,
+    sweetness: beer.sweetness,
+  })
+  if (sensory) parts.push(sensory)
+
   return parts.join(' ')
 }

@@ -29,3 +29,11 @@ def test_compose_text_preserves_hebrew_input() -> None:
     )
     text = compose_text(intent)
     assert "ערב חם בתל אביב" in text
+
+
+def test_compose_text_includes_style_anchors() -> None:
+    intent = SessionIntent(vibe=Vibe.refreshing, abv_intent=AbvIntent.low, free_text="")
+    text = compose_text(intent)
+    assert "crisp lagers" in text
+    cozy = SessionIntent(vibe=Vibe.cozy, abv_intent=AbvIntent.high, free_text="")
+    assert "stouts" in compose_text(cozy)

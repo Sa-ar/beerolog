@@ -120,6 +120,22 @@ export const beers = pgTable(
 )
 
 // ---------------------------------------------------------------------------
+// Icons (generated SVG assets, reused by canonical purpose)
+// ---------------------------------------------------------------------------
+
+export const icons = pgTable(
+  'icons',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    purpose: text('purpose').notNull(),
+    description: text('description').notNull(),
+    svgContent: text('svg_content').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex('icons_purpose_uniq').on(t.purpose)],
+)
+
+// ---------------------------------------------------------------------------
 // Ratings (integer 1–5)
 // ---------------------------------------------------------------------------
 

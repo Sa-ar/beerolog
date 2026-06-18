@@ -17,6 +17,25 @@ _VIBE_PHRASE = {
     Vibe.familiar: "wants something familiar and comforting",
 }
 
+_VIBE_STYLE_ANCHOR = {
+    Vibe.refreshing: (
+        "Tonight lean toward crisp lagers, pilsners, wheat beers, kölsch, "
+        "and light sours with bright carbonation"
+    ),
+    Vibe.cozy: (
+        "Tonight lean toward stouts, porters, brown ales, barleywines, "
+        "and warming malty beers with depth"
+    ),
+    Vibe.adventurous: (
+        "Tonight lean toward barrel-aged beers, mixed-fermentation, imperial styles, "
+        "sours, and unusual limited releases"
+    ),
+    Vibe.familiar: (
+        "Tonight lean toward mainstream lagers, classic pale ales, well-known imports, "
+        "and approachable crowd-pleasers"
+    ),
+}
+
 _ABV_PHRASE = {
     AbvIntent.low: "prefers a low-alcohol session beer (4.5% or under)",
     AbvIntent.medium: "is happy with a medium-strength beer (4.5% to 6.5%)",
@@ -29,6 +48,7 @@ def compose_text(intent: SessionIntent) -> str:
     parts = [
         "Drinking right now.",
         f"Tonight the drinker {_VIBE_PHRASE[intent.vibe]}.",
+        _VIBE_STYLE_ANCHOR[intent.vibe] + ".",
         f"{_ABV_PHRASE[intent.abv_intent].capitalize()}.",
     ]
     if intent.free_text.strip():

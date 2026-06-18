@@ -30,6 +30,9 @@ __pycache__/
 .worktrees/
 .gstack/
 
+# scratch / one-off scrape artifacts
+tmp/
+
 # editor/tool sidecar dirs
 .superset/
 

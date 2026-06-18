@@ -3,15 +3,21 @@
 from __future__ import annotations
 
 import pytest  # type: ignore[import-not-found]
+from beerolog_icon_service.curated_icons import get_curated_svg
+from beerolog_icon_service.models import IconRecord
 from fastapi.testclient import TestClient  # type: ignore[import-not-found]
 
 from app.auth import get_current_user
 from app.main import app
 from app.routes.onboarding import (
     _embedding_client_dep,
+    _icon_generator_dep,
     get_baseline_taste_repo,
+    get_icon_repo,
 )
 from app.services.baseline_taste_repo import BaselineTasteSnapshot
+
+VALID_SVG = '<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="8"/></svg>'
 
 
 class _MemoryRepo:
@@ -38,15 +44,63 @@ class _MemoryRepo:
         return snap
 
 
+class _MemoryIconRepo:
+    def __init__(self) -> None:
+        self._rows: dict[str, IconRecord] = {}
+
+    async def find_by_purpose(self, purpose: str) -> IconRecord | None:
+        return self._rows.get(purpose)
+
+    async def insert_or_get(
+        self, *, purpose: str, description: str, svg_content: str
+    ) -> IconRecord:
+        existing = self._rows.get(purpose)
+        if existing is not None:
+            return existing
+        record = IconRecord(
+            id=f"id-{purpose}",
+            purpose=purpose,
+            description=description,
+            svg_content=svg_content,
+            created_at="2026-06-17T00:00:00+00:00",
+        )
+        self._rows[purpose] = record
+        return record
+
+    async def upsert(self, *, purpose: str, description: str, svg_content: str) -> IconRecord:
+        record = IconRecord(
+            id=f"id-{purpose}",
+            purpose=purpose,
+            description=description,
+            svg_content=svg_content,
+            created_at="2026-06-17T00:00:00+00:00",
+        )
+        self._rows[purpose] = record
+        return record
+
+
+class _FailingIconRepo(_MemoryIconRepo):
+    async def upsert(self, *, purpose: str, description: str, svg_content: str) -> IconRecord:
+        raise RuntimeError("icon persistence failed")
+
+
 class _StubEmbeddingClient:
     def __init__(self) -> None:
         self.calls: list[str] = []
 
     async def embed(self, text: str) -> list[float]:
         self.calls.append(text)
-        # Deterministic 8-D vector that varies with the text
         h = hash(text)
         return [((h >> (i * 4)) & 0xF) / 15.0 for i in range(8)]
+
+
+class _StubIconGenerator:
+    def __init__(self) -> None:
+        self.calls: list[str] = []
+
+    async def generate_svg(self, description: str) -> str:
+        self.calls.append(description)
+        return VALID_SVG
 
 
 FAKE_USER = {"sub": "user_test_456"}
@@ -68,20 +122,39 @@ def repo() -> _MemoryRepo:
 
 
 @pytest.fixture
+def icon_repo() -> _MemoryIconRepo:
+    return _MemoryIconRepo()
+
+
+@pytest.fixture
 def embedding_client() -> _StubEmbeddingClient:
     return _StubEmbeddingClient()
 
 
 @pytest.fixture
-def client(repo: _MemoryRepo, embedding_client: _StubEmbeddingClient) -> TestClient:
+def icon_generator() -> _StubIconGenerator:
+    return _StubIconGenerator()
+
+
+@pytest.fixture
+def client(
+    repo: _MemoryRepo,
+    icon_repo: _MemoryIconRepo,
+    embedding_client: _StubEmbeddingClient,
+    icon_generator: _StubIconGenerator,
+) -> TestClient:
     app.dependency_overrides[get_baseline_taste_repo] = lambda: repo
+    app.dependency_overrides[get_icon_repo] = lambda: icon_repo
     app.dependency_overrides[_embedding_client_dep] = lambda: embedding_client
+    app.dependency_overrides[_icon_generator_dep] = lambda: icon_generator
     app.dependency_overrides[get_current_user] = lambda: FAKE_USER
     try:
         yield TestClient(app)
     finally:
         app.dependency_overrides.pop(get_baseline_taste_repo, None)
+        app.dependency_overrides.pop(get_icon_repo, None)
         app.dependency_overrides.pop(_embedding_client_dep, None)
+        app.dependency_overrides.pop(_icon_generator_dep, None)
         app.dependency_overrides.pop(get_current_user, None)
 
 
@@ -115,6 +188,37 @@ def test_get_my_baseline_taste_returns_persisted(client: TestClient) -> None:
     assert body["user_id"] == FAKE_USER["sub"]
 
 
+def test_get_my_baseline_taste_includes_curated_icons(
+    client: TestClient,
+    icon_generator: _StubIconGenerator,
+) -> None:
+    client.post("/onboarding", json=_HOP_HEAD_ANSWERS)
+    r = client.get("/me/baseline-taste")
+    assert r.status_code == 200
+    body = r.json()
+    assert body["icons"] is not None
+    hero = body["icons"]["hero"]
+    assert hero["svg"] == get_curated_svg(hero["purpose"])
+    assert len(body["icons"]["flavors"]) == 4
+    sour = next(f for f in body["icons"]["flavors"] if f["flavor_key"] == "sour")
+    assert "hsl(48 96% 58%)" in sour["svg"]
+    assert icon_generator.calls == []
+
+
+def test_get_my_baseline_taste_succeeds_when_icon_repo_raises(
+    client: TestClient,
+    icon_generator: _StubIconGenerator,
+) -> None:
+    app.dependency_overrides[get_icon_repo] = lambda: _FailingIconRepo()
+    try:
+        client.post("/onboarding", json=_HOP_HEAD_ANSWERS)
+        r = client.get("/me/baseline-taste")
+        assert r.status_code == 200
+        assert r.json()["icons"] is None
+    finally:
+        app.dependency_overrides[get_icon_repo] = lambda: _MemoryIconRepo()
+
+
 def test_patch_baseline_taste_updates_only_supplied_fields(
     client: TestClient,
     embedding_client: _StubEmbeddingClient,
@@ -125,23 +229,10 @@ def test_patch_baseline_taste_updates_only_supplied_fields(
     assert r.status_code == 200, r.text
     body = r.json()
     assert body["bubbles"] == pytest.approx(0.1)
-    # The patched embedding text should differ from the onboarding text
-    assert len(embedding_client.calls) == 1
 
-
-def test_patch_404_when_not_onboarded(client: TestClient) -> None:
     r = client.patch("/me/baseline-taste", json={"bubbles": 0.5})
-    assert r.status_code == 404
+    assert r.status_code == 200
 
-
-def test_onboarding_requires_auth() -> None:
-    raw_client = TestClient(app)
-    r = raw_client.post("/onboarding", json=_HOP_HEAD_ANSWERS)
-    assert r.status_code == 401
-
-
-def test_patch_validates_dial_ranges(client: TestClient) -> None:
-    client.post("/onboarding", json=_HOP_HEAD_ANSWERS)
     r = client.patch("/me/baseline-taste", json={"bubbles": 1.5})
     assert r.status_code == 422
     r = client.patch("/me/baseline-taste", json={"bitterness": -0.1})

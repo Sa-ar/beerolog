@@ -4,6 +4,23 @@
  */
 
 export interface paths {
+    "/debug/recommendations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Debug Recommendations */
+        get: operations["debugRecommendations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -21,67 +38,15 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/menu/scan": {
+    "/health/ready": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get?: never;
-        put?: never;
-        /** Scan Menu Image */
-        post: operations["scanMenu"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/recommendations/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Recommend */
-        post: operations["recommendBeers"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/users/me/history": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get My History */
-        get: operations["getMyHistory"];
-        put?: never;
-        /** Add To My History */
-        post: operations["addToMyHistory"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/users/me/persona": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get My Persona */
-        get: operations["getMyPersona"];
+        /** Readiness */
+        get: operations["getReadiness"];
         put?: never;
         post?: never;
         delete?: never;
@@ -90,17 +55,16 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/users/me/profile": {
+    "/icons/catalog": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get My Profile */
-        get: operations["getMyProfile"];
-        /** Save My Profile */
-        put: operations["saveMyProfile"];
+        /** Get Icon Catalog */
+        get: operations["getIconCatalog"];
+        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -108,7 +72,42 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/users/me/rate": {
+    "/me/baseline-taste": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get My Baseline Taste */
+        get: operations["getMyBaselineTaste"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Patch My Baseline Taste */
+        patch: operations["patchMyBaselineTaste"];
+        trace?: never;
+    };
+    "/me/ratings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List My Ratings */
+        get: operations["listMyRatings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/onboarding": {
         parameters: {
             query?: never;
             header?: never;
@@ -117,8 +116,42 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Rate Beer */
-        post: operations["rateMyBeer"];
+        /** Complete Onboarding */
+        post: operations["completeOnboarding"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ratings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Rating */
+        post: operations["createRating"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/recommendations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Post Recommendations */
+        post: operations["postRecommendations"];
         delete?: never;
         options?: never;
         head?: never;
@@ -129,44 +162,103 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        /** AddHistoryRequest */
-        AddHistoryRequest: {
-            /** Beer Id */
-            beer_id: string;
-            rating?: components["schemas"]["RatingValue"] | null;
-        };
-        /** BeerPayload */
-        BeerPayload: {
-            /** Brewery */
-            brewery?: string | null;
-            /** Description */
-            description?: string | null;
-            /** Flavor Vector */
-            flavor_vector: number[];
-            /** Id */
-            id: string;
-            /** Name */
-            name: string;
-            /** Style */
-            style: string;
-        };
-        /** FlavorVector */
-        FlavorVector: {
-            /** Adventure */
-            adventure: number;
+        /**
+         * AbvIntent
+         * @enum {string}
+         */
+        AbvIntent: "low" | "medium" | "high" | "any";
+        /**
+         * BaselineTasteDials
+         * @description User-facing, editable taste dials derived from onboarding answers.
+         */
+        BaselineTasteDials: {
             /** Bitterness */
             bitterness: number;
-            /** Body */
-            body: number;
-            /** Fruitiness */
-            fruitiness: number;
-            /** Roast */
-            roast: number;
-            /** Sourness */
-            sourness: number;
-            /** Sweetness */
-            sweetness: number;
+            /** Bubbles */
+            bubbles: number;
+            /** Flavor Family */
+            flavor_family: {
+                [key: string]: number;
+            };
+            /** Novelty Affinity */
+            novelty_affinity: number;
         };
+        /**
+         * BaselineTasteRecord
+         * @description Persisted BaselineTaste returned by /me/baseline-taste.
+         */
+        BaselineTasteRecord: {
+            /** Bitterness */
+            bitterness: number;
+            /** Bubbles */
+            bubbles: number;
+            /** Embedding Fresh At */
+            embedding_fresh_at: string;
+            /** Flavor Family */
+            flavor_family: {
+                [key: string]: number;
+            };
+            icons?: components["schemas"]["TasteProfileIcons"] | null;
+            /** Novelty Affinity */
+            novelty_affinity: number;
+            /** Updated At */
+            updated_at: string;
+            /** User Id */
+            user_id: string;
+        };
+        /**
+         * Carbonation
+         * @enum {string}
+         */
+        Carbonation: "still" | "light" | "strong";
+        /** CatalogIconItem */
+        CatalogIconItem: {
+            /** Key */
+            key: string;
+            /** Purpose */
+            purpose: string;
+            /** Svg */
+            svg: string;
+        };
+        /**
+         * CitrusPick
+         * @enum {string}
+         */
+        CitrusPick: "grapefruit" | "orange" | "lemonade" | "none";
+        /**
+         * CoffeeStyle
+         * @enum {string}
+         */
+        CoffeeStyle: "black" | "espresso" | "hafuch" | "iced_sweet" | "none";
+        /** ComponentStatus */
+        ComponentStatus: {
+            /** Detail */
+            detail?: string | null;
+            /**
+             * Name
+             * @enum {string}
+             */
+            name: "process" | "config" | "database" | "embedding_provider";
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "ok" | "degraded" | "down";
+        };
+        /** CreateRatingRequest */
+        CreateRatingRequest: {
+            /** Beer Id */
+            beer_id: string;
+            /** Note */
+            note?: string | null;
+            /** Rating */
+            rating: number;
+        };
+        /**
+         * DominantComponent
+         * @enum {string}
+         */
+        DominantComponent: "baseline" | "session" | "abv" | "novelty_positive" | "novelty_negative";
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -174,115 +266,211 @@ export interface components {
         };
         /** HealthResponse */
         HealthResponse: {
-            /** Status */
-            status: string;
+            /**
+             * Status
+             * @constant
+             */
+            status: "ok";
         };
-        /** HistoryEntry */
-        HistoryEntry: {
+        /** IconCatalogResponse */
+        IconCatalogResponse: {
+            /**
+             * Flavors
+             * @default []
+             */
+            flavors: components["schemas"]["CatalogIconItem"][];
+            /**
+             * Journey
+             * @default []
+             */
+            journey: components["schemas"]["CatalogIconItem"][];
+            /**
+             * Marketing
+             * @default []
+             */
+            marketing: components["schemas"]["CatalogIconItem"][];
+            /**
+             * Session Abv
+             * @default []
+             */
+            session_abv: components["schemas"]["CatalogIconItem"][];
+            /**
+             * Session Vibes
+             * @default []
+             */
+            session_vibes: components["schemas"]["CatalogIconItem"][];
+        };
+        /**
+         * LovePref
+         * @enum {string}
+         */
+        LovePref: "love" | "okay" | "avoid";
+        /** OnboardingAnswers */
+        OnboardingAnswers: {
+            citrus: components["schemas"]["CitrusPick"];
+            coffee: components["schemas"]["CoffeeStyle"];
+            /** Novelty Seeking */
+            novelty_seeking: boolean;
+            smoked_foods: components["schemas"]["LovePref"];
+            snack: components["schemas"]["SnackPick"];
+            sour_foods: components["schemas"]["LovePref"];
+            water: components["schemas"]["Carbonation"];
+        };
+        /** PatchBaselineTasteRequest */
+        PatchBaselineTasteRequest: {
+            /** Bitterness */
+            bitterness?: number | null;
+            /** Bubbles */
+            bubbles?: number | null;
+            /** Flavor Family */
+            flavor_family?: {
+                [key: string]: number;
+            } | null;
+            /** Novelty Affinity */
+            novelty_affinity?: number | null;
+        };
+        /** RatingRecord */
+        RatingRecord: {
+            /** Beer Brewery */
+            beer_brewery: string;
             /** Beer Id */
             beer_id: string;
-            rating: components["schemas"]["RatingValue"] | null;
-            /** Tried At */
-            tried_at: string;
-        };
-        /** HistoryResponse */
-        HistoryResponse: {
-            /** Entries */
-            entries: components["schemas"]["HistoryEntry"][];
-        };
-        /** MenuScanRequest */
-        MenuScanRequest: {
-            /** Image Base64 */
-            image_base64: string;
-        };
-        /** OkResponse */
-        OkResponse: {
-            /** Ok */
-            ok: boolean;
-        };
-        /** PersonaResponse */
-        PersonaResponse: {
-            persona: components["schemas"]["PersonaSummary"] | null;
-        };
-        /** PersonaSummary */
-        PersonaSummary: {
-            /** Description */
-            description?: string | null;
-            /** Icon */
-            icon: string;
+            /** Beer Name */
+            beer_name: string;
+            /** Created At */
+            created_at: string;
             /** Id */
             id: string;
-            /** Name */
-            name: string;
+            /** Note */
+            note: string | null;
+            /** Rating */
+            rating: number;
         };
-        /** ProfileResponse */
-        ProfileResponse: {
-            /** User Id */
-            user_id: string;
-            /** Vector */
-            vector: number[] | null;
+        /** RatingsHistoryResponse */
+        RatingsHistoryResponse: {
+            /** Page */
+            page: number;
+            /** Page Size */
+            page_size: number;
+            /** Ratings */
+            ratings: components["schemas"]["RatingRecord"][];
         };
-        /** RateBeerRequest */
-        RateBeerRequest: {
-            beer: components["schemas"]["RatedBeerInput"];
-            rating: components["schemas"]["RatingValue"];
+        /** ReadinessResponse */
+        ReadinessResponse: {
+            /** Components */
+            components: components["schemas"]["ComponentStatus"][];
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "ready" | "not_ready";
         };
-        /** RatedBeerInput */
-        RatedBeerInput: {
+        /**
+         * RecommendationsRequest
+         * @description Debug-style request: caller supplies the dials + intent directly.
+         *
+         *     Slice #76 introduces persisted BaselineTaste; this slice posts the
+         *     answers inline to keep the smoke test independent of user persistence.
+         */
+        RecommendationsRequest: {
+            /** Alpha */
+            alpha?: number | null;
+            baseline: components["schemas"]["BaselineTasteDials"];
+            /** Beta */
+            beta?: number | null;
+            session?: components["schemas"]["SessionIntent"] | null;
+            /**
+             * Top K
+             * @default 5
+             */
+            top_k: number;
+        };
+        /** RecommendationsResponse */
+        RecommendationsResponse: {
+            /** Alpha */
+            alpha: number;
+            /** Beta */
+            beta: number;
+            /** Results */
+            results: components["schemas"]["RecommendedBeer"][];
+        };
+        /** RecommendedBeer */
+        RecommendedBeer: {
+            /** Abv */
+            abv: number;
+            breakdown: components["schemas"]["ScoreBreakdown"];
             /** Brewery */
-            brewery?: string | null;
-            /** Description */
-            description?: string | null;
-            /** Flavor Vector */
-            flavor_vector: number[];
+            brewery: string;
+            /**
+             * Color
+             * @enum {string}
+             */
+            color: "pale" | "gold" | "amber" | "brown" | "dark";
             /** Id */
             id: string;
+            /** Image Url */
+            image_url?: string | null;
+            /**
+             * Market Tier
+             * @enum {string}
+             */
+            market_tier: "mainstream" | "craft" | "import";
             /** Name */
             name: string;
             /** Style */
             style: string;
+            /** Why Line */
+            why_line: string;
+        };
+        /** ScoreBreakdown */
+        ScoreBreakdown: {
+            /** Abv Fits Intent */
+            abv_fits_intent?: boolean | null;
+            /** Abv Score */
+            abv_score: number;
+            /** Baseline Cos */
+            baseline_cos: number;
+            /** Baseline Score */
+            baseline_score: number;
+            dominant_component: components["schemas"]["DominantComponent"];
+            /** Novelty Score */
+            novelty_score: number;
+            /** Session Cos */
+            session_cos: number;
+            /** Session Score */
+            session_score: number;
+            /** Total Score */
+            total_score: number;
+        };
+        /** SessionIntent */
+        SessionIntent: {
+            abv_intent: components["schemas"]["AbvIntent"];
+            /**
+             * Free Text
+             * @default
+             */
+            free_text: string;
+            vibe: components["schemas"]["Vibe"];
         };
         /**
-         * RatingValue
+         * SnackPick
          * @enum {string}
          */
-        RatingValue: "loved" | "fine" | "disliked";
-        /** RecommendationRequest */
-        RecommendationRequest: {
-            /** Beers */
-            beers: components["schemas"]["BeerPayload"][];
-            taste_vector: components["schemas"]["FlavorVector"];
+        SnackPick: "dark_chocolate" | "halva" | "fresh_fruit" | "milk_chocolate";
+        /** TasteProfileIcon */
+        TasteProfileIcon: {
+            /** Flavor Key */
+            flavor_key?: string | null;
+            /** Purpose */
+            purpose: string;
+            /** Svg */
+            svg: string;
         };
-        /** RecommendationResponse */
-        RecommendationResponse: {
-            adventurous: components["schemas"]["BeerPayload"] | null;
-            backup: components["schemas"]["BeerPayload"] | null;
-            best: components["schemas"]["BeerPayload"];
-            /** Explanations */
-            explanations: {
-                [key: string]: string;
-            };
-        };
-        /** SaveProfileRequest */
-        SaveProfileRequest: {
-            /** Vector */
-            vector: number[];
-        };
-        /** ScanResultItem */
-        ScanResultItem: {
-            /** Confidence */
-            confidence: number;
-            /** Matched Id */
-            matched_id: string | null;
-            /** Needs Review */
-            needs_review: boolean;
-            /** Raw Text */
-            raw_text: string;
-        };
-        /** UpdatedVectorResponse */
-        UpdatedVectorResponse: {
-            /** Updated Vector */
-            updated_vector: number[] | null;
+        /** TasteProfileIcons */
+        TasteProfileIcons: {
+            /** Flavors */
+            flavors: components["schemas"]["TasteProfileIcon"][];
+            hero: components["schemas"]["TasteProfileIcon"];
         };
         /** ValidationError */
         ValidationError: {
@@ -297,6 +485,11 @@ export interface components {
             /** Error Type */
             type: string;
         };
+        /**
+         * Vibe
+         * @enum {string}
+         */
+        Vibe: "refreshing" | "cozy" | "adventurous" | "familiar";
     };
     responses: never;
     parameters: never;
@@ -306,6 +499,26 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    debugRecommendations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecommendationsResponse"];
+                };
+            };
+        };
+    };
     getHealth: {
         parameters: {
             query?: never;
@@ -326,73 +539,7 @@ export interface operations {
             };
         };
     };
-    scanMenu: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["MenuScanRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ScanResultItem"][];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    recommendBeers: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RecommendationRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RecommendationResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    getMyHistory: {
+    getReadiness: {
         parameters: {
             query?: never;
             header?: never;
@@ -407,12 +554,52 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HistoryResponse"];
+                    "application/json": components["schemas"]["ReadinessResponse"];
                 };
             };
         };
     };
-    addToMyHistory: {
+    getIconCatalog: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IconCatalogResponse"];
+                };
+            };
+        };
+    };
+    getMyBaselineTaste: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BaselineTasteRecord"];
+                };
+            };
+        };
+    };
+    patchMyBaselineTaste: {
         parameters: {
             query?: never;
             header?: never;
@@ -421,7 +608,72 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["AddHistoryRequest"];
+                "application/json": components["schemas"]["PatchBaselineTasteRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BaselineTasteRecord"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    listMyRatings: {
+        parameters: {
+            query?: {
+                page?: number;
+                page_size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RatingsHistoryResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    completeOnboarding: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OnboardingAnswers"];
             };
         };
         responses: {
@@ -431,7 +683,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["OkResponse"];
+                    "application/json": components["schemas"]["BaselineTasteRecord"];
                 };
             };
             /** @description Validation Error */
@@ -445,47 +697,7 @@ export interface operations {
             };
         };
     };
-    getMyPersona: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PersonaResponse"];
-                };
-            };
-        };
-    };
-    getMyProfile: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProfileResponse"];
-                };
-            };
-        };
-    };
-    saveMyProfile: {
+    createRating: {
         parameters: {
             query?: never;
             header?: never;
@@ -494,17 +706,17 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["SaveProfileRequest"];
+                "application/json": components["schemas"]["CreateRatingRequest"];
             };
         };
         responses: {
             /** @description Successful Response */
-            200: {
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ProfileResponse"];
+                    "application/json": components["schemas"]["RatingRecord"];
                 };
             };
             /** @description Validation Error */
@@ -518,7 +730,7 @@ export interface operations {
             };
         };
     };
-    rateMyBeer: {
+    postRecommendations: {
         parameters: {
             query?: never;
             header?: never;
@@ -527,7 +739,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["RateBeerRequest"];
+                "application/json": components["schemas"]["RecommendationsRequest"];
             };
         };
         responses: {
@@ -537,7 +749,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UpdatedVectorResponse"];
+                    "application/json": components["schemas"]["RecommendationsResponse"];
                 };
             };
             /** @description Validation Error */

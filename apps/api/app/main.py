@@ -10,8 +10,9 @@ from app.config import settings
 from app.db import close_pool, get_pool
 from app.errors import BeerologError
 from app.observability import configure_logging, instrument_requests, logger
-from app.routes import debug, health, onboarding, ratings, recommendations
+from app.routes import debug, health, icons, onboarding, ratings, recommendations
 from app.services.baseline_taste_repo import AsyncpgBaselineTasteRepo
+from app.services.icon_repo import AsyncpgIconRepo
 from app.services.ratings_repo import AsyncpgRatingsRepo
 
 configure_logging(settings.log_level)
@@ -38,6 +39,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
             AsyncpgBaselineTasteRepo(pool)
         )
         app.dependency_overrides[ratings.get_ratings_repo] = lambda: AsyncpgRatingsRepo(pool)
+        app.dependency_overrides[onboarding.get_icon_repo] = lambda: AsyncpgIconRepo(pool)
 
     try:
         yield
@@ -58,6 +60,7 @@ app.add_middleware(
 )
 
 app.include_router(health.router)
+app.include_router(icons.router)
 app.include_router(onboarding.router)
 app.include_router(recommendations.router)
 app.include_router(ratings.router)

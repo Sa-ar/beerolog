@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import pytest  # type: ignore[import-not-found]
 
-from app.api_contracts import DominantComponent
+from app.api_contracts import AbvIntent, DominantComponent
 from app.services.match_engine import BeerCandidate, rank
 
 
@@ -25,6 +25,7 @@ def _beer(
         style="y",
         abv=5.0,
         market_tier="craft",
+        color="gold",
         image_url=None,
         adventurousness=adventurousness,
         embedding=embedding,
@@ -155,3 +156,42 @@ def test_dominant_component_marks_novelty_positive_when_it_dominates() -> None:
         beta=0.5,
     )
     assert results[0].dominant_component == DominantComponent.novelty_positive
+
+
+def test_abv_weight_boosts_in_band_beer() -> None:
+    low = BeerCandidate(
+        id="lowabv",
+        name="LowAbv",
+        brewery="x",
+        style="y",
+        abv=4.0,
+        market_tier="craft",
+        color="gold",
+        image_url=None,
+        adventurousness=0.0,
+        embedding=[1.0, 0.0, 0.0],
+    )
+    high = BeerCandidate(
+        id="highabv",
+        name="HighAbv",
+        brewery="x",
+        style="y",
+        abv=8.0,
+        market_tier="craft",
+        color="gold",
+        image_url=None,
+        adventurousness=0.0,
+        embedding=[1.0, 0.0, 0.0],
+    )
+    results = rank(
+        baseline_embedding=[1.0, 0.0, 0.0],
+        session_embedding=[1.0, 0.0, 0.0],
+        novelty_affinity=0.5,
+        catalog=[low, high],
+        alpha=0.5,
+        beta=0.0,
+        abv_intent=AbvIntent.low,
+        abv_weight=0.2,
+    )
+    assert results[0].beer.id == "lowabv"
+    assert results[0].abv_score > 0

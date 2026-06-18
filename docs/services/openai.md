@@ -15,6 +15,7 @@ Set it as `OPENAI_API_KEY` in `apps/api/.env`.
 | Beer embeddings (stored in `beers.embedding`) | `text-embedding-3-small` (1536 dims) |
 | User profile embeddings (stored in `user_profiles.embedding`) | `text-embedding-3-small` (1536 dims) |
 | Menu image scanning — extract beer names from a photo (deferred venue/scan surface) | `gpt-4o` |
+| Taste profile icons (GPT SVG, stored in `icons`) | `gpt-4o-mini` |
 | Recommendation explanations — one sentence per beer | `gpt-4o` |
 
 ## Usage notes

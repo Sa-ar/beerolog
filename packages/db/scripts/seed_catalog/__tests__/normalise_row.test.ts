@@ -154,6 +154,8 @@ describe('composeBeerText', () => {
     expect(text).toContain('Malts: Pilsner, Caramel-40')
     expect(text).toContain('gold colour')
     expect(text).toContain('Citrus and pine forward')
+    expect(text).toContain('Sensory profile:')
+    expect(text).toContain('grapefruit juice')
   })
   it('omits null clauses cleanly', () => {
     const minimal = normaliseRow({

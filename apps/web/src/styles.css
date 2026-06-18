@@ -1,11 +1,20 @@
 @import 'tailwindcss';
 
-:root {
-  --brand-50: 38 92% 96%;
-  --brand-100: 38 92% 90%;
-  --brand-500: 25 85% 50%;
-  --brand-600: 25 85% 43%;
-  --brand-900: 25 50% 15%;
+@source '../../packages/ui/src';
+
+@theme {
+  --color-brand-50: hsl(38 92% 96%);
+  --color-brand-100: hsl(38 92% 90%);
+  --color-brand-200: hsl(38 80% 85%);
+  --color-brand-300: hsl(30 75% 70%);
+  --color-brand-500: hsl(25 85% 50%);
+  --color-brand-600: hsl(25 85% 43%);
+  --color-brand-700: hsl(25 70% 35%);
+  --color-brand-900: hsl(25 50% 15%);
+  --color-danger-50: hsl(0 86% 97%);
+  --color-danger-200: hsl(0 74% 90%);
+  --color-danger-700: hsl(0 65% 40%);
+  --color-warning-50: hsl(38 92% 96%);
   --radius: 0.5rem;
   --radius-lg: 0.75rem;
   --radius-xl: 1rem;
@@ -14,4 +23,12 @@
 body {
   font-family: system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
+}
+
+button:not(:disabled) {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
 }

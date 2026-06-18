@@ -19,7 +19,7 @@ def _parse_pgvector(value: object) -> list[float]:
 
 async def fetch_catalog(pool) -> list[BeerCandidate]:
     sql = """
-        SELECT id, name, brewery, style, abv, market_tier,
+        SELECT id, name, brewery, style, abv, market_tier, color,
                image_url, adventurousness, embedding
         FROM beers
     """
@@ -33,6 +33,7 @@ async def fetch_catalog(pool) -> list[BeerCandidate]:
             style=row["style"],
             abv=row["abv"],
             market_tier=row["market_tier"],
+            color=row["color"],
             image_url=row["image_url"],
             adventurousness=row["adventurousness"],
             embedding=_parse_pgvector(row["embedding"]),

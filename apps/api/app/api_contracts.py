@@ -90,6 +90,17 @@ class BaselineTasteDials(BaseModel):
     novelty_affinity: Annotated[float, Field(ge=0.0, le=1.0)]
 
 
+class TasteProfileIcon(BaseModel):
+    purpose: str
+    flavor_key: str | None = None
+    svg: str
+
+
+class TasteProfileIcons(BaseModel):
+    hero: TasteProfileIcon
+    flavors: list[TasteProfileIcon]
+
+
 class BaselineTasteRecord(BaseModel):
     """Persisted BaselineTaste returned by /me/baseline-taste."""
 
@@ -100,6 +111,22 @@ class BaselineTasteRecord(BaseModel):
     novelty_affinity: float
     embedding_fresh_at: str  # ISO-8601
     updated_at: str  # ISO-8601
+    icons: TasteProfileIcons | None = None
+
+
+
+class CatalogIconItem(BaseModel):
+    key: str
+    purpose: str
+    svg: str
+
+
+class IconCatalogResponse(BaseModel):
+    session_vibes: list[CatalogIconItem] = []
+    session_abv: list[CatalogIconItem] = []
+    journey: list[CatalogIconItem] = []
+    flavors: list[CatalogIconItem] = []
+    marketing: list[CatalogIconItem] = []
 
 
 class PatchBaselineTasteRequest(BaseModel):
@@ -142,13 +169,18 @@ class SessionIntent(BaseModel):
 class DominantComponent(StrEnum):
     baseline = "baseline"
     session = "session"
+    abv = "abv"
     novelty_positive = "novelty_positive"
     novelty_negative = "novelty_negative"
 
 
 class ScoreBreakdown(BaseModel):
+    baseline_cos: float
+    session_cos: float
     baseline_score: float
     session_score: float
+    abv_score: float
+    abv_fits_intent: bool | None = None
     novelty_score: float
     total_score: float
     dominant_component: DominantComponent
@@ -161,6 +193,7 @@ class RecommendedBeer(BaseModel):
     style: str
     abv: float
     market_tier: Literal["mainstream", "craft", "import"]
+    color: Literal["pale", "gold", "amber", "brown", "dark"]
     image_url: str | None = None
     why_line: str
     breakdown: ScoreBreakdown
@@ -180,10 +213,18 @@ class RecommendationsRequest(BaseModel):
     top_k: int = 5
 
 
+class MatchCalibration(BaseModel):
+    """Fixed affine anchors for user-facing cosine % (not result-set normalization)."""
+
+    cos_floor: float
+    cos_ceiling: float
+
+
 class RecommendationsResponse(BaseModel):
     results: list[RecommendedBeer]
     alpha: float
     beta: float
+    calibration: MatchCalibration
 
 
 # ---------------------------------------------------------------------------

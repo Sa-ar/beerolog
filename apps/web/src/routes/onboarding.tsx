@@ -1,12 +1,14 @@
 /**
  * /onboarding — captures the 7 quiz answers (PRD §Onboarding) and posts
  * them to POST /onboarding, which composes dials + embedding and persists
- * the user's BaselineTaste. Redirects to /session-intent on success.
+ * the user's BaselineTaste. Redirects to the dashboard on success.
  */
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
+import { Alert } from '@beerolog/ui'
 import { apiFetch } from '../lib/api-fetch'
+import { onboardingSaveErrorMessage } from '../lib/user-facing-errors'
 
 export const Route = createFileRoute('/onboarding')({
   component: OnboardingPage,
@@ -91,9 +93,9 @@ function OnboardingPage() {
         body: JSON.stringify(a),
       })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
-      navigate({ to: '/session-intent' })
+      navigate({ to: '/' })
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to save your taste profile')
+      setError(onboardingSaveErrorMessage(e))
     } finally {
       setSubmitting(false)
     }
@@ -149,7 +151,11 @@ function OnboardingPage() {
         onChange={(v) => setA({ ...a, smoked_foods: v })}
       />
 
-      {error && <p style={{ color: '#b00020' }}>{error}</p>}
+      {error ? (
+        <Alert variant="error" onRetry={() => void submit()}>
+          {error}
+        </Alert>
+      ) : null}
 
       <button
         type="button"

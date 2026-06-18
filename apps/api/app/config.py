@@ -24,9 +24,17 @@ class Settings(BaseSettings):
 
     # Taste-profile matcher knobs (PRD: taste-profile-matcher.md)
     match_alpha: float = 0.6
+    # Baseline weight when a session intent is present (lower → session matters more)
+    match_session_alpha: float = 0.4
     match_beta: float = 0.3
+    # Bonus/penalty applied when beer ABV matches/mismatches session abv_intent
+    match_abv_weight: float = 0.15
+    # Affine rescaling anchors for user-facing match % (probe: probe_cosine_calibration)
+    match_cos_floor: float = 0.20
+    match_cos_ceiling: float = 0.50
     baseline_staleness_days: int = 7
     embedding_model: str = "text-embedding-3-large"
+    icon_model: str = "gpt-4o-mini"
 
     @field_validator("cors_allowed_origins", mode="before")
     @classmethod

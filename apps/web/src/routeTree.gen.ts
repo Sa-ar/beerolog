@@ -10,8 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SigninRouteImport } from './routes/signin'
-import { Route as SessionIntentRouteImport } from './routes/session-intent'
-import { Route as RecommendationsV2RouteImport } from './routes/recommendations-v2'
+import { Route as RecommendationsRouteImport } from './routes/recommendations'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as IndexRouteImport } from './routes/index'
 
@@ -20,14 +19,9 @@ const SigninRoute = SigninRouteImport.update({
   path: '/signin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SessionIntentRoute = SessionIntentRouteImport.update({
-  id: '/session-intent',
-  path: '/session-intent',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RecommendationsV2Route = RecommendationsV2RouteImport.update({
-  id: '/recommendations-v2',
-  path: '/recommendations-v2',
+const RecommendationsRoute = RecommendationsRouteImport.update({
+  id: '/recommendations',
+  path: '/recommendations',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OnboardingRoute = OnboardingRouteImport.update({
@@ -44,54 +38,34 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/onboarding': typeof OnboardingRoute
-  '/recommendations-v2': typeof RecommendationsV2Route
-  '/session-intent': typeof SessionIntentRoute
+  '/recommendations': typeof RecommendationsRoute
   '/signin': typeof SigninRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/onboarding': typeof OnboardingRoute
-  '/recommendations-v2': typeof RecommendationsV2Route
-  '/session-intent': typeof SessionIntentRoute
+  '/recommendations': typeof RecommendationsRoute
   '/signin': typeof SigninRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/onboarding': typeof OnboardingRoute
-  '/recommendations-v2': typeof RecommendationsV2Route
-  '/session-intent': typeof SessionIntentRoute
+  '/recommendations': typeof RecommendationsRoute
   '/signin': typeof SigninRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/onboarding'
-    | '/recommendations-v2'
-    | '/session-intent'
-    | '/signin'
+  fullPaths: '/' | '/onboarding' | '/recommendations' | '/signin'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/onboarding'
-    | '/recommendations-v2'
-    | '/session-intent'
-    | '/signin'
-  id:
-    | '__root__'
-    | '/'
-    | '/onboarding'
-    | '/recommendations-v2'
-    | '/session-intent'
-    | '/signin'
+  to: '/' | '/onboarding' | '/recommendations' | '/signin'
+  id: '__root__' | '/' | '/onboarding' | '/recommendations' | '/signin'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   OnboardingRoute: typeof OnboardingRoute
-  RecommendationsV2Route: typeof RecommendationsV2Route
-  SessionIntentRoute: typeof SessionIntentRoute
+  RecommendationsRoute: typeof RecommendationsRoute
   SigninRoute: typeof SigninRoute
 }
 
@@ -104,18 +78,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SigninRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/session-intent': {
-      id: '/session-intent'
-      path: '/session-intent'
-      fullPath: '/session-intent'
-      preLoaderRoute: typeof SessionIntentRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/recommendations-v2': {
-      id: '/recommendations-v2'
-      path: '/recommendations-v2'
-      fullPath: '/recommendations-v2'
-      preLoaderRoute: typeof RecommendationsV2RouteImport
+    '/recommendations': {
+      id: '/recommendations'
+      path: '/recommendations'
+      fullPath: '/recommendations'
+      preLoaderRoute: typeof RecommendationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/onboarding': {
@@ -138,8 +105,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   OnboardingRoute: OnboardingRoute,
-  RecommendationsV2Route: RecommendationsV2Route,
-  SessionIntentRoute: SessionIntentRoute,
+  RecommendationsRoute: RecommendationsRoute,
   SigninRoute: SigninRoute,
 }
 export const routeTree = rootRouteImport

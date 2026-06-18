@@ -6,8 +6,8 @@
   an optional Hebrew/English free-text box. Posts to
   `/api/recommendations` with a placeholder baseline (the slice/74
   matcher accepts dials inline), stores the response in `sessionStorage`,
-  and routes to `/recommendations-v2`.
-- `/recommendations-v2` route — 5-card results page. Reads the last
+  and routes to `/recommendations`.
+- `/recommendations` route — 5-card results page. Reads the last
   payload from `sessionStorage`. Each card shows name, brewery, style,
   ABV, market-tier badge, and the why-line from the API. A toggle
   reveals the full score breakdown for debugging.

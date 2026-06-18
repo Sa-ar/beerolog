@@ -1,3 +1,4 @@
+export { Alert, type AlertProps } from './components/alert'
 export { Button, type ButtonProps } from './components/button'
 export { Card, CardHeader, CardContent } from './components/card'
 export { Badge, type BadgeProps } from './components/badge'

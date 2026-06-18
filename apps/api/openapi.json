@@ -1,0 +1,1228 @@
+{
+  "components": {
+    "schemas": {
+      "AbvIntent": {
+        "enum": [
+          "low",
+          "medium",
+          "high",
+          "any"
+        ],
+        "title": "AbvIntent",
+        "type": "string"
+      },
+      "BaselineTasteDials": {
+        "description": "User-facing, editable taste dials derived from onboarding answers.",
+        "properties": {
+          "bitterness": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Bitterness",
+            "type": "number"
+          },
+          "bubbles": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Bubbles",
+            "type": "number"
+          },
+          "flavor_family": {
+            "additionalProperties": {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            "title": "Flavor Family",
+            "type": "object"
+          },
+          "novelty_affinity": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Novelty Affinity",
+            "type": "number"
+          }
+        },
+        "required": [
+          "bubbles",
+          "bitterness",
+          "flavor_family",
+          "novelty_affinity"
+        ],
+        "title": "BaselineTasteDials",
+        "type": "object"
+      },
+      "BaselineTasteRecord": {
+        "description": "Persisted BaselineTaste returned by /me/baseline-taste.",
+        "properties": {
+          "bitterness": {
+            "title": "Bitterness",
+            "type": "number"
+          },
+          "bubbles": {
+            "title": "Bubbles",
+            "type": "number"
+          },
+          "embedding_fresh_at": {
+            "title": "Embedding Fresh At",
+            "type": "string"
+          },
+          "flavor_family": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Flavor Family",
+            "type": "object"
+          },
+          "icons": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TasteProfileIcons"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "novelty_affinity": {
+            "title": "Novelty Affinity",
+            "type": "number"
+          },
+          "updated_at": {
+            "title": "Updated At",
+            "type": "string"
+          },
+          "user_id": {
+            "title": "User Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "user_id",
+          "bubbles",
+          "bitterness",
+          "flavor_family",
+          "novelty_affinity",
+          "embedding_fresh_at",
+          "updated_at"
+        ],
+        "title": "BaselineTasteRecord",
+        "type": "object"
+      },
+      "Carbonation": {
+        "enum": [
+          "still",
+          "light",
+          "strong"
+        ],
+        "title": "Carbonation",
+        "type": "string"
+      },
+      "CatalogIconItem": {
+        "properties": {
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "purpose": {
+            "title": "Purpose",
+            "type": "string"
+          },
+          "svg": {
+            "title": "Svg",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "purpose",
+          "svg"
+        ],
+        "title": "CatalogIconItem",
+        "type": "object"
+      },
+      "CitrusPick": {
+        "enum": [
+          "grapefruit",
+          "orange",
+          "lemonade",
+          "none"
+        ],
+        "title": "CitrusPick",
+        "type": "string"
+      },
+      "CoffeeStyle": {
+        "enum": [
+          "black",
+          "espresso",
+          "hafuch",
+          "iced_sweet",
+          "none"
+        ],
+        "title": "CoffeeStyle",
+        "type": "string"
+      },
+      "ComponentStatus": {
+        "properties": {
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail"
+          },
+          "name": {
+            "enum": [
+              "process",
+              "config",
+              "database",
+              "embedding_provider"
+            ],
+            "title": "Name",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "ok",
+              "degraded",
+              "down"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "status"
+        ],
+        "title": "ComponentStatus",
+        "type": "object"
+      },
+      "CreateRatingRequest": {
+        "properties": {
+          "beer_id": {
+            "title": "Beer Id",
+            "type": "string"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "rating": {
+            "maximum": 5.0,
+            "minimum": 1.0,
+            "title": "Rating",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "beer_id",
+          "rating"
+        ],
+        "title": "CreateRatingRequest",
+        "type": "object"
+      },
+      "DominantComponent": {
+        "enum": [
+          "baseline",
+          "session",
+          "abv",
+          "novelty_positive",
+          "novelty_negative"
+        ],
+        "title": "DominantComponent",
+        "type": "string"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "HealthResponse": {
+        "properties": {
+          "status": {
+            "const": "ok",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "HealthResponse",
+        "type": "object"
+      },
+      "IconCatalogResponse": {
+        "properties": {
+          "flavors": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/CatalogIconItem"
+            },
+            "title": "Flavors",
+            "type": "array"
+          },
+          "journey": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/CatalogIconItem"
+            },
+            "title": "Journey",
+            "type": "array"
+          },
+          "marketing": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/CatalogIconItem"
+            },
+            "title": "Marketing",
+            "type": "array"
+          },
+          "session_abv": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/CatalogIconItem"
+            },
+            "title": "Session Abv",
+            "type": "array"
+          },
+          "session_vibes": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/CatalogIconItem"
+            },
+            "title": "Session Vibes",
+            "type": "array"
+          }
+        },
+        "title": "IconCatalogResponse",
+        "type": "object"
+      },
+      "LovePref": {
+        "enum": [
+          "love",
+          "okay",
+          "avoid"
+        ],
+        "title": "LovePref",
+        "type": "string"
+      },
+      "OnboardingAnswers": {
+        "properties": {
+          "citrus": {
+            "$ref": "#/components/schemas/CitrusPick"
+          },
+          "coffee": {
+            "$ref": "#/components/schemas/CoffeeStyle"
+          },
+          "novelty_seeking": {
+            "title": "Novelty Seeking",
+            "type": "boolean"
+          },
+          "smoked_foods": {
+            "$ref": "#/components/schemas/LovePref"
+          },
+          "snack": {
+            "$ref": "#/components/schemas/SnackPick"
+          },
+          "sour_foods": {
+            "$ref": "#/components/schemas/LovePref"
+          },
+          "water": {
+            "$ref": "#/components/schemas/Carbonation"
+          }
+        },
+        "required": [
+          "coffee",
+          "water",
+          "novelty_seeking",
+          "snack",
+          "sour_foods",
+          "citrus",
+          "smoked_foods"
+        ],
+        "title": "OnboardingAnswers",
+        "type": "object"
+      },
+      "PatchBaselineTasteRequest": {
+        "properties": {
+          "bitterness": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bitterness"
+          },
+          "bubbles": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bubbles"
+          },
+          "flavor_family": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "maximum": 1.0,
+                  "minimum": 0.0,
+                  "type": "number"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Flavor Family"
+          },
+          "novelty_affinity": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Novelty Affinity"
+          }
+        },
+        "title": "PatchBaselineTasteRequest",
+        "type": "object"
+      },
+      "RatingRecord": {
+        "properties": {
+          "beer_brewery": {
+            "title": "Beer Brewery",
+            "type": "string"
+          },
+          "beer_id": {
+            "title": "Beer Id",
+            "type": "string"
+          },
+          "beer_name": {
+            "title": "Beer Name",
+            "type": "string"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "rating": {
+            "title": "Rating",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "beer_id",
+          "beer_name",
+          "beer_brewery",
+          "rating",
+          "note",
+          "created_at"
+        ],
+        "title": "RatingRecord",
+        "type": "object"
+      },
+      "RatingsHistoryResponse": {
+        "properties": {
+          "page": {
+            "title": "Page",
+            "type": "integer"
+          },
+          "page_size": {
+            "title": "Page Size",
+            "type": "integer"
+          },
+          "ratings": {
+            "items": {
+              "$ref": "#/components/schemas/RatingRecord"
+            },
+            "title": "Ratings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "ratings",
+          "page",
+          "page_size"
+        ],
+        "title": "RatingsHistoryResponse",
+        "type": "object"
+      },
+      "ReadinessResponse": {
+        "properties": {
+          "components": {
+            "items": {
+              "$ref": "#/components/schemas/ComponentStatus"
+            },
+            "title": "Components",
+            "type": "array"
+          },
+          "status": {
+            "enum": [
+              "ready",
+              "not_ready"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "components"
+        ],
+        "title": "ReadinessResponse",
+        "type": "object"
+      },
+      "RecommendationsRequest": {
+        "description": "Debug-style request: caller supplies the dials + intent directly.\n\nSlice #76 introduces persisted BaselineTaste; this slice posts the\nanswers inline to keep the smoke test independent of user persistence.",
+        "properties": {
+          "alpha": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Alpha"
+          },
+          "baseline": {
+            "$ref": "#/components/schemas/BaselineTasteDials"
+          },
+          "beta": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Beta"
+          },
+          "session": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SessionIntent"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "top_k": {
+            "default": 5,
+            "title": "Top K",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "baseline"
+        ],
+        "title": "RecommendationsRequest",
+        "type": "object"
+      },
+      "RecommendationsResponse": {
+        "properties": {
+          "alpha": {
+            "title": "Alpha",
+            "type": "number"
+          },
+          "beta": {
+            "title": "Beta",
+            "type": "number"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/RecommendedBeer"
+            },
+            "title": "Results",
+            "type": "array"
+          }
+        },
+        "required": [
+          "results",
+          "alpha",
+          "beta"
+        ],
+        "title": "RecommendationsResponse",
+        "type": "object"
+      },
+      "RecommendedBeer": {
+        "properties": {
+          "abv": {
+            "title": "Abv",
+            "type": "number"
+          },
+          "breakdown": {
+            "$ref": "#/components/schemas/ScoreBreakdown"
+          },
+          "brewery": {
+            "title": "Brewery",
+            "type": "string"
+          },
+          "color": {
+            "enum": [
+              "pale",
+              "gold",
+              "amber",
+              "brown",
+              "dark"
+            ],
+            "title": "Color",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "market_tier": {
+            "enum": [
+              "mainstream",
+              "craft",
+              "import"
+            ],
+            "title": "Market Tier",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "style": {
+            "title": "Style",
+            "type": "string"
+          },
+          "why_line": {
+            "title": "Why Line",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "brewery",
+          "style",
+          "abv",
+          "market_tier",
+          "color",
+          "why_line",
+          "breakdown"
+        ],
+        "title": "RecommendedBeer",
+        "type": "object"
+      },
+      "ScoreBreakdown": {
+        "properties": {
+          "abv_fits_intent": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abv Fits Intent"
+          },
+          "abv_score": {
+            "title": "Abv Score",
+            "type": "number"
+          },
+          "baseline_cos": {
+            "title": "Baseline Cos",
+            "type": "number"
+          },
+          "baseline_score": {
+            "title": "Baseline Score",
+            "type": "number"
+          },
+          "dominant_component": {
+            "$ref": "#/components/schemas/DominantComponent"
+          },
+          "novelty_score": {
+            "title": "Novelty Score",
+            "type": "number"
+          },
+          "session_cos": {
+            "title": "Session Cos",
+            "type": "number"
+          },
+          "session_score": {
+            "title": "Session Score",
+            "type": "number"
+          },
+          "total_score": {
+            "title": "Total Score",
+            "type": "number"
+          }
+        },
+        "required": [
+          "baseline_cos",
+          "session_cos",
+          "baseline_score",
+          "session_score",
+          "abv_score",
+          "novelty_score",
+          "total_score",
+          "dominant_component"
+        ],
+        "title": "ScoreBreakdown",
+        "type": "object"
+      },
+      "SessionIntent": {
+        "properties": {
+          "abv_intent": {
+            "$ref": "#/components/schemas/AbvIntent"
+          },
+          "free_text": {
+            "default": "",
+            "title": "Free Text",
+            "type": "string"
+          },
+          "vibe": {
+            "$ref": "#/components/schemas/Vibe"
+          }
+        },
+        "required": [
+          "vibe",
+          "abv_intent"
+        ],
+        "title": "SessionIntent",
+        "type": "object"
+      },
+      "SnackPick": {
+        "enum": [
+          "dark_chocolate",
+          "halva",
+          "fresh_fruit",
+          "milk_chocolate"
+        ],
+        "title": "SnackPick",
+        "type": "string"
+      },
+      "TasteProfileIcon": {
+        "properties": {
+          "flavor_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Flavor Key"
+          },
+          "purpose": {
+            "title": "Purpose",
+            "type": "string"
+          },
+          "svg": {
+            "title": "Svg",
+            "type": "string"
+          }
+        },
+        "required": [
+          "purpose",
+          "svg"
+        ],
+        "title": "TasteProfileIcon",
+        "type": "object"
+      },
+      "TasteProfileIcons": {
+        "properties": {
+          "flavors": {
+            "items": {
+              "$ref": "#/components/schemas/TasteProfileIcon"
+            },
+            "title": "Flavors",
+            "type": "array"
+          },
+          "hero": {
+            "$ref": "#/components/schemas/TasteProfileIcon"
+          }
+        },
+        "required": [
+          "hero",
+          "flavors"
+        ],
+        "title": "TasteProfileIcons",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      },
+      "Vibe": {
+        "enum": [
+          "refreshing",
+          "cozy",
+          "adventurous",
+          "familiar"
+        ],
+        "title": "Vibe",
+        "type": "string"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "title": "Beerolog API",
+    "version": "0.0.1"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/debug/recommendations": {
+      "get": {
+        "operationId": "debugRecommendations",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecommendationsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Debug Recommendations",
+        "tags": [
+          "debug"
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "getHealth",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Health"
+      }
+    },
+    "/health/ready": {
+      "get": {
+        "operationId": "getReadiness",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadinessResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Readiness"
+      }
+    },
+    "/icons/catalog": {
+      "get": {
+        "operationId": "getIconCatalog",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IconCatalogResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get Icon Catalog",
+        "tags": [
+          "icons"
+        ]
+      }
+    },
+    "/me/baseline-taste": {
+      "get": {
+        "operationId": "getMyBaselineTaste",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaselineTasteRecord"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get My Baseline Taste",
+        "tags": [
+          "onboarding"
+        ]
+      },
+      "patch": {
+        "operationId": "patchMyBaselineTaste",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchBaselineTasteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaselineTasteRecord"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Patch My Baseline Taste",
+        "tags": [
+          "onboarding"
+        ]
+      }
+    },
+    "/me/ratings": {
+      "get": {
+        "operationId": "listMyRatings",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Page Size",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RatingsHistoryResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List My Ratings",
+        "tags": [
+          "ratings"
+        ]
+      }
+    },
+    "/onboarding": {
+      "post": {
+        "operationId": "completeOnboarding",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OnboardingAnswers"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaselineTasteRecord"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Complete Onboarding",
+        "tags": [
+          "onboarding"
+        ]
+      }
+    },
+    "/ratings": {
+      "post": {
+        "operationId": "createRating",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRatingRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RatingRecord"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Rating",
+        "tags": [
+          "ratings"
+        ]
+      }
+    },
+    "/recommendations": {
+      "post": {
+        "operationId": "postRecommendations",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecommendationsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecommendationsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Post Recommendations",
+        "tags": [
+          "recommendations"
+        ]
+      }
+    }
+  }
+}
