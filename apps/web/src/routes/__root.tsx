@@ -6,6 +6,7 @@ import { IconCatalogProvider } from '@beerolog/icons'
 import { AppFooter } from '../components/AppFooter'
 import { AppHeader } from '../components/AppHeader'
 import { AgeVerificationGate } from '../components/AgeVerificationGate'
+import { SkipLink } from '../components/SkipLink'
 import { AuthTokenBridge } from '../components/AuthTokenBridge'
 import { GlobalErrorPage } from '../components/GlobalErrorPage'
 import { NotFoundPage } from '../components/NotFoundPage'
@@ -40,12 +41,15 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body className="flex min-h-dvh flex-col bg-gradient-to-b from-amber-50 to-white text-neutral-900">
         <I18nextProvider i18n={i18n}>
+          <SkipLink />
           <ClerkProvider {...clerkProps}>
             <IconCatalogProvider apiUrl={apiUrl}>
               <AuthTokenBridge />
               <AgeVerificationGate initialVerified={ageVerified} />
               <AppHeader />
-              {children}
+              <div id="main-content" tabIndex={-1} className="flex flex-1 flex-col outline-none">
+                {children}
+              </div>
               <AppFooter />
             </IconCatalogProvider>
           </ClerkProvider>

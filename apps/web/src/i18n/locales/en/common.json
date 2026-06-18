@@ -6,6 +6,7 @@
     "backToHome": "Back to home"
   },
   "header": { "home": "Beerolog home" },
+  "a11y": { "skipToContent": "Skip to content" },
   "footer": {
     "responsibleDrinking": "Drink responsibly. Beerolog is for adults 18+ and does not sell alcohol.",
     "legal": "Legal",
