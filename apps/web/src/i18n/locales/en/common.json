@@ -6,6 +6,17 @@
     "backToHome": "Back to home"
   },
   "header": { "home": "Beerolog home" },
+  "footer": {
+    "responsibleDrinking": "Drink responsibly. Beerolog is for adults 18+ and does not sell alcohol."
+  },
+  "ageGate": {
+    "title": "Age verification",
+    "body": "Beerolog contains alcohol-related content and is intended for adults aged 18 and over. Please confirm your age to continue.",
+    "confirm": "I am 18 or older",
+    "deny": "I am not 18 or older",
+    "deniedTitle": "Sorry, you cannot use Beerolog",
+    "deniedBody": "You must be 18 or older to use this app. Please close this page."
+  },
   "settings": { "title": "Settings", "language": "Language" },
   "auth": { "signIn": "Sign in" },
   "signin": {
@@ -67,7 +78,7 @@
     "howItWorks": "How it works",
     "howItWorksHint": "Sign in so your quiz answers and picks are saved to your profile.",
     "cta": "Sign in to start",
-    "ctaHint": "Free to try. Your taste profile stays with your account.",
+    "ctaHint": "Always free. Your taste profile stays with your account.",
     "steps": {
       "quiz": {
         "title": "Quick taste quiz",
