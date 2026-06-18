@@ -20,10 +20,10 @@
 - Supported MVP is the signed-in solo flow: auth, menu scan, quiz, menu-scoped recommendations, ratings, and taste profile.
 - Deferred surfaces include venue QR, group sessions, challenges, leaderboards, badges, and broader bar tooling.
 - GitHub issues are the source of truth for planning; PRDs live in docs/prds/.
-- Production domain is beerolog.com; web deploys on Vercel (beerolog.vercel.app).
+- Production domains are beerolog.com (web) and api.beerolog.com (API); Vercel defaults are beerolog.vercel.app and beerolog-api.vercel.app.
 - Clerk handles authentication.
-- Production stack: Vercel hosts apps/web (TanStack Start SSR), Railway hosts apps/api (FastAPI), Neon Postgres is the database.
-- Vercel web deploy uses Nitro `preset: 'vercel'`, root `vercel.json`, and `api/index.mjs` SSR handler wiring TanStack Start to serverless functions.
+- Production stack: Vercel hosts apps/web (`beerolog`, TanStack Start SSR) and apps/api (`beerolog-api`, FastAPI via uv); Neon Postgres is the database.
+- Vercel web deploy uses Nitro `preset: 'vercel'`, root `vercel.json`, and `api/index.mjs` SSR handler; API deploy uses `apps/api/vercel.json`, monorepo-root install for `packages/icon-service`, and `apps/api/api/index.py`.
 - Shared product vocabulary and MVP boundary live in CONTEXT.md; durable decisions live in docs/adr/.
 - Beer catalog includes a `color` field (pale | gold | amber | brown | dark) for UI beer-color swatches.
 - Catalog seed data must not persist Untappd references; beer catalog images use Vercel Blob URLs only (no third-party CDNs).
