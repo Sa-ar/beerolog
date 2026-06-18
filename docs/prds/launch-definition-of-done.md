@@ -86,3 +86,13 @@ This PRD is intentionally release-focused, not expansion-focused. It does not ad
 This PRD defines the release bar for the current Beerolog MVP; it does not decide the next roadmap expansion. If the supported product boundary changes later, that change should be captured in a separate PRD and follow-on ADR rather than folded into launch-readiness criteria.
 
 The launch gate should be interpreted conservatively. If the signed-in solo flow works only in development, if production configuration is incomplete, if contracts drift, or if operators cannot diagnose failures with the available runtime signals, the product is not launch-ready yet.
+
+### Compliance launch blockers
+
+Per `docs/prds/compliance-privacy-and-accessibility.md`, the following are launch blockers for the supported MVP and must be resolved before go-live:
+
+- **Missing privacy policy** — the privacy policy must be published and approved by counsel (draft banner removed) at `/legal/privacy`.
+- **Missing accessibility statement** — the SI 5568 / WCAG 2.0 AA accessibility statement must be published at `/legal/accessibility` with a named coordinator and contact.
+- **Missing account-deletion path** — signed-in users must be able to delete their Beerolog data (`DELETE /me` + settings UI).
+
+Operator evidence for these lives in `docs/ops/compliance-readiness.md` and `docs/ops/checklists/accessibility-verification.md`.

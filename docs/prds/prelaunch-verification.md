@@ -80,3 +80,13 @@ The feature stays verification-focused. It does not add new product scope, reope
 This PRD is intentionally narrow. The launch-definition PRD says Beerolog needs verification evidence before release; this document defines what that evidence means for the supported MVP right before shipping.
 
 If the supported product boundary expands later, or if the team decides that explanations, persistence, or other currently required launch behaviors should no longer be treated as blockers, that change should be made through a separate follow-on PRD and, if necessary, an ADR update rather than quietly weakening prelaunch verification.
+
+### Compliance verification
+
+Prelaunch evidence must also confirm the compliance bar from `docs/prds/compliance-privacy-and-accessibility.md`. The following are release blockers and must appear in the evidence record:
+
+- **Privacy policy** published and counsel-approved (draft banner removed).
+- **Accessibility statement** published (SI 5568 / WCAG 2.0 AA) with the real coordinator contact, and the automated axe gate green in CI.
+- **Account deletion** and **data export** verified in staging (`DELETE /me`, `GET /me/export`).
+
+Use `docs/ops/compliance-readiness.md` (legal-evidence template) and `docs/ops/checklists/accessibility-verification.md` (manual a11y checklist) to collect this evidence.
