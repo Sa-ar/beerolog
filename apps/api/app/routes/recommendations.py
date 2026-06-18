@@ -121,13 +121,14 @@ async def post_recommendations(
             RecommendedBeer(
                 id=r.beer.id,
                 name=r.beer.name,
+                name_hebrew=r.beer.name_hebrew,
                 brewery=r.beer.brewery,
                 style=r.beer.style,
                 abv=r.beer.abv,
                 market_tier=r.beer.market_tier,  # type: ignore[arg-type]
                 color=r.beer.color,  # type: ignore[arg-type]
                 image_url=r.beer.image_url,
-                why_line=why_line.explain(r.dominant_component, session=body.session),
+                why=why_line.explain(r.dominant_component, session=body.session),
                 breakdown=ScoreBreakdown(
                     baseline_cos=r.baseline_cos,
                     session_cos=r.session_cos,

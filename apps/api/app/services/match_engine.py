@@ -27,6 +27,7 @@ class BeerCandidate:
     image_url: str | None
     adventurousness: float
     embedding: list[float]
+    name_hebrew: str | None = None
 
 
 @dataclass(frozen=True)

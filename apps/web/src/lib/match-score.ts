@@ -14,7 +14,8 @@ export type ScoreBreakdown = {
 }
 
 export type MatchContributor = {
-  label: string
+  // Stable key; the UI resolves it via recommendations.contributors.<key>.
+  key: 'taste' | 'mood' | 'abvFit' | 'noveltyBoost' | 'noveltyPenalty'
   percent: number
 }
 
@@ -111,7 +112,7 @@ export function matchAlignmentPercents(
 ): MatchContributor[] {
   const items: MatchContributor[] = [
     {
-      label: 'Taste profile',
+      key: 'taste',
       percent: calibratedAlignmentPercent(
         resolveBaselineCos(breakdown, alpha, hasSession),
         calibration,
@@ -121,7 +122,7 @@ export function matchAlignmentPercents(
 
   if (hasSession) {
     items.push({
-      label: "Tonight's mood",
+      key: 'mood',
       percent: calibratedAlignmentPercent(
         resolveSessionCos(breakdown, alpha, hasSession),
         calibration,
@@ -133,7 +134,7 @@ export function matchAlignmentPercents(
     const fits =
       breakdown.abv_fits_intent != null ? breakdown.abv_fits_intent : breakdown.abv_score > 0
     items.push({
-      label: 'ABV fit',
+      key: 'abvFit',
       percent: fits ? 100 : 0,
     })
   }
@@ -141,7 +142,7 @@ export function matchAlignmentPercents(
   const noveltyBoost = Math.round((breakdown.novelty_score / 0.15) * 100)
   if (Math.abs(noveltyBoost) >= 1) {
     items.push({
-      label: noveltyBoost >= 0 ? 'Novelty boost' : 'Novelty penalty',
+      key: noveltyBoost >= 0 ? 'noveltyBoost' : 'noveltyPenalty',
       percent: Math.abs(noveltyBoost),
     })
   }

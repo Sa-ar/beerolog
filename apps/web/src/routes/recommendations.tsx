@@ -6,6 +6,7 @@ import { CatalogIcon } from '@beerolog/icons'
 import { Alert, Button } from '@beerolog/ui'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { RecommendationBeerCard, type RecommendedBeer } from '../components/RecommendationBeerCard'
 import { RecommendationsLoadingState } from '../components/RecommendationsLoadingState'
 import { StatusCard } from '../components/StatusCard'
@@ -50,6 +51,7 @@ function getInitialPageState(): PageState {
 }
 
 function RecommendationsPage() {
+  const { t } = useTranslation()
   const [pageState, setPageState] = useState<PageState>(getInitialPageState)
   const [loadingMore, setLoadingMore] = useState(false)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -74,7 +76,7 @@ function RecommendationsPage() {
         clearPendingSession()
         setPageState({
           status: 'error',
-          message: sessionStartErrorMessage(e),
+          message: sessionStartErrorMessage(t, e),
           request: pending,
         })
       }
@@ -101,7 +103,7 @@ function RecommendationsPage() {
       clearPendingSession()
       setPageState({
         status: 'error',
-        message: sessionStartErrorMessage(e),
+        message: sessionStartErrorMessage(t, e),
         request,
       })
     }
@@ -117,7 +119,7 @@ function RecommendationsPage() {
       )
       setPageState({ status: 'ready', results: merged, hasMore: moreAvailable })
     } catch (e) {
-      setLoadError(loadMoreErrorMessage(e))
+      setLoadError(loadMoreErrorMessage(t, e))
     } finally {
       setLoadingMore(false)
     }
@@ -132,16 +134,16 @@ function RecommendationsPage() {
       <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-4 py-8 sm:gap-8 sm:px-6 sm:py-10 md:py-12">
         <section className="space-y-1">
           <p className="text-sm font-semibold uppercase tracking-wide text-brand-600">
-            Recommendations
+            {t('recommendations.eyebrow')}
           </p>
           <h1 className="text-2xl font-bold tracking-tight text-neutral-900 sm:text-3xl md:text-4xl">
-            Couldn&apos;t load your picks
+            {t('recommendations.errorTitle')}
           </h1>
         </section>
 
         <StatusCard
           variant="error"
-          title="Couldn't load your picks"
+          title={t('recommendations.errorTitle')}
           description={pageState.message}
           illustration={
             <CatalogIcon group="journey" iconKey="picks" className="h-36 w-44 opacity-60" />
@@ -149,11 +151,11 @@ function RecommendationsPage() {
           action={
             <div className="flex w-full max-w-xs flex-col gap-3">
               <Button className="w-full" size="lg" onClick={() => void handleRetrySession()}>
-                Try again
+                {t('common.tryAgain')}
               </Button>
               <Link to="/" className="w-full">
                 <Button className="w-full" size="md" variant="outline">
-                  Back to dashboard
+                  {t('recommendations.backToDashboard')}
                 </Button>
               </Link>
             </div>
@@ -168,24 +170,24 @@ function RecommendationsPage() {
       <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-4 py-8 sm:gap-8 sm:px-6 sm:py-10 md:py-12">
         <section className="space-y-1">
           <p className="text-sm font-semibold uppercase tracking-wide text-brand-600">
-            Recommendations
+            {t('recommendations.eyebrow')}
           </p>
           <h1 className="text-2xl font-bold tracking-tight text-neutral-900 sm:text-3xl md:text-4xl">
-            No picks yet
+            {t('recommendations.missingTitle')}
           </h1>
         </section>
 
         <StatusCard
           variant="empty"
-          title="No picks yet"
-          description="Pick tonight's vibe and we'll match five beers to how you feel right now."
+          title={t('recommendations.missingTitle')}
+          description={t('recommendations.missingDescription')}
           illustration={
             <CatalogIcon group="journey" iconKey="picks" className="h-36 w-44" />
           }
           action={
             <Link to="/" className="w-full max-w-xs">
               <Button className="w-full" size="lg">
-                Start a session
+                {t('recommendations.startSession')}
               </Button>
             </Link>
           }
@@ -201,19 +203,18 @@ function RecommendationsPage() {
   const beta = stored?.beta ?? 0.3
   const hasSession = Boolean(stored?.request?.session)
   const abvIntent = stored?.request?.session.abv_intent
-  const pickLabel = results.length === 1 ? 'pick' : 'picks'
 
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-4 py-8 sm:gap-8 sm:px-6 sm:py-10 md:py-12">
       <section className="space-y-2">
         <p className="text-sm font-semibold uppercase tracking-wide text-brand-600">
-          Matched for you
+          {t('recommendations.matchedEyebrow')}
         </p>
         <h1 className="text-2xl font-bold tracking-tight text-neutral-900 sm:text-3xl md:text-4xl">
-          Your top {results.length} {pickLabel}
+          {t('recommendations.heading', { count: results.length })}
         </h1>
         <p className="max-w-xl text-sm text-neutral-600 sm:text-base">
-          Ranked for your saved taste profile and tonight&apos;s session intent.
+          {t('recommendations.subhead')}
         </p>
       </section>
 
@@ -247,7 +248,9 @@ function RecommendationsPage() {
                 onClick={() => void handleLoadMore()}
                 className="w-full max-w-md rounded-xl px-8 shadow-sm"
               >
-                {loadingMore ? 'Loading more picks…' : `Show ${RECS_PAGE_SIZE} more picks`}
+                {loadingMore
+                  ? t('recommendations.loadingMore')
+                  : t('recommendations.showMore', { count: RECS_PAGE_SIZE })}
               </Button>
             </div>
           ) : null}

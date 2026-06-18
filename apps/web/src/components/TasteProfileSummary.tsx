@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
 import { CatalogIcon, GeneratedTasteIcon, resolveProfileHeroSvg } from '@beerolog/icons'
 import { Badge, Button, Card } from '@beerolog/ui'
 import {
@@ -16,14 +17,14 @@ type TasteProfileSummaryProps = {
 }
 
 export function TasteProfileSummary({ greeting, baseline }: TasteProfileSummaryProps) {
-  const flavors = topFlavorFamilies(baseline)
-  const title = flavorTitle(baseline)
+  const { t, i18n } = useTranslation()
+  const flavors = topFlavorFamilies(t, baseline)
+  const title = flavorTitle(t, baseline)
   const heroSvg = resolveProfileHeroSvg(baseline, baseline.icons)
-  const updated = new Date(baseline.updated_at).toLocaleDateString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
+  const updated = new Date(baseline.updated_at).toLocaleDateString(
+    i18n.language.startsWith('he') ? 'he-IL' : 'en-US',
+    { month: 'short', day: 'numeric', year: 'numeric' },
+  )
 
   return (
     <div className="flex flex-col gap-8">
@@ -32,7 +33,7 @@ export function TasteProfileSummary({ greeting, baseline }: TasteProfileSummaryP
           {greeting}
         </p>
         <h1 className="text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
-          Ready for tonight?
+          {t('profile.summary.ready')}
         </h1>
       </section>
 
@@ -46,12 +47,12 @@ export function TasteProfileSummary({ greeting, baseline }: TasteProfileSummaryP
           </span>
           <div className="min-w-0 space-y-1">
             <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">
-              Your taste profile
+              {t('profile.title')}
             </p>
             {title ? (
               <h2 className="text-2xl font-bold tracking-tight text-neutral-900">{title}</h2>
             ) : null}
-            <p className="text-base text-neutral-600">{noveltyLabel(baseline)}</p>
+            <p className="text-base text-neutral-600">{noveltyLabel(t, baseline)}</p>
           </div>
         </div>
 
@@ -65,7 +66,9 @@ export function TasteProfileSummary({ greeting, baseline }: TasteProfileSummaryP
         </div>
 
         <div className="border-t border-brand-100/80 bg-white/60 px-6 py-3">
-          <p className="text-xs text-neutral-500">Profile last updated {updated}</p>
+          <p className="text-xs text-neutral-500">
+            {t('profile.summary.lastUpdated', { date: updated })}
+          </p>
         </div>
       </Card>
 
@@ -75,30 +78,30 @@ export function TasteProfileSummary({ greeting, baseline }: TasteProfileSummaryP
 
       <Card className="space-y-5 p-6">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
-          Your taste dials
+          {t('profile.summary.dials')}
         </h2>
 
         <div className="space-y-4">
           <TasteDial
-            label="Carbonation"
+            label={t('profile.dials.carbonation.label')}
             value={baseline.bubbles}
-            low="Still"
-            mid="Light fizz"
-            high="Sparkling"
+            low={t('profile.dials.carbonation.low')}
+            mid={t('profile.dials.carbonation.mid')}
+            high={t('profile.dials.carbonation.high')}
           />
           <TasteDial
-            label="Bitterness"
+            label={t('profile.dials.bitterness.label')}
             value={baseline.bitterness}
-            low="Mild"
-            mid="Balanced"
-            high="Bold"
+            low={t('profile.dials.bitterness.low')}
+            mid={t('profile.dials.bitterness.mid')}
+            high={t('profile.dials.bitterness.high')}
           />
           <TasteDial
-            label="Novelty"
+            label={t('profile.dials.novelty.label')}
             value={baseline.novelty_affinity}
-            low="Familiar"
-            mid="Open"
-            high="Adventurous"
+            low={t('profile.dials.novelty.low')}
+            mid={t('profile.dials.novelty.mid')}
+            high={t('profile.dials.novelty.high')}
           />
         </div>
       </Card>
@@ -106,11 +109,11 @@ export function TasteProfileSummary({ greeting, baseline }: TasteProfileSummaryP
       <section className="flex flex-col gap-3">
         <Link to="/onboarding">
           <Button className="w-full" size="md" variant="outline">
-            Retake the taste quiz
+            {t('profile.summary.retake')}
           </Button>
         </Link>
         <p className="text-center text-xs text-neutral-500">
-          Your picks and ratings keep refining what we recommend.
+          {t('profile.summary.retakeHint')}
         </p>
       </section>
     </div>

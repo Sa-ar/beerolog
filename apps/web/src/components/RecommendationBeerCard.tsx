@@ -1,3 +1,5 @@
+import type { TFunction } from 'i18next'
+import { useTranslation } from 'react-i18next'
 import { Badge, Card } from '@beerolog/ui'
 import { BeerColorGlass } from './BeerColorGlass'
 import { deriveBeerColor, type BeerColor } from '../lib/beer-color'
@@ -19,14 +21,20 @@ type Breakdown = {
 export type RecommendedBeer = {
   id: string
   name: string
+  name_hebrew?: string | null
   brewery: string
   style: string
   abv: number
   market_tier: 'mainstream' | 'craft' | 'import'
   color?: BeerColor | null
   image_url: string | null
-  why_line: string
+  why: WhyLine
   breakdown: Breakdown
+}
+
+export type WhyLine = {
+  code: string
+  params?: Record<string, string>
 }
 
 type RecommendationBeerCardProps = {
@@ -39,12 +47,6 @@ type RecommendationBeerCardProps = {
   calibration?: MatchCalibration
 }
 
-const TIER_LABELS: Record<RecommendedBeer['market_tier'], string> = {
-  mainstream: 'Mainstream',
-  craft: 'Craft',
-  import: 'Import',
-}
-
 export function RecommendationBeerCard({
   beer,
   rank,
@@ -54,7 +56,11 @@ export function RecommendationBeerCard({
   abvIntent,
   calibration,
 }: RecommendationBeerCardProps) {
+  const { t, i18n } = useTranslation()
   const isTopPick = rank === 1
+  // Catalog names are bilingual; show Hebrew when the UI is Hebrew, fall back to English.
+  const displayName =
+    i18n.language.startsWith('he') && beer.name_hebrew ? beer.name_hebrew : beer.name
   const beerColor = deriveBeerColor(beer.style, beer.color)
   const contributors = matchAlignmentPercents(
     beer.breakdown,
@@ -89,9 +95,9 @@ export function RecommendationBeerCard({
           <Badge
             variant="success"
             className="whitespace-nowrap text-xs font-semibold tabular-nums"
-            aria-label={`${matchPercent} percent match`}
+            aria-label={t('recommendations.matchAria', { percent: matchPercent })}
           >
-            {matchPercent}% match
+            {t('recommendations.matchBadge', { percent: matchPercent })}
           </Badge>
         </div>
 
@@ -100,11 +106,11 @@ export function RecommendationBeerCard({
             <div className="order-2 min-w-0 space-y-1 sm:order-1 sm:flex-1">
               {isTopPick ? (
                 <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">
-                  Top pick
+                  {t('recommendations.topPick')}
                 </p>
               ) : null}
               <h2 className="text-base font-bold leading-snug tracking-tight text-neutral-900 break-words sm:text-lg sm:leading-tight sm:text-xl">
-                {beer.name}
+                {displayName}
               </h2>
               <p className="text-sm text-neutral-600">{beer.brewery}</p>
             </div>
@@ -127,28 +133,28 @@ export function RecommendationBeerCard({
               {beer.style}
             </Badge>
             <Badge variant="default" className="text-xs">
-              {formatAbv(beer.abv)} ABV
+              {t('recommendations.abvBadge', { abv: formatAbv(beer.abv) })}
             </Badge>
             <Badge variant={tierBadgeVariant(beer.market_tier)} className="text-xs">
-              {TIER_LABELS[beer.market_tier]}
+              {t(`recommendations.tier.${beer.market_tier}`)}
             </Badge>
           </div>
 
           <div className="w-full space-y-2">
-            {beer.why_line ? (
-              <blockquote className="border-t-4 border-brand-400 bg-brand-50/60 px-3 py-2 text-sm italic leading-relaxed text-neutral-700 sm:border-l-4 sm:border-t-0">
-                {beer.why_line}
+            {beer.why?.code ? (
+              <blockquote className="border-t-4 border-brand-400 bg-brand-50/60 px-3 py-2 text-sm italic leading-relaxed text-neutral-700 sm:border-s-4 sm:border-t-0">
+                {whyText(t, beer.why)}
               </blockquote>
             ) : null}
 
             <details className="w-full rounded-lg border border-neutral-200 bg-neutral-50/80 px-3 py-2 text-left text-xs text-neutral-600">
               <summary className="cursor-pointer font-medium text-neutral-700">
-                How we matched this beer
+                {t('recommendations.howMatched')}
               </summary>
-              <ul className="mt-2 space-y-1 pl-4">
+              <ul className="mt-2 space-y-1 ps-4">
                 {contributors.map((item) => (
-                  <li key={item.label}>
-                    {item.label}:{' '}
+                  <li key={item.key}>
+                    {t(`recommendations.contributors.${item.key}`)}:{' '}
                     <span className="font-semibold tabular-nums text-neutral-800">
                       {item.percent}%
                     </span>
@@ -165,6 +171,15 @@ export function RecommendationBeerCard({
 
 function formatAbv(abv: number): string {
   return `${Number(abv.toFixed(1))}%`
+}
+
+// Renders the API's language-neutral why-line. Vibe/ABV params are themselves
+// translated (why.vibe.*, why.abv.*) so the sentence reads naturally per language.
+function whyText(t: TFunction, why: WhyLine): string {
+  const params: Record<string, string> = {}
+  if (why.params?.vibe) params.vibe = t(`why.vibeWord.${why.params.vibe}`)
+  if (why.params?.abv) params.abv = t(`why.abvWord.${why.params.abv}`)
+  return t(`why.${why.code}`, params)
 }
 
 function tierBadgeVariant(

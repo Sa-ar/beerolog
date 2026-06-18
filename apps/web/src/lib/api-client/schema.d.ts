@@ -305,6 +305,16 @@ export interface components {
          * @enum {string}
          */
         LovePref: "love" | "okay" | "avoid";
+        /**
+         * MatchCalibration
+         * @description Fixed affine anchors for user-facing cosine % (not result-set normalization).
+         */
+        MatchCalibration: {
+            /** Cos Ceiling */
+            cos_ceiling: number;
+            /** Cos Floor */
+            cos_floor: number;
+        };
         /** OnboardingAnswers */
         OnboardingAnswers: {
             citrus: components["schemas"]["CitrusPick"];
@@ -391,6 +401,7 @@ export interface components {
             alpha: number;
             /** Beta */
             beta: number;
+            calibration: components["schemas"]["MatchCalibration"];
             /** Results */
             results: components["schemas"]["RecommendedBeer"][];
         };
@@ -417,10 +428,11 @@ export interface components {
             market_tier: "mainstream" | "craft" | "import";
             /** Name */
             name: string;
+            /** Name Hebrew */
+            name_hebrew?: string | null;
             /** Style */
             style: string;
-            /** Why Line */
-            why_line: string;
+            why: components["schemas"]["WhyLine"];
         };
         /** ScoreBreakdown */
         ScoreBreakdown: {
@@ -490,6 +502,22 @@ export interface components {
          * @enum {string}
          */
         Vibe: "refreshing" | "cozy" | "adventurous" | "familiar";
+        /**
+         * WhyLine
+         * @description Language-neutral recommendation explanation.
+         *
+         *     The API picks the code + params; the frontend renders the localized
+         *     sentence (key why.<code>). Keeps copy in one place and the embedding
+         *     templates English-only.
+         */
+        WhyLine: {
+            /** Code */
+            code: string;
+            /** Params */
+            params?: {
+                [key: string]: string;
+            };
+        };
     };
     responses: never;
     parameters: never;

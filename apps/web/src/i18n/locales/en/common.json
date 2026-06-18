@@ -1,0 +1,214 @@
+{
+  "appTitle": "Beerolog",
+  "language": { "label": "Language", "he": "עברית", "en": "English" },
+  "common": {
+    "tryAgain": "Try again",
+    "backToHome": "Back to home"
+  },
+  "header": { "home": "Beerolog home" },
+  "settings": { "title": "Settings", "language": "Language" },
+  "auth": { "signIn": "Sign in" },
+  "signin": {
+    "title": "Beerolog",
+    "subtitle": "Sign in with a social account to save your taste profile and beer picks."
+  },
+  "notFound": {
+    "title": "Wrong bar, wrong beer",
+    "description": "Double-check the link, or let Beerolog guide you back to picks you'll enjoy."
+  },
+  "greeting": {
+    "morning": "Good morning",
+    "afternoon": "Good afternoon",
+    "evening": "Good evening",
+    "named": "{{greeting}}, {{name}}"
+  },
+  "flavors": {
+    "malty": "Malty",
+    "hoppy": "Hoppy",
+    "roasty": "Roasty",
+    "fruity": "Fruity",
+    "sour": "Sour",
+    "smoky": "Smoky"
+  },
+  "profile": {
+    "title": "Your taste profile",
+    "novelty": { "explorer": "Flavor explorer", "comfort": "Comfort seeker" },
+    "summary": {
+      "ready": "Ready for tonight?",
+      "lastUpdated": "Profile last updated {{date}}",
+      "dials": "Your taste dials",
+      "retake": "Retake the taste quiz",
+      "retakeHint": "Your picks and ratings keep refining what we recommend."
+    },
+    "dials": {
+      "carbonation": { "label": "Carbonation", "low": "Still", "mid": "Light fizz", "high": "Sparkling" },
+      "bitterness": { "label": "Bitterness", "low": "Mild", "mid": "Balanced", "high": "Bold" },
+      "novelty": { "label": "Novelty", "low": "Familiar", "mid": "Open", "high": "Adventurous" }
+    }
+  },
+  "emptyProfile": {
+    "headline": "Let's learn how you taste",
+    "intro": "A short quiz about coffee, snacks, and everyday flavors — we'll turn it into beer picks you'll actually enjoy.",
+    "cardTitle": "No taste profile yet",
+    "cardDescription": "Takes about 30 seconds. No beer knowledge required.",
+    "cta": "Start the taste quiz",
+    "whatNext": "What happens next",
+    "steps": {
+      "quiz": { "title": "Quick taste quiz", "detail": "Seven everyday questions — no beer jargon." },
+      "vibe": { "title": "Tonight's vibe", "detail": "Refreshing or cozy, low or high ABV." },
+      "picks": { "title": "Your top 5 picks", "detail": "Matched to your saved taste profile." }
+    }
+  },
+  "home": {
+    "loadingSession": "Loading session…",
+    "eyebrow": "Solo taste learning",
+    "headline": "Find beers you'll actually enjoy",
+    "subhead": "Beerolog learns how you taste, then matches every session to what you want right now.",
+    "howItWorks": "How it works",
+    "howItWorksHint": "Sign in so your quiz answers and picks are saved to your profile.",
+    "cta": "Sign in to start",
+    "ctaHint": "Free to try. Your taste profile stays with your account.",
+    "steps": {
+      "quiz": {
+        "title": "Quick taste quiz",
+        "detail": "Seven everyday food & drink questions — no beer jargon."
+      },
+      "vibe": {
+        "title": "Tonight's vibe",
+        "detail": "Pick refreshing or cozy, low or high ABV, optional free text."
+      },
+      "picks": {
+        "title": "Your top 5 picks",
+        "detail": "Recommendations matched to your saved taste profile."
+      }
+    }
+  },
+  "onboarding": {
+    "title": "Tell us how you taste",
+    "intro": "Seven quick picks. We use these to model your baseline so every session recommendation lands closer to what you actually enjoy.",
+    "saving": "Saving…",
+    "save": "Save my taste profile",
+    "questions": {
+      "coffee": "How do you take coffee?",
+      "water": "Water style?",
+      "novelty": "Do you like trying things you haven't had before?",
+      "snack": "Pick a snack",
+      "sour": "Sour foods (pickles, kimchi, yogurt)?",
+      "citrus": "Pick a citrus",
+      "smoked": "Smoked foods (brisket, smoked cheese)?"
+    }
+  },
+  "enums": {
+    "common": { "yes": "Yes", "no": "No" },
+    "coffee": {
+      "black": "Black",
+      "espresso": "Espresso",
+      "hafuch": "Hafuch",
+      "iced_sweet": "Iced & sweet",
+      "none": "Don't drink coffee"
+    },
+    "water": { "still": "Still", "light": "Lightly fizzy", "strong": "Strongly fizzy" },
+    "snack": {
+      "dark_chocolate": "Dark chocolate",
+      "halva": "Halva",
+      "fresh_fruit": "Fresh fruit",
+      "milk_chocolate": "Milk chocolate"
+    },
+    "love": { "love": "Love them", "okay": "They're okay", "avoid": "Avoid them" },
+    "citrus": {
+      "grapefruit": "Grapefruit",
+      "orange": "Orange",
+      "lemonade": "Lemonade",
+      "none": "None of those"
+    },
+    "vibe": {
+      "refreshing": { "label": "Refreshing", "hint": "crisp and easy" },
+      "cozy": { "label": "Cozy", "hint": "warming and rich" },
+      "adventurous": { "label": "Adventurous", "hint": "try something new" },
+      "familiar": { "label": "Familiar", "hint": "comforting and known" }
+    },
+    "abv": {
+      "low": { "label": "Low", "hint": "≤4.5%" },
+      "medium": { "label": "Medium", "hint": "4.5–6.5%" },
+      "high": { "label": "High", "hint": "6.5%+" },
+      "any": { "label": "Any", "hint": "no preference" }
+    }
+  },
+  "session": {
+    "start": "Start a session",
+    "intro": "Pick tonight's vibe and ABV — optionally add a few words about the moment.",
+    "vibeLegend": "Vibe",
+    "abvLegend": "ABV",
+    "tellMore": "Tell us more",
+    "optional": "(optional)",
+    "placeholder": "Hot evening, sharing a platter, want something crisp…",
+    "submit": "Get my top 5"
+  },
+  "why": {
+    "baseline_vibe": "Matches your usual style + tonight's {{vibe}} vibe.",
+    "baseline": "Matches your usual style.",
+    "session_vibe": "Tonight's {{vibe}} vibe pulled this one in.",
+    "session": "Tonight's mood pulled this one in.",
+    "abv": "Fits your {{abv}}-ABV pick for tonight.",
+    "abv_any": "Matches your alcohol preference for tonight.",
+    "novelty_positive": "A bolder pick than usual — you said you wanted to explore.",
+    "novelty_negative": "A safe familiar choice — close to what you normally like.",
+    "vibeWord": { "refreshing": "refreshing", "cozy": "cozy", "adventurous": "adventurous", "familiar": "familiar" },
+    "abvWord": { "low": "low", "medium": "medium", "high": "high" }
+  },
+  "recommendations": {
+    "eyebrow": "Recommendations",
+    "errorTitle": "Couldn't load your picks",
+    "backToDashboard": "Back to dashboard",
+    "missingTitle": "No picks yet",
+    "missingDescription": "Pick tonight's vibe and we'll match five beers to how you feel right now.",
+    "startSession": "Start a session",
+    "matchedEyebrow": "Matched for you",
+    "loadingAria": "Loading recommendations",
+    "heading_one": "Your top {{count}} pick",
+    "heading_other": "Your top {{count}} picks",
+    "subhead": "Ranked for your saved taste profile and tonight's session intent.",
+    "loadingMore": "Loading more picks…",
+    "showMore": "Show {{count}} more picks",
+    "topPick": "Top pick",
+    "matchBadge": "{{percent}}% match",
+    "matchAria": "{{percent}} percent match",
+    "abvBadge": "{{abv}} ABV",
+    "howMatched": "How we matched this beer",
+    "tier": { "mainstream": "Mainstream", "craft": "Craft", "import": "Import" },
+    "contributors": {
+      "taste": "Taste profile",
+      "mood": "Tonight's mood",
+      "abvFit": "ABV fit",
+      "noveltyBoost": "Novelty boost",
+      "noveltyPenalty": "Novelty penalty"
+    }
+  },
+  "errors": {
+    "global": {
+      "title": "Something went wrong",
+      "message": "An unexpected error occurred. Try again or head back to home."
+    },
+    "baselineLoad": {
+      "network": {
+        "title": "Can't reach Beerolog",
+        "message": "We couldn't connect right now. Check your connection and try again in a moment."
+      },
+      "unauthorized": {
+        "title": "Session needs a refresh",
+        "message": "Your sign-in didn't carry through. Try again or sign out and back in."
+      },
+      "server": {
+        "title": "Beerolog is temporarily unavailable",
+        "message": "Something went wrong on our end. Give it a moment and try again."
+      },
+      "unknown": {
+        "title": "Couldn't load your profile",
+        "message": "Something unexpected happened while loading your taste profile."
+      }
+    },
+    "sessionStart": "We couldn't start your session. Check your connection and try again.",
+    "loadMore": "We couldn't load more picks. Give it a moment and try again.",
+    "onboardingSave": "We couldn't save your taste profile. Try again in a moment."
+  }
+}

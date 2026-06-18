@@ -87,7 +87,7 @@ def test_returns_top_5_with_full_breakdown(client: TestClient) -> None:
     body = r.json()
     assert len(body["results"]) == 5
     for beer in body["results"]:
-        assert beer["why_line"]
+        assert beer["why"]["code"]
         assert beer["color"] in ("pale", "gold", "amber", "brown", "dark")
         breakdown = beer["breakdown"]
         for k in (
@@ -133,10 +133,10 @@ def test_skip_session_intent_path(client: TestClient) -> None:
     body = r.json()
     assert body["alpha"] == 0.6
     for beer in body["results"]:
-        assert beer["why_line"] in (
-            "Matches your usual style.",
-            "A bolder pick than usual — you said you wanted to explore.",
-            "A safe familiar choice — close to what you normally like.",
+        assert beer["why"]["code"] in (
+            "baseline",
+            "novelty_positive",
+            "novelty_negative",
         )
 
 

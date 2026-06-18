@@ -36,27 +36,10 @@ export const RECS_STORAGE_KEY = 'beerolog_last_recs'
 export const RECS_PENDING_KEY = 'beerolog_pending_session'
 const RECS_REQUEST_KEY = 'beerolog_last_recs_request'
 
-export const VIBE_OPTIONS: {
-  value: SessionVibe
-  label: string
-  hint: string
-}[] = [
-  { value: 'refreshing', label: 'Refreshing', hint: 'crisp and easy' },
-  { value: 'cozy', label: 'Cozy', hint: 'warming and rich' },
-  { value: 'adventurous', label: 'Adventurous', hint: 'try something new' },
-  { value: 'familiar', label: 'Familiar', hint: 'comforting and known' },
-]
+// Values only; labels/hints come from enums.vibe.<value>.{label,hint} translation keys.
+export const VIBE_OPTIONS: SessionVibe[] = ['refreshing', 'cozy', 'adventurous', 'familiar']
 
-export const ABV_OPTIONS: {
-  value: AbvIntent
-  label: string
-  hint: string
-}[] = [
-  { value: 'low', label: 'Low', hint: '≤4.5%' },
-  { value: 'medium', label: 'Medium', hint: '4.5–6.5%' },
-  { value: 'high', label: 'High', hint: '6.5%+' },
-  { value: 'any', label: 'Any', hint: 'no preference' },
-]
+export const ABV_OPTIONS: AbvIntent[] = ['low', 'medium', 'high', 'any']
 
 function persistSessionResults(
   request: StoredSessionRequest,

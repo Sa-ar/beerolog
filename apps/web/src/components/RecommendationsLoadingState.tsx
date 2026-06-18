@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Card } from '@beerolog/ui'
 import { RECS_PAGE_SIZE } from '../lib/session-intent'
 
@@ -46,15 +47,16 @@ function RecommendationCardSkeleton({ isTopPick }: { isTopPick: boolean }) {
 }
 
 export function RecommendationsLoadingState() {
+  const { t } = useTranslation()
   return (
     <main
       className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-4 py-8 sm:gap-8 sm:px-6 sm:py-10 md:py-12"
       aria-busy="true"
-      aria-label="Loading recommendations"
+      aria-label={t('recommendations.loadingAria')}
     >
       <section className="animate-pulse space-y-2">
         <p className="text-sm font-semibold uppercase tracking-wide text-brand-600">
-          Matched for you
+          {t('recommendations.matchedEyebrow')}
         </p>
         <div className="h-9 w-56 max-w-full rounded-lg bg-neutral-200" />
         <div className="h-4 w-72 max-w-full rounded bg-neutral-100" />

@@ -325,6 +325,25 @@
         "title": "LovePref",
         "type": "string"
       },
+      "MatchCalibration": {
+        "description": "Fixed affine anchors for user-facing cosine % (not result-set normalization).",
+        "properties": {
+          "cos_ceiling": {
+            "title": "Cos Ceiling",
+            "type": "number"
+          },
+          "cos_floor": {
+            "title": "Cos Floor",
+            "type": "number"
+          }
+        },
+        "required": [
+          "cos_floor",
+          "cos_ceiling"
+        ],
+        "title": "MatchCalibration",
+        "type": "object"
+      },
       "OnboardingAnswers": {
         "properties": {
           "citrus": {
@@ -584,6 +603,9 @@
             "title": "Beta",
             "type": "number"
           },
+          "calibration": {
+            "$ref": "#/components/schemas/MatchCalibration"
+          },
           "results": {
             "items": {
               "$ref": "#/components/schemas/RecommendedBeer"
@@ -595,7 +617,8 @@
         "required": [
           "results",
           "alpha",
-          "beta"
+          "beta",
+          "calibration"
         ],
         "title": "RecommendationsResponse",
         "type": "object"
@@ -652,13 +675,23 @@
             "title": "Name",
             "type": "string"
           },
+          "name_hebrew": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name Hebrew"
+          },
           "style": {
             "title": "Style",
             "type": "string"
           },
-          "why_line": {
-            "title": "Why Line",
-            "type": "string"
+          "why": {
+            "$ref": "#/components/schemas/WhyLine"
           }
         },
         "required": [
@@ -669,7 +702,7 @@
           "abv",
           "market_tier",
           "color",
-          "why_line",
+          "why",
           "breakdown"
         ],
         "title": "RecommendedBeer",
@@ -862,6 +895,27 @@
         ],
         "title": "Vibe",
         "type": "string"
+      },
+      "WhyLine": {
+        "description": "Language-neutral recommendation explanation.\n\nThe API picks the code + params; the frontend renders the localized\nsentence (key why.<code>). Keeps copy in one place and the embedding\ntemplates English-only.",
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "params": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Params",
+            "type": "object"
+          }
+        },
+        "required": [
+          "code"
+        ],
+        "title": "WhyLine",
+        "type": "object"
       }
     },
     "securitySchemes": {
