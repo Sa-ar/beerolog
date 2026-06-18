@@ -2,6 +2,7 @@
  * /recommendations — beer picks matched to taste profile and session intent.
  */
 
+import { RedirectToSignIn, Show } from '@clerk/tanstack-react-start'
 import { CatalogIcon } from '@beerolog/icons'
 import { Alert, Button } from '@beerolog/ui'
 import { createFileRoute, Link } from '@tanstack/react-router'
@@ -27,6 +28,19 @@ export const Route = createFileRoute('/recommendations')({
   component: RecommendationsPage,
 })
 
+function RecommendationsPage() {
+  return (
+    <>
+      <Show when="signed-out">
+        <RedirectToSignIn />
+      </Show>
+      <Show when="signed-in">
+        <RecommendationsContent />
+      </Show>
+    </>
+  )
+}
+
 type PageState =
   | { status: 'loading' }
   | { status: 'ready'; results: RecommendedBeer[]; hasMore: boolean }
@@ -50,7 +64,7 @@ function getInitialPageState(): PageState {
   return { status: 'missing' }
 }
 
-function RecommendationsPage() {
+function RecommendationsContent() {
   const { t } = useTranslation()
   const [pageState, setPageState] = useState<PageState>(getInitialPageState)
   const [loadingMore, setLoadingMore] = useState(false)
