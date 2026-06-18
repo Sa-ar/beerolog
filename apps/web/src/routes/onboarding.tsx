@@ -4,6 +4,7 @@
  * the user's BaselineTaste. Redirects to the dashboard on success.
  */
 
+import { RedirectToSignIn, Show } from '@clerk/tanstack-react-start'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -14,6 +15,19 @@ import { onboardingSaveErrorMessage } from '../lib/user-facing-errors'
 export const Route = createFileRoute('/onboarding')({
   component: OnboardingPage,
 })
+
+function OnboardingPage() {
+  return (
+    <>
+      <Show when="signed-out">
+        <RedirectToSignIn />
+      </Show>
+      <Show when="signed-in">
+        <OnboardingForm />
+      </Show>
+    </>
+  )
+}
 
 type Coffee = 'black' | 'espresso' | 'hafuch' | 'iced_sweet' | 'none'
 type Water = 'still' | 'light' | 'strong'
@@ -39,7 +53,7 @@ const SNACK_OPTS: Snack[] = ['dark_chocolate', 'halva', 'fresh_fruit', 'milk_cho
 const LOVE_OPTS: Love[] = ['love', 'okay', 'avoid']
 const CITRUS_OPTS: Citrus[] = ['grapefruit', 'orange', 'lemonade', 'none']
 
-function OnboardingPage() {
+function OnboardingForm() {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const [a, setA] = useState<Answers>({

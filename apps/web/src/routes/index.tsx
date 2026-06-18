@@ -4,6 +4,7 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button, Card } from '@beerolog/ui'
+import { PAGE_MAIN } from '../lib/page-shell'
 import { TasteProfileEmptyState } from '../components/TasteProfileEmptyState'
 import { TasteProfileErrorState } from '../components/TasteProfileErrorState'
 import { TasteProfileLoadingState } from '../components/TasteProfileLoadingState'
@@ -37,14 +38,14 @@ function HomePage() {
 
   if (signedIn) {
     return (
-      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-6 py-10 sm:py-12">
+      <main className={`${PAGE_MAIN} py-10 sm:py-12`}>
         <SignedInHome firstName={user?.firstName} />
       </main>
     )
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-10 px-6 py-12">
+    <main className={`${PAGE_MAIN} gap-8 py-8 sm:gap-10 sm:py-12`}>
       <VisitorHome />
     </main>
   )
@@ -103,7 +104,7 @@ function SignedInHome({ firstName }: { firstName: string | null | undefined }) {
 function SessionLoading() {
   const { t } = useTranslation()
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-6 py-12">
+    <main className={`${PAGE_MAIN} py-12`}>
       <p className="text-center text-sm text-neutral-400 animate-pulse">
         {t('home.loadingSession')}
       </p>
@@ -119,10 +120,10 @@ function VisitorHome() {
         <p className="text-sm font-semibold uppercase tracking-wide text-brand-600">
           {t('home.eyebrow')}
         </p>
-        <h1 className="text-4xl font-bold tracking-tight text-neutral-900 sm:text-5xl">
+        <h1 className="text-3xl font-bold tracking-tight text-balance text-neutral-900 sm:text-4xl md:text-5xl">
           {t('home.headline')}
         </h1>
-        <p className="mx-auto max-w-lg text-lg text-neutral-600">{t('home.subhead')}</p>
+        <p className="mx-auto max-w-lg text-base text-neutral-600 sm:text-lg">{t('home.subhead')}</p>
       </section>
 
       <section className="space-y-4">
@@ -131,14 +132,14 @@ function VisitorHome() {
           <p className="mt-1 text-sm text-neutral-600">{t('home.howItWorksHint')}</p>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-3 sm:gap-6">
           {STEPS.map((step) => (
             <Card
               key={step}
               className="flex flex-col items-center gap-2 p-4 text-center transition-colors hover:border-brand-500 hover:bg-brand-50"
             >
               <CatalogIcon group="journey" iconKey={step} className="h-9 w-9" />
-              <div>
+              <div className="min-w-0">
                 <p className="font-medium text-neutral-900">{t(`home.steps.${step}.title`)}</p>
                 <p className="mt-1 text-sm text-neutral-600">{t(`home.steps.${step}.detail`)}</p>
               </div>
@@ -147,7 +148,7 @@ function VisitorHome() {
         </div>
       </section>
 
-      <section className="flex flex-col gap-3">
+      <section className="flex flex-col gap-3 sm:mx-auto sm:max-w-md lg:max-w-lg">
         <Link to="/signin/$" params={{ _splat: '' }} search={{ next: '/onboarding' }}>
           <Button className="w-full" size="lg">
             {t('home.cta')}
