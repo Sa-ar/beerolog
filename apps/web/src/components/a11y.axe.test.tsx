@@ -1,3 +1,4 @@
+import { screen } from '@testing-library/react'
 import type { ReactElement, ReactNode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { axe } from 'vitest-axe'
@@ -15,6 +16,7 @@ vi.mock('../lib/api-client/client', () => ({
 }))
 
 const { LegalPage } = await import('./LegalPage')
+const { AgeVerificationGate } = await import('./AgeVerificationGate')
 const { AppFooter } = await import('./AppFooter')
 const { SkipLink } = await import('./SkipLink')
 const { QuizChips } = await import('./QuizChips')
@@ -65,5 +67,13 @@ describe('accessibility (axe) — compliance surfaces', () => {
 
   it('export data panel', async () => {
     await expectNoViolations(<ExportDataCard />)
+  })
+
+  it('age gate (open state)', async () => {
+    renderWithI18n(<AgeVerificationGate initialVerified={false} />, 'en')
+    // Scope axe to the dialog subtree: Base UI's sibling focus-trap guards are
+    // role=button-with-no-name by design and would otherwise trip aria-command-name.
+    const dialog = await screen.findByRole('dialog')
+    expect(await axe(dialog)).toHaveNoViolations()
   })
 })
