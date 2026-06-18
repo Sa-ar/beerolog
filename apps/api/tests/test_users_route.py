@@ -13,8 +13,16 @@ from fastapi.testclient import TestClient  # type: ignore[import-not-found]
 from app.auth import get_current_user
 from app.main import app
 from app.routes.users import get_account_repo
+from app.services.account_repo import (
+    AccountExportData,
+    ExportBaselineData,
+    ExportRatingData,
+)
 
 FAKE_USER = {"sub": "user_test_123"}
+
+EXPORT_EMAIL = "taster@example.com"
+EXPORT_NOTE = "smooth and malty"
 
 
 class _MemoryAccountRepo:
@@ -29,6 +37,20 @@ class _MemoryAccountRepo:
     async def delete_account(self, *, user_id: str) -> None:
         self.deleted.append(user_id)
         self.data.pop(user_id, None)
+
+    async def export_account(self, *, user_id: str) -> AccountExportData:
+        return AccountExportData(
+            id=user_id,
+            email=EXPORT_EMAIL,
+            display_name="Taster",
+            baseline_taste=ExportBaselineData(
+                bubbles=0.4,
+                bitterness=0.7,
+                flavor_family={"hoppy": 0.9},
+                novelty_affinity=0.5,
+            ),
+            ratings=[ExportRatingData(beer_id="goldstar", rating="loved", note=EXPORT_NOTE)],
+        )
 
 
 @pytest.fixture
@@ -71,3 +93,31 @@ def test_delete_me_logs_request_id_and_user_id(
     messages = " ".join(rec.getMessage() for rec in caplog.records)
     assert "user_test_123" in messages
     assert "req-abc" in messages
+
+
+def test_export_me_returns_account_metadata_baseline_and_ratings(client: TestClient) -> None:
+    r = client.get("/me/export")
+    assert r.status_code == 200
+    body = r.json()
+    assert body["id"] == "user_test_123"
+    assert body["email"] == EXPORT_EMAIL
+    assert body["baseline_taste"]["flavor_family"] == {"hoppy": 0.9}
+    assert body["ratings"][0]["beer_id"] == "goldstar"
+    # Embedding vector is disclosed in the policy but never exported.
+    assert "embedding" not in body["baseline_taste"]
+
+
+def test_export_me_requires_auth() -> None:
+    raw_client = TestClient(app)
+    r = raw_client.get("/me/export")
+    assert r.status_code == 401
+
+
+def test_export_me_does_not_log_the_payload(
+    client: TestClient, caplog: pytest.LogCaptureFixture
+) -> None:
+    with caplog.at_level("INFO"):
+        client.get("/me/export")
+    messages = " ".join(rec.getMessage() for rec in caplog.records)
+    assert EXPORT_EMAIL not in messages
+    assert EXPORT_NOTE not in messages

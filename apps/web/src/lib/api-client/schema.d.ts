@@ -107,6 +107,23 @@ export interface paths {
         patch: operations["patchMyBaselineTaste"];
         trace?: never;
     };
+    "/me/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Export My Account */
+        get: operations["exportMyAccount"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/me/ratings": {
         parameters: {
             query?: never;
@@ -191,6 +208,21 @@ export interface components {
         AccountDeletionResponse: {
             /** Deleted */
             deleted: boolean;
+        };
+        /**
+         * AccountExport
+         * @description Portable copy of a user's Beerolog-owned data (no internal embedding).
+         */
+        AccountExport: {
+            baseline_taste: components["schemas"]["ExportBaselineTaste"] | null;
+            /** Display Name */
+            display_name: string | null;
+            /** Email */
+            email: string | null;
+            /** Id */
+            id: string;
+            /** Ratings */
+            ratings: components["schemas"]["ExportRating"][];
         };
         /**
          * BaselineTasteDials
@@ -284,6 +316,28 @@ export interface components {
          * @enum {string}
          */
         DominantComponent: "baseline" | "session" | "abv" | "novelty_positive" | "novelty_negative";
+        /** ExportBaselineTaste */
+        ExportBaselineTaste: {
+            /** Bitterness */
+            bitterness: number;
+            /** Bubbles */
+            bubbles: number;
+            /** Flavor Family */
+            flavor_family: {
+                [key: string]: number;
+            };
+            /** Novelty Affinity */
+            novelty_affinity: number;
+        };
+        /** ExportRating */
+        ExportRating: {
+            /** Beer Id */
+            beer_id: string;
+            /** Note */
+            note: string | null;
+            /** Rating */
+            rating: string | null;
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -701,6 +755,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    exportMyAccount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountExport"];
                 };
             };
         };

@@ -19,6 +19,14 @@
       "cancel": "Cancel",
       "deleting": "Deleting…",
       "error": "Something went wrong. Please try again."
+    },
+    "export": {
+      "title": "Export your data",
+      "description": "Download a copy of the data Beerolog stores about you: your account details, taste profile, and ratings. (The internal taste embedding is not human-readable and is not included.)",
+      "cta": "Export my data",
+      "loading": "Preparing…",
+      "download": "Download JSON",
+      "error": "Something went wrong. Please try again."
     }
   },
   "footer": {
