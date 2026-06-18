@@ -11,6 +11,20 @@
         "title": "AbvIntent",
         "type": "string"
       },
+      "AccountDeletionResponse": {
+        "description": "Contract the web client uses to then complete Clerk sign-out.",
+        "properties": {
+          "deleted": {
+            "title": "Deleted",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "deleted"
+        ],
+        "title": "AccountDeletionResponse",
+        "type": "object"
+      },
       "BaselineTasteDials": {
         "description": "User-facing, editable taste dials derived from onboarding answers.",
         "properties": {
@@ -1006,6 +1020,32 @@
         "summary": "Get Icon Catalog",
         "tags": [
           "icons"
+        ]
+      }
+    },
+    "/me": {
+      "delete": {
+        "operationId": "deleteMyAccount",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountDeletionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Delete My Account",
+        "tags": [
+          "account"
         ]
       }
     },

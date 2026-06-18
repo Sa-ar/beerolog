@@ -10,7 +10,8 @@ from app.config import settings
 from app.db import close_pool, get_pool
 from app.errors import BeerologError
 from app.observability import configure_logging, instrument_requests, logger
-from app.routes import debug, health, icons, onboarding, ratings, recommendations
+from app.routes import debug, health, icons, onboarding, ratings, recommendations, users
+from app.services.account_repo import AsyncpgAccountRepo
 from app.services.baseline_taste_repo import AsyncpgBaselineTasteRepo
 from app.services.icon_repo import AsyncpgIconRepo
 from app.services.ratings_repo import AsyncpgRatingsRepo
@@ -40,6 +41,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
         )
         app.dependency_overrides[ratings.get_ratings_repo] = lambda: AsyncpgRatingsRepo(pool)
         app.dependency_overrides[onboarding.get_icon_repo] = lambda: AsyncpgIconRepo(pool)
+        app.dependency_overrides[users.get_account_repo] = lambda: AsyncpgAccountRepo(pool)
 
     try:
         yield
@@ -64,6 +66,7 @@ app.include_router(icons.router)
 app.include_router(onboarding.router)
 app.include_router(recommendations.router)
 app.include_router(ratings.router)
+app.include_router(users.router)
 app.include_router(debug.router)
 
 

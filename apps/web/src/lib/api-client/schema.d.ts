@@ -72,6 +72,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete My Account */
+        delete: operations["deleteMyAccount"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/me/baseline-taste": {
         parameters: {
             query?: never;
@@ -167,6 +184,14 @@ export interface components {
          * @enum {string}
          */
         AbvIntent: "low" | "medium" | "high" | "any";
+        /**
+         * AccountDeletionResponse
+         * @description Contract the web client uses to then complete Clerk sign-out.
+         */
+        AccountDeletionResponse: {
+            /** Deleted */
+            deleted: boolean;
+        };
         /**
          * BaselineTasteDials
          * @description User-facing, editable taste dials derived from onboarding answers.
@@ -603,6 +628,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["IconCatalogResponse"];
+                };
+            };
+        };
+    };
+    deleteMyAccount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountDeletionResponse"];
                 };
             };
         };
