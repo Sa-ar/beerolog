@@ -1,0 +1,27 @@
+# Beerolog
+
+> Beerolog helps a person learn their taste, get strong beer recommendations, and refine their profile over time. Signed-in solo flow: sign in, complete a 7-question taste quiz, get menu-scoped recommendations, rate beers, and keep an evolving taste profile.
+
+Beerolog is an auth-gated app (Clerk). Pages require sign-in; the API requires a Clerk session token.
+
+## Pages
+
+- [Dashboard](https://beerolog.com/): taste-profile summary, time-aware greeting, onboarding CTA
+- [Onboarding quiz](https://beerolog.com/onboarding): 7-question taste quiz (coffee, water, snacks, novelty, sour, citrus, smoked)
+- [Recommendations](https://beerolog.com/recommendations): top beer picks from saved taste profile + optional vibe context
+- [Sign in](https://beerolog.com/signin): Clerk authentication
+
+## API
+
+Base URL is set per deployment (VITE_API_URL). Endpoints require a Clerk session token unless noted.
+
+- `GET /health`: liveness probe (public)
+- `GET /health/ready`: readiness probe with per-component status (public)
+- `POST /onboarding`: submit 7 quiz answers; persists baseline taste profile
+- `GET /recommendations`: menu-scoped beer recommendations for the user
+- `POST /ratings`: record a beer rating to evolve the taste profile
+- `GET /icons`: icon metadata for the catalog
+
+## Out of scope
+
+No venue/scan flows, group sessions, friend challenges, leaderboards, badges, or bar-operator tooling.
