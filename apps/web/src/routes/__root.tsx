@@ -6,6 +6,7 @@ import { IconCatalogProvider } from '@beerolog/icons'
 import { AppFooter } from '../components/AppFooter'
 import { AppHeader } from '../components/AppHeader'
 import { AgeVerificationGate } from '../components/AgeVerificationGate'
+import { CookieNotice } from '../components/CookieNotice'
 import { SkipLink } from '../components/SkipLink'
 import { AuthTokenBridge } from '../components/AuthTokenBridge'
 import { GlobalErrorPage } from '../components/GlobalErrorPage'
@@ -51,6 +52,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
                 {children}
               </div>
               <AppFooter />
+              <CookieNotice />
             </IconCatalogProvider>
           </ClerkProvider>
         </I18nextProvider>

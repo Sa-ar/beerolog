@@ -7,6 +7,14 @@
   },
   "header": { "home": "Beerolog home" },
   "a11y": { "skipToContent": "Skip to content" },
+  "cookies": {
+    "notice": {
+      "label": "Cookie notice",
+      "body": "Beerolog uses only essential and functional cookies — no advertising or analytics.",
+      "learnMore": "Learn more",
+      "dismiss": "Got it"
+    }
+  },
   "privacy": {
     "title": "Privacy & your data",
     "delete": {
