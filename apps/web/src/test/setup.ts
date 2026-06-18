@@ -1,4 +1,8 @@
 import '@testing-library/jest-dom/vitest'
+import * as axeMatchers from 'vitest-axe/matchers'
+import { expect } from 'vitest'
+
+expect.extend(axeMatchers)
 
 // jsdom here exposes an incomplete localStorage; install a working in-memory
 // Storage so components using Web Storage are testable.

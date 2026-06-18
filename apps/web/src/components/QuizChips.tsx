@@ -18,7 +18,7 @@ export function QuizChips<T extends string>({
 }) {
   const { t } = useTranslation()
   return (
-    <section role="radiogroup" aria-label={title} className="mt-6">
+    <div role="radiogroup" aria-label={title} className="mt-6">
       <h2 className="mb-2 text-lg font-semibold text-neutral-900">{title}</h2>
       <div className="flex flex-wrap gap-2">
         {options.map((opt) => {
@@ -41,6 +41,6 @@ export function QuizChips<T extends string>({
           )
         })}
       </div>
-    </section>
+    </div>
   )
 }

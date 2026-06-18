@@ -26,6 +26,9 @@ jobs:
 
       - run: pnpm lint:js
 
+      - name: Web unit + accessibility (axe) tests
+        run: pnpm --dir apps/web test
+
   db-schema:
     name: Drizzle migration check
     runs-on: ubuntu-latest
