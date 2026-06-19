@@ -3,8 +3,9 @@ name: CI
 on:
   push:
     branches: [main]
+  # Run on every pull request, including stacked PRs whose base is not main,
+  # so each PR in a stack is validated before it reaches main.
   pull_request:
-    branches: [main]
 
 jobs:
   typescript:
