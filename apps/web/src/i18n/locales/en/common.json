@@ -6,6 +6,21 @@
     "backToHome": "Back to home"
   },
   "header": { "home": "Beerolog home" },
+  "a11y": { "skipToContent": "Skip to content" },
+  "privacy": {
+    "title": "Privacy & your data",
+    "delete": {
+      "title": "Delete account",
+      "description": "Permanently delete your Beerolog account and everything we store about you (your taste profile and ratings). This cannot be undone. Your sign-in is managed by Clerk, and you'll be signed out.",
+      "cta": "Delete account",
+      "confirmPhrase": "delete my account",
+      "inputLabel": "Type \"delete my account\" to confirm",
+      "confirm": "Permanently delete",
+      "cancel": "Cancel",
+      "deleting": "Deleting…",
+      "error": "Something went wrong. Please try again."
+    }
+  },
   "footer": {
     "responsibleDrinking": "Drink responsibly. Beerolog is for adults 18+ and does not sell alcohol.",
     "legal": "Legal",
