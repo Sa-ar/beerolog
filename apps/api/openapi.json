@@ -25,6 +25,63 @@
         "title": "AccountDeletionResponse",
         "type": "object"
       },
+      "AccountExport": {
+        "description": "Portable copy of a user's Beerolog-owned data (no internal embedding).",
+        "properties": {
+          "baseline_taste": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ExportBaselineTaste"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "display_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Display Name"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "ratings": {
+            "items": {
+              "$ref": "#/components/schemas/ExportRating"
+            },
+            "title": "Ratings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "display_name",
+          "baseline_taste",
+          "ratings"
+        ],
+        "title": "AccountExport",
+        "type": "object"
+      },
       "BaselineTasteDials": {
         "description": "User-facing, editable taste dials derived from onboarding answers.",
         "properties": {
@@ -256,6 +313,74 @@
         ],
         "title": "DominantComponent",
         "type": "string"
+      },
+      "ExportBaselineTaste": {
+        "properties": {
+          "bitterness": {
+            "title": "Bitterness",
+            "type": "number"
+          },
+          "bubbles": {
+            "title": "Bubbles",
+            "type": "number"
+          },
+          "flavor_family": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Flavor Family",
+            "type": "object"
+          },
+          "novelty_affinity": {
+            "title": "Novelty Affinity",
+            "type": "number"
+          }
+        },
+        "required": [
+          "bubbles",
+          "bitterness",
+          "flavor_family",
+          "novelty_affinity"
+        ],
+        "title": "ExportBaselineTaste",
+        "type": "object"
+      },
+      "ExportRating": {
+        "properties": {
+          "beer_id": {
+            "title": "Beer Id",
+            "type": "string"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "rating": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rating"
+          }
+        },
+        "required": [
+          "beer_id",
+          "rating",
+          "note"
+        ],
+        "title": "ExportRating",
+        "type": "object"
       },
       "HTTPValidationError": {
         "properties": {
@@ -1116,6 +1241,32 @@
         "summary": "Patch My Baseline Taste",
         "tags": [
           "onboarding"
+        ]
+      }
+    },
+    "/me/export": {
+      "get": {
+        "operationId": "exportMyAccount",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountExport"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Export My Account",
+        "tags": [
+          "account"
         ]
       }
     },

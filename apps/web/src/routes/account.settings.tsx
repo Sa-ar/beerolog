@@ -2,6 +2,7 @@ import { Card, CardContent } from '@beerolog/ui'
 import { createFileRoute } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { DeleteAccountCard } from '../components/DeleteAccountCard'
+import { ExportDataCard } from '../components/ExportDataCard'
 import { LanguageSwitcher } from '../components/LanguageSwitcher'
 
 export const Route = createFileRoute('/account/settings')({
@@ -18,6 +19,7 @@ function AccountSettings() {
           <LanguageSwitcher />
         </CardContent>
       </Card>
+      <ExportDataCard />
       <DeleteAccountCard />
     </div>
   )

@@ -7,6 +7,14 @@
   },
   "header": { "home": "Beerolog home" },
   "a11y": { "skipToContent": "Skip to content" },
+  "cookies": {
+    "notice": {
+      "label": "Cookie notice",
+      "body": "Beerolog uses only essential and functional cookies — no advertising or analytics.",
+      "learnMore": "Learn more",
+      "dismiss": "Got it"
+    }
+  },
   "privacy": {
     "title": "Privacy & your data",
     "delete": {
@@ -18,6 +26,14 @@
       "confirm": "Permanently delete",
       "cancel": "Cancel",
       "deleting": "Deleting…",
+      "error": "Something went wrong. Please try again."
+    },
+    "export": {
+      "title": "Export your data",
+      "description": "Download a copy of the data Beerolog stores about you: your account details, taste profile, and ratings. (The internal taste embedding is not human-readable and is not included.)",
+      "cta": "Export my data",
+      "loading": "Preparing…",
+      "download": "Download JSON",
       "error": "Something went wrong. Please try again."
     }
   },
