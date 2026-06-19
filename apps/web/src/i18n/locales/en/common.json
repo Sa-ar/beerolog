@@ -7,7 +7,59 @@
   },
   "header": { "home": "Beerolog home" },
   "footer": {
-    "responsibleDrinking": "Drink responsibly. Beerolog is for adults 18+ and does not sell alcohol."
+    "responsibleDrinking": "Drink responsibly. Beerolog is for adults 18+ and does not sell alcohol.",
+    "legal": "Legal",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "cookies": "Cookies",
+    "accessibility": "Accessibility"
+  },
+  "legal": {
+    "draftNotice": "Draft — this text is pending legal review and is not yet final.",
+    "lastUpdated": "Last updated: pending launch.",
+    "privacy": {
+      "title": "Privacy Policy",
+      "intro": "This policy explains what personal data Beerolog collects, why we process it, and which third parties help us run the service.",
+      "sections": [
+        { "heading": "What we collect", "body": "Your account identifier, and your email and display name if your sign-in provider shares them; your baseline taste profile (taste dials, flavor family, novelty affinity); and your beer ratings and optional notes." },
+        { "heading": "How we use it", "body": "To build your taste persona and generate beer recommendations. We do not sell your personal data." },
+        { "heading": "Beerolog data vs. authentication data", "body": "Sign-in and session data are held by our authentication provider, Clerk. The data listed above is stored in Beerolog's own database." },
+        { "heading": "Ephemeral session intent", "body": "The vibe, ABV range, and free text you enter for a recommendation are processed for that request only and are not stored as standalone records." },
+        { "heading": "Taste embedding", "body": "We derive an internal similarity vector from your ratings for matching. It is disclosed here but is not human-readable and is not included in data exports." },
+        { "heading": "Sub-processors", "body": "Clerk (authentication), our hosting provider, our database provider, and OpenAI (model inference). Prompts sent for inference are not logged beyond our observability rules." },
+        { "heading": "Your rights", "body": "You can export or permanently delete the data Beerolog stores about you from your account settings. Authentication data may also be managed through Clerk." },
+        { "heading": "Contact", "body": "Email privacy@beerolog.example to ask about your data. (Contact address pending launch.)" }
+      ]
+    },
+    "terms": {
+      "title": "Terms of Use",
+      "intro": "By using Beerolog you agree to these terms.",
+      "sections": [
+        { "heading": "Age requirement", "body": "Beerolog presents information about alcoholic beverages and is intended only for users of legal drinking age in their location." },
+        { "heading": "Acceptable use", "body": "Use Beerolog for personal, lawful purposes. Do not attempt to disrupt or abuse the service." },
+        { "heading": "No warranty", "body": "Recommendations are provided for guidance only, without warranty. Drink responsibly." },
+        { "heading": "Changes", "body": "We may update these terms; material changes will be reflected on this page." }
+      ]
+    },
+    "cookies": {
+      "title": "Cookie Notice",
+      "intro": "Beerolog uses a small number of cookies. We do not use advertising or analytics cookies.",
+      "sections": [
+        { "heading": "Essential cookies", "body": "age_verified records that you confirmed you are of legal drinking age, so the age gate is not shown on every visit. It is required to access alcohol-related content and cannot be turned off while you use the site." },
+        { "heading": "Functional cookies", "body": "lang remembers your language preference (Hebrew or English). It is not used for tracking." },
+        { "heading": "Non-essential cookies", "body": "We do not set analytics or marketing cookies. If that ever changes, they will not be activated without your explicit opt-in." }
+      ]
+    },
+    "accessibility": {
+      "title": "Accessibility Statement",
+      "intro": "Beerolog is committed to making its supported experience accessible to everyone.",
+      "sections": [
+        { "heading": "Conformance target", "body": "We aim to meet Israeli Standard SI 5568, which adopts WCAG 2.0 Level AA, across the supported sign-in, onboarding, and recommendation flows." },
+        { "heading": "Known gaps", "body": "Our third-party sign-in screens are provided by Clerk and may not fully meet our target; we track their accessibility and will update this statement as gaps are closed. Remediation timeline: pending launch." },
+        { "heading": "Accessibility coordinator", "body": "Coordinator name and role: pending assignment. Contact: accessibility@beerolog.example." },
+        { "heading": "Feedback", "body": "If you encounter a barrier, contact our accessibility coordinator and we will work to resolve it." }
+      ]
+    }
   },
   "ageGate": {
     "title": "Age verification",
