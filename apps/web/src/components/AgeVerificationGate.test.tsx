@@ -10,6 +10,11 @@ vi.mock('../lib/age-consent-cookie', () => ({
   setAgeVerified: vi.fn(),
 }))
 
+const useAuthMock = vi.fn(() => ({ isLoaded: true, isSignedIn: false }))
+vi.mock('@clerk/tanstack-react-start', () => ({
+  useAuth: () => useAuthMock(),
+}))
+
 import { setAgeVerified } from '../lib/age-consent-cookie'
 
 const i18n = i18next.createInstance()
@@ -35,6 +40,13 @@ function renderGate(initialVerified = false) {
 describe('AgeVerificationGate', () => {
   beforeEach(() => {
     vi.mocked(setAgeVerified).mockClear()
+    useAuthMock.mockReturnValue({ isLoaded: true, isSignedIn: false })
+  })
+
+  it('renders nothing when signed in', () => {
+    useAuthMock.mockReturnValue({ isLoaded: true, isSignedIn: true })
+    const { container } = renderGate(false)
+    expect(container).toBeEmptyDOMElement()
   })
 
   it('renders nothing when already verified', () => {

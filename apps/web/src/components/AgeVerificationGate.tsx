@@ -1,3 +1,4 @@
+import { useAuth } from '@clerk/tanstack-react-start'
 import { Button, Dialog, DialogContent, DialogDescription, DialogTitle } from '@beerolog/ui'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -7,9 +8,12 @@ export function AgeVerificationGate({ initialVerified }: { initialVerified: bool
   const [gateOpen, setGateOpen] = useState(!initialVerified)
   const [mounted, setMounted] = useState(!initialVerified)
   const [denied, setDenied] = useState(false)
+  const { isLoaded, isSignedIn } = useAuth()
   const { t } = useTranslation()
 
-  if (!mounted) {
+  // Signed-in users verified their age at sign-up; don't gate them.
+  // Hide while auth is still loading to avoid a flash of the dialog.
+  if (!mounted || !isLoaded || isSignedIn) {
     return null
   }
 
