@@ -35,6 +35,7 @@ class Settings(BaseSettings):
     baseline_staleness_days: int = 7
     embedding_model: str = "text-embedding-3-large"
     icon_model: str = "gpt-4o-mini"
+    persona_model: str = "gpt-4o-mini"
 
     @field_validator("cors_allowed_origins", mode="before")
     @classmethod

@@ -6,10 +6,12 @@ import {
   dialDescriptor,
   flavorTitle,
   noveltyLabel,
+  personaForLang,
   topFlavorFamilies,
   type BaselineTaste,
 } from '../lib/baseline-taste'
 import { SessionQuickPick } from './SessionQuickPick'
+import { TasteRadar } from './TasteRadar'
 
 type TasteProfileSummaryProps = {
   greeting: string
@@ -21,6 +23,27 @@ export function TasteProfileSummary({ greeting, baseline }: TasteProfileSummaryP
   const flavors = topFlavorFamilies(t, baseline)
   const title = flavorTitle(t, baseline)
   const heroSvg = resolveProfileHeroSvg(baseline, baseline.icons)
+  const persona = personaForLang(baseline, i18n.language)
+  const radarAxes = [
+    { key: 'bitterness', value: baseline.bitterness },
+    { key: 'sweetness', value: baseline.sweetness ?? 0.5 },
+    { key: 'body', value: baseline.body ?? 0.5 },
+    { key: 'hoppy', value: baseline.flavor_family.hoppy ?? 0 },
+    { key: 'malty', value: baseline.flavor_family.malty ?? 0 },
+    { key: 'roasty', value: baseline.flavor_family.roasty ?? 0 },
+    { key: 'sour', value: baseline.flavor_family.sour ?? 0 },
+    { key: 'novelty', value: baseline.novelty_affinity },
+  ]
+  const radarLabels: Record<string, string> = {
+    bitterness: t('profile.dials.bitterness.label'),
+    sweetness: t('profile.dials.sweetness.label'),
+    body: t('profile.dials.body.label'),
+    hoppy: t('flavors.hoppy'),
+    malty: t('flavors.malty'),
+    roasty: t('flavors.roasty'),
+    sour: t('flavors.sour'),
+    novelty: t('profile.dials.novelty.label'),
+  }
   const updated = new Date(baseline.updated_at).toLocaleDateString(
     i18n.language.startsWith('he') ? 'he-IL' : 'en-US',
     { month: 'short', day: 'numeric', year: 'numeric' },
@@ -72,6 +95,19 @@ export function TasteProfileSummary({ greeting, baseline }: TasteProfileSummaryP
         </div>
       </Card>
 
+      <Card className="space-y-4 p-6">
+        {persona ? (
+          <div className="space-y-1 text-center">
+            <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+              {t('profile.persona.heading')}
+            </p>
+            <h2 className="text-xl font-bold text-neutral-900">{persona.title}</h2>
+            <p className="text-sm text-neutral-600">{persona.blurb}</p>
+          </div>
+        ) : null}
+        <TasteRadar axes={radarAxes} labels={radarLabels} ariaLabel={t('profile.radar.aria')} />
+      </Card>
+
       <Card className="border-brand-200 bg-white p-6 shadow-sm">
         <SessionQuickPick baseline={baseline} />
       </Card>
@@ -95,6 +131,20 @@ export function TasteProfileSummary({ greeting, baseline }: TasteProfileSummaryP
             low={t('profile.dials.bitterness.low')}
             mid={t('profile.dials.bitterness.mid')}
             high={t('profile.dials.bitterness.high')}
+          />
+          <TasteDial
+            label={t('profile.dials.sweetness.label')}
+            value={baseline.sweetness ?? 0.5}
+            low={t('profile.dials.sweetness.low')}
+            mid={t('profile.dials.sweetness.mid')}
+            high={t('profile.dials.sweetness.high')}
+          />
+          <TasteDial
+            label={t('profile.dials.body.label')}
+            value={baseline.body ?? 0.5}
+            low={t('profile.dials.body.low')}
+            mid={t('profile.dials.body.mid')}
+            high={t('profile.dials.body.high')}
           />
           <TasteDial
             label={t('profile.dials.novelty.label')}

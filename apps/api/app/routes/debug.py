@@ -10,15 +10,17 @@ from fastapi import APIRouter, Depends
 
 from app.api_contracts import (
     AbvIntent,
+    AdventureLevel,
     Carbonation,
-    CitrusPick,
+    ChocoPref,
     CoffeeStyle,
     LovePref,
     OnboardingAnswers,
     RecommendationsRequest,
     RecommendationsResponse,
     SessionIntent,
-    SnackPick,
+    StrengthPref,
+    SweetPref,
     Vibe,
 )
 from app.routes.recommendations import (
@@ -32,12 +34,13 @@ router = APIRouter(prefix="/debug", tags=["debug"])
 
 _DEFAULT_ANSWERS = OnboardingAnswers(
     coffee=CoffeeStyle.black,
+    chocolate=ChocoPref.dark_90,
     water=Carbonation.strong,
-    novelty_seeking=True,
-    snack=SnackPick.dark_chocolate,
     sour_foods=LovePref.okay,
-    citrus=CitrusPick.grapefruit,
     smoked_foods=LovePref.okay,
+    sweet_tooth=SweetPref.dry,
+    strength=StrengthPref.strong,
+    adventure=AdventureLevel.high,
 )
 
 _DEFAULT_SESSION = SessionIntent(

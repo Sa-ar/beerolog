@@ -150,6 +150,9 @@ def test_uses_persisted_baseline_embedding_when_authenticated(client: TestClient
         user_id="user_test",
         bubbles=0.1,
         bitterness=0.1,
+        sweetness=0.5,
+        body=0.5,
+        abv_affinity=0.5,
         flavor_family={
             "malty": 0.1,
             "hoppy": 0.1,
@@ -170,6 +173,44 @@ def test_uses_persisted_baseline_embedding_when_authenticated(client: TestClient
     assert authed.status_code == 200
     authed_ids = [b["id"] for b in authed.json()["results"]]
     assert anon_ids != authed_ids
+
+
+def test_authed_sessionless_applies_baseline_abv_band(client: TestClient) -> None:
+    payload = {k: v for k, v in _PAYLOAD.items() if k != "session"}
+
+    anon = client.post("/recommendations", json=payload)
+    assert anon.status_code == 200
+    assert all(b["breakdown"]["abv_score"] == 0 for b in anon.json()["results"])
+
+    snap = BaselineTasteSnapshot(
+        user_id="user_test",
+        bubbles=0.1,
+        bitterness=0.1,
+        sweetness=0.5,
+        body=0.5,
+        abv_affinity=0.1,
+        flavor_family={
+            "malty": 0.1,
+            "hoppy": 0.1,
+            "roasty": 0.1,
+            "fruity": 0.1,
+            "sour": 0.1,
+            "smoky": 0.1,
+        },
+        novelty_affinity=0.15,
+        embedding=[1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        embedding_fresh_at="2026-06-15T00:00:00+00:00",
+        updated_at="2026-06-15T00:00:00+00:00",
+    )
+    app.dependency_overrides[get_baseline_taste_repo] = lambda: _MemoryBaselineRepo(snap)
+    app.dependency_overrides[get_optional_user] = lambda: {"sub": "user_test"}
+    try:
+        authed = client.post("/recommendations", json=payload)
+        assert authed.status_code == 200
+        assert any(b["breakdown"]["abv_score"] != 0 for b in authed.json()["results"])
+    finally:
+        app.dependency_overrides[get_baseline_taste_repo] = lambda: _NullBaselineRepo()
+        app.dependency_overrides.pop(get_optional_user, None)
 
 
 def test_503_when_openai_key_missing(monkeypatch) -> None:

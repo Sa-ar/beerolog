@@ -13,7 +13,7 @@ import type { BaselineLoadErrorReason } from '../lib/load-baseline-taste'
 import { loadBaselineTaste } from '../lib/load-baseline-taste'
 import { clearBaselineCache, readBaselineCache, writeBaselineCache } from '../lib/baseline-cache'
 import type { BaselineTaste } from '../lib/baseline-taste'
-import { timeAwareGreeting } from '../lib/baseline-taste'
+import { timeAwareGreeting, isStaleProfile } from '../lib/baseline-taste'
 
 export const Route = createFileRoute('/')({
   component: HomePage,
@@ -65,11 +65,18 @@ function SignedInHome({ firstName }: { firstName: string | null | undefined }) {
     // Seed from cache so the profile shows instantly; only show the loading
     // screen on a true cold start (no cached profile yet).
     const cached = readBaselineCache(userId)
-    setProfileState(cached ? { status: 'ready', baseline: cached } : { status: 'loading' })
+    // A cached profile from an older model is stale — force the new quiz.
+    const usableCache = cached && !isStaleProfile(cached) ? cached : null
+    setProfileState(usableCache ? { status: 'ready', baseline: usableCache } : { status: 'loading' })
     void (async () => {
       const result = await loadBaselineTaste(() => getToken())
       if (cancelled) return
       if (result.status === 'ready') {
+        if (isStaleProfile(result.baseline)) {
+          clearBaselineCache(userId)
+          setProfileState({ status: 'empty' })
+          return
+        }
         writeBaselineCache(userId, result.baseline)
         setProfileState({ status: 'ready', baseline: result.baseline })
         return
@@ -81,7 +88,7 @@ function SignedInHome({ firstName }: { firstName: string | null | undefined }) {
       }
       // Revalidation failed: keep showing the cached profile rather than flashing
       // an error; only surface the error when we have nothing to show.
-      if (!cached) setProfileState({ status: 'error', reason: result.reason })
+      if (!usableCache) setProfileState({ status: 'error', reason: result.reason })
     })()
     return () => {
       cancelled = true

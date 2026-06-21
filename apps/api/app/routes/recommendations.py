@@ -10,6 +10,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.api_contracts import (
+    AbvIntent,
     MatchCalibration,
     RecommendationsRequest,
     RecommendationsResponse,
@@ -21,7 +22,7 @@ from app.config import settings
 from app.db import get_pool
 from app.placeholder_catalog import get_embedded_catalog
 from app.routes.onboarding import get_baseline_taste_repo
-from app.services import session_intent, why_line
+from app.services import abv_band, session_intent, why_line
 from app.services.baseline_dials_text import dials_to_text
 from app.services.baseline_taste_repo import BaselineTasteRepo
 from app.services.catalog_repo import fetch_catalog
@@ -76,13 +77,16 @@ async def post_recommendations(
 
     session_vec: list[float] | None = None
     abv_intent = None
+    abv_weight = 0.0
     if body.session is not None:
         session_vec = await client.embed(session_intent.compose_text(body.session))
-        abv_intent = body.session.abv_intent
+        # An explicit tonight-ABV choice wins; 'any' falls through to the baseline band below.
+        if body.session.abv_intent != AbvIntent.any:
+            abv_intent = body.session.abv_intent
+            abv_weight = settings.match_abv_weight
 
     alpha = _resolve_alpha(body)
     beta = body.beta if body.beta is not None else settings.match_beta
-    abv_weight = settings.match_abv_weight if body.session is not None else 0.0
 
     catalog: list = []
     if settings.database_url:
@@ -99,6 +103,10 @@ async def post_recommendations(
         snap = await repo.get(user["sub"])
         if snap is not None:
             novelty_affinity = snap.novelty_affinity
+            # Persisted ABV appetite as a soft default when tonight has no explicit ABV intent.
+            if abv_intent is None:
+                abv_intent = abv_band.band_for_affinity(snap.abv_affinity)
+                abv_weight = settings.match_abv_weight
 
     results = rank(
         baseline_embedding=baseline_vec,
