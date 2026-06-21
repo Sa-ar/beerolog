@@ -163,11 +163,11 @@
     "title": "Your taste profile",
     "novelty": { "explorer": "Flavor explorer", "comfort": "Comfort seeker" },
     "summary": {
-      "ready": "Ready for tonight?",
+      "ready": "Here's how you taste",
       "lastUpdated": "Profile last updated {{date}}",
       "dials": "Your taste dials",
-      "retake": "Retake the taste quiz",
-      "retakeHint": "Your picks and ratings keep refining what we recommend."
+      "retake": "Refine my taste profile",
+      "retakeHint": "Every pick and rating makes your profile sharper."
     },
     "dials": {
       "carbonation": { "label": "Carbonation", "low": "Still", "mid": "Light fizz", "high": "Sparkling" },
@@ -176,11 +176,11 @@
     }
   },
   "emptyProfile": {
-    "headline": "Let's learn how you taste",
-    "intro": "A short quiz about coffee, snacks, and everyday flavors — we'll turn it into beer picks you'll actually enjoy.",
-    "cardTitle": "No taste profile yet",
-    "cardDescription": "Takes about 30 seconds. No beer knowledge required.",
-    "cta": "Start the taste quiz",
+    "headline": "Create your personal taste profile",
+    "intro": "Answer a few everyday-flavor questions and I'll build a taste profile that's truly yours — then match beers to it.",
+    "cardTitle": "Your taste profile is waiting",
+    "cardDescription": "About 30 seconds. No beer knowledge needed.",
+    "cta": "Create my taste profile",
     "whatNext": "What happens next",
     "steps": {
       "quiz": { "title": "Quick taste quiz", "detail": "Seven everyday questions — no beer jargon." },
@@ -294,6 +294,13 @@
     "startSession": "Start a session",
     "matchedEyebrow": "Matched for you",
     "loadingAria": "Loading recommendations",
+    "thinking": [
+      "Reading your taste profile…",
+      "Weighing hops against malt…",
+      "Scanning craft & import shelves…",
+      "Matching bitterness to your dials…",
+      "Lining up tonight's pours…"
+    ],
     "heading_one": "Your top {{count}} pick",
     "heading_other": "Your top {{count}} picks",
     "subhead": "Ranked for your saved taste profile and tonight's session intent.",

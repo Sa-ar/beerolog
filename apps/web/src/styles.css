@@ -4,6 +4,15 @@
 @source './**/*.{ts,tsx}';
 @source inline("fixed inset-0 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 flex items-center justify-center p-4 pointer-events-none pointer-events-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)]");
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 @theme {
   --color-brand-50: hsl(38 92% 96%);
   --color-brand-100: hsl(38 92% 90%);

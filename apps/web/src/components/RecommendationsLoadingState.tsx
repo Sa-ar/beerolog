@@ -1,6 +1,35 @@
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Card } from '@beerolog/ui'
+import { PAGE_SHELL_X } from '../lib/page-shell'
 import { RECS_PAGE_SIZE } from '../lib/session-intent'
+
+const CYCLE_MS = 1800
+
+// Claude-style "thinking" line: cycles flavor/beer-style phrases while picks are
+// matched. Honors prefers-reduced-motion by holding on the first phrase.
+function ThinkingMessages() {
+  const { t } = useTranslation()
+  const phrases = t('recommendations.thinking', { returnObjects: true }) as string[]
+  const [index, setIndex] = useState(0)
+
+  useEffect(() => {
+    if (phrases.length <= 1) return
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return
+    const id = setInterval(() => setIndex((i) => (i + 1) % phrases.length), CYCLE_MS)
+    return () => clearInterval(id)
+  }, [phrases.length])
+
+  return (
+    <p
+      key={index}
+      aria-live="polite"
+      className="min-h-[1.875rem] text-lg font-medium text-neutral-700 animate-[fadeIn_500ms_ease]"
+    >
+      {phrases[index]}
+    </p>
+  )
+}
 
 function RecommendationCardSkeleton({ isTopPick }: { isTopPick: boolean }) {
   return (
@@ -50,16 +79,15 @@ export function RecommendationsLoadingState() {
   const { t } = useTranslation()
   return (
     <main
-      className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-4 py-8 sm:gap-8 sm:px-6 sm:py-10 md:py-12"
+      className={`${PAGE_SHELL_X} flex flex-1 flex-col gap-6 py-8 sm:gap-8 sm:py-10 md:py-12`}
       aria-busy="true"
       aria-label={t('recommendations.loadingAria')}
     >
-      <section className="animate-pulse space-y-2">
+      <section className="space-y-2">
         <p className="text-sm font-semibold uppercase tracking-wide text-brand-600">
           {t('recommendations.matchedEyebrow')}
         </p>
-        <div className="h-9 w-56 max-w-full rounded-lg bg-neutral-200" />
-        <div className="h-4 w-72 max-w-full rounded bg-neutral-100" />
+        <ThinkingMessages />
       </section>
 
       <div className="flex flex-col gap-3 sm:gap-4">

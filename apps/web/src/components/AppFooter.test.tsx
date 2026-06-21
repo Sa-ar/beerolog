@@ -28,6 +28,9 @@ vi.mock('@tanstack/react-router', () => ({
     )
   },
 }))
+vi.mock('@clerk/tanstack-react-start', () => ({
+  useAuth: () => ({ isLoaded: true, isSignedIn: false }),
+}))
 
 // Imported after the mock is registered.
 const { AppFooter } = await import('./AppFooter')

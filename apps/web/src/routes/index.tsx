@@ -11,6 +11,7 @@ import { TasteProfileLoadingState } from '../components/TasteProfileLoadingState
 import { TasteProfileSummary } from '../components/TasteProfileSummary'
 import type { BaselineLoadErrorReason } from '../lib/load-baseline-taste'
 import { loadBaselineTaste } from '../lib/load-baseline-taste'
+import { clearBaselineCache, readBaselineCache, writeBaselineCache } from '../lib/baseline-cache'
 import type { BaselineTaste } from '../lib/baseline-taste'
 import { timeAwareGreeting } from '../lib/baseline-taste'
 
@@ -52,7 +53,7 @@ function HomePage() {
 }
 
 function SignedInHome({ firstName }: { firstName: string | null | undefined }) {
-  const { getToken, isLoaded: authLoaded } = useAuth()
+  const { getToken, isLoaded: authLoaded, userId } = useAuth()
   const [profileState, setProfileState] = useState<ProfileState>({ status: 'idle' })
   const [retryCount, setRetryCount] = useState(0)
   const { t } = useTranslation()
@@ -61,24 +62,31 @@ function SignedInHome({ firstName }: { firstName: string | null | undefined }) {
   useEffect(() => {
     if (!authLoaded) return
     let cancelled = false
+    // Seed from cache so the profile shows instantly; only show the loading
+    // screen on a true cold start (no cached profile yet).
+    const cached = readBaselineCache(userId)
+    setProfileState(cached ? { status: 'ready', baseline: cached } : { status: 'loading' })
     void (async () => {
-      setProfileState({ status: 'loading' })
       const result = await loadBaselineTaste(() => getToken())
       if (cancelled) return
       if (result.status === 'ready') {
+        writeBaselineCache(userId, result.baseline)
         setProfileState({ status: 'ready', baseline: result.baseline })
         return
       }
       if (result.status === 'empty') {
+        clearBaselineCache(userId)
         setProfileState({ status: 'empty' })
         return
       }
-      setProfileState({ status: 'error', reason: result.reason })
+      // Revalidation failed: keep showing the cached profile rather than flashing
+      // an error; only surface the error when we have nothing to show.
+      if (!cached) setProfileState({ status: 'error', reason: result.reason })
     })()
     return () => {
       cancelled = true
     }
-  }, [authLoaded, getToken, retryCount])
+  }, [authLoaded, getToken, userId, retryCount])
 
   if (!authLoaded || profileState.status === 'loading' || profileState.status === 'idle') {
     return <TasteProfileLoadingState greeting={greeting} />
