@@ -47,7 +47,10 @@ Artifacts to collect and link from the release record
 (`docs/ops/releases/<YYYY-MM-DD>-<version>.md`) before go-live:
 
 - [ ] Privacy policy reviewed & approved by qualified counsel; draft banner
-      removed from `/legal/privacy`
+      removed from `/legal/privacy` (Note: GDPR requires a full physical address. 
+      The controller address is currently set to 'Ramat Gan, Israel (Full physical 
+      address available upon request)'. Ensure a P.O. Box or business mailing 
+      address in Ramat Gan is obtained and listed before removing the draft banner.)
 - [ ] Terms of use approved by counsel; draft banner removed
 - [ ] Cookie notice copy approved; classifications match `COOKIE_REGISTRY`
 - [ ] Accessibility statement finalized with the real coordinator name/role/email

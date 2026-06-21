@@ -1,3 +1,4 @@
+import { useAuth } from '@clerk/tanstack-react-start'
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { LEGAL_SLUGS } from '../lib/legal/registry'
@@ -8,9 +9,15 @@ import { LanguageSwitcher } from './LanguageSwitcher'
 // language switcher. Physical (flex) layout keeps order stable across RTL/LTR.
 export function AppFooter() {
   const { t } = useTranslation()
+  const { isSignedIn } = useAuth()
+
+  // Marketing chrome only — hidden once the user is in the app.
+  if (isSignedIn) return null
+
   return (
     <footer className="mt-auto border-t border-amber-100 bg-white/80">
       <div
+        dir="ltr"
         className={`${PAGE_FOOTER_SHELL} flex flex-col items-center gap-4 py-4 text-center sm:flex-row sm:items-center sm:justify-between sm:text-start`}
       >
         <p dir="auto" className="text-xs text-neutral-500 sm:max-w-md">

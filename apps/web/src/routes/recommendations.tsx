@@ -12,6 +12,7 @@ import { RecommendationBeerCard, type RecommendedBeer } from '../components/Reco
 import { RecommendationsLoadingState } from '../components/RecommendationsLoadingState'
 import { StatusCard } from '../components/StatusCard'
 import { DEFAULT_MATCH_CALIBRATION, tonightMatchPercent } from '../lib/match-score'
+import { PAGE_SHELL_X } from '../lib/page-shell'
 import { loadMoreErrorMessage, sessionStartErrorMessage } from '../lib/user-facing-errors'
 import {
   clearPendingSession,
@@ -145,7 +146,7 @@ function RecommendationsContent() {
 
   if (pageState.status === 'error') {
     return (
-      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-4 py-8 sm:gap-8 sm:px-6 sm:py-10 md:py-12">
+      <main className={`${PAGE_SHELL_X} flex flex-1 flex-col gap-6 py-8 sm:gap-8 sm:py-10 md:py-12`}>
         <section className="space-y-1">
           <p className="text-sm font-semibold uppercase tracking-wide text-brand-600">
             {t('recommendations.eyebrow')}
@@ -181,7 +182,7 @@ function RecommendationsContent() {
 
   if (pageState.status === 'missing') {
     return (
-      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-4 py-8 sm:gap-8 sm:px-6 sm:py-10 md:py-12">
+      <main className={`${PAGE_SHELL_X} flex flex-1 flex-col gap-6 py-8 sm:gap-8 sm:py-10 md:py-12`}>
         <section className="space-y-1">
           <p className="text-sm font-semibold uppercase tracking-wide text-brand-600">
             {t('recommendations.eyebrow')}
@@ -219,7 +220,7 @@ function RecommendationsContent() {
   const abvIntent = stored?.request?.session.abv_intent
 
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-4 py-8 sm:gap-8 sm:px-6 sm:py-10 md:py-12">
+    <main className={`${PAGE_SHELL_X} flex flex-1 flex-col gap-6 py-8 sm:gap-8 sm:py-10 md:py-12`}>
       <section className="space-y-2">
         <p className="text-sm font-semibold uppercase tracking-wide text-brand-600">
           {t('recommendations.matchedEyebrow')}
