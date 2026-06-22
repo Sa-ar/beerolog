@@ -33,6 +33,10 @@ class Settings(BaseSettings):
     match_cos_floor: float = 0.20
     match_cos_ceiling: float = 0.50
     baseline_staleness_days: int = 7
+    # Guest preview (public, OpenAI-free): how many results are unlocked before
+    # sign-up, and how many to score/return from the dial-space matcher.
+    guest_unlocked_count: int = 3
+    guest_top_k: int = 12
     embedding_model: str = "text-embedding-3-large"
     icon_model: str = "gpt-4o-mini"
     persona_model: str = "gpt-4o-mini"

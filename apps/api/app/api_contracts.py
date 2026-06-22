@@ -293,6 +293,35 @@ class RecommendationsResponse(BaseModel):
 
 
 # ---------------------------------------------------------------------------
+# Guest preview (public, OpenAI-free)
+# ---------------------------------------------------------------------------
+
+
+class GuestRecommendedBeer(BaseModel):
+    """Slimmed result for the public guest preview.
+
+    Deliberately decoupled from the authed RecommendedBeer: no score
+    breakdown, a plain integer match_percent, and a plain `why` string.
+    """
+
+    id: str
+    name: str
+    name_hebrew: str | None = None
+    brewery: str
+    style: str
+    abv: float
+    color: Literal["pale", "gold", "amber", "brown", "dark"]
+    image_url: str | None = None
+    match_percent: int
+    why: str
+
+
+class GuestRecommendationsResponse(BaseModel):
+    results: list[GuestRecommendedBeer]
+    unlocked_count: int
+
+
+# ---------------------------------------------------------------------------
 # Ratings (slice #78)
 # ---------------------------------------------------------------------------
 

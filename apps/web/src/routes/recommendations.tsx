@@ -11,16 +11,22 @@ import { useTranslation } from 'react-i18next'
 import { RecommendationBeerCard, type RecommendedBeer } from '../components/RecommendationBeerCard'
 import { RecommendationsLoadingState } from '../components/RecommendationsLoadingState'
 import { StatusCard } from '../components/StatusCard'
+import { apiFetch } from '../lib/api-fetch'
+import { clearGuestAnswers, readGuestAnswers } from '../lib/guest-answers'
 import { DEFAULT_MATCH_CALIBRATION, tonightMatchPercent } from '../lib/match-score'
+import { prunedAnswers } from '../lib/onboarding-quiz'
 import { PAGE_SHELL_X } from '../lib/page-shell'
 import { loadMoreErrorMessage, sessionStartErrorMessage } from '../lib/user-facing-errors'
 import {
   clearPendingSession,
+  fetchBaselineRecommendations,
   hasMoreResultsAvailable,
   loadMoreRecommendations,
   readPendingSession,
   readStoredRecommendations,
+  type RecommendationsPayload,
   RECS_PAGE_SIZE,
+  type SessionBaseline,
   startSession,
   type StoredSessionRequest,
 } from '../lib/session-intent'
@@ -48,6 +54,60 @@ type PageState =
   | { status: 'missing' }
   | { status: 'error'; message: string; request: StoredSessionRequest }
 
+// Subset of BaselineTasteRecord (api_contracts) needed to build a baseline-only
+// recommendations request. Hand-mirrored — we don't couple to the generated client.
+type BaselineTasteRecord = {
+  bubbles: number
+  bitterness: number
+  flavor_family: Record<string, number>
+  novelty_affinity: number
+}
+
+function baselineFromRecord(record: BaselineTasteRecord): SessionBaseline {
+  return {
+    bubbles: record.bubbles,
+    bitterness: record.bitterness,
+    flavor_family: record.flavor_family,
+    novelty_affinity: record.novelty_affinity,
+  }
+}
+
+/**
+ * Post-signup hydration: turn stored guest quiz answers into a full authed
+ * profile so the user never retakes the quiz. Returns baseline recommendations
+ * when freshly hydrated, or null when nothing to hydrate (caller falls back to
+ * its normal flow). Always discards stored guest answers once auth is known.
+ */
+async function hydrateGuestAnswers(): Promise<RecommendationsPayload | null> {
+  const profileRes = await apiFetch('/me/baseline-taste')
+
+  // Existing profile (returning user): discard any stale guest answers, no POST.
+  if (profileRes.ok) {
+    clearGuestAnswers()
+    return null
+  }
+
+  // Only an explicit "no profile yet" justifies onboarding; other errors bubble
+  // so the page can surface them rather than silently re-onboarding.
+  if (profileRes.status !== 404) {
+    throw new Error(`HTTP ${profileRes.status}`)
+  }
+
+  const answers = readGuestAnswers()
+  if (!answers) return null
+
+  const onboardingRes = await apiFetch('/onboarding', {
+    method: 'POST',
+    body: JSON.stringify(prunedAnswers(answers)),
+  })
+  if (!onboardingRes.ok) throw new Error(`HTTP ${onboardingRes.status}`)
+  const record = (await onboardingRes.json()) as BaselineTasteRecord
+
+  const payload = await fetchBaselineRecommendations(baselineFromRecord(record))
+  clearGuestAnswers()
+  return payload
+}
+
 function getInitialPageState(): PageState {
   if (readPendingSession()) {
     return { status: 'loading' }
@@ -73,27 +133,64 @@ function RecommendationsContent() {
 
   useEffect(() => {
     const pending = readPendingSession()
-    if (!pending) return
-
     let cancelled = false
+
+    // An in-flight session-start (from the dashboard) takes precedence and keeps
+    // its existing flow untouched.
+    if (pending) {
+      void (async () => {
+        try {
+          const data = await startSession(pending.baseline, pending.session)
+          if (cancelled) return
+          clearPendingSession()
+          setPageState({
+            status: 'ready',
+            results: data.results,
+            hasMore: hasMoreResultsAvailable(data.results.length),
+          })
+        } catch (e) {
+          if (cancelled) return
+          clearPendingSession()
+          setPageState({
+            status: 'error',
+            message: sessionStartErrorMessage(t, e),
+            request: pending,
+          })
+        }
+      })()
+      return () => {
+        cancelled = true
+      }
+    }
+
+    // No guest answers stored → nothing to hydrate; keep today's behavior exactly
+    // (renders stored recs or the missing/empty state), no extra profile fetch.
+    if (!readGuestAnswers()) {
+      return () => {
+        cancelled = true
+      }
+    }
+
+    // Guest answers present → attempt post-signup hydration (guest answers → full
+    // profile). Decoupled from the CTA: runs however the signed-in user got here.
+    setPageState({ status: 'loading' })
     void (async () => {
+      let payload: RecommendationsPayload | null = null
       try {
-        const data = await startSession(pending.baseline, pending.session)
-        if (cancelled) return
-        clearPendingSession()
+        payload = await hydrateGuestAnswers()
+      } catch {
+        // Hydration failed (network/onboarding error) — fall back to whatever the
+        // normal flow shows (stored recs or the missing/empty state).
+      }
+      if (cancelled) return
+      if (payload) {
         setPageState({
           status: 'ready',
-          results: data.results,
-          hasMore: hasMoreResultsAvailable(data.results.length),
+          results: payload.results,
+          hasMore: hasMoreResultsAvailable(payload.results.length),
         })
-      } catch (e) {
-        if (cancelled) return
-        clearPendingSession()
-        setPageState({
-          status: 'error',
-          message: sessionStartErrorMessage(t, e),
-          request: pending,
-        })
+      } else {
+        setPageState(getInitialPageState())
       }
     })()
 

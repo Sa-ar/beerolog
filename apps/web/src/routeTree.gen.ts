@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TryRouteImport } from './routes/try'
 import { Route as RecommendationsRouteImport } from './routes/recommendations'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as AccountRouteImport } from './routes/account'
@@ -21,6 +22,11 @@ import { Route as AccountSettingsRouteImport } from './routes/account.settings'
 import { Route as AccountSecurityRouteImport } from './routes/account.security'
 import { Route as AccountProfileRouteImport } from './routes/account.profile'
 
+const TryRoute = TryRouteImport.update({
+  id: '/try',
+  path: '/try',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RecommendationsRoute = RecommendationsRouteImport.update({
   id: '/recommendations',
   path: '/recommendations',
@@ -82,6 +88,7 @@ export interface FileRoutesByFullPath {
   '/account': typeof AccountRouteWithChildren
   '/onboarding': typeof OnboardingRoute
   '/recommendations': typeof RecommendationsRoute
+  '/try': typeof TryRoute
   '/account/profile': typeof AccountProfileRoute
   '/account/security': typeof AccountSecurityRoute
   '/account/settings': typeof AccountSettingsRoute
@@ -94,6 +101,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/onboarding': typeof OnboardingRoute
   '/recommendations': typeof RecommendationsRoute
+  '/try': typeof TryRoute
   '/account/profile': typeof AccountProfileRoute
   '/account/security': typeof AccountSecurityRoute
   '/account/settings': typeof AccountSettingsRoute
@@ -108,6 +116,7 @@ export interface FileRoutesById {
   '/account': typeof AccountRouteWithChildren
   '/onboarding': typeof OnboardingRoute
   '/recommendations': typeof RecommendationsRoute
+  '/try': typeof TryRoute
   '/account/profile': typeof AccountProfileRoute
   '/account/security': typeof AccountSecurityRoute
   '/account/settings': typeof AccountSettingsRoute
@@ -123,6 +132,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/onboarding'
     | '/recommendations'
+    | '/try'
     | '/account/profile'
     | '/account/security'
     | '/account/settings'
@@ -135,6 +145,7 @@ export interface FileRouteTypes {
     | '/'
     | '/onboarding'
     | '/recommendations'
+    | '/try'
     | '/account/profile'
     | '/account/security'
     | '/account/settings'
@@ -148,6 +159,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/onboarding'
     | '/recommendations'
+    | '/try'
     | '/account/profile'
     | '/account/security'
     | '/account/settings'
@@ -162,6 +174,7 @@ export interface RootRouteChildren {
   AccountRoute: typeof AccountRouteWithChildren
   OnboardingRoute: typeof OnboardingRoute
   RecommendationsRoute: typeof RecommendationsRoute
+  TryRoute: typeof TryRoute
   LegalSlugRoute: typeof LegalSlugRoute
   SigninSplatRoute: typeof SigninSplatRoute
   SignupSplatRoute: typeof SignupSplatRoute
@@ -169,6 +182,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/try': {
+      id: '/try'
+      path: '/try'
+      fullPath: '/try'
+      preLoaderRoute: typeof TryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/recommendations': {
       id: '/recommendations'
       path: '/recommendations'
@@ -271,6 +291,7 @@ const rootRouteChildren: RootRouteChildren = {
   AccountRoute: AccountRouteWithChildren,
   OnboardingRoute: OnboardingRoute,
   RecommendationsRoute: RecommendationsRoute,
+  TryRoute: TryRoute,
   LegalSlugRoute: LegalSlugRoute,
   SigninSplatRoute: SigninSplatRoute,
   SignupSplatRoute: SignupSplatRoute,
