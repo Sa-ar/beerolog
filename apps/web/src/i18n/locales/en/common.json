@@ -136,10 +136,36 @@
       "error": "Something went wrong. Please try again."
     }
   },
-  "auth": { "signIn": "Sign in" },
+  "auth": {
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "google": "Continue with Google",
+    "or": "or",
+    "email": "Email",
+    "password": "Password",
+    "devMode": "Development mode",
+    "genericError": "Something went wrong. Please try again."
+  },
   "signin": {
-    "title": "Beerolog",
-    "subtitle": "Sign in with a social account to save your taste profile and beer picks."
+    "heading": "Welcome back",
+    "subtitle": "Sign in to pick up your taste profile and fresh beer picks.",
+    "signingIn": "Signing in…",
+    "mfaUnsupported": "This account needs an extra verification step we don’t support yet.",
+    "noAccount": "New to Beerolog?",
+    "createAccount": "Create an account"
+  },
+  "signup": {
+    "heading": "Create your account",
+    "subtitle": "Save your taste profile and get beer picks made just for you.",
+    "creating": "Creating account…",
+    "haveAccount": "Already have an account?",
+    "signInLink": "Sign in",
+    "verifyHeading": "Check your email",
+    "verifySubtitle": "We sent a 6-digit code to {{email}}. Enter it to finish signing up.",
+    "code": "Verification code",
+    "verify": "Verify email",
+    "verifying": "Verifying…",
+    "invalidCode": "That code didn’t work. Check it and try again."
   },
   "notFound": {
     "title": "Wrong bar, wrong beer",

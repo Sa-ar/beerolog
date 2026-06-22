@@ -1,39 +1,124 @@
-import { SignIn } from '@clerk/tanstack-react-start'
-import { createFileRoute } from '@tanstack/react-router'
+import { AuthenticateWithRedirectCallback, useSignIn } from '@clerk/tanstack-react-start'
+import { Button } from '@beerolog/ui'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
+import { type FormEvent, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { PAGE_MAIN } from '../lib/page-shell'
+import {
+  AuthDivider,
+  AuthError,
+  AuthField,
+  AuthLayout,
+  GoogleButton,
+  clerkError,
+} from '../components/AuthLayout'
 
-// Splat route so Clerk's path routing can mount its sub-paths
-// (/signin/sso-callback, /signin/factor-one, reset, etc.) under /signin.
+// Splat route so Clerk's OAuth redirect can land on /signin/sso-callback.
 export const Route = createFileRoute('/signin/$')({
-  validateSearch: (search: Record<string, unknown>) => ({
-    next: typeof search['next'] === 'string' ? search['next'] : '/',
-  }),
+  validateSearch: (search: Record<string, unknown>) =>
+    typeof search['next'] === 'string' ? { next: search['next'] } : {},
   component: SignInPage,
 })
 
 function SignInPage() {
-  const { next } = Route.useSearch()
+  const { _splat } = Route.useParams()
+
+  // OAuth round-trip lands here; let Clerk finish the handshake and redirect.
+  if (_splat === 'sso-callback') {
+    return <AuthenticateWithRedirectCallback />
+  }
+
+  return <SignInForm />
+}
+
+function SignInForm() {
+  const next = Route.useSearch().next ?? '/'
   const { t } = useTranslation()
+  const navigate = useNavigate()
+  const { isLoaded, signIn, setActive } = useSignIn()
+
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
+
+  async function handlePasswordSignIn(e: FormEvent) {
+    e.preventDefault()
+    if (!isLoaded || submitting) return
+    setSubmitting(true)
+    setError(null)
+    try {
+      const result = await signIn.create({ identifier: email, password })
+      if (result.status === 'complete') {
+        await setActive({ session: result.createdSessionId })
+        await navigate({ to: next })
+      } else {
+        // ponytail: second factors (MFA / email-code) not built here. Add a
+        // verification screen if those strategies get enabled in Clerk.
+        setError(t('signin.mfaUnsupported'))
+      }
+    } catch (err) {
+      setError(clerkError(err, t('auth.genericError')))
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  async function handleGoogle() {
+    if (!isLoaded) return
+    setError(null)
+    try {
+      await signIn.authenticateWithRedirect({
+        strategy: 'oauth_google',
+        redirectUrl: '/signin/sso-callback',
+        redirectUrlComplete: next,
+      })
+    } catch (err) {
+      setError(clerkError(err, t('auth.genericError')))
+    }
+  }
 
   return (
-    <main className={`${PAGE_MAIN} items-center justify-center gap-8 py-8 sm:py-12`}>
-      <div className="w-full max-w-md text-center">
-        <h1 className="text-3xl font-bold text-neutral-900 sm:text-4xl">🍻 {t('signin.title')}</h1>
-        <p className="mt-2 text-sm text-neutral-500 sm:text-base">{t('signin.subtitle')}</p>
-      </div>
-      <SignIn
-        routing="path"
-        path="/signin"
-        signUpUrl="/signin"
-        forceRedirectUrl={next}
-        appearance={{
-          elements: {
-            rootBox: 'mx-auto w-full max-w-md',
-            card: 'shadow-lg rounded-2xl',
-          },
-        }}
-      />
-    </main>
+    <AuthLayout
+      heading={t('signin.heading')}
+      subtitle={t('signin.subtitle')}
+      footer={
+        <>
+          {t('signin.noAccount')}{' '}
+          <Link
+            to="/signup/$"
+            params={{ _splat: '' }}
+            search={{ next }}
+            className="font-semibold text-brand-600 hover:text-brand-700"
+          >
+            {t('signin.createAccount')}
+          </Link>
+        </>
+      }
+    >
+      <GoogleButton onClick={handleGoogle} disabled={!isLoaded} />
+      <AuthDivider />
+      <form className="flex flex-col gap-4" onSubmit={handlePasswordSignIn}>
+        <AuthField
+          label={t('auth.email')}
+          type="email"
+          autoComplete="email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <AuthField
+          label={t('auth.password')}
+          type="password"
+          autoComplete="current-password"
+          required
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <AuthError message={error} />
+        <Button type="submit" disabled={!isLoaded || submitting}>
+          {submitting ? t('signin.signingIn') : t('auth.signIn')}
+        </Button>
+      </form>
+    </AuthLayout>
   )
 }

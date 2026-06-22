@@ -30,7 +30,9 @@ export const Route = createRootRoute({
 function RootDocument({ children }: { children: React.ReactNode }) {
   const { lang, ageVerified } = Route.useLoaderData()
   const i18n = useMemo(() => createI18n(lang), [lang])
-  const clerkProps = publishableKey ? { publishableKey } : {}
+  // signInUrl points Clerk's RedirectToSignIn (and friends) at our own /signin
+  // page instead of Clerk's hosted Account Portal.
+  const clerkProps = publishableKey ? { publishableKey, signInUrl: '/signin' } : {}
 
   return (
     <html lang={lang} dir={dirFor(lang)}>

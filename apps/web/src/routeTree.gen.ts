@@ -14,6 +14,7 @@ import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AccountIndexRouteImport } from './routes/account.index'
+import { Route as SignupSplatRouteImport } from './routes/signup.$'
 import { Route as SigninSplatRouteImport } from './routes/signin.$'
 import { Route as LegalSlugRouteImport } from './routes/legal.$slug'
 import { Route as AccountSettingsRouteImport } from './routes/account.settings'
@@ -44,6 +45,11 @@ const AccountIndexRoute = AccountIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AccountRoute,
+} as any)
+const SignupSplatRoute = SignupSplatRouteImport.update({
+  id: '/signup/$',
+  path: '/signup/$',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const SigninSplatRoute = SigninSplatRouteImport.update({
   id: '/signin/$',
@@ -81,6 +87,7 @@ export interface FileRoutesByFullPath {
   '/account/settings': typeof AccountSettingsRoute
   '/legal/$slug': typeof LegalSlugRoute
   '/signin/$': typeof SigninSplatRoute
+  '/signup/$': typeof SignupSplatRoute
   '/account/': typeof AccountIndexRoute
 }
 export interface FileRoutesByTo {
@@ -92,6 +99,7 @@ export interface FileRoutesByTo {
   '/account/settings': typeof AccountSettingsRoute
   '/legal/$slug': typeof LegalSlugRoute
   '/signin/$': typeof SigninSplatRoute
+  '/signup/$': typeof SignupSplatRoute
   '/account': typeof AccountIndexRoute
 }
 export interface FileRoutesById {
@@ -105,6 +113,7 @@ export interface FileRoutesById {
   '/account/settings': typeof AccountSettingsRoute
   '/legal/$slug': typeof LegalSlugRoute
   '/signin/$': typeof SigninSplatRoute
+  '/signup/$': typeof SignupSplatRoute
   '/account/': typeof AccountIndexRoute
 }
 export interface FileRouteTypes {
@@ -119,6 +128,7 @@ export interface FileRouteTypes {
     | '/account/settings'
     | '/legal/$slug'
     | '/signin/$'
+    | '/signup/$'
     | '/account/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -130,6 +140,7 @@ export interface FileRouteTypes {
     | '/account/settings'
     | '/legal/$slug'
     | '/signin/$'
+    | '/signup/$'
     | '/account'
   id:
     | '__root__'
@@ -142,6 +153,7 @@ export interface FileRouteTypes {
     | '/account/settings'
     | '/legal/$slug'
     | '/signin/$'
+    | '/signup/$'
     | '/account/'
   fileRoutesById: FileRoutesById
 }
@@ -152,6 +164,7 @@ export interface RootRouteChildren {
   RecommendationsRoute: typeof RecommendationsRoute
   LegalSlugRoute: typeof LegalSlugRoute
   SigninSplatRoute: typeof SigninSplatRoute
+  SignupSplatRoute: typeof SignupSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -190,6 +203,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/account/'
       preLoaderRoute: typeof AccountIndexRouteImport
       parentRoute: typeof AccountRoute
+    }
+    '/signup/$': {
+      id: '/signup/$'
+      path: '/signup/$'
+      fullPath: '/signup/$'
+      preLoaderRoute: typeof SignupSplatRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/signin/$': {
       id: '/signin/$'
@@ -253,6 +273,7 @@ const rootRouteChildren: RootRouteChildren = {
   RecommendationsRoute: RecommendationsRoute,
   LegalSlugRoute: LegalSlugRoute,
   SigninSplatRoute: SigninSplatRoute,
+  SignupSplatRoute: SignupSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
