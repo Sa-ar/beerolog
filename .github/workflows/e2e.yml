@@ -1,14 +1,17 @@
 name: E2E (onboarding quiz)
 
-# Cost control: every run performs ONE onboarding submit, which calls OpenAI
-# (embedding + icon + persona) on the dev API. So this NEVER runs per-push —
-# only on a manual dispatch, or when a PR is explicitly labeled "e2e".
+# Cost note: every run performs ONE onboarding submit, which calls OpenAI
+# (embedding + icon + persona) on the dev API. Triggers: a push to `staging`
+# (the dev deployment, auto-synced from main), a manual dispatch, or a PR
+# explicitly labeled "e2e".
 on:
   workflow_dispatch:
     inputs:
       base_url:
         description: 'Dev deployment URL (dev Clerk + dev API). Falls back to the E2E_BASE_URL secret.'
         required: false
+  push:
+    branches: [staging]
   pull_request:
     types: [labeled]
 
@@ -22,8 +25,9 @@ permissions:
 jobs:
   e2e:
     name: Playwright (onboarding)
-    # Manual dispatch always runs; on a PR, only when the "e2e" label is added.
-    if: github.event_name == 'workflow_dispatch' || github.event.label.name == 'e2e'
+    # Runs on a push to staging or a manual dispatch; on a PR, only when the
+    # "e2e" label is added.
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || github.event.label.name == 'e2e'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
