@@ -33,7 +33,7 @@ function SignUpForm() {
   const next = Route.useSearch().next ?? '/'
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { isLoaded, signUp, setActive } = useSignUp()
+  const { signUp } = useSignUp()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -44,12 +44,16 @@ function SignUpForm() {
 
   async function handleSignUp(e: FormEvent) {
     e.preventDefault()
-    if (!isLoaded || submitting) return
+    if (submitting) return
     setSubmitting(true)
     setError(null)
     try {
-      await signUp.create({ emailAddress: email, password })
-      await signUp.prepareEmailAddressVerification({ strategy: 'email_code' })
+      const { error } = await signUp.password({ emailAddress: email, password })
+      if (error) {
+        setError(clerkError(error, t('auth.genericError')))
+        return
+      }
+      await signUp.verifications.sendEmailCode()
       setPendingVerification(true)
     } catch (err) {
       setError(clerkError(err, t('auth.genericError')))
@@ -60,13 +64,13 @@ function SignUpForm() {
 
   async function handleVerify(e: FormEvent) {
     e.preventDefault()
-    if (!isLoaded || submitting) return
+    if (submitting) return
     setSubmitting(true)
     setError(null)
     try {
-      const result = await signUp.attemptEmailAddressVerification({ code })
-      if (result.status === 'complete') {
-        await setActive({ session: result.createdSessionId })
+      await signUp.verifications.verifyEmailCode({ code })
+      if (signUp.status === 'complete') {
+        await signUp.finalize()
         await navigate({ to: next })
       } else {
         setError(t('auth.genericError'))
@@ -79,14 +83,14 @@ function SignUpForm() {
   }
 
   async function handleGoogle() {
-    if (!isLoaded) return
     setError(null)
     try {
-      await signUp.authenticateWithRedirect({
+      const { error } = await signUp.sso({
         strategy: 'oauth_google',
-        redirectUrl: '/signup/sso-callback',
-        redirectUrlComplete: next,
+        redirectUrl: next,
+        redirectCallbackUrl: '/signup/sso-callback',
       })
+      if (error) setError(clerkError(error, t('auth.genericError')))
     } catch (err) {
       setError(clerkError(err, t('auth.genericError')))
     }
@@ -109,7 +113,7 @@ function SignUpForm() {
           onChange={(e) => setCode(e.target.value)}
         />
         <AuthError message={error} />
-        <Button type="submit" disabled={!isLoaded || submitting}>
+        <Button type="submit" disabled={submitting}>
           {submitting ? t('signup.verifying') : t('signup.verify')}
         </Button>
       </AuthLayout>
@@ -134,7 +138,7 @@ function SignUpForm() {
         </>
       }
     >
-      <GoogleButton onClick={handleGoogle} disabled={!isLoaded} />
+      <GoogleButton onClick={handleGoogle} disabled={submitting} />
       <AuthDivider />
       <form className="flex flex-col gap-4" onSubmit={handleSignUp}>
         <AuthField
@@ -155,7 +159,7 @@ function SignUpForm() {
           onChange={(e) => setPassword(e.target.value)}
         />
         <AuthError message={error} />
-        <Button type="submit" disabled={!isLoaded || submitting}>
+        <Button type="submit" disabled={submitting}>
           {submitting ? t('signup.creating') : t('auth.signUp')}
         </Button>
       </form>

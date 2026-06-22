@@ -34,7 +34,7 @@ function SignInForm() {
   const next = Route.useSearch().next ?? '/'
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { isLoaded, signIn, setActive } = useSignIn()
+  const { signIn } = useSignIn()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -43,13 +43,17 @@ function SignInForm() {
 
   async function handlePasswordSignIn(e: FormEvent) {
     e.preventDefault()
-    if (!isLoaded || submitting) return
+    if (submitting) return
     setSubmitting(true)
     setError(null)
     try {
-      const result = await signIn.create({ identifier: email, password })
-      if (result.status === 'complete') {
-        await setActive({ session: result.createdSessionId })
+      const { error } = await signIn.password({ identifier: email, password })
+      if (error) {
+        setError(clerkError(error, t('auth.genericError')))
+        return
+      }
+      if (signIn.status === 'complete') {
+        await signIn.finalize()
         await navigate({ to: next })
       } else {
         // ponytail: second factors (MFA / email-code) not built here. Add a
@@ -64,14 +68,14 @@ function SignInForm() {
   }
 
   async function handleGoogle() {
-    if (!isLoaded) return
     setError(null)
     try {
-      await signIn.authenticateWithRedirect({
+      const { error } = await signIn.sso({
         strategy: 'oauth_google',
-        redirectUrl: '/signin/sso-callback',
-        redirectUrlComplete: next,
+        redirectUrl: next,
+        redirectCallbackUrl: '/signin/sso-callback',
       })
+      if (error) setError(clerkError(error, t('auth.genericError')))
     } catch (err) {
       setError(clerkError(err, t('auth.genericError')))
     }
@@ -95,7 +99,7 @@ function SignInForm() {
         </>
       }
     >
-      <GoogleButton onClick={handleGoogle} disabled={!isLoaded} />
+      <GoogleButton onClick={handleGoogle} disabled={submitting} />
       <AuthDivider />
       <form className="flex flex-col gap-4" onSubmit={handlePasswordSignIn}>
         <AuthField
@@ -115,7 +119,7 @@ function SignInForm() {
           onChange={(e) => setPassword(e.target.value)}
         />
         <AuthError message={error} />
-        <Button type="submit" disabled={!isLoaded || submitting}>
+        <Button type="submit" disabled={submitting}>
           {submitting ? t('signin.signingIn') : t('auth.signIn')}
         </Button>
       </form>
