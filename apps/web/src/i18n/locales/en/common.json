@@ -273,6 +273,21 @@
       "flavor_cues": "Tap everything that's you"
     }
   },
+  "try": {
+    "eyebrow": "Free taste preview",
+    "intro": "Answer a few everyday-flavor questions and we'll show you beers that match — no sign-up needed to start.",
+    "seeResults": "See your results",
+    "retake": "Retake the quiz",
+    "loading": "Finding your matches…",
+    "unlocked": "{{count}} matches unlocked",
+    "matchBadge": "{{percent}}% match",
+    "matchAria": "{{percent}} percent match",
+    "abvBadge": "{{abv}} ABV",
+    "lockedTitle": "{{count}} more matches waiting",
+    "lockedSubtitle": "Sign up to unlock the rest of your matches.",
+    "unlockCta": "Sign up to unlock",
+    "lockedRegionLabel": "Locked matches — sign up to view"
+  },
   "enums": {
     "common": { "yes": "Yes", "no": "No" },
     "coffee": {

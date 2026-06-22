@@ -273,6 +273,21 @@
       "flavor_cues": "סמנו כל מה שמתאים לכם"
     }
   },
+  "try": {
+    "eyebrow": "טעימה חינמית",
+    "intro": "ענו על כמה שאלות טעם יומיומיות ונראה לכם בירות שמתאימות — בלי הרשמה כדי להתחיל.",
+    "seeResults": "לתוצאות שלכם",
+    "retake": "למלא את השאלון מחדש",
+    "loading": "מחפשים התאמות…",
+    "unlocked": "{{count}} התאמות נפתחו",
+    "matchBadge": "{{percent}}% התאמה",
+    "matchAria": "{{percent}} אחוז התאמה",
+    "abvBadge": "{{abv}} אלכוהול",
+    "lockedTitle": "עוד {{count}} התאמות מחכות",
+    "lockedSubtitle": "הירשמו כדי לפתוח את שאר ההתאמות שלכם.",
+    "unlockCta": "הירשמו כדי לפתוח",
+    "lockedRegionLabel": "התאמות נעולות — הירשמו כדי לצפות"
+  },
   "enums": {
     "common": { "yes": "כן", "no": "לא" },
     "coffee": {
