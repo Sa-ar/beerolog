@@ -123,8 +123,13 @@ test('guest takes the quiz, hits the 3-result gate, signs in, and lands on full 
 
   // The signed-in hydration branch clears stored guest answers (the returning
   // user already has a profile, so they're discarded rather than re-submitted).
-  const stored = await page.evaluate(() => window.localStorage.getItem('beerolog:guest_answers'))
-  expect(stored).toBeNull()
+  // Hydration clears asynchronously after GET /me/baseline-taste resolves, so
+  // poll rather than reading once.
+  await expect
+    .poll(() => page.evaluate(() => window.localStorage.getItem('beerolog:guest_answers')), {
+      timeout: 15_000,
+    })
+    .toBeNull()
 })
 
 // Placeholder per the PRD testing list: rapid repeated POST /guest-recommendations
