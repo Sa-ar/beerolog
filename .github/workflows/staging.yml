@@ -28,9 +28,41 @@ jobs:
       # Fails loudly if staging has diverged — it should only ever track main.
       - run: git push origin "${{ github.sha }}:refs/heads/staging"
 
+  changes:
+    name: Detect app changes
+    runs-on: ubuntu-latest
+    outputs:
+      app: ${{ steps.filter.outputs.app }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      # The e2e makes a paid OpenAI call, so skip it when a push only touches
+      # docs / markdown / CI config. Staging still syncs + redeploys above.
+      - id: filter
+        env:
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.sha }}
+        run: |
+          # Unknown/initial base → run the e2e (safe default).
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            echo "app=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          APP=false
+          while IFS= read -r f; do
+            [ -z "$f" ] && continue
+            case "$f" in
+              docs/*|*.md|.github/*) ;;
+              *) APP=true ;;
+            esac
+          done <<< "$(git diff --name-only "$BEFORE" "$AFTER")"
+          echo "app changed: $APP"
+          echo "app=$APP" >> "$GITHUB_OUTPUT"
+
   wait-for-deploy:
     name: Wait for staging deploys
-    needs: sync
+    needs: [sync, changes]
+    if: needs.changes.outputs.app == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
