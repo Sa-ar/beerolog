@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint src",
     "api:generate": "openapi-typescript ../api/openapi.json -o src/lib/api-client/schema.d.ts",
-    "test": "vitest run"
+    "test": "vitest run",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "@beerolog/db": "workspace:*",
@@ -29,6 +30,9 @@
     "vite": "^6.4.2"
   },
   "devDependencies": {
+    "@clerk/backend": "3.4.13",
+    "@clerk/testing": "2.0.5",
+    "@playwright/test": "^1.49.1",
     "@tailwindcss/vite": "^4.0.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
@@ -36,6 +40,7 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.7.0",
+    "dotenv": "^16.4.7",
     "jsdom": "^26.1.0",
     "nitro": "npm:nitro-nightly@4.0.0-20251010-091516-7cafddba",
     "openapi-typescript": "^7.13.0",

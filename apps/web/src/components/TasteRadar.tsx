@@ -21,6 +21,7 @@ export function TasteRadar({
       viewBox={`0 0 ${size} ${size}`}
       className="mx-auto h-auto w-full max-w-[16rem]"
       role="img"
+      data-testid="taste-radar"
       aria-label={ariaLabel}
     >
       {rings.map((f) => (

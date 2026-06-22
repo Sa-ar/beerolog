@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  '@clerk/shared': 4.13.1
+  '@clerk/backend': 3.4.13
+  '@clerk/react': 6.7.1
+
 importers:
 
   .:
@@ -81,6 +86,15 @@ importers:
         specifier: ^6.4.2
         version: 6.4.2(@types/node@22.19.19)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.3)
     devDependencies:
+      '@clerk/backend':
+        specifier: 3.4.13
+        version: 3.4.13(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+      '@clerk/testing':
+        specifier: 2.0.5
+        version: 2.0.5(@playwright/test@1.61.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+      '@playwright/test':
+        specifier: ^1.49.1
+        version: 1.61.0
       '@tailwindcss/vite':
         specifier: ^4.0.0
         version: 4.3.0(vite@6.4.2(@types/node@22.19.19)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.3))
@@ -102,6 +116,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: ^4.7.0
         version: 4.7.0(vite@6.4.2(@types/node@22.19.19)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.3))
+      dotenv:
+        specifier: ^16.4.7
+        version: 16.6.1
       jsdom:
         specifier: ^26.1.0
         version: 26.1.0
@@ -399,6 +416,18 @@ packages:
       '@tanstack/react-start': ^1.157.0
       react: ^18.0.0 || ~19.0.3 || ~19.1.4 || ~19.2.3 || ~19.3.0-0
       react-dom: ^18.0.0 || ~19.0.3 || ~19.1.4 || ~19.2.3 || ~19.3.0-0
+
+  '@clerk/testing@2.0.5':
+    resolution: {integrity: sha512-DbWgBjP5TO71RrGF8uCDEgfsS9V+eL+3IF3u+1DTMbqxzu4pCP4zbLrPMC26KyMWG2zn4E+njYpDArlKiTmazA==}
+    engines: {node: '>=20.9.0'}
+    peerDependencies:
+      '@playwright/test': ^1
+      cypress: ^13 || ^14
+    peerDependenciesMeta:
+      '@playwright/test':
+        optional: true
+      cypress:
+        optional: true
 
   '@csstools/color-helpers@5.1.0':
     resolution: {integrity: sha512-S11EXWJyy0Mz5SYvRmY8nJYTFFd1LCNV+7cXyAgQtOOuzb4EsgfqDufL+9esx72/eLhsRdGZwaldu/h+E4t4BA==}
@@ -1134,6 +1163,11 @@ packages:
   '@opentelemetry/api@1.9.0':
     resolution: {integrity: sha512-3giAOQvZiH5F9bMlMiv8+GSPMeqg0dbaeo58/0SlA9sxSqZhnUtxzX9/2FzyhS9sWQf5S0GJE0AKBrFqjpeYcg==}
     engines: {node: '>=8.0.0'}
+
+  '@playwright/test@1.61.0':
+    resolution: {integrity: sha512-cKA5B6lpFEMyMGjxF54QihfYpB4FkEGH+qZhtArDEG+wezQAJY8Pq6C7T1SjWz+FFzt3TbyoXBQYk/0292TdJA==}
+    engines: {node: '>=18'}
+    hasBin: true
 
   '@redocly/ajv@8.11.2':
     resolution: {integrity: sha512-io1JpnwtIcvojV7QKDUSIuMN/ikdOUd1ReEnUnMKGfDVridQZ31J0MmIuqwuRjWDZfmvr+Q0MqCcfHM2gTivOg==}
@@ -2040,6 +2074,14 @@ packages:
   dom-accessibility-api@0.6.3:
     resolution: {integrity: sha512-7ZgogeTnjuHbo+ct10G9Ffp0mif17idi0IyWNVA/wcwcm7NPOD/WEHVP3n7n3MhXqxoIYm8d6MuZohYWIZ4T3w==}
 
+  dotenv@16.6.1:
+    resolution: {integrity: sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow==}
+    engines: {node: '>=12'}
+
+  dotenv@17.2.2:
+    resolution: {integrity: sha512-Sf2LSQP+bOlhKWWyhFsn0UsfdK/kCWRv1iuA2gXAwt3dyNabr6QSj00I2V10pidqz69soatm9ZwZvpQMTIOd5Q==}
+    engines: {node: '>=12'}
+
   dotenv@17.4.2:
     resolution: {integrity: sha512-nI4U3TottKAcAD9LLud4Cb7b2QztQMUEfHbvhTH09bqXTxnSie8WnjPALV/WMCrJZ6UV/qHJ6L03OqO3LcdYZw==}
     engines: {node: '>=12'}
@@ -2326,6 +2368,11 @@ packages:
   for-each@0.3.5:
     resolution: {integrity: sha512-dKx12eRCVIzqCxFGplyFKJMPvLEWgmNtUrpTiJIR5u97zEhRG8ySrtboPHZXx7daLxQVrl643cTzbab2tkQjxg==}
     engines: {node: '>= 0.4'}
+
+  fsevents@2.3.2:
+    resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==}
+    engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
+    os: [darwin]
 
   fsevents@2.3.3:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
@@ -2916,6 +2963,16 @@ packages:
   picomatch@4.0.4:
     resolution: {integrity: sha512-QP88BAKvMam/3NxH6vj2o21R6MjxZUAd6nlwAS/pnGvN9IVLocLHxGYIzFhg6fUQ+5th6P4dv4eW9jX3DSIj7A==}
     engines: {node: '>=12'}
+
+  playwright-core@1.61.0:
+    resolution: {integrity: sha512-caX7TrY3Ml6egyDX0WUcTHDxodl/b51y5wJOdCEA36QviK/s2g081hvmGs8eaE3DWb6NYZQ6BjO/QkNRPenoPA==}
+    engines: {node: '>=18'}
+    hasBin: true
+
+  playwright@1.61.0:
+    resolution: {integrity: sha512-Z+7BeeqQPRRzklHsVFP4KTGIyMxKUmfeRA4WisM6G3/XW6nwGeX6fX9qYaDa+CiUqpOkb2f6X3nar05R3kSuJQ==}
+    engines: {node: '>=18'}
+    hasBin: true
 
   pluralize@8.0.0:
     resolution: {integrity: sha512-Nc3IT5yHzflTfbjgqWcCPpo7DaKy4FnpB0l/zCAW0Tc7jxAiuqSxHasntB3D7887LSrA93kDJ9IXovxJYxyLCA==}
@@ -3849,6 +3906,17 @@ snapshots:
       react-dom: 19.2.6(react@19.2.6)
       tslib: 2.8.1
 
+  '@clerk/testing@2.0.5(@playwright/test@1.61.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)':
+    dependencies:
+      '@clerk/backend': 3.4.13(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+      '@clerk/shared': 4.13.1(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+      dotenv: 17.2.2
+    optionalDependencies:
+      '@playwright/test': 1.61.0
+    transitivePeerDependencies:
+      - react
+      - react-dom
+
   '@csstools/color-helpers@5.1.0': {}
 
   '@csstools/css-calc@2.1.4(@csstools/css-parser-algorithms@3.0.5(@csstools/css-tokenizer@3.0.4))(@csstools/css-tokenizer@3.0.4)':
@@ -4278,6 +4346,10 @@ snapshots:
   '@oozcitak/util@10.0.0': {}
 
   '@opentelemetry/api@1.9.0': {}
+
+  '@playwright/test@1.61.0':
+    dependencies:
+      playwright: 1.61.0
 
   '@redocly/ajv@8.11.2':
     dependencies:
@@ -5194,6 +5266,10 @@ snapshots:
 
   dom-accessibility-api@0.6.3: {}
 
+  dotenv@16.6.1: {}
+
+  dotenv@17.2.2: {}
+
   dotenv@17.4.2: {}
 
   drizzle-kit@0.28.1:
@@ -5568,6 +5644,9 @@ snapshots:
   for-each@0.3.5:
     dependencies:
       is-callable: 1.2.7
+
+  fsevents@2.3.2:
+    optional: true
 
   fsevents@2.3.3:
     optional: true
@@ -6166,6 +6245,14 @@ snapshots:
   picocolors@1.1.1: {}
 
   picomatch@4.0.4: {}
+
+  playwright-core@1.61.0: {}
+
+  playwright@1.61.0:
+    dependencies:
+      playwright-core: 1.61.0
+    optionalDependencies:
+      fsevents: 2.3.2
 
   pluralize@8.0.0: {}
 

@@ -3,3 +3,10 @@
 /.clerk/
 .vercel
 .env*
+!.env.e2e.example
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/.playwright/

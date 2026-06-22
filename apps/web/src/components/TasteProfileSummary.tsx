@@ -101,7 +101,9 @@ export function TasteProfileSummary({ greeting, baseline }: TasteProfileSummaryP
             <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
               {t('profile.persona.heading')}
             </p>
-            <h2 className="text-xl font-bold text-neutral-900">{persona.title}</h2>
+            <h2 data-testid="persona-title" className="text-xl font-bold text-neutral-900">
+              {persona.title}
+            </h2>
             <p className="text-sm text-neutral-600">{persona.blurb}</p>
           </div>
         ) : null}

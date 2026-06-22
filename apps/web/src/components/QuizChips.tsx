@@ -18,7 +18,7 @@ export function QuizChips<T extends string>({
 }) {
   const { t } = useTranslation()
   return (
-    <div role="radiogroup" aria-label={title} className="mt-6">
+    <div role="radiogroup" data-testid="quiz-question" aria-label={title} className="mt-6">
       <h2 className="mb-2 text-lg font-semibold text-neutral-900">{title}</h2>
       <div className="flex flex-wrap gap-2">
         {options.map((opt) => {
@@ -28,6 +28,7 @@ export function QuizChips<T extends string>({
               key={opt}
               type="button"
               role="radio"
+              data-value={opt}
               aria-checked={selected}
               onClick={() => onChange(opt)}
               className={`rounded-full px-3.5 py-2 text-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 ${

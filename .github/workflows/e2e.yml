@@ -1,0 +1,65 @@
+name: E2E (onboarding quiz)
+
+# Cost control: every run performs ONE onboarding submit, which calls OpenAI
+# (embedding + icon + persona) on the dev API. So this NEVER runs per-push —
+# only on a manual dispatch, or when a PR is explicitly labeled "e2e".
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: 'Dev deployment URL (dev Clerk + dev API). Falls back to the E2E_BASE_URL secret.'
+        required: false
+  pull_request:
+    types: [labeled]
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    name: Playwright (onboarding)
+    # Manual dispatch always runs; on a PR, only when the "e2e" label is added.
+    if: github.event_name == 'workflow_dispatch' || github.event.label.name == 'e2e'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright Chromium
+        run: pnpm --dir apps/web exec playwright install --with-deps chromium
+
+      # E2E runs against a stable dev deployment (dev Clerk + dev API) whose
+      # origin is allow-listed in the dev API's CORS / azp. Per-PR previews use
+      # non-deterministic origins, so we don't target them.
+      - name: Run onboarding e2e
+        env:
+          E2E_BASE_URL: ${{ github.event.inputs.base_url || secrets.E2E_BASE_URL }}
+          E2E_CLERK_EMAIL: ${{ secrets.E2E_CLERK_EMAIL }}
+          E2E_CLERK_PASSWORD: ${{ secrets.E2E_CLERK_PASSWORD }}
+          # clerkSetup() mints a Testing Token to bypass the dev-browser handshake.
+          CLERK_PUBLISHABLE_KEY: ${{ secrets.E2E_CLERK_PUBLISHABLE_KEY }}
+          CLERK_SECRET_KEY: ${{ secrets.E2E_CLERK_SECRET_KEY }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+        run: pnpm --dir apps/web e2e
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: apps/web/playwright-report/
+          retention-days: 7
+          if-no-files-found: ignore

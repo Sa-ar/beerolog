@@ -113,7 +113,12 @@ function OnboardingForm() {
                   {error}
                 </Alert>
               ) : null}
-              <Button size="lg" disabled={submitting} onClick={() => void submit()}>
+              <Button
+                size="lg"
+                data-testid="quiz-submit"
+                disabled={submitting}
+                onClick={() => void submit()}
+              >
                 {submitting ? t('onboarding.saving') : t('onboarding.save')}
               </Button>
             </div>
@@ -126,6 +131,7 @@ function OnboardingForm() {
           {history.length > 0 ? (
             <button
               type="button"
+              data-testid="quiz-back"
               onClick={back}
               className="text-sm font-medium text-neutral-500 underline-offset-2 hover:underline"
             >
@@ -172,7 +178,12 @@ function MultiQuestion({
   }
 
   return (
-    <div role="group" aria-label={t(`onboarding.questions.${q.id}`)} className="space-y-3">
+    <div
+      role="group"
+      data-testid={`question-${q.id}`}
+      aria-label={t(`onboarding.questions.${q.id}`)}
+      className="space-y-3"
+    >
       <p className="font-medium text-neutral-900">{t(`onboarding.questions.${q.id}`)}</p>
       <div className="flex flex-wrap gap-2">
         {q.options.map((option) => {
@@ -181,6 +192,7 @@ function MultiQuestion({
             <button
               key={option}
               type="button"
+              data-value={option}
               aria-pressed={on}
               onClick={() => toggle(option)}
               className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors ${
@@ -195,11 +207,16 @@ function MultiQuestion({
         })}
       </div>
       <div className="flex gap-3">
-        <Button size="md" onClick={() => onCommit(q.field, selected)}>
+        <Button size="md" data-testid="quiz-continue" onClick={() => onCommit(q.field, selected)}>
           {t('onboarding.continue')}
         </Button>
         {q.optional ? (
-          <Button size="md" variant="outline" onClick={() => onCommit(q.field, [])}>
+          <Button
+            size="md"
+            variant="outline"
+            data-testid="quiz-skip"
+            onClick={() => onCommit(q.field, [])}
+          >
             {t('onboarding.skip')}
           </Button>
         ) : null}
