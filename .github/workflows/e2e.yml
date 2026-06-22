@@ -1,8 +1,8 @@
 name: E2E (onboarding quiz)
 
 # Cost note: every run performs ONE onboarding submit, which calls OpenAI
-# (embedding + icon + persona) on the dev API. Triggers: a push to `staging`
-# (the dev deployment, auto-synced from main), a manual dispatch, or a PR
+# (embedding + icon + persona) on the dev API. Triggers: called by the staging
+# pipeline (staging.yml) after each push to main, a manual dispatch, or a PR
 # explicitly labeled "e2e".
 on:
   workflow_dispatch:
@@ -10,8 +10,7 @@ on:
       base_url:
         description: 'Dev deployment URL (dev Clerk + dev API). Falls back to the E2E_BASE_URL secret.'
         required: false
-  push:
-    branches: [staging]
+  workflow_call: {}
   pull_request:
     types: [labeled]
 
@@ -25,10 +24,13 @@ permissions:
 jobs:
   e2e:
     name: Playwright (onboarding)
-    # Runs on a push to staging or a manual dispatch; on a PR, only when the
-    # "e2e" label is added.
-    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || github.event.label.name == 'e2e'
-    runs-on: ubuntu-latest
+    # Runs when dispatched or called by the staging pipeline; on a PR, only when
+    # the "e2e" label is added.
+    if: github.event_name != 'pull_request' || github.event.label.name == 'e2e'
+    # Set the E2E_RUNNER repo variable to a Blacksmith label
+    # (e.g. blacksmith-2vcpu-ubuntu-2204) after installing the Blacksmith GitHub
+    # App to run on their faster free-tier runners; defaults to GitHub's.
+    runs-on: ${{ vars.E2E_RUNNER || 'ubuntu-latest' }}
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
