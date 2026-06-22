@@ -1,0 +1,26 @@
+name: Sync staging with main
+
+# Keep the long-lived `staging` branch (the dev deployment the onboarding e2e
+# targets) fast-forwarded to `main` on every push, so it never drifts.
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-staging
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      # Fast-forward staging to this commit. Fails (loudly) if staging has
+      # diverged from main — staging is meant to track main only.
+      - name: Fast-forward staging to main
+        run: git push origin "${{ github.sha }}:refs/heads/staging"
