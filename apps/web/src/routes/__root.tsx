@@ -2,6 +2,7 @@ import { ClerkProvider } from '@clerk/tanstack-react-start'
 import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
 import { useMemo } from 'react'
 import { I18nextProvider } from 'react-i18next'
+import { Analytics } from '@vercel/analytics/react'
 import { IconCatalogProvider } from '@beerolog/icons'
 import { AppFooter } from '../components/AppFooter'
 import { AppHeader } from '../components/AppHeader'
@@ -58,6 +59,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             </IconCatalogProvider>
           </ClerkProvider>
         </I18nextProvider>
+        <Analytics />
         <Scripts />
       </body>
     </html>
