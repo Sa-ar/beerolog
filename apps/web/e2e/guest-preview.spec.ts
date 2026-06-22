@@ -40,10 +40,15 @@ async function walkQuiz(page: Page) {
   await page.getByTestId('quiz-submit').click()
 }
 
-// Sign up through our custom /signup page (mirror of the onboarding sign-in
-// flow): email + password, then the new-device email code (424242 for
-// +clerk_test addresses entered into the one-time-code input).
-async function signUpThroughCustomPage(page: Page) {
+// Sign IN the existing +clerk_test user through our custom /signin page. The
+// e2e reuses an already-registered email (E2E_CLERK_EMAIL), so signing UP would
+// fail; the funnel still lands a returning user on /recommendations via the
+// signed-in hydration branch. Mirrors onboarding.spec's proven sign-in flow:
+// navigate to /signin with next=/recommendations, email + password, then the
+// new-device email code (424242 for +clerk_test) into the one-time-code input,
+// and wait to leave /signin.
+async function signInExistingUser(page: Page) {
+  await page.goto('/signin/$?next=/recommendations')
   await page.locator('input[type="email"]').fill(EMAIL as string)
   await page.locator('input[type="password"]').fill(PASSWORD as string)
   await page.locator('form button[type="submit"]').click()
@@ -53,9 +58,11 @@ async function signUpThroughCustomPage(page: Page) {
     await codeInput.fill('424242')
     await page.locator('form button[type="submit"]').click()
   }
+  // On success the signin page navigates to `next` (/recommendations).
+  await page.waitForURL((url) => !url.pathname.includes('/signin'))
 }
 
-test('guest takes the quiz, hits the 3-result gate, signs up, and lands on full recommendations', async ({
+test('guest takes the quiz, hits the 3-result gate, signs in, and lands on full recommendations', async ({
   page,
 }) => {
   test.skip(!EMAIL || !PASSWORD, 'Set E2E_CLERK_EMAIL / E2E_CLERK_PASSWORD in .env.e2e')
@@ -91,19 +98,21 @@ test('guest takes the quiz, hits the 3-result gate, signs up, and lands on full 
   await expect(locked).toHaveAttribute('aria-hidden', 'true')
   await expect(locked.getByTestId('guest-beer-card').first()).toBeAttached()
 
-  // A sign-up CTA points at sign-up with next=/recommendations.
+  // The CTA still targets the new-user path: sign-up with next=/recommendations.
+  // We assert that target but don't follow it — the e2e reuses an existing
+  // (already-registered) account, so we convert via sign-in below instead.
   const cta = page.getByTestId('guest-signup-cta')
   await expect(cta).toBeVisible()
   const href = await cta.getAttribute('href')
   expect(href).toContain('/signup')
   expect(href).toContain('next=%2Frecommendations')
 
-  // --- Convert: follow the CTA and complete sign-up through the custom page. ---
-  await cta.click()
-  await page.waitForURL((url) => url.pathname.includes('/signup'))
-  await signUpThroughCustomPage(page)
+  // --- Convert: sign IN the existing user (not sign-up) with the same
+  // next=/recommendations target the CTA advertises. The returning user has a
+  // profile, so the signed-in hydration branch lands them on full recs. ---
+  await signInExistingUser(page)
 
-  // Payoff: post-signup hydration lands the user on /recommendations.
+  // Payoff: hydration lands the (returning) user on /recommendations.
   await page.waitForURL((url) => url.pathname.endsWith('/recommendations'))
 
   // Full, unblurred recommendations render: the matched-results heading shows and
@@ -112,7 +121,8 @@ test('guest takes the quiz, hits the 3-result gate, signs up, and lands on full 
   await expect(page.getByTestId('guest-results-locked')).toHaveCount(0)
   await expect(page.getByTestId('guest-signup-cta')).toHaveCount(0)
 
-  // Stored guest answers are cleared after hydration to prevent double-submission.
+  // The signed-in hydration branch clears stored guest answers (the returning
+  // user already has a profile, so they're discarded rather than re-submitted).
   const stored = await page.evaluate(() => window.localStorage.getItem('beerolog:guest_answers'))
   expect(stored).toBeNull()
 })
