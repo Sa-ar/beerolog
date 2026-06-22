@@ -151,6 +151,12 @@
     "subtitle": "Sign in to pick up your taste profile and fresh beer picks.",
     "signingIn": "Signing in…",
     "mfaUnsupported": "This account needs an extra verification step we don’t support yet.",
+    "verifyHeading": "Check your email",
+    "verifySubtitle": "We sent a 6-digit code to {{email}}. Enter it to finish signing in.",
+    "code": "Verification code",
+    "verify": "Verify",
+    "verifying": "Verifying…",
+    "invalidCode": "That code didn’t work. Check it and try again.",
     "noAccount": "New to Beerolog?",
     "createAccount": "Create an account"
   },

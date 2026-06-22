@@ -40,6 +40,8 @@ function SignInForm() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const [needsCode, setNeedsCode] = useState(false)
+  const [code, setCode] = useState('')
 
   async function handlePasswordSignIn(e: FormEvent) {
     e.preventDefault()
@@ -56,8 +58,38 @@ function SignInForm() {
         await signIn.finalize()
         await navigate({ to: next })
       } else {
-        // ponytail: second factors (MFA / email-code) not built here. Add a
-        // verification screen if those strategies get enabled in Clerk.
+        // New device / additional verification: email a one-time code and prompt
+        // for it. Falls back to mfaUnsupported if email_code isn't the required
+        // strategy (e.g. TOTP), which this flow doesn't handle.
+        const { error: sendError } = await signIn.emailCode.sendCode()
+        if (sendError) {
+          setError(t('signin.mfaUnsupported'))
+          return
+        }
+        setNeedsCode(true)
+      }
+    } catch (err) {
+      setError(clerkError(err, t('auth.genericError')))
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  async function handleVerifyCode(e: FormEvent) {
+    e.preventDefault()
+    if (submitting) return
+    setSubmitting(true)
+    setError(null)
+    try {
+      const { error } = await signIn.emailCode.verifyCode({ code })
+      if (error) {
+        setError(clerkError(error, t('signin.invalidCode')))
+        return
+      }
+      if (signIn.status === 'complete') {
+        await signIn.finalize()
+        await navigate({ to: next })
+      } else {
         setError(t('signin.mfaUnsupported'))
       }
     } catch (err) {
@@ -79,6 +111,30 @@ function SignInForm() {
     } catch (err) {
       setError(clerkError(err, t('auth.genericError')))
     }
+  }
+
+  if (needsCode) {
+    return (
+      <AuthLayout
+        heading={t('signin.verifyHeading')}
+        subtitle={t('signin.verifySubtitle', { email })}
+        onSubmit={handleVerifyCode}
+      >
+        <AuthField
+          label={t('signin.code')}
+          type="text"
+          inputMode="numeric"
+          autoComplete="one-time-code"
+          required
+          value={code}
+          onChange={(e) => setCode(e.target.value)}
+        />
+        <AuthError message={error} />
+        <Button type="submit" disabled={submitting}>
+          {submitting ? t('signin.verifying') : t('signin.verify')}
+        </Button>
+      </AuthLayout>
+    )
   }
 
   return (
