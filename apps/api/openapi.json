@@ -465,6 +465,105 @@
         "title": "FlavorCue",
         "type": "string"
       },
+      "GuestRecommendationsResponse": {
+        "properties": {
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/GuestRecommendedBeer"
+            },
+            "title": "Results",
+            "type": "array"
+          },
+          "unlocked_count": {
+            "title": "Unlocked Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "results",
+          "unlocked_count"
+        ],
+        "title": "GuestRecommendationsResponse",
+        "type": "object"
+      },
+      "GuestRecommendedBeer": {
+        "description": "Slimmed result for the public guest preview.\n\nDeliberately decoupled from the authed RecommendedBeer: no score\nbreakdown, a plain integer match_percent, and a plain `why` string.",
+        "properties": {
+          "abv": {
+            "title": "Abv",
+            "type": "number"
+          },
+          "brewery": {
+            "title": "Brewery",
+            "type": "string"
+          },
+          "color": {
+            "enum": [
+              "pale",
+              "gold",
+              "amber",
+              "brown",
+              "dark"
+            ],
+            "title": "Color",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "match_percent": {
+            "title": "Match Percent",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "name_hebrew": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name Hebrew"
+          },
+          "style": {
+            "title": "Style",
+            "type": "string"
+          },
+          "why": {
+            "title": "Why",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "brewery",
+          "style",
+          "abv",
+          "color",
+          "match_percent",
+          "why"
+        ],
+        "title": "GuestRecommendedBeer",
+        "type": "object"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -1188,6 +1287,47 @@
         "summary": "Debug Recommendations",
         "tags": [
           "debug"
+        ]
+      }
+    },
+    "/guest-recommendations": {
+      "post": {
+        "operationId": "postGuestRecommendations",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OnboardingAnswers"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuestRecommendationsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Post Guest Recommendations",
+        "tags": [
+          "guest"
         ]
       }
     },

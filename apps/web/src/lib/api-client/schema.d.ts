@@ -21,6 +21,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/guest-recommendations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Post Guest Recommendations */
+        post: operations["postGuestRecommendations"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -376,6 +393,45 @@ export interface components {
          * @enum {string}
          */
         FlavorCue: "grapefruit" | "caramel" | "pine" | "tropical" | "banana_bread" | "citrus_zest" | "coffee" | "bread_crust";
+        /** GuestRecommendationsResponse */
+        GuestRecommendationsResponse: {
+            /** Results */
+            results: components["schemas"]["GuestRecommendedBeer"][];
+            /** Unlocked Count */
+            unlocked_count: number;
+        };
+        /**
+         * GuestRecommendedBeer
+         * @description Slimmed result for the public guest preview.
+         *
+         *     Deliberately decoupled from the authed RecommendedBeer: no score
+         *     breakdown, a plain integer match_percent, and a plain `why` string.
+         */
+        GuestRecommendedBeer: {
+            /** Abv */
+            abv: number;
+            /** Brewery */
+            brewery: string;
+            /**
+             * Color
+             * @enum {string}
+             */
+            color: "pale" | "gold" | "amber" | "brown" | "dark";
+            /** Id */
+            id: string;
+            /** Image Url */
+            image_url?: string | null;
+            /** Match Percent */
+            match_percent: number;
+            /** Name */
+            name: string;
+            /** Name Hebrew */
+            name_hebrew?: string | null;
+            /** Style */
+            style: string;
+            /** Why */
+            why: string;
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -676,6 +732,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RecommendationsResponse"];
+                };
+            };
+        };
+    };
+    postGuestRecommendations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OnboardingAnswers"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GuestRecommendationsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
