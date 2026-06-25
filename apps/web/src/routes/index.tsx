@@ -169,6 +169,11 @@ function VisitorHome() {
             {t('home.cta')}
           </Button>
         </Link>
+        <Link to="/try">
+          <Button className="w-full" size="lg" variant="outline">
+            {t('home.tryCta')}
+          </Button>
+        </Link>
         <p className="text-center text-sm text-neutral-500">{t('home.ctaHint')}</p>
       </section>
     </>

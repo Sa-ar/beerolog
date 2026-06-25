@@ -116,9 +116,11 @@ class OnboardingAnswers(BaseModel):
     strength: StrengthPref
     adventure: AdventureLevel
     # CATA "what puts you off" — multi-select, fired only on an extreme avoid.
-    avoids: list[AvoidCue] = Field(default_factory=list)
+    # max_length bounds the payload at the trust boundary (public endpoint):
+    # there are only this many distinct cues, so a longer list is dup-stuffing.
+    avoids: list[AvoidCue] = Field(default_factory=list, max_length=4)
     # Optional capstone flavor-cue grid.
-    flavor_cues: list[FlavorCue] = Field(default_factory=list)
+    flavor_cues: list[FlavorCue] = Field(default_factory=list, max_length=8)
 
 
 class BaselineTasteDials(BaseModel):

@@ -674,6 +674,7 @@
             "items": {
               "$ref": "#/components/schemas/AvoidCue"
             },
+            "maxItems": 4,
             "title": "Avoids",
             "type": "array"
           },
@@ -694,6 +695,7 @@
             "items": {
               "$ref": "#/components/schemas/FlavorCue"
             },
+            "maxItems": 8,
             "title": "Flavor Cues",
             "type": "array"
           },

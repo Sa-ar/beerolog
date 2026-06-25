@@ -232,6 +232,7 @@
     "howItWorks": "How it works",
     "howItWorksHint": "Sign in so your quiz answers and picks are saved to your profile.",
     "cta": "Sign in to start",
+    "tryCta": "Try it free — no sign-in",
     "ctaHint": "Always free. Your taste profile stays with your account.",
     "steps": {
       "quiz": {

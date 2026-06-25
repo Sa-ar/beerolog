@@ -6,6 +6,7 @@ producing a 1536-D vector for an arbitrary string. Tests mock this call.
 
 from __future__ import annotations
 
+from functools import lru_cache
 from typing import Protocol
 
 from app.config import settings
@@ -34,8 +35,13 @@ class OpenAIEmbeddingClient:
         return list(resp.data[0].embedding)
 
 
+@lru_cache(maxsize=4)
+def _client_for(api_key: str, model: str) -> EmbeddingClient:
+    return OpenAIEmbeddingClient(api_key=api_key, model=model)
+
+
 def get_embedding_client() -> EmbeddingClient:
-    return OpenAIEmbeddingClient(
-        api_key=settings.openai_api_key,
-        model=settings.embedding_model,
-    )
+    # Memoized per (key, model): one AsyncOpenAI (and its HTTP pool) per process
+    # instead of per request, but a settings change (key rotation, a test that
+    # swaps the key) yields a fresh client rather than a stale cached one.
+    return _client_for(settings.openai_api_key, settings.embedding_model)

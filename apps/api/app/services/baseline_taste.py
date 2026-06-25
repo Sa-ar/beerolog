@@ -220,11 +220,13 @@ def compose_text(answers: OnboardingAnswers) -> str:
     parts.append(_SMOKED_PHRASE[answers.smoked_foods] + ".")
     parts.append(_ADVENTURE_PHRASE[answers.adventure] + ".")
 
+    # Dedup + sort so the composed text (and thus the guest embedding-cache key)
+    # is canonical: ['pine','citrus'] and ['citrus','pine'] map to one entry.
     if answers.flavor_cues:
-        chosen = ", ".join(_CUE_WORD[c] for c in answers.flavor_cues)
+        chosen = ", ".join(_CUE_WORD[c] for c in sorted(set(answers.flavor_cues)))
         parts.append(f"Tastes that feel like them: {chosen}.")
     if answers.avoids:
-        chosen = ", ".join(_AVOID_WORD[a] for a in answers.avoids)
+        chosen = ", ".join(_AVOID_WORD[a] for a in sorted(set(answers.avoids)))
         parts.append(f"Puts them off: {chosen}.")
 
     return " ".join(parts)

@@ -119,3 +119,12 @@ def test_compose_text_swaps_novelty_phrase_on_level() -> None:
 def test_compose_text_includes_capstone_cues() -> None:
     answers = HOP_HEAD.model_copy(update={"flavor_cues": [FlavorCue.grapefruit]})
     assert "grapefruit" in compose_text(answers)
+
+
+def test_compose_text_cue_order_is_canonical() -> None:
+    """Permuted/duplicated cues compose identically -> one guest-cache key."""
+    a = HOP_HEAD.model_copy(update={"flavor_cues": [FlavorCue.pine, FlavorCue.caramel]})
+    b = HOP_HEAD.model_copy(
+        update={"flavor_cues": [FlavorCue.caramel, FlavorCue.pine, FlavorCue.caramel]}
+    )
+    assert compose_text(a) == compose_text(b)

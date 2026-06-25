@@ -12,6 +12,8 @@ from fastapi.testclient import TestClient  # type: ignore[import-not-found]
 
 from app.config import settings
 from app.main import app
+from app.routes import guest_recommendations as guest_route
+from app.services.match_engine import BeerCandidate
 
 _PAYLOAD = {
     "coffee": "black",
@@ -55,6 +57,109 @@ def test_works_with_database_url_unset(monkeypatch) -> None:
     r = raw.post("/guest-recommendations", json=_PAYLOAD)
     assert r.status_code == 200, r.text
     assert len(r.json()["results"]) > 0
+
+
+class _FakeClient:
+    """Counts embed calls so we can assert the cache served the second hit."""
+
+    def __init__(self) -> None:
+        self.calls = 0
+
+    async def embed(self, text: str) -> list[float]:
+        self.calls += 1
+        return [1.0] + [0.0] * 1535
+
+
+def _embedded_catalog() -> list[BeerCandidate]:
+    return [
+        BeerCandidate(
+            id="b1",
+            name="Test Lager",
+            brewery="Acme",
+            style="lager",
+            abv=5.0,
+            market_tier="craft",
+            color="gold",
+            image_url=None,
+            adventurousness=0.3,
+            embedding=[1.0] + [0.0] * 1535,
+        )
+    ]
+
+
+def test_embedding_path_uses_cache(monkeypatch) -> None:
+    """With a client + embedded catalog, identical answers embed once, then cache."""
+    guest_route._EMBED_CACHE.clear()
+    fake = _FakeClient()
+
+    async def _load() -> list[BeerCandidate]:
+        return _embedded_catalog()
+
+    monkeypatch.setattr(guest_route, "_load_catalog", _load)
+    app.dependency_overrides[guest_route._optional_embedding_client] = lambda: fake
+    try:
+        raw = TestClient(app)
+        first = raw.post("/guest-recommendations", json=_PAYLOAD)
+        second = raw.post("/guest-recommendations", json=_PAYLOAD)
+    finally:
+        app.dependency_overrides.pop(guest_route._optional_embedding_client, None)
+
+    assert first.status_code == 200, first.text
+    assert second.status_code == 200, second.text
+    assert first.json()["results"][0]["id"] == "b1"
+    assert fake.calls == 1  # second request was a cache hit
+
+
+def test_low_dim_catalog_falls_back_to_dials(monkeypatch) -> None:
+    """Toy/placeholder embeddings (wrong dim) must dial-score, not cosine-match."""
+    guest_route._EMBED_CACHE.clear()
+    fake = _FakeClient()
+
+    async def _load() -> list[BeerCandidate]:
+        beer = _embedded_catalog()[0]
+        return [BeerCandidate(**{**beer.__dict__, "embedding": [0.7, 0.3, 0.5]})]
+
+    monkeypatch.setattr(guest_route, "_load_catalog", _load)
+    app.dependency_overrides[guest_route._optional_embedding_client] = lambda: fake
+    try:
+        r = TestClient(app).post("/guest-recommendations", json=_PAYLOAD)
+    finally:
+        app.dependency_overrides.pop(guest_route._optional_embedding_client, None)
+
+    assert r.status_code == 200, r.text
+    assert fake.calls == 0  # never embedded -> dial path
+    assert r.json()["results"][0]["match_percent"] >= 0
+
+
+def test_over_embed_budget_falls_back_to_dials(monkeypatch) -> None:
+    """When the paid-embed budget is spent, guests dial-score (no API call)."""
+    guest_route._EMBED_CACHE.clear()
+    monkeypatch.setattr(guest_route, "_EMBED_BUDGET", 0)
+    monkeypatch.setattr(guest_route, "_embed_window_start", 0.0)
+    monkeypatch.setattr(guest_route, "_embed_window_count", 0)
+    fake = _FakeClient()
+
+    async def _load() -> list[BeerCandidate]:
+        return _embedded_catalog()
+
+    monkeypatch.setattr(guest_route, "_load_catalog", _load)
+    app.dependency_overrides[guest_route._optional_embedding_client] = lambda: fake
+    try:
+        r = TestClient(app).post("/guest-recommendations", json=_PAYLOAD)
+    finally:
+        app.dependency_overrides.pop(guest_route._optional_embedding_client, None)
+
+    assert r.status_code == 200, r.text
+    assert fake.calls == 0  # budget exhausted -> never embedded
+    assert len(r.json()["results"]) > 0  # still served via dial scoring
+
+
+def test_oversized_multiselect_returns_422() -> None:
+    """max_length bounds the public payload: a dup-stuffed list is rejected."""
+    raw = TestClient(app)
+    payload = {**_PAYLOAD, "avoids": ["too_bitter"] * 9}
+    r = raw.post("/guest-recommendations", json=payload)
+    assert r.status_code == 422
 
 
 def test_malformed_answers_returns_422() -> None:
