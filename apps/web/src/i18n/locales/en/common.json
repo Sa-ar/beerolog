@@ -38,7 +38,7 @@
     }
   },
   "footer": {
-    "responsibleDrinking": "Drink responsibly. Beerolog is for adults 18+ and does not sell alcohol.",
+    "responsibleDrinking": "Drink responsibly. Beerolog is for adults of legal drinking age (18+ in Israel) and does not sell alcohol.",
     "legal": "Legal",
     "privacy": "Privacy",
     "terms": "Terms",
@@ -52,23 +52,23 @@
       "title": "Privacy Policy",
       "intro": "This policy explains what personal data Beerolog collects, why we process it, and which third parties help us run the service.",
       "sections": [
-        { "heading": "What we collect", "body": "Your account identifier, and your email and display name if your sign-in provider shares them; your baseline taste profile (taste dials, flavor family, novelty affinity); and your beer ratings and optional notes." },
+        { "heading": "What we collect", "body": "Your account identifier, and your email and display name if your sign-in provider shares them; your baseline taste profile (taste dials, flavor family, novelty affinity); and your beer ratings and optional notes. Like any web service, we and our providers also process technical data such as IP address, device and browser information, and security logs to operate the service, keep your account secure, and prevent abuse. When you scan a bar menu, the photo is processed in memory only to read the menu items and is discarded immediately afterward; it is not stored and is not shared with any third party." },
         { "heading": "How we use it", "body": "To build your taste persona and generate beer recommendations. We do not sell your personal data." },
         { "heading": "Beerolog data vs. authentication data", "body": "Sign-in and session data are held by our authentication provider, Clerk. The data listed above is stored in Beerolog's own database." },
-        { "heading": "Ephemeral session intent", "body": "The vibe, ABV range, and free text you enter for a recommendation are processed for that request only and are not stored as standalone records." },
-        { "heading": "Taste embedding", "body": "We derive an internal similarity vector from your ratings for matching. It is disclosed here but is not human-readable and is not included in data exports." },
-        { "heading": "Sub-processors", "body": "Clerk (authentication), our hosting provider, our database provider, and OpenAI (model inference). Prompts sent for inference are not logged beyond our observability rules." },
-        { "heading": "Your rights", "body": "You can export or permanently delete the data Beerolog stores about you from your account settings. Authentication data may also be managed through Clerk." },
-        { "heading": "Contact", "body": "Email privacy@beerolog.example to ask about your data. (Contact address pending launch.)" }
+        { "heading": "Ephemeral session intent", "body": "The vibe, ABV range, and free text you enter for a recommendation are processed only to generate that recommendation and are not stored by Beerolog as standalone records. This text — but not your name or contact details — is sent to our inference provider (OpenAI) only to produce the result, and may be retained by OpenAI under its API data-usage terms." },
+        { "heading": "Taste embedding", "body": "We derive an internal similarity vector from your ratings for matching. It is disclosed here but is not human-readable and is not included in data exports because it is derived and internal: it is regenerated from your ratings, which are exported, and it is deleted when you delete your account. You can still request access to, or deletion of, this derived data, subject to applicable law." },
+        { "heading": "Sub-processors", "body": "Clerk (authentication), Vercel (hosting), Neon (database), and OpenAI (model inference). Some of these providers, including Clerk and OpenAI, may process your data on servers outside Israel; we rely on their contractual data-protection terms for those transfers. Prompts sent for inference are not logged by Beerolog beyond our observability rules." },
+        { "heading": "Your rights", "body": "You can export, or delete from our active systems, the data Beerolog stores about you from your account settings. Residual copies may persist briefly in encrypted backups and provider logs before being overwritten on their normal cycles. For any privacy request — including data held by our authentication provider — you can contact Beerolog and we will handle or coordinate it." },
+        { "heading": "Contact", "body": "Email privacy@beerolog.com to ask about your data." }
       ]
     },
     "terms": {
       "title": "Terms of Use",
       "intro": "By using Beerolog you agree to these terms.",
       "sections": [
-        { "heading": "Age requirement", "body": "Beerolog presents information about alcoholic beverages and is intended only for users of legal drinking age in their location." },
+        { "heading": "Age requirement", "body": "Beerolog presents information about alcoholic beverages and is intended for use in Israel, where the minimum age is 18. You must be 18 or older and of legal drinking age in your location to use it; if you access Beerolog from elsewhere, you are responsible for complying with your local laws. Beerolog may not be appropriate or lawful in every location; do not use it where alcohol-related content or recommendation services are prohibited." },
         { "heading": "Acceptable use", "body": "Use Beerolog for personal, lawful purposes. Do not attempt to disrupt or abuse the service." },
-        { "heading": "No warranty", "body": "Recommendations are provided for guidance only, without warranty. Drink responsibly." },
+        { "heading": "No warranty", "body": "Recommendations are provided for guidance only, without warranty, and may contain inaccuracies. Do not rely on Beerolog for medical, allergen, dietary, pregnancy, or driving decisions — always check product labels and official sources. Beerolog does not sell, deliver, or facilitate the purchase of alcohol. Drink responsibly." },
         { "heading": "Changes", "body": "We may update these terms; material changes will be reflected on this page." }
       ]
     },
@@ -76,7 +76,7 @@
       "title": "Cookie Notice",
       "intro": "Beerolog uses a small number of cookies. We do not use advertising or analytics cookies.",
       "sections": [
-        { "heading": "Essential cookies", "body": "age_verified records that you confirmed you are of legal drinking age, so the age gate is not shown on every visit. It is required to access alcohol-related content and cannot be turned off while you use the site." },
+        { "heading": "Essential cookies", "body": "age_verified records that you confirmed you are of legal drinking age, so the age gate is not shown on every visit. It is required to access alcohol-related content and cannot be turned off while you use the site. Our sign-in provider, Clerk, also sets essential cookies that keep you securely signed in; these are required and are governed by Clerk's own policies." },
         { "heading": "Functional cookies", "body": "lang remembers your language preference (Hebrew or English). It is not used for tracking." },
         { "heading": "Non-essential cookies", "body": "We do not set analytics or marketing cookies. If that ever changes, they will not be activated without your explicit opt-in." }
       ]
@@ -85,17 +85,17 @@
       "title": "Accessibility Statement",
       "intro": "Beerolog is committed to making its supported experience accessible to everyone.",
       "sections": [
-        { "heading": "Conformance target", "body": "We aim to meet Israeli Standard SI 5568, which adopts WCAG 2.0 Level AA, across the supported sign-in, onboarding, and recommendation flows." },
+        { "heading": "Conformance target", "body": "We aim to meet Israeli Standard SI 5568, which adopts WCAG 2.0 Level AA, across the onboarding and recommendation flows we build. Third-party sign-in screens are provided by Clerk and are not yet fully conformant (see Known gaps)." },
         { "heading": "Known gaps", "body": "Our third-party sign-in screens are provided by Clerk and may not fully meet our target; we track their accessibility and will update this statement as gaps are closed. Remediation timeline: pending launch." },
-        { "heading": "Accessibility coordinator", "body": "Coordinator name and role: pending assignment. Contact: accessibility@beerolog.example." },
+        { "heading": "Accessibility coordinator", "body": "Coordinator: Saar Davidson, site owner. Contact: accessibility@beerolog.com." },
         { "heading": "Feedback", "body": "If you encounter a barrier, contact our accessibility coordinator and we will work to resolve it." }
       ]
     }
   },
   "ageGate": {
     "title": "Age verification",
-    "body": "Beerolog contains alcohol-related content and is intended for adults aged 18 and over. Please confirm your age to continue.",
-    "confirm": "I am 18 or older",
+    "body": "Beerolog contains alcohol-related content and is intended for adults who are 18 or older and of legal drinking age where they live. Please confirm to continue.",
+    "confirm": "I am 18 or older and of legal drinking age where I live",
     "deny": "I am not 18 or older",
     "deniedTitle": "Sorry, you cannot use Beerolog",
     "deniedBody": "You must be 18 or older to use this app. Please close this page."
