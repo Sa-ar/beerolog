@@ -28,7 +28,7 @@ export function BeerologLogo({
   return (
     <span className={`inline-flex min-w-0 items-center justify-center gap-2 ${className}`}>
       <BeerologMark className={`shrink-0 ${iconClassName}`} />
-      <span className="max-w-[9rem] truncate text-[1.05rem] font-bold leading-none tracking-tight text-amber-950 sm:max-w-none">
+      <span className="max-w-[9rem] truncate font-script text-2xl leading-none tracking-tight text-brand-300 sm:max-w-none">
         {title}
       </span>
     </span>

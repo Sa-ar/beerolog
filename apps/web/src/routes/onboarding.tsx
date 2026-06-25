@@ -49,6 +49,7 @@ function OnboardingForm() {
         body: JSON.stringify(prunedAnswers(answers)),
       })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      localStorage.removeItem('beerolog_onboarding_quiz')
       navigate({ to: '/' })
     } catch (e) {
       setError(onboardingSaveErrorMessage(t, e))
@@ -58,9 +59,9 @@ function OnboardingForm() {
   }
 
   return (
-    <main className={`${PAGE_MAIN} py-8 sm:py-10`}>
-      <section className="mb-6 space-y-1">
-        <p className="text-sm font-semibold uppercase tracking-wide text-brand-600">
+    <main className={`${PAGE_MAIN} py-6 sm:py-10`}>
+      <section className="mb-4 space-y-1 sm:mb-6">
+        <p className="text-sm font-semibold uppercase tracking-wide text-brand-300">
           {t('onboarding.eyebrow')}
         </p>
         <h1 className="text-2xl font-bold tracking-tight text-neutral-900 sm:text-3xl">
@@ -69,7 +70,11 @@ function OnboardingForm() {
         <p className="text-neutral-600">{t('onboarding.intro')}</p>
       </section>
 
-      <QuizStepper onComplete={(answers) => void submit(answers)} completing={submitting}>
+      <QuizStepper
+        onComplete={(answers) => void submit(answers)}
+        completing={submitting}
+        storageKey="beerolog_onboarding_quiz"
+      >
         {error ? <Alert variant="error">{error}</Alert> : null}
       </QuizStepper>
     </main>

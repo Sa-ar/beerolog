@@ -7,7 +7,7 @@ import { BeerologLogo } from './BeerologLogo'
 export function AppHeader() {
   const { t } = useTranslation()
   return (
-    <header className="sticky top-0 z-10 border-b border-amber-100 bg-white/80 backdrop-blur">
+    <header className="sticky top-0 z-10 border-b border-brand-700/50 bg-[hsl(26_24%_8%)]/85 backdrop-blur">
       <div className={`${PAGE_HEADER_SHELL} flex min-w-0 items-center justify-between py-3`}>
         <Link
           to="/"

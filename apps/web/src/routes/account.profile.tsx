@@ -80,7 +80,7 @@ function ProfilePage() {
     <Card>
       <CardContent className="pt-6">
         <div className="mb-6 flex items-center gap-4">
-          <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-amber-700 text-xl font-semibold text-white">
+          <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-amber-700 text-xl font-semibold text-[#fff]">
             {user.hasImage ? (
               <img src={user.imageUrl} alt="" className="h-full w-full object-cover" />
             ) : (

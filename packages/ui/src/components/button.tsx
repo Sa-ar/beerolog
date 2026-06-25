@@ -7,10 +7,10 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-brand-500 text-white hover:bg-brand-600',
+        default: 'bg-brand-500 text-[hsl(26_30%_10%)] hover:bg-brand-600',
         outline: 'border border-brand-500 text-brand-500 hover:bg-brand-50',
-        ghost: 'hover:bg-brand-50 text-brand-900',
-        destructive: 'bg-red-600 text-white hover:bg-red-700',
+        ghost: 'hover:bg-brand-50 text-brand-200',
+        destructive: 'bg-red-600 text-[#fff] hover:bg-red-700',
       },
       size: {
         sm: 'h-9 px-3 text-sm',

@@ -46,6 +46,7 @@ function TryPage() {
     setView({ status: 'loading' })
     try {
       const data = await fetchGuestRecommendations(answers)
+      localStorage.removeItem('beerolog_try_quiz')
       setView({ status: 'results', data })
     } catch {
       setView({ status: 'error' })
@@ -71,14 +72,15 @@ function TryPage() {
 
   function retake() {
     clearGuestAnswers()
+    localStorage.removeItem('beerolog_try_quiz')
     setLastAnswers(null)
     setView({ status: 'quiz' })
   }
 
   return (
-    <main className={`${PAGE_MAIN} py-8 sm:py-10`}>
-      <section className="mb-6 space-y-1">
-        <p className="text-sm font-semibold uppercase tracking-wide text-brand-600">
+    <main className={`${PAGE_MAIN} py-6 sm:py-10`}>
+      <section className="mb-4 space-y-1 sm:mb-6">
+        <p className="text-sm font-semibold uppercase tracking-wide text-brand-300">
           {t('try.eyebrow')}
         </p>
         <h1 className="text-2xl font-bold tracking-tight text-neutral-900 sm:text-3xl">
@@ -101,7 +103,7 @@ function TryPage() {
       ) : null}
 
       {view.status === 'quiz' ? (
-        <QuizStepper onComplete={onComplete} />
+        <QuizStepper onComplete={onComplete} storageKey="beerolog_try_quiz" />
       ) : null}
 
       {view.status === 'loading' ? (

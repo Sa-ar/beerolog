@@ -29,7 +29,7 @@ function AccountSettings() {
                 key={slug}
                 to="/legal/$slug"
                 params={{ slug }}
-                className="text-sm font-medium text-neutral-600 hover:text-amber-800 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
+                className="text-sm font-medium text-neutral-600 hover:text-brand-300 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
               >
                 {t(`footer.${slug}`)}
               </Link>

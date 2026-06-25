@@ -50,9 +50,9 @@ export function TasteProfileSummary({ greeting, baseline }: TasteProfileSummaryP
   )
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-8 animate-[fadeIn_320ms_ease-out]">
       <section className="space-y-1">
-        <p className="text-sm font-semibold uppercase tracking-wide text-brand-600">
+        <p className="text-sm font-semibold uppercase tracking-wide text-brand-300">
           {greeting}
         </p>
         <h1 className="text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
@@ -60,16 +60,16 @@ export function TasteProfileSummary({ greeting, baseline }: TasteProfileSummaryP
         </h1>
       </section>
 
-      <Card className="overflow-hidden border-brand-200 bg-gradient-to-br from-brand-50 via-white to-amber-50/80 p-0 shadow-md">
+      <Card className="overflow-hidden border border-brand-700/50 bg-[hsl(25_24%_7%)] p-0 shadow-md">
         <div className="flex items-start gap-4 p-6 pb-4">
           <span
-            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-brand-100"
+            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-neutral-100 shadow-sm ring-1 ring-brand-700/40"
             aria-hidden
           >
             {heroSvg ? <GeneratedTasteIcon svg={heroSvg} className="h-9 w-9" /> : null}
           </span>
           <div className="min-w-0 space-y-1">
-            <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">
+            <p className="text-xs font-semibold uppercase tracking-wide text-brand-300">
               {t('profile.title')}
             </p>
             {title ? (
@@ -88,7 +88,7 @@ export function TasteProfileSummary({ greeting, baseline }: TasteProfileSummaryP
           ))}
         </div>
 
-        <div className="border-t border-brand-100/80 bg-white/60 px-6 py-3">
+        <div className="border-t border-brand-700/30 bg-neutral-100/40 px-6 py-3">
           <p className="text-xs text-neutral-500">
             {t('profile.summary.lastUpdated', { date: updated })}
           </p>
@@ -110,7 +110,7 @@ export function TasteProfileSummary({ greeting, baseline }: TasteProfileSummaryP
         <TasteRadar axes={radarAxes} labels={radarLabels} ariaLabel={t('profile.radar.aria')} />
       </Card>
 
-      <Card className="border-brand-200 bg-white p-6 shadow-sm">
+      <Card className="border border-brand-700/40 p-6 shadow-sm">
         <SessionQuickPick baseline={baseline} />
       </Card>
 
@@ -196,9 +196,9 @@ function TasteDial({
           {descriptor} · {percent}%
         </span>
       </div>
-      <div className="h-2.5 overflow-hidden rounded-full bg-neutral-100">
+      <div className="h-2.5 overflow-hidden rounded-full bg-neutral-200">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-brand-400 to-brand-600 transition-all"
+          className="h-full rounded-full bg-gradient-to-r rtl:bg-gradient-to-l from-brand-500 to-brand-300 transition-all"
           style={{ width: `${percent}%` }}
         />
       </div>

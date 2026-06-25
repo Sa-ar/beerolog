@@ -1,44 +1,104 @@
 import { useTranslation } from 'react-i18next'
+import { QuizIcon } from './quiz-icons'
 
-// Accessible single-choice quiz control. Exposes the question as a named
-// radiogroup and each option as a radio with programmatic checked state, so the
-// selection is conveyed to assistive tech (not by color alone).
+// Grid columns tuned to the option count so a 3-option scale sits on one row
+// instead of leaving an orphaned card in a 2-column grid.
+export function optionGrid(n: number): string {
+  if (n <= 1) return 'grid-cols-1'
+  if (n === 3) return 'grid-cols-3'
+  if (n === 2 || n === 4) return 'grid-cols-2'
+  return 'grid-cols-2 sm:grid-cols-3'
+}
+
+const CARD =
+  'group relative flex min-h-20 cursor-pointer items-center justify-center rounded-xl border-2 p-4 text-center font-display text-lg uppercase tracking-wide transition-colors has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand-500'
+const CARD_ON = 'border-brand-300 bg-brand-300 font-semibold text-[hsl(26_30%_10%)]'
+const CARD_OFF =
+  'border-neutral-300 bg-neutral-100/40 text-neutral-900 hover:border-brand-300 hover:bg-neutral-100'
+
+// Shared card styling for radio (single) and checkbox (multi) option cards.
+export const optionCardClass = (selected: boolean) => `${CARD} ${selected ? CARD_ON : CARD_OFF}`
+
+// Hand-drawn chalk tick that strokes itself on when an option is selected.
+export function ChalkTick() {
+  return (
+    <svg
+      aria-hidden
+      viewBox="0 0 24 24"
+      className="pointer-events-none absolute end-2 top-2 h-4 w-4 text-[hsl(26_30%_10%)]"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="3"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path
+        d="M4 12 l5 5 L20 5"
+        className="[stroke-dasharray:30] [stroke-dashoffset:30] animate-[chalkDraw_220ms_ease-out_forwards]"
+      />
+    </svg>
+  )
+}
+
+// Accessible single-choice control: a native radio group (one tab stop, arrow
+// keys move + select) styled as cards. `onChange` fires for keyboard and
+// pointer; `onPointerPick` fires only on pointer/tap, so callers can gate
+// auto-advance to pointer use and leave keyboard users an explicit Next.
 export function QuizChips<T extends string>({
   title,
   group,
   options,
   value,
   onChange,
+  onPointerPick,
 }: {
   title: string
   group: string
   options: T[]
   value: T | null
   onChange: (v: T) => void
+  onPointerPick?: ((v: T) => void) | undefined
 }) {
   const { t } = useTranslation()
   return (
-    <div role="radiogroup" data-testid="quiz-question" aria-label={title} className="mt-6">
-      <h2 className="mb-2 text-lg font-semibold text-neutral-900">{title}</h2>
-      <div className="flex flex-wrap gap-2">
+    <div role="radiogroup" aria-label={title} data-testid="quiz-question" className="mt-6">
+      <h2 className="mb-3 font-display text-xl font-semibold uppercase tracking-wide text-neutral-900">
+        {title}
+      </h2>
+      <div className={`grid gap-3 ${optionGrid(options.length)}`}>
         {options.map((opt) => {
           const selected = value === opt
           return (
-            <button
+            // The label wraps a native radio that owns keyboard selection; this
+            // onClick only gates pointer-driven auto-advance (keyboard must NOT
+            // advance), so the a11y listener rules don't apply here.
+            // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events
+            <label
               key={opt}
-              type="button"
-              role="radio"
-              data-value={opt}
-              aria-checked={selected}
-              onClick={() => onChange(opt)}
-              className={`rounded-full px-3.5 py-2 text-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 ${
-                selected
-                  ? 'border-2 border-brand-600 bg-brand-50 text-brand-900'
-                  : 'border border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-50'
-              }`}
+              className={optionCardClass(selected)}
+              // Auto-advance on real pointer clicks only. A keyboard arrow that
+              // changes the radio also fires `click`, but with detail 0; real
+              // taps/clicks have detail >= 1. Committing here (on the current
+              // card) also avoids the pointerup -> remount -> trailing-click race.
+              onClick={(e) => {
+                if (onPointerPick && e.detail > 0) onPointerPick(opt)
+              }}
             >
-              {t(`enums.${group}.${opt}`)}
-            </button>
+              <input
+                type="radio"
+                name={group}
+                value={opt}
+                checked={selected}
+                data-value={opt}
+                onChange={() => onChange(opt)}
+                className="sr-only"
+              />
+              <span className="flex flex-col items-center gap-1.5">
+                <QuizIcon group={group} option={opt} className="h-7 w-7" />
+                <span>{t(`enums.${group}.${opt}`)}</span>
+              </span>
+              {selected ? <ChalkTick /> : null}
+            </label>
           )
         })}
       </div>

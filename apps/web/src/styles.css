@@ -13,11 +13,19 @@
   }
 }
 
+/* Chalk tick that strokes itself on when a quiz option is selected. */
+@keyframes chalkDraw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
 @theme {
   --color-brand-50: hsl(38 92% 96%);
   --color-brand-100: hsl(38 92% 90%);
   --color-brand-200: hsl(38 80% 85%);
   --color-brand-300: hsl(30 75% 70%);
+  --color-brand-400: hsl(28 80% 60%);
   --color-brand-500: hsl(25 85% 50%);
   --color-brand-600: hsl(25 85% 43%);
   --color-brand-700: hsl(25 70% 35%);
@@ -29,6 +37,35 @@
   --radius: 0.5rem;
   --radius-lg: 0.75rem;
   --radius-xl: 1rem;
+
+  /* Pub-chalkboard type. Per-glyph fallback: Latin uses Oswald/Caveat; Hebrew
+     glyphs (absent from those) fall through to the Hebrew display/handwritten
+     faces (Suez One / Gveret Levin). */
+  --font-display: 'Oswald', 'Secular One', 'Bebas Neue', Impact, sans-serif;
+  --font-script: 'Caveat', 'Gveret Levin AlefAlefAlef', 'Segoe Script', cursive;
+
+  /* Dark mode by token remap: the neutral ramp is inverted so the app's
+     light-theme utilities (text-neutral-900, bg-white, border-neutral-200,
+     ...) render as cream-on-espresso everywhere without touching each route.
+     ponytail: remap ~11 tokens instead of editing hundreds of utilities.
+     Ceiling: a surface that genuinely needs light-on-dark is the exception;
+     override it locally if one shows up. */
+  /* Light-amber tints become dark warm tints so light-theme hover/fill
+     utilities (hover:bg-brand-50, alert info) stay readable on the board
+     instead of flashing as low-contrast pale patches. */
+  --color-brand-50: hsl(30 30% 15%);
+  --color-brand-100: hsl(30 28% 21%);
+  --color-white: hsl(28 16% 13%); /* card/header surface */
+  --color-neutral-50: hsl(28 16% 11%);
+  --color-neutral-100: hsl(28 15% 15%);
+  --color-neutral-200: hsl(30 12% 24%); /* borders */
+  --color-neutral-300: hsl(32 12% 34%);
+  --color-neutral-400: hsl(36 16% 55%);
+  --color-neutral-500: hsl(38 22% 68%);
+  --color-neutral-600: hsl(40 28% 78%); /* secondary text */
+  --color-neutral-700: hsl(42 34% 85%);
+  --color-neutral-800: hsl(44 40% 90%);
+  --color-neutral-900: hsl(44 46% 93%); /* primary cream text */
 }
 
 html {
@@ -38,6 +75,28 @@ html {
 body {
   font-family: system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
+  color: hsl(44 46% 93%);
+  background-color: hsl(26 24% 9%);
+  /* faint warm spotlight from the top, like light over a bar board */
+  background-image: radial-gradient(120% 80% at 50% -10%, hsl(34 38% 18% / 0.55), transparent 62%);
+  background-attachment: fixed;
+}
+
+/* Chalk-menu headings; the wordmark/hero opt into the handwritten accent. */
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+}
+
+/* Hebrew/RTL: uppercase and letter-spacing are Latin display affectations
+   that mangle Hebrew (no case; tracking breaks the letterforms). Neutralize
+   them on display text so any Hebrew face reads cleanly. */
+[dir='rtl'] :is(h1, h2, h3),
+[dir='rtl'] .font-display,
+[dir='rtl'] .uppercase {
+  text-transform: none;
+  letter-spacing: normal;
 }
 
 button:not(:disabled) {

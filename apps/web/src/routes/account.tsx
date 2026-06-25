@@ -30,8 +30,8 @@ function AccountLayout() {
                   key={tab.key}
                   to={tab.to}
                   className="rounded-lg px-3 py-2 text-sm font-medium transition-colors"
-                  activeProps={{ className: 'bg-amber-700 text-white' }}
-                  inactiveProps={{ className: 'text-neutral-600 hover:bg-amber-50' }}
+                  activeProps={{ className: 'bg-amber-700 text-[#fff]' }}
+                  inactiveProps={{ className: 'text-neutral-600 hover:bg-white/5' }}
                 >
                   {t(`account.tabs.${tab.key}`)}
                 </Link>

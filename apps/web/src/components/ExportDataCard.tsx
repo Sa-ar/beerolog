@@ -32,7 +32,7 @@ export function ExportDataCard() {
           type="button"
           onClick={handleExport}
           disabled={loading}
-          className="rounded-lg border border-amber-200 px-3 py-2 text-sm font-medium text-amber-800 hover:bg-amber-50 disabled:opacity-50"
+          className="rounded-lg border border-amber-200 px-3 py-2 text-sm font-medium text-brand-300 hover:bg-white/5 disabled:opacity-50"
         >
           {loading ? t('privacy.export.loading') : t('privacy.export.cta')}
         </button>
@@ -46,7 +46,7 @@ export function ExportDataCard() {
             <a
               download="beerolog-data.json"
               href={`data:application/json;charset=utf-8,${encodeURIComponent(json)}`}
-              className="inline-block text-sm font-medium text-amber-800 underline"
+              className="inline-block text-sm font-medium text-brand-300 underline"
             >
               {t('privacy.export.download')}
             </a>

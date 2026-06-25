@@ -11,14 +11,14 @@ export function AuthControls() {
         <Link
           to="/signup/$"
           params={{ _splat: '' }}
-          className="hidden min-h-11 items-center justify-center rounded-lg px-3 text-sm font-semibold text-amber-800 hover:bg-amber-100 sm:inline-flex"
+          className="hidden min-h-11 items-center justify-center rounded-lg px-3 text-sm font-semibold text-brand-200 hover:bg-white/5 sm:inline-flex"
         >
           {t('auth.signUp')}
         </Link>
         <Link
           to="/signin/$"
           params={{ _splat: '' }}
-          className="inline-flex min-h-11 items-center justify-center rounded-lg bg-amber-700 px-4 text-sm font-semibold text-white hover:bg-amber-800"
+          className="inline-flex min-h-11 items-center justify-center rounded-lg bg-brand-500 px-4 text-sm font-semibold text-[hsl(26_30%_10%)] hover:bg-brand-600"
         >
           {t('auth.signIn')}
         </Link>
