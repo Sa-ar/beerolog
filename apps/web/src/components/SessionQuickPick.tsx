@@ -107,6 +107,7 @@ export function SessionQuickPick({ baseline }: SessionQuickPickProps) {
           placeholder={t('session.placeholder')}
           className="w-full resize-none rounded-xl border border-neutral-200 bg-neutral-50/80 px-3 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-400 transition-colors focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/30"
         />
+        <p className="text-xs text-neutral-400">{t('session.sensitiveDataNote')}</p>
       </div>
 
       <Button
