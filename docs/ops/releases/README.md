@@ -13,8 +13,8 @@ Store release evidence records here for specific launch candidates or deployment
 The post-deploy smoke (`docs/ops/checklists/post-deploy-smoke.md`) captures into these files. At minimum every record must include:
 
 - A one-line summary at the top: what changed in this release
-- Vercel + Railway build URLs
-- Origin triple in effect (Railway `CORS_ALLOWED_ORIGINS` + Vercel `VITE_API_BASE_URL` + Clerk Allowed Origins) — see `docs/ops/checklists/origin-alignment.md`
+- Vercel web + API build URLs
+- Origin triple in effect (API `CORS_ALLOWED_ORIGINS` + Vercel `VITE_API_BASE_URL` + Clerk Allowed Origins) — see `docs/ops/checklists/origin-alignment.md`
 - `GET /health/ready` JSON output, every component
 - Smoke output from `docs/ops/checklists/post-deploy-smoke.md` — including a sample 5-beer recommendations payload with `embedding` arrays truncated
 - Any request ids captured from intentional typed-error tests

@@ -8,17 +8,17 @@ Beer recommendation and social expert app. Take a short quiz, get three beers ma
 graph TD
   Browser([Browser])
   Vercel[Vercel — web app<br/>TanStack Start / React]
-  Railway[Railway — API<br/>Python FastAPI]
+  Api[Vercel — API<br/>Python FastAPI]
   Neon[(Neon PostgreSQL)]
   Clerk[Clerk<br/>Auth]
   OpenAI[OpenAI<br/>Recommendation explanations]
 
   Browser --> Vercel
-  Vercel --> Railway
-  Railway --> Neon
+  Vercel --> Api
+  Api --> Neon
   Vercel --> Clerk
-  Railway --> Clerk
-  Railway --> OpenAI
+  Api --> Clerk
+  Api --> OpenAI
 ```
 
 ## Monorepo layout
@@ -26,7 +26,7 @@ graph TD
 | Directory | Purpose |
 |---|---|
 | `apps/web` | TanStack Start (React + Vinxi) frontend, deployed on Vercel |
-| `apps/api` | FastAPI backend, deployed on Railway |
+| `apps/api` | FastAPI backend, deployed on Vercel (separate `beerolog-api` project) |
 | `packages/types` | Shared TypeScript types and FlavorVector contract |
 | `packages/db` | Drizzle ORM schema + migrations (Neon PostgreSQL) |
 | `packages/ui` | Shared React component library |
@@ -89,5 +89,5 @@ pnpm test
 - [Clerk (authentication)](docs/services/clerk.md)
 - [Neon PostgreSQL](docs/services/neon.md)
 - [OpenAI](docs/services/openai.md)
-- [Railway (API deployment)](docs/services/railway.md)
+- [Vercel (API deployment)](docs/services/vercel-api.md)
 - [Vercel (web deployment)](docs/services/vercel.md)

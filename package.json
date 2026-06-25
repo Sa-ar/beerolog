@@ -24,7 +24,8 @@
     "contracts:generate": "pnpm openapi:export && pnpm --dir apps/web run api:generate",
     "contracts:check": "pnpm contracts:generate && git diff --exit-code -- apps/api/openapi.json apps/web/src/lib/api-client/schema.d.ts",
     "sync:api": "uv --directory apps/api sync --extra dev",
-    "dev:api": "bash -c 'set -a && . ./scripts/ports.sh && set +a && pnpm sync:api && uv --directory apps/api run uvicorn app.main:app --reload --host 127.0.0.1 --port \"$API_PORT\"'"
+    "dev:api": "bash -c 'set -a && . ./scripts/ports.sh && set +a && pnpm sync:api && uv --directory apps/api run uvicorn app.main:app --reload --host 127.0.0.1 --port \"$API_PORT\"'",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -33,6 +34,7 @@
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "globals": "^17.6.0",
     "prettier": "^3.0.0",
+    "husky": "^9.1.7",
     "turbo": "^2.0.0",
     "typescript": "^5.5.0",
     "typescript-eslint": "^8.59.4"

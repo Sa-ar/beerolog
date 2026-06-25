@@ -1,0 +1,16 @@
+# Blocking pre-push gate. Bypass in a pinch with: git push --no-verify
+# Fast deterministic gates first (free, fast to fail) — then AI review.
+set -e
+
+pnpm lint
+pnpm typecheck
+pnpm test
+
+# ponytail: woz-review runs on the Claude subscription ($0 API). Requires the
+# `claude` CLI + woz plugin on PATH; blocks the push on a non-zero exit.
+# If unavailable (e.g. CI checkout), skip rather than wedge the push.
+if command -v claude >/dev/null 2>&1; then
+  claude -p "/woz-review"
+else
+  echo "pre-push: claude CLI not found, skipping woz-review (fast gates already passed)"
+fi

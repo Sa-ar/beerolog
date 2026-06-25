@@ -39,7 +39,7 @@ pnpm lint
 
 | Variable | Required | Description |
 |---|---|---|
-| `VITE_API_URL` | yes | API base URL. Local: `http://localhost:8000`. Prod: Railway URL. |
+| `VITE_API_URL` | yes | API base URL. Local: `http://localhost:8000`. Prod: the `beerolog-api` Vercel URL. |
 | `VITE_CLERK_PUBLISHABLE_KEY` | yes | Clerk publishable key (e.g. `pk_test_...` for dev, `pk_live_...` for prod) |
 
 For local development, set `VITE_API_URL=http://localhost:8000` and set `VITE_CLERK_PUBLISHABLE_KEY` to your Clerk development instance publishable key. See [docs/services/clerk.md](../../docs/services/clerk.md).

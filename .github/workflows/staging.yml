@@ -20,7 +20,7 @@ concurrency:
 jobs:
   sync:
     name: Fast-forward staging to main
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -30,7 +30,7 @@ jobs:
 
   changes:
     name: Detect app changes
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
     outputs:
       app: ${{ steps.filter.outputs.app }}
     steps:
@@ -63,7 +63,7 @@ jobs:
     name: Wait for staging deploys
     needs: [sync, changes]
     if: needs.changes.outputs.app == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
     timeout-minutes: 12
     steps:
       # The sync push redeploys both the web and api Vercel projects for this

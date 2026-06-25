@@ -5,7 +5,7 @@
 1. [neon.tech](https://neon.tech) → New project
 2. Project name: `beerolog`
 3. PostgreSQL version: 16
-4. Region: closest to Railway region (e.g. `us-east-1`)
+4. Region: closest to the API's Vercel region (e.g. `us-east-1`)
 5. **Create project**
 
 ## Get the connection string
