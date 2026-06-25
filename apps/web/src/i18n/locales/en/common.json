@@ -38,7 +38,7 @@
     }
   },
   "footer": {
-    "responsibleDrinking": "Drink responsibly. Beerolog is for adults of legal drinking age (18+ in Israel) and does not sell alcohol.",
+    "responsibleDrinking": "Drink responsibly. Beerolog is for adults 18+ and does not sell alcohol.",
     "alcoholWarning": "Warning: excessive alcohol consumption endangers life and is harmful to health!",
     "legal": "Legal",
     "privacy": "Privacy",
@@ -51,55 +51,59 @@
     "lastUpdated": "Last updated: pending launch.",
     "privacy": {
       "title": "Privacy Policy",
-      "intro": "This policy explains what personal data Beerolog collects, why we process it, and which third parties help us run the service.",
+      "intro": "This policy explains how Beerolog collects, uses, and discloses your personal data, and what rights you have regarding your data.",
       "sections": [
-        { "heading": "What we collect", "body": "Your account identifier, and your email and display name if your sign-in provider shares them; your baseline taste profile (taste dials, flavor family, novelty affinity); and your beer ratings and optional notes. Like any web service, we and our providers also process technical data such as IP address, device and browser information, and security logs to operate the service, keep your account secure, and prevent abuse. When you scan a bar menu, the photo is used only to read the menu items shown and is not stored afterward. Reading the menu may involve our inference provider (OpenAI); the image is not used for any other purpose." },
-        { "heading": "How we use it", "body": "To build your taste persona and generate beer recommendations. We do not sell your personal data." },
-        { "heading": "Beerolog data vs. authentication data", "body": "Sign-in and session data are held by our authentication provider, Clerk. The data listed above is stored in Beerolog's own database." },
-        { "heading": "Ephemeral session intent", "body": "The vibe, ABV range, and free text you enter for a recommendation are processed only to generate that recommendation and are not stored by Beerolog as standalone records. This text — but not your name or contact details — is sent to our inference provider (OpenAI) only to produce the result, and may be retained by OpenAI under its API data-usage terms." },
-        { "heading": "Taste embedding", "body": "We derive an internal similarity vector from your ratings for matching. It is disclosed here but is not human-readable and is not included in data exports because it is derived and internal: it is regenerated from your ratings, which are exported, and it is deleted when you delete your account. You can still request access to, or deletion of, this derived data, subject to applicable law." },
-        { "heading": "Sub-processors", "body": "Clerk (authentication), Vercel (hosting), Neon (database), and OpenAI (model inference). Each is engaged under its data-processing terms, which include security, confidentiality, and breach-notification obligations. Some of these providers, including Clerk and OpenAI, may process your data on servers outside Israel — including in countries whose privacy protections differ from Israel's — in reliance on those contractual safeguards. Prompts sent for inference are not logged by Beerolog beyond our observability rules." },
-        { "heading": "Your rights", "body": "Under Israel's Privacy Protection Law you have the right to inspect (access) the personal data we hold about you, to ask us to correct it if it is inaccurate, and to ask us to delete it. From your account settings you can export, or delete from our active systems, the data Beerolog stores about you; residual copies may persist briefly in encrypted backups and provider logs before being overwritten on their normal cycles. For any privacy request — including access or correction, or data held by our authentication provider — contact Beerolog and we will handle or coordinate it. We may need to verify your identity before acting on a request." },
-        { "heading": "Contact", "body": "Email privacy@beerolog.com to ask about your data." }
+        { "heading": "Data Controller", "body": "Saar Davidson (privacy@beerolog.com) operates Beerolog and is the Data Controller responsible for your personal data. Address: Ramat Gan, Israel (Full physical address available upon request)." },
+        { "heading": "What we collect & Lawful basis", "body": "We collect your account identifier, email, and display name (shared via Clerk); your baseline taste metrics (taste dials, flavor family, novelty affinity); and your ratings and notes. Our lawful basis is Performance of a Contract (to provide recommendations) and Legitimate Interest (platform security). When you scan a bar menu, the photo is used only to read the menu items shown and is not stored afterward; reading the menu may involve our inference provider (OpenAI), and the image is not used for any other purpose." },
+        { "heading": "No sale of personal data; Anonymous aggregates", "body": "We do not sell your personal data (such as email or specific rating profiles linked to your identity). We may compile, analyze, and share completely anonymized, aggregated statistical insights derived from general platform usage, which cannot be traced back to any individual user." },
+        { "heading": "Beerolog database vs. Authentication", "body": "Your sign-in credentials and session security are managed by our authentication provider, Clerk Inc. Your taste quiz answers, ratings, and account metadata are stored in Beerolog's secure database." },
+        { "heading": "Temporary usage preferences", "body": "The vibe, ABV range, and free-text inputs you enter to get a recommendation are processed ephemerally for that request only and are not stored in our database as standalone records." },
+        { "heading": "Taste embedding vectors", "body": "We calculate an internal similarity vector (embedding) from your ratings to perform matching. This vector is disclosed here, but it is not human-readable and is not included in JSON data exports." },
+        { "heading": "Sub-processors & International transfers", "body": "We share data with Clerk Inc. (authentication), Vercel Inc. (web hosting), Neon AD (database), and OpenAI LLC (recommendation inference). By using the service, you consent to your data being transferred to and stored in the US and the EU." },
+        { "heading": "Data retention & Deletion", "body": "We store your personal data as long as your account remains active. You can export or permanently delete your data from your account settings at any time. Erased data is permanently wiped from our active databases within 30 days." },
+        { "heading": "Children's privacy", "body": "Beerolog is intended only for adults aged 18 and older. We do not knowingly collect data from children under 18. If we discover underage data has been collected, it will be deleted immediately." },
+        { "heading": "Your rights & Contact", "body": "You have the right to access, correct, export, object to processing, or request erasure of your data under GDPR and local laws. Contact privacy@beerolog.com to exercise these rights." }
       ]
     },
     "terms": {
       "title": "Terms of Use",
-      "intro": "By using Beerolog you agree to these terms.",
+      "intro": "By accessing or using Beerolog, you agree to be bound by these terms. If you do not agree, please do not use the service.",
       "sections": [
-        { "heading": "Age requirement", "body": "Beerolog presents information about alcoholic beverages and is intended for use in Israel, where the minimum age is 18. You must be 18 or older and of legal drinking age in your location to use it; if you access Beerolog from elsewhere, you are responsible for complying with your local laws. Beerolog may not be appropriate or lawful in every location; do not use it where alcohol-related content or recommendation services are prohibited." },
-        { "heading": "Acceptable use", "body": "Use Beerolog for personal, lawful purposes. Do not attempt to disrupt or abuse the service." },
-        { "heading": "No warranty", "body": "Recommendations are provided for guidance only, without warranty, and may contain inaccuracies. Do not rely on Beerolog for medical, allergen, dietary, pregnancy, or driving decisions — always check product labels and official sources. Beerolog does not sell, deliver, or facilitate the purchase of alcohol. Drink responsibly." },
-        { "heading": "Changes", "body": "We may update these terms; material changes will be reflected on this page." },
+        { "heading": "Age requirement & statutory warning", "body": "Beerolog is intended only for users who are 18 years of age or older (or the legal drinking age in their location, whichever is higher). WARNING: Excessive consumption of alcohol is life-threatening and harmful to health! Drink responsibly. Never consume alcohol and drive. All product names, logos, and brands are property of their respective owners. Their use does not imply endorsement. Allergen Warning: Beer contains gluten, yeast, and other potential allergens. Beerolog does not verify ingredient lists; always inspect the physical beverage packaging before consumption." },
+        { "heading": "No warranties & limitation of liability", "body": "Beerolog is provided 'as is' and 'as available,' without warranties of any kind, express or implied. Beerolog, its owner (Saar Davidson), and its affiliates disclaim all liability for any direct, indirect, incidental, special, or consequential damages (including health issues, personal injury, or decisions made based on beer recommendations) arising out of your use of the service." },
+        { "heading": "User content & license", "body": "You retain ownership of any ratings, reviews, or notes you submit. However, by submitting content to Beerolog, you grant us a non-exclusive, worldwide, royalty-free, perpetual license to use, store, display, reproduce, and analyze this data to generate recommendations and improve our services." },
+        { "heading": "Data location & international transfers", "body": "By using the service, you acknowledge and agree that your personal data (including email, ratings, and taste profile) will be processed and stored on cloud servers outside of your home country, including in the United States and the European Union, which may have different data protection standards." },
+        { "heading": "Termination & account deletion", "body": "You may terminate these terms at any time by permanently deleting your account from your settings panel. We reserve the right to suspend, restrict, or terminate your account at any time at our sole discretion, without liability, if we suspect a violation of these terms." },
+        { "heading": "Governing law & jurisdiction", "body": "These terms are governed by the laws of the State of Israel. Any dispute arising under or in connection with these terms shall be subject to the exclusive jurisdiction of the competent courts of Tel Aviv, Israel." },
+        { "heading": "Changes to terms", "body": "We may update these terms from time to time. Material updates will be posted on this page. Your continued use of the service constitutes acceptance of the modified terms." },
         { "heading": "Sensitive information", "body": "Please do not enter sensitive personal information — such as health, medical, dietary-health, or pregnancy details — in the free-text fields. Beerolog does not need this information and asks you not to provide it." },
-        { "heading": "Governing law and jurisdiction", "body": "These terms are governed by the laws of the State of Israel, without regard to its conflict-of-law rules. The competent courts of Tel Aviv-Yafo have exclusive jurisdiction over any dispute arising from them or from your use of Beerolog." },
         { "heading": "Language", "body": "Beerolog provides these terms and the privacy policy in Hebrew and English. In the event of any conflict or discrepancy between the versions, the Hebrew version prevails." }
       ]
     },
     "cookies": {
-      "title": "Cookie Notice",
-      "intro": "Beerolog uses a small number of cookies. We do not use advertising or analytics cookies.",
+      "title": "Cookie Policy",
+      "intro": "Beerolog uses a minimal number of cookies and browser storage to provide a functional and secure experience. We do not use cookies for advertising or tracking.",
       "sections": [
-        { "heading": "Essential cookies", "body": "age_verified records that you confirmed you are of legal drinking age, so the age gate is not shown on every visit. It stores only that confirmation and lasts for 12 months. It is required to access alcohol-related content and cannot be turned off while you use the site. Our sign-in provider, Clerk, also sets essential cookies that keep you securely signed in; these are required and are governed by Clerk's own policies." },
-        { "heading": "Functional cookies", "body": "lang remembers your language preference (Hebrew or English). It is not used for tracking." },
-        { "heading": "Non-essential cookies", "body": "We do not set analytics or marketing cookies. If that ever changes, they will not be activated without your explicit opt-in." }
+        { "heading": "Strictly necessary cookies", "body": "• 'age_verified' (First-party): Records that you verified you are 18 or older to prevent the age gate from appearing on every visit. Lifespan: 1 year.\n• Authentication Cookies (Third-party/Clerk): Managed by Clerk Inc. to identify active sign-in sessions and maintain security. Lifespan: Per session / Clerk retention policy." },
+        { "heading": "Functional cookies & storage", "body": "• 'lang' (First-party cookie): Remembers your preferred language selection (English or Hebrew) so you do not have to reset it. Lifespan: 1 year.\n• 'cookie_notice_ack' (First-party LocalStorage): Remembers that you dismissed the cookie notice banner so it does not reappear on subsequent visits. Lifespan: Persistent until cleared." },
+        { "heading": "Non-essential cookies", "body": "We do not set any marketing, targeting, or analytics cookies. If we introduce them in the future, they will not be activated without your explicit, voluntary opt-in." }
       ]
     },
     "accessibility": {
       "title": "Accessibility Statement",
-      "intro": "Beerolog is committed to making its supported experience accessible to everyone.",
+      "intro": "Beerolog is committed to ensuring its website is accessible to individuals with disabilities. We continuously improve our user experience to meet Israeli Standard SI 5568 (WCAG 2.0 Level AA).",
       "sections": [
-        { "heading": "Conformance target", "body": "We aim to meet Israeli Standard SI 5568, which adopts WCAG 2.0 Level AA, across the onboarding and recommendation flows we build. Third-party sign-in screens are provided by Clerk and are not yet fully conformant (see Known gaps)." },
-        { "heading": "Known gaps", "body": "Our third-party sign-in screens are provided by Clerk and may not fully meet our target; we track their accessibility and update this statement as gaps are closed. If a sign-in barrier prevents you from accessing Beerolog, contact our accessibility coordinator (below) and we will help you sign in or use the service through an alternative route." },
-        { "heading": "Accessibility coordinator", "body": "Coordinator: Saar Davidson, site owner. Contact: accessibility@beerolog.com." },
-        { "heading": "Feedback", "body": "If you encounter a barrier, contact our accessibility coordinator and we will work to resolve it." }
+        { "heading": "Conformance & Implemented features", "body": "This website is designed to conform to the WCAG 2.0 Level AA guidelines. Supported accessibility features include: \n• Skip-to-content links for quick keyboard navigation.\n• Semantic HTML landmarks and structures for screen reader compatibility.\n• Full keyboard-only navigation capability across all onboarding and beer recommendation flows.\n• High color-contrast support and clean visibility indicators." },
+        { "heading": "Known gaps & Alternatives", "body": "Our sign-in screens are embedded and managed by a third-party provider, Clerk Inc. Some of Clerk's hosted interfaces may not fully conform to Level AA. If you experience barriers during sign-in, please contact our coordinator for alternative onboarding assistance." },
+        { "heading": "Accessibility coordinator", "body": "Coordinator: Saar Davidson, Owner.\nEmail: accessibility@beerolog.com (Contact address pending launch)." },
+        { "heading": "Feedback & Document dates", "body": "We welcome your feedback. If you encounter any barriers, please email us. Statement prepared: June 2026. Last updated: June 2026." }
       ]
     }
   },
   "ageGate": {
     "title": "Age verification",
-    "body": "Beerolog contains alcohol-related content and is intended for adults who are 18 or older and of legal drinking age where they live. Please confirm to continue.",
-    "confirm": "I am 18 or older and of legal drinking age where I live",
+    "body": "Beerolog contains alcohol-related content and is intended for adults aged 18 and over. Please confirm your age to continue.",
+    "confirm": "I am 18 or older",
     "deny": "I am not 18 or older",
     "deniedTitle": "Sorry, you cannot use Beerolog",
     "deniedBody": "You must be 18 or older to use this app. Please close this page."
@@ -135,10 +139,42 @@
       "error": "Something went wrong. Please try again."
     }
   },
-  "auth": { "signIn": "Sign in" },
+  "auth": {
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "google": "Continue with Google",
+    "or": "or",
+    "email": "Email",
+    "password": "Password",
+    "devMode": "Development mode",
+    "genericError": "Something went wrong. Please try again."
+  },
   "signin": {
-    "title": "Beerolog",
-    "subtitle": "Sign in with a social account to save your taste profile and beer picks."
+    "heading": "Welcome back",
+    "subtitle": "Sign in to pick up your taste profile and fresh beer picks.",
+    "signingIn": "Signing in…",
+    "mfaUnsupported": "This account needs an extra verification step we don’t support yet.",
+    "verifyHeading": "Check your email",
+    "verifySubtitle": "We sent a 6-digit code to {{email}}. Enter it to finish signing in.",
+    "code": "Verification code",
+    "verify": "Verify",
+    "verifying": "Verifying…",
+    "invalidCode": "That code didn’t work. Check it and try again.",
+    "noAccount": "New to Beerolog?",
+    "createAccount": "Create an account"
+  },
+  "signup": {
+    "heading": "Create your account",
+    "subtitle": "Save your taste profile and get beer picks made just for you.",
+    "creating": "Creating account…",
+    "haveAccount": "Already have an account?",
+    "signInLink": "Sign in",
+    "verifyHeading": "Check your email",
+    "verifySubtitle": "We sent a 6-digit code to {{email}}. Enter it to finish signing up.",
+    "code": "Verification code",
+    "verify": "Verify email",
+    "verifying": "Verifying…",
+    "invalidCode": "That code didn’t work. Check it and try again."
   },
   "notFound": {
     "title": "Wrong bar, wrong beer",
@@ -162,24 +198,28 @@
     "title": "Your taste profile",
     "novelty": { "explorer": "Flavor explorer", "comfort": "Comfort seeker" },
     "summary": {
-      "ready": "Ready for tonight?",
+      "ready": "Here's how you taste",
       "lastUpdated": "Profile last updated {{date}}",
       "dials": "Your taste dials",
-      "retake": "Retake the taste quiz",
-      "retakeHint": "Your picks and ratings keep refining what we recommend."
+      "retake": "Refine my taste profile",
+      "retakeHint": "Every pick and rating makes your profile sharper."
     },
     "dials": {
       "carbonation": { "label": "Carbonation", "low": "Still", "mid": "Light fizz", "high": "Sparkling" },
       "bitterness": { "label": "Bitterness", "low": "Mild", "mid": "Balanced", "high": "Bold" },
+      "sweetness": { "label": "Sweetness", "low": "Dry", "mid": "Balanced", "high": "Sweet" },
+      "body": { "label": "Body", "low": "Light", "mid": "Medium", "high": "Full" },
       "novelty": { "label": "Novelty", "low": "Familiar", "mid": "Open", "high": "Adventurous" }
-    }
+    },
+    "persona": { "heading": "Your taste persona" },
+    "radar": { "aria": "Your taste profile radar" }
   },
   "emptyProfile": {
-    "headline": "Let's learn how you taste",
-    "intro": "A short quiz about coffee, snacks, and everyday flavors — we'll turn it into beer picks you'll actually enjoy.",
-    "cardTitle": "No taste profile yet",
-    "cardDescription": "Takes about 30 seconds. No beer knowledge required.",
-    "cta": "Start the taste quiz",
+    "headline": "Create your personal taste profile",
+    "intro": "Answer a few everyday-flavor questions and I'll build a taste profile that's truly yours — then match beers to it.",
+    "cardTitle": "Your taste profile is waiting",
+    "cardDescription": "About 30 seconds. No beer knowledge needed.",
+    "cta": "Create my taste profile",
     "whatNext": "What happens next",
     "steps": {
       "quiz": { "title": "Quick taste quiz", "detail": "Seven everyday questions — no beer jargon." },
@@ -195,6 +235,7 @@
     "howItWorks": "How it works",
     "howItWorksHint": "Sign in so your quiz answers and picks are saved to your profile.",
     "cta": "Sign in to start",
+    "tryCta": "Try it free — no sign-in",
     "ctaHint": "Always free. Your taste profile stays with your account.",
     "steps": {
       "quiz": {
@@ -212,28 +253,95 @@
     }
   },
   "onboarding": {
-    "title": "Tell us how you taste",
-    "intro": "Seven quick picks. We use these to model your baseline so every session recommendation lands closer to what you actually enjoy.",
+    "eyebrow": "Taste profile",
+    "title": "Let's find your taste",
+    "intro": "A few quick, everyday-flavor questions — no beer knowledge needed. We turn them into a taste profile that's truly yours.",
+    "progress": "Question {{step}} of about {{total}}",
+    "readyHeadline": "That's everything — ready to build your profile.",
+    "reviewHeadline": "Review your answers",
+    "edit": "Edit",
+    "back": "Back",
+    "next": "Next",
+    "done": "Done",
+    "optional": "(optional)",
+    "savedHint": "Answers saved",
+    "almostThere": "Almost there — one more and we'll pour your matches.",
+    "submitHint": "Free — and your taste profile stays with your account.",
+    "continue": "Continue",
+    "skip": "Skip",
     "saving": "Saving…",
-    "save": "Save my taste profile",
+    "save": "Create my taste profile",
     "questions": {
-      "coffee": "How do you take coffee?",
-      "water": "Water style?",
-      "novelty": "Do you like trying things you haven't had before?",
-      "snack": "Pick a snack",
-      "sour": "Sour foods (pickles, kimchi, yogurt)?",
-      "citrus": "Pick a citrus",
-      "smoked": "Smoked foods (brisket, smoked cheese)?"
+      "coffee": "Your coffee order?",
+      "chocolate": "Dark chocolate — how dark?",
+      "water": "Fizzy or flat?",
+      "sweet_tooth": "Sweet tooth, or dry & crisp?",
+      "strength": "A few easy ones, or one strong one?",
+      "sour_foods": "Sour & vinegary things — pickles, kombucha?",
+      "sour_wild": "Funky, wild, barnyard flavors too?",
+      "smoked_foods": "Smoky foods — BBQ, smoked fish?",
+      "adventure": "How adventurous are you with new flavors?",
+      "avoids": "What usually puts you off?",
+      "flavor_cues": "Tap everything that's you"
     }
+  },
+  "try": {
+    "eyebrow": "Free taste preview",
+    "intro": "Answer a few everyday-flavor questions and we'll show you beers that match — no sign-up needed to start.",
+    "seeResults": "See your results",
+    "retake": "Retake the quiz",
+    "loading": "Finding your matches…",
+    "unlocked": "{{count}} matches unlocked",
+    "matchBadge": "{{percent}}% match",
+    "matchAria": "{{percent}} percent match",
+    "abvBadge": "{{abv}} ABV",
+    "lockedTitle": "{{count}} more matches waiting",
+    "lockedSubtitle": "Sign up to unlock the rest of your matches.",
+    "unlockCta": "Sign up to unlock",
+    "lockedRegionLabel": "Locked matches — sign up to view"
   },
   "enums": {
     "common": { "yes": "Yes", "no": "No" },
     "coffee": {
       "black": "Black",
-      "espresso": "Espresso",
-      "hafuch": "Hafuch",
-      "iced_sweet": "Iced & sweet",
-      "none": "Don't drink coffee"
+      "milk_based": "With milk",
+      "sweet": "Sweet & creamy",
+      "none": "I don't do coffee"
+    },
+    "choco": {
+      "dark_90": "90%+ dark",
+      "dark_70": "~70% dark",
+      "milk": "Milk chocolate",
+      "none": "Not a chocolate person"
+    },
+    "fizz": { "strong": "Love the fizz", "light": "A little fizz", "still": "Prefer it flat" },
+    "sweet": { "rich": "Sweet & rich", "balanced": "Balanced", "dry": "Dry & crisp" },
+    "strength": {
+      "light": "A few light & easy",
+      "medium": "Middle of the road",
+      "strong": "One strong one"
+    },
+    "sour_wild": { "bright": "Bright & citrusy", "funky": "Funky & wild" },
+    "adventure": {
+      "high": "Give me the weirdest thing",
+      "medium": "Sometimes",
+      "low": "Stick to what I know"
+    },
+    "avoid": {
+      "too_bitter": "Too bitter",
+      "too_sweet": "Too sweet",
+      "too_heavy": "Too heavy",
+      "too_dark": "Too dark"
+    },
+    "cue": {
+      "grapefruit": "Grapefruit",
+      "caramel": "Caramel",
+      "pine": "Pine",
+      "tropical": "Tropical fruit",
+      "banana_bread": "Banana bread",
+      "citrus_zest": "Citrus zest",
+      "coffee": "Roasted coffee",
+      "bread_crust": "Bread crust"
     },
     "water": { "still": "Still", "light": "Lightly fizzy", "strong": "Strongly fizzy" },
     "snack": {
@@ -294,6 +402,13 @@
     "startSession": "Start a session",
     "matchedEyebrow": "Matched for you",
     "loadingAria": "Loading recommendations",
+    "thinking": [
+      "Reading your taste profile…",
+      "Weighing hops against malt…",
+      "Scanning craft & import shelves…",
+      "Matching bitterness to your dials…",
+      "Lining up tonight's pours…"
+    ],
     "heading_one": "Your top {{count}} pick",
     "heading_other": "Your top {{count}} picks",
     "subhead": "Ranked for your saved taste profile and tonight's session intent.",

@@ -122,6 +122,26 @@ function resolveSessionRequest(stored: RecommendationsPayload): StoredSessionReq
   throw new Error('Start a new session from your dashboard to load more picks.')
 }
 
+// Baseline-only fetch (no tonight session intent) — used by post-signup
+// hydration on /recommendations. Persists results the same way startSession
+// does so the existing render + load-more flow picks them up unchanged.
+export async function fetchBaselineRecommendations(
+  baseline: SessionBaseline,
+): Promise<RecommendationsPayload> {
+  const res = await apiFetch('/recommendations', {
+    method: 'POST',
+    body: JSON.stringify({ baseline, top_k: RECS_PAGE_SIZE }),
+  })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  const data = (await res.json()) as Omit<RecommendationsPayload, 'request'>
+  const results = data.results.map(normalizeRecommendedBeer)
+  sessionStorage.setItem(
+    RECS_STORAGE_KEY,
+    JSON.stringify({ ...data, results } satisfies RecommendationsPayload),
+  )
+  return { ...data, results }
+}
+
 export async function startSession(
   baseline: SessionBaseline,
   session: SessionRequest,

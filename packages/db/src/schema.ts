@@ -74,9 +74,20 @@ export const userBaselineTaste = pgTable('user_baseline_taste', {
     .references(() => users.id, { onDelete: 'cascade' }),
   bubbles: real('bubbles').notNull(),
   bitterness: real('bitterness').notNull(),
+  // New first-class dials (ADR-0005); default 0.5 so existing rows backfill neutral.
+  sweetness: real('sweetness').notNull().default(0.5),
+  body: real('body').notNull().default(0.5),
+  abvAffinity: real('abv_affinity').notNull().default(0.5),
   // flavorFamily is a {malty,hoppy,roasty,fruity,sour,smoky: 0..1} object
   flavorFamily: jsonb('flavor_family').notNull(),
   noveltyAffinity: real('novelty_affinity').notNull(),
+  // Profiles below the current model version are treated as stale (forced re-quiz).
+  modelVersion: integer('model_version').notNull().default(0),
+  // LLM persona, persisted per language; populated at onboarding (slice #126).
+  personaTitleEn: text('persona_title_en'),
+  personaTitleHe: text('persona_title_he'),
+  personaBlurbEn: text('persona_blurb_en'),
+  personaBlurbHe: text('persona_blurb_he'),
   embedding: vector('embedding', { dimensions: 1536 }).notNull(),
   embeddingFreshAt: timestamp('embedding_fresh_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),

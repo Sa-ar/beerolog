@@ -75,7 +75,7 @@ export function RecommendationBeerCard({
       className={[
         'overflow-hidden transition-shadow',
         isTopPick
-          ? 'border-brand-300 bg-gradient-to-br from-brand-50 via-white to-amber-50/80 shadow-md'
+          ? 'border border-brand-700/50 bg-[hsl(25_24%_7%)] shadow-md'
           : 'border-neutral-200 bg-white shadow-sm',
       ].join(' ')}
     >
@@ -85,7 +85,7 @@ export function RecommendationBeerCard({
             className={[
               'flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold',
               isTopPick
-                ? 'bg-brand-500 text-white shadow-sm'
+                ? 'bg-brand-500 text-[hsl(26_30%_10%)] shadow-sm'
                 : 'bg-neutral-100 text-neutral-600',
             ].join(' ')}
             aria-hidden
@@ -101,7 +101,7 @@ export function RecommendationBeerCard({
           </Badge>
         </div>
 
-        <div className="flex w-full min-w-0 flex-1 flex-col items-center gap-3 text-center sm:items-start sm:text-left">
+        <div className="flex w-full min-w-0 flex-1 flex-col items-center gap-3 text-center sm:items-start sm:text-start">
           <div className="flex w-full flex-col items-center gap-3 sm:flex-row sm:items-start sm:gap-4">
             <div className="order-2 min-w-0 space-y-1 sm:order-1 sm:flex-1">
               {isTopPick ? (
@@ -147,7 +147,7 @@ export function RecommendationBeerCard({
               </blockquote>
             ) : null}
 
-            <details className="w-full rounded-lg border border-neutral-200 bg-neutral-50/80 px-3 py-2 text-left text-xs text-neutral-600">
+            <details className="w-full rounded-lg border border-neutral-200 bg-neutral-50/80 px-3 py-2 text-start text-xs text-neutral-600">
               <summary className="cursor-pointer font-medium text-neutral-700">
                 {t('recommendations.howMatched')}
               </summary>

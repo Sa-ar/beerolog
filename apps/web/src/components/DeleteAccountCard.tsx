@@ -65,7 +65,7 @@ export function DeleteAccountCard() {
                 type="button"
                 onClick={handleDelete}
                 disabled={!canDelete}
-                className="rounded-lg bg-red-600 px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
+                className="rounded-lg bg-red-600 px-3 py-2 text-sm font-medium text-[#fff] disabled:opacity-50"
               >
                 {deleting ? t('privacy.delete.deleting') : t('privacy.delete.confirm')}
               </button>

@@ -1,0 +1,37 @@
+name: Migrate prod DB
+
+# Apply Drizzle migrations to the production database whenever the schema or
+# migrations change on main. Prevents the prod DB drifting behind the deployed
+# code (Vercel builds don't run migrations). Keep migrations backward-compatible
+# (additive) so the brief window alongside the Vercel deploy is zero-downtime.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/db/migrations/**'
+      - 'packages/db/src/schema.ts'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: migrate-prod
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    name: Apply Drizzle migrations to prod
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: db:migrate (production)
+        env:
+          DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+        run: pnpm --filter @beerolog/db db:migrate

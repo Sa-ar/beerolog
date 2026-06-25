@@ -1,0 +1,23 @@
+# Local per-worktree Postgres (pgvector) — an alternative to a Neon branch.
+# Driven by scripts/db.sh: COMPOSE_PROJECT_NAME isolates container+volume per
+# worktree, DB_PORT is a free host port from scripts/ports.sh.
+# ponytail: plaintext dev creds, single db, no backups — it's a throwaway dev DB.
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-beerolog}
+    ports:
+      - '${DB_PORT:-5432}:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER}']
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  pgdata:

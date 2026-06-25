@@ -50,7 +50,7 @@ export function UserMenu() {
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label={t('menu.account')}
-        className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-amber-700 text-sm font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
+        className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-amber-700 text-sm font-semibold text-[#fff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
       >
         {user.hasImage ? (
           <img src={user.imageUrl} alt="" className="h-full w-full object-cover" />
@@ -73,7 +73,7 @@ export function UserMenu() {
               to={tab.to}
               role="menuitem"
               onClick={() => setOpen(false)}
-              className="block px-4 py-2 text-sm text-neutral-700 hover:bg-amber-50"
+              className="block px-4 py-2 text-sm text-neutral-700 hover:bg-white/5"
             >
               {t(`account.tabs.${tab.key}`)}
             </Link>

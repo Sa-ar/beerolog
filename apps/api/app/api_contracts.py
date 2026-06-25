@@ -38,9 +38,15 @@ class TypedError(BaseModel):
 
 class CoffeeStyle(StrEnum):
     black = "black"
-    espresso = "espresso"
-    hafuch = "hafuch"
-    iced_sweet = "iced_sweet"
+    milk_based = "milk_based"
+    sweet = "sweet"
+    none = "none"
+
+
+class ChocoPref(StrEnum):
+    dark_90 = "dark_90"
+    dark_70 = "dark_70"
+    milk = "milk"
     none = "none"
 
 
@@ -50,34 +56,71 @@ class Carbonation(StrEnum):
     strong = "strong"
 
 
-class SnackPick(StrEnum):
-    dark_chocolate = "dark_chocolate"
-    halva = "halva"
-    fresh_fruit = "fresh_fruit"
-    milk_chocolate = "milk_chocolate"
-
-
 class LovePref(StrEnum):
     love = "love"
     okay = "okay"
     avoid = "avoid"
 
 
-class CitrusPick(StrEnum):
+class SourWild(StrEnum):
+    bright = "bright"
+    funky = "funky"
+
+
+class SweetPref(StrEnum):
+    rich = "rich"
+    balanced = "balanced"
+    dry = "dry"
+
+
+class StrengthPref(StrEnum):
+    light = "light"
+    medium = "medium"
+    strong = "strong"
+
+
+class AdventureLevel(StrEnum):
+    low = "low"
+    medium = "medium"
+    high = "high"
+
+
+class AvoidCue(StrEnum):
+    too_bitter = "too_bitter"
+    too_sweet = "too_sweet"
+    too_heavy = "too_heavy"
+    too_dark = "too_dark"
+
+
+class FlavorCue(StrEnum):
     grapefruit = "grapefruit"
-    orange = "orange"
-    lemonade = "lemonade"
-    none = "none"
+    caramel = "caramel"
+    pine = "pine"
+    tropical = "tropical"
+    banana_bread = "banana_bread"
+    citrus_zest = "citrus_zest"
+    coffee = "coffee"
+    bread_crust = "bread_crust"
 
 
 class OnboardingAnswers(BaseModel):
     coffee: CoffeeStyle
+    # Conditional bitterness confirm — asked only when coffee is ambiguous.
+    chocolate: ChocoPref | None = None
     water: Carbonation
-    novelty_seeking: bool
-    snack: SnackPick
     sour_foods: LovePref
-    citrus: CitrusPick
+    # Conditional refinement — asked only when sour_foods == love.
+    sour_wild: SourWild | None = None
     smoked_foods: LovePref
+    sweet_tooth: SweetPref
+    strength: StrengthPref
+    adventure: AdventureLevel
+    # CATA "what puts you off" — multi-select, fired only on an extreme avoid.
+    # max_length bounds the payload at the trust boundary (public endpoint):
+    # there are only this many distinct cues, so a longer list is dup-stuffing.
+    avoids: list[AvoidCue] = Field(default_factory=list, max_length=4)
+    # Optional capstone flavor-cue grid.
+    flavor_cues: list[FlavorCue] = Field(default_factory=list, max_length=8)
 
 
 class BaselineTasteDials(BaseModel):
@@ -85,6 +128,11 @@ class BaselineTasteDials(BaseModel):
 
     bubbles: Annotated[float, Field(ge=0.0, le=1.0)]
     bitterness: Annotated[float, Field(ge=0.0, le=1.0)]
+    # New dials default to neutral so callers (e.g. the recommendations debug path)
+    # that omit them stay valid; onboarding always sets explicit values.
+    sweetness: Annotated[float, Field(ge=0.0, le=1.0)] = 0.5
+    body: Annotated[float, Field(ge=0.0, le=1.0)] = 0.5
+    abv_affinity: Annotated[float, Field(ge=0.0, le=1.0)] = 0.5
     flavor_family: dict[str, Annotated[float, Field(ge=0.0, le=1.0)]]
     # Keys: malty, hoppy, roasty, fruity, sour, smoky
     novelty_affinity: Annotated[float, Field(ge=0.0, le=1.0)]
@@ -101,14 +149,28 @@ class TasteProfileIcons(BaseModel):
     flavors: list[TasteProfileIcon]
 
 
+class TasteProfilePersona(BaseModel):
+    """LLM-generated, cosmetic taste persona, persisted per language."""
+
+    title_en: str
+    blurb_en: str
+    title_he: str
+    blurb_he: str
+
+
 class BaselineTasteRecord(BaseModel):
     """Persisted BaselineTaste returned by /me/baseline-taste."""
 
     user_id: str
     bubbles: float
     bitterness: float
+    sweetness: float
+    body: float
+    abv_affinity: float
     flavor_family: dict[str, float]
     novelty_affinity: float
+    model_version: int
+    persona: TasteProfilePersona | None = None
     embedding_fresh_at: str  # ISO-8601
     updated_at: str  # ISO-8601
     icons: TasteProfileIcons | None = None
@@ -126,13 +188,6 @@ class IconCatalogResponse(BaseModel):
     journey: list[CatalogIconItem] = []
     flavors: list[CatalogIconItem] = []
     marketing: list[CatalogIconItem] = []
-
-
-class PatchBaselineTasteRequest(BaseModel):
-    bubbles: Annotated[float, Field(ge=0.0, le=1.0)] | None = None
-    bitterness: Annotated[float, Field(ge=0.0, le=1.0)] | None = None
-    flavor_family: dict[str, Annotated[float, Field(ge=0.0, le=1.0)]] | None = None
-    novelty_affinity: Annotated[float, Field(ge=0.0, le=1.0)] | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -237,6 +292,35 @@ class RecommendationsResponse(BaseModel):
     alpha: float
     beta: float
     calibration: MatchCalibration
+
+
+# ---------------------------------------------------------------------------
+# Guest preview (public, OpenAI-free)
+# ---------------------------------------------------------------------------
+
+
+class GuestRecommendedBeer(BaseModel):
+    """Slimmed result for the public guest preview.
+
+    Deliberately decoupled from the authed RecommendedBeer: no score
+    breakdown, a plain integer match_percent, and a plain `why` string.
+    """
+
+    id: str
+    name: str
+    name_hebrew: str | None = None
+    brewery: str
+    style: str
+    abv: float
+    color: Literal["pale", "gold", "amber", "brown", "dark"]
+    image_url: str | None = None
+    match_percent: int
+    why: str
+
+
+class GuestRecommendationsResponse(BaseModel):
+    results: list[GuestRecommendedBeer]
+    unlocked_count: int
 
 
 # ---------------------------------------------------------------------------

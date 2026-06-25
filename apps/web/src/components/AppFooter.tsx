@@ -1,3 +1,4 @@
+import { useAuth } from '@clerk/tanstack-react-start'
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { LEGAL_SLUGS } from '../lib/legal/registry'
@@ -8,9 +9,15 @@ import { LanguageSwitcher } from './LanguageSwitcher'
 // language switcher. Physical (flex) layout keeps order stable across RTL/LTR.
 export function AppFooter() {
   const { t } = useTranslation()
+  const { isSignedIn } = useAuth()
+
+  // Marketing chrome only — hidden once the user is in the app.
+  if (isSignedIn) return null
+
   return (
-    <footer className="mt-auto border-t border-amber-100 bg-white/80">
+    <footer className="mt-auto border-t border-brand-700/40 bg-[hsl(26_24%_8%)]/60">
       <div
+        dir="ltr"
         className={`${PAGE_FOOTER_SHELL} flex flex-col items-center gap-4 py-4 text-center sm:flex-row sm:items-center sm:justify-between sm:text-start`}
       >
         <div dir="auto" className="space-y-1 text-xs text-neutral-500 sm:max-w-md">
@@ -26,7 +33,7 @@ export function AppFooter() {
               key={slug}
               to="/legal/$slug"
               params={{ slug }}
-              className="rounded transition-colors hover:text-amber-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
+              className="rounded transition-colors hover:text-brand-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
             >
               {t(`footer.${slug}`)}
             </Link>

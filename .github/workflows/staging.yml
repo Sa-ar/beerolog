@@ -1,0 +1,91 @@
+name: Staging pipeline
+
+# On every push to main: fast-forward the long-lived `staging` branch to main
+# (which redeploys the staging dev environment on Vercel), wait for those
+# deploys, then run the onboarding e2e against staging. Replaces the standalone
+# sync action; a single workflow avoids the GITHUB_TOKEN limitation where a
+# bot push to staging wouldn't trigger a separate push-triggered workflow.
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  deployments: read
+
+concurrency:
+  group: staging-pipeline
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Fast-forward staging to main
+    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      # Fails loudly if staging has diverged — it should only ever track main.
+      - run: git push origin "${{ github.sha }}:refs/heads/staging"
+
+  changes:
+    name: Detect app changes
+    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
+    outputs:
+      app: ${{ steps.filter.outputs.app }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      # The e2e makes a paid OpenAI call, so skip it when a push only touches
+      # docs / markdown / CI config. Staging still syncs + redeploys above.
+      - id: filter
+        env:
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.sha }}
+        run: |
+          # Unknown/initial base → run the e2e (safe default).
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            echo "app=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          APP=false
+          while IFS= read -r f; do
+            [ -z "$f" ] && continue
+            case "$f" in
+              docs/*|*.md|.github/*) ;;
+              *) APP=true ;;
+            esac
+          done <<< "$(git diff --name-only "$BEFORE" "$AFTER")"
+          echo "app changed: $APP"
+          echo "app=$APP" >> "$GITHUB_OUTPUT"
+
+  wait-for-deploy:
+    name: Wait for staging deploys
+    needs: [sync, changes]
+    if: needs.changes.outputs.app == 'true'
+    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
+    timeout-minutes: 12
+    steps:
+      # The sync push redeploys both the web and api Vercel projects for this
+      # commit. Wait until both report a successful deployment status.
+      - name: Poll Vercel deployments
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.sha }}
+        run: |
+          for i in $(seq 1 40); do
+            SUCCESS=0
+            for D in $(gh api "repos/${{ github.repository }}/deployments?sha=$SHA&per_page=50" --jq '.[].id' || true); do
+              ST=$(gh api "repos/${{ github.repository }}/deployments/$D/statuses" --jq '.[0].state // empty' || true)
+              [ "$ST" = "success" ] && SUCCESS=$((SUCCESS+1))
+            done
+            if [ "$SUCCESS" -ge 2 ]; then echo "web + api staging deploys ready"; exit 0; fi
+            echo "waiting for staging deploys ($i/40): $SUCCESS/2 ready"; sleep 20
+          done
+          echo "::error::staging web/api deploys did not succeed in time"; exit 1
+
+  e2e:
+    name: Onboarding e2e (staging)
+    needs: wait-for-deploy
+    uses: ./.github/workflows/e2e.yml
+    secrets: inherit

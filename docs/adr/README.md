@@ -25,3 +25,4 @@ Write or update an ADR when a decision changes product boundary, system shape, o
 - `0002-clerk-social-first-auth.md`
 - `0003-two-layer-taste-architecture.md`
 - `0004-compliance-privacy-and-accessibility.md`
+- `0005-richer-taste-model-and-adaptive-quiz.md`

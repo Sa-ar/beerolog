@@ -10,6 +10,7 @@ vi.mock('@tanstack/react-router', () => ({
 }))
 vi.mock('@clerk/tanstack-react-start', () => ({
   useClerk: () => ({ signOut: vi.fn() }),
+  useAuth: () => ({ isLoaded: true, isSignedIn: false }),
 }))
 vi.mock('../lib/api-client/client', () => ({
   apiClient: { DELETE: vi.fn(), GET: vi.fn() },

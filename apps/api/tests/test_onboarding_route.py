@@ -12,10 +12,13 @@ from app.main import app
 from app.routes.onboarding import (
     _embedding_client_dep,
     _icon_generator_dep,
+    _persona_generator_dep,
     get_baseline_taste_repo,
     get_icon_repo,
 )
+from app.services.baseline_taste import TASTE_MODEL_VERSION
 from app.services.baseline_taste_repo import BaselineTasteSnapshot
+from app.services.persona import Persona
 
 VALID_SVG = '<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="8"/></svg>'
 
@@ -28,17 +31,40 @@ class _MemoryRepo:
         return self._rows.get(user_id)
 
     async def save(
-        self, *, user_id, bubbles, bitterness, flavor_family, novelty_affinity, embedding
+        self,
+        *,
+        user_id,
+        bubbles,
+        bitterness,
+        sweetness,
+        body,
+        abv_affinity,
+        flavor_family,
+        novelty_affinity,
+        embedding,
+        model_version,
+        persona_title_en=None,
+        persona_blurb_en=None,
+        persona_title_he=None,
+        persona_blurb_he=None,
     ) -> BaselineTasteSnapshot:
         snap = BaselineTasteSnapshot(
             user_id=user_id,
             bubbles=bubbles,
             bitterness=bitterness,
+            sweetness=sweetness,
+            body=body,
+            abv_affinity=abv_affinity,
             flavor_family=flavor_family,
             novelty_affinity=novelty_affinity,
             embedding=embedding,
             embedding_fresh_at="2026-06-15T00:00:00+00:00",
             updated_at="2026-06-15T00:00:00+00:00",
+            model_version=model_version,
+            persona_title_en=persona_title_en,
+            persona_blurb_en=persona_blurb_en,
+            persona_title_he=persona_title_he,
+            persona_blurb_he=persona_blurb_he,
         )
         self._rows[user_id] = snap
         return snap
@@ -103,16 +129,27 @@ class _StubIconGenerator:
         return VALID_SVG
 
 
+class _StubPersonaGenerator:
+    async def generate(self, *, dials) -> Persona:
+        return Persona(
+            title_en="Hop Hunter",
+            blurb_en="You chase big, bitter, adventurous brews.",
+            title_he="צייד כשות",
+            blurb_he="אתה רודף אחרי טעמים מרים והרפתקניים.",
+        )
+
+
 FAKE_USER = {"sub": "user_test_456"}
 
 _HOP_HEAD_ANSWERS = {
     "coffee": "black",
+    "chocolate": "dark_90",
     "water": "strong",
-    "novelty_seeking": True,
-    "snack": "dark_chocolate",
     "sour_foods": "okay",
-    "citrus": "grapefruit",
     "smoked_foods": "love",
+    "sweet_tooth": "dry",
+    "strength": "strong",
+    "adventure": "high",
 }
 
 
@@ -137,16 +174,23 @@ def icon_generator() -> _StubIconGenerator:
 
 
 @pytest.fixture
+def persona_generator() -> _StubPersonaGenerator:
+    return _StubPersonaGenerator()
+
+
+@pytest.fixture
 def client(
     repo: _MemoryRepo,
     icon_repo: _MemoryIconRepo,
     embedding_client: _StubEmbeddingClient,
     icon_generator: _StubIconGenerator,
+    persona_generator: _StubPersonaGenerator,
 ) -> TestClient:
     app.dependency_overrides[get_baseline_taste_repo] = lambda: repo
     app.dependency_overrides[get_icon_repo] = lambda: icon_repo
     app.dependency_overrides[_embedding_client_dep] = lambda: embedding_client
     app.dependency_overrides[_icon_generator_dep] = lambda: icon_generator
+    app.dependency_overrides[_persona_generator_dep] = lambda: persona_generator
     app.dependency_overrides[get_current_user] = lambda: FAKE_USER
     try:
         yield TestClient(app)
@@ -155,6 +199,7 @@ def client(
         app.dependency_overrides.pop(get_icon_repo, None)
         app.dependency_overrides.pop(_embedding_client_dep, None)
         app.dependency_overrides.pop(_icon_generator_dep, None)
+        app.dependency_overrides.pop(_persona_generator_dep, None)
         app.dependency_overrides.pop(get_current_user, None)
 
 
@@ -173,6 +218,31 @@ def test_onboarding_persists_dials(client: TestClient, repo: _MemoryRepo) -> Non
         "smoky",
     }
     assert FAKE_USER["sub"] in repo._rows
+
+
+def test_onboarding_persists_current_model_version(client: TestClient) -> None:
+    r = client.post("/onboarding", json=_HOP_HEAD_ANSWERS)
+    assert r.status_code == 201, r.text
+    assert r.json()["model_version"] == TASTE_MODEL_VERSION
+
+
+def test_onboarding_includes_new_taste_dials(client: TestClient) -> None:
+    r = client.post("/onboarding", json=_HOP_HEAD_ANSWERS)
+    assert r.status_code == 201, r.text
+    body = r.json()
+    for dial in ("sweetness", "body", "abv_affinity"):
+        assert 0.0 <= body[dial] <= 1.0, f"{dial} missing or out of range"
+
+
+def test_onboarding_persists_bilingual_persona(client: TestClient) -> None:
+    client.post("/onboarding", json=_HOP_HEAD_ANSWERS)
+    r = client.get("/me/baseline-taste")
+    assert r.status_code == 200
+    persona = r.json()["persona"]
+    assert persona["title_en"] == "Hop Hunter"
+    assert persona["title_he"] == "צייד כשות"
+    assert persona["blurb_en"]
+    assert persona["blurb_he"]
 
 
 def test_get_my_baseline_taste_404_before_onboarding(client: TestClient) -> None:
@@ -219,21 +289,7 @@ def test_get_my_baseline_taste_succeeds_when_icon_repo_raises(
         app.dependency_overrides[get_icon_repo] = lambda: _MemoryIconRepo()
 
 
-def test_patch_baseline_taste_updates_only_supplied_fields(
-    client: TestClient,
-    embedding_client: _StubEmbeddingClient,
-) -> None:
+def test_patch_baseline_taste_endpoint_removed(client: TestClient) -> None:
     client.post("/onboarding", json=_HOP_HEAD_ANSWERS)
-    embedding_client.calls.clear()
     r = client.patch("/me/baseline-taste", json={"bubbles": 0.1})
-    assert r.status_code == 200, r.text
-    body = r.json()
-    assert body["bubbles"] == pytest.approx(0.1)
-
-    r = client.patch("/me/baseline-taste", json={"bubbles": 0.5})
-    assert r.status_code == 200
-
-    r = client.patch("/me/baseline-taste", json={"bubbles": 1.5})
-    assert r.status_code == 422
-    r = client.patch("/me/baseline-taste", json={"bitterness": -0.1})
-    assert r.status_code == 422
+    assert r.status_code == 405

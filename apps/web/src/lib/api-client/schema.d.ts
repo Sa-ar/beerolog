@@ -21,6 +21,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/guest-recommendations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Post Guest Recommendations */
+        post: operations["postGuestRecommendations"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -103,8 +120,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Patch My Baseline Taste */
-        patch: operations["patchMyBaselineTaste"];
+        patch?: never;
         trace?: never;
     };
     "/me/export": {
@@ -225,12 +241,32 @@ export interface components {
             ratings: components["schemas"]["ExportRating"][];
         };
         /**
+         * AdventureLevel
+         * @enum {string}
+         */
+        AdventureLevel: "low" | "medium" | "high";
+        /**
+         * AvoidCue
+         * @enum {string}
+         */
+        AvoidCue: "too_bitter" | "too_sweet" | "too_heavy" | "too_dark";
+        /**
          * BaselineTasteDials
          * @description User-facing, editable taste dials derived from onboarding answers.
          */
         BaselineTasteDials: {
+            /**
+             * Abv Affinity
+             * @default 0.5
+             */
+            abv_affinity: number;
             /** Bitterness */
             bitterness: number;
+            /**
+             * Body
+             * @default 0.5
+             */
+            body: number;
             /** Bubbles */
             bubbles: number;
             /** Flavor Family */
@@ -239,14 +275,23 @@ export interface components {
             };
             /** Novelty Affinity */
             novelty_affinity: number;
+            /**
+             * Sweetness
+             * @default 0.5
+             */
+            sweetness: number;
         };
         /**
          * BaselineTasteRecord
          * @description Persisted BaselineTaste returned by /me/baseline-taste.
          */
         BaselineTasteRecord: {
+            /** Abv Affinity */
+            abv_affinity: number;
             /** Bitterness */
             bitterness: number;
+            /** Body */
+            body: number;
             /** Bubbles */
             bubbles: number;
             /** Embedding Fresh At */
@@ -256,8 +301,13 @@ export interface components {
                 [key: string]: number;
             };
             icons?: components["schemas"]["TasteProfileIcons"] | null;
+            /** Model Version */
+            model_version: number;
             /** Novelty Affinity */
             novelty_affinity: number;
+            persona?: components["schemas"]["TasteProfilePersona"] | null;
+            /** Sweetness */
+            sweetness: number;
             /** Updated At */
             updated_at: string;
             /** User Id */
@@ -278,15 +328,15 @@ export interface components {
             svg: string;
         };
         /**
-         * CitrusPick
+         * ChocoPref
          * @enum {string}
          */
-        CitrusPick: "grapefruit" | "orange" | "lemonade" | "none";
+        ChocoPref: "dark_90" | "dark_70" | "milk" | "none";
         /**
          * CoffeeStyle
          * @enum {string}
          */
-        CoffeeStyle: "black" | "espresso" | "hafuch" | "iced_sweet" | "none";
+        CoffeeStyle: "black" | "milk_based" | "sweet" | "none";
         /** ComponentStatus */
         ComponentStatus: {
             /** Detail */
@@ -337,6 +387,50 @@ export interface components {
             note: string | null;
             /** Rating */
             rating: string | null;
+        };
+        /**
+         * FlavorCue
+         * @enum {string}
+         */
+        FlavorCue: "grapefruit" | "caramel" | "pine" | "tropical" | "banana_bread" | "citrus_zest" | "coffee" | "bread_crust";
+        /** GuestRecommendationsResponse */
+        GuestRecommendationsResponse: {
+            /** Results */
+            results: components["schemas"]["GuestRecommendedBeer"][];
+            /** Unlocked Count */
+            unlocked_count: number;
+        };
+        /**
+         * GuestRecommendedBeer
+         * @description Slimmed result for the public guest preview.
+         *
+         *     Deliberately decoupled from the authed RecommendedBeer: no score
+         *     breakdown, a plain integer match_percent, and a plain `why` string.
+         */
+        GuestRecommendedBeer: {
+            /** Abv */
+            abv: number;
+            /** Brewery */
+            brewery: string;
+            /**
+             * Color
+             * @enum {string}
+             */
+            color: "pale" | "gold" | "amber" | "brown" | "dark";
+            /** Id */
+            id: string;
+            /** Image Url */
+            image_url?: string | null;
+            /** Match Percent */
+            match_percent: number;
+            /** Name */
+            name: string;
+            /** Name Hebrew */
+            name_hebrew?: string | null;
+            /** Style */
+            style: string;
+            /** Why */
+            why: string;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -396,27 +490,19 @@ export interface components {
         };
         /** OnboardingAnswers */
         OnboardingAnswers: {
-            citrus: components["schemas"]["CitrusPick"];
+            adventure: components["schemas"]["AdventureLevel"];
+            /** Avoids */
+            avoids?: components["schemas"]["AvoidCue"][];
+            chocolate?: components["schemas"]["ChocoPref"] | null;
             coffee: components["schemas"]["CoffeeStyle"];
-            /** Novelty Seeking */
-            novelty_seeking: boolean;
+            /** Flavor Cues */
+            flavor_cues?: components["schemas"]["FlavorCue"][];
             smoked_foods: components["schemas"]["LovePref"];
-            snack: components["schemas"]["SnackPick"];
             sour_foods: components["schemas"]["LovePref"];
+            sour_wild?: components["schemas"]["SourWild"] | null;
+            strength: components["schemas"]["StrengthPref"];
+            sweet_tooth: components["schemas"]["SweetPref"];
             water: components["schemas"]["Carbonation"];
-        };
-        /** PatchBaselineTasteRequest */
-        PatchBaselineTasteRequest: {
-            /** Bitterness */
-            bitterness?: number | null;
-            /** Bubbles */
-            bubbles?: number | null;
-            /** Flavor Family */
-            flavor_family?: {
-                [key: string]: number;
-            } | null;
-            /** Novelty Affinity */
-            novelty_affinity?: number | null;
         };
         /** RatingRecord */
         RatingRecord: {
@@ -544,10 +630,20 @@ export interface components {
             vibe: components["schemas"]["Vibe"];
         };
         /**
-         * SnackPick
+         * SourWild
          * @enum {string}
          */
-        SnackPick: "dark_chocolate" | "halva" | "fresh_fruit" | "milk_chocolate";
+        SourWild: "bright" | "funky";
+        /**
+         * StrengthPref
+         * @enum {string}
+         */
+        StrengthPref: "light" | "medium" | "strong";
+        /**
+         * SweetPref
+         * @enum {string}
+         */
+        SweetPref: "rich" | "balanced" | "dry";
         /** TasteProfileIcon */
         TasteProfileIcon: {
             /** Flavor Key */
@@ -562,6 +658,20 @@ export interface components {
             /** Flavors */
             flavors: components["schemas"]["TasteProfileIcon"][];
             hero: components["schemas"]["TasteProfileIcon"];
+        };
+        /**
+         * TasteProfilePersona
+         * @description LLM-generated, cosmetic taste persona, persisted per language.
+         */
+        TasteProfilePersona: {
+            /** Blurb En */
+            blurb_en: string;
+            /** Blurb He */
+            blurb_he: string;
+            /** Title En */
+            title_en: string;
+            /** Title He */
+            title_he: string;
         };
         /** ValidationError */
         ValidationError: {
@@ -622,6 +732,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RecommendationsResponse"];
+                };
+            };
+        };
+    };
+    postGuestRecommendations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OnboardingAnswers"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GuestRecommendationsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -722,39 +865,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["BaselineTasteRecord"];
-                };
-            };
-        };
-    };
-    patchMyBaselineTaste: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PatchBaselineTasteRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BaselineTasteRecord"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

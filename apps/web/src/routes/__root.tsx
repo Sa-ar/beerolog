@@ -2,6 +2,7 @@ import { ClerkProvider } from '@clerk/tanstack-react-start'
 import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
 import { useMemo } from 'react'
 import { I18nextProvider } from 'react-i18next'
+import { Analytics } from '@vercel/analytics/react'
 import { IconCatalogProvider } from '@beerolog/icons'
 import { AppFooter } from '../components/AppFooter'
 import { AppHeader } from '../components/AppHeader'
@@ -30,17 +31,25 @@ export const Route = createRootRoute({
 function RootDocument({ children }: { children: React.ReactNode }) {
   const { lang, ageVerified } = Route.useLoaderData()
   const i18n = useMemo(() => createI18n(lang), [lang])
-  const clerkProps = publishableKey ? { publishableKey } : {}
+  // signInUrl points Clerk's RedirectToSignIn (and friends) at our own /signin
+  // page instead of Clerk's hosted Account Portal.
+  const clerkProps = publishableKey ? { publishableKey, signInUrl: '/signin' } : {}
 
   return (
     <html lang={lang} dir={dirFor(lang)}>
       <head>
         <HeadContent />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Caveat:wght@600;700&family=Secular+One&family=Gveret+Levin+AlefAlefAlef&display=swap"
+        />
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <title>{lang === 'he' ? 'בירולוג' : 'Beerolog'}</title>
       </head>
-      <body className="flex min-h-dvh flex-col bg-gradient-to-b from-amber-50 to-white text-neutral-900">
+      <body className="flex min-h-dvh flex-col text-neutral-900">
         <I18nextProvider i18n={i18n}>
           <SkipLink />
           <ClerkProvider {...clerkProps}>
@@ -56,6 +65,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             </IconCatalogProvider>
           </ClerkProvider>
         </I18nextProvider>
+        <Analytics />
         <Scripts />
       </body>
     </html>

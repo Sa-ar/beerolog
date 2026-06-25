@@ -62,7 +62,7 @@ Tests still use in-memory overrides via FastAPI `dependency_overrides`, but the 
 | `LOG_LEVEL` | no | `INFO` | Python log level for request logs and startup warnings |
 | `API_SECRET` | no | `dev-secret` | HS256 secret for deferred QR and challenge tokens |
 
-> **Production**: `API_SECRET` defaults to `dev-secret`. This **must** be set to a random secret in Railway before going live. See [docs/services/railway.md](../../docs/services/railway.md).
+> **Production**: `API_SECRET` defaults to `dev-secret`. This **must** be set to a random secret in the `beerolog-api` Vercel project before going live. See [docs/services/vercel-api.md](../../docs/services/vercel-api.md).
 
 ## API endpoints
 

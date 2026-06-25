@@ -3,12 +3,20 @@
   "private": true,
   "scripts": {
     "build": "turbo build",
-    "dev": "turbo dev",
+    "dev": "bash scripts/dev.sh",
+    "dev:web": "bash -c 'set -a && . ./scripts/ports.sh && set +a && pnpm --dir apps/web dev'",
+    "dev:turbo": "turbo dev",
+    "worktree": "bash scripts/worktree-up.sh",
     "lint": "pnpm lint:js && pnpm lint:api",
     "typecheck": "turbo typecheck",
     "test": "pnpm test:api && pnpm contracts:check",
     "db:generate": "turbo db:generate",
     "db:migrate": "turbo db:migrate",
+    "db:up": "bash scripts/db.sh up",
+    "db:down": "bash scripts/db.sh down",
+    "db:seed": "bash scripts/db.sh seed",
+    "wt:rm": "bash scripts/worktree-rm.sh",
+    "wt:prune": "bash scripts/db.sh prune",
     "lint:js": "turbo lint",
     "lint:api": "uv --directory apps/api run ruff check . && uv --directory apps/api run ruff format --check .",
     "test:api": "uv --directory apps/api run pytest tests/ -v",
@@ -16,7 +24,8 @@
     "contracts:generate": "pnpm openapi:export && pnpm --dir apps/web run api:generate",
     "contracts:check": "pnpm contracts:generate && git diff --exit-code -- apps/api/openapi.json apps/web/src/lib/api-client/schema.d.ts",
     "sync:api": "uv --directory apps/api sync --extra dev",
-    "dev:api": "pnpm sync:api && uv --directory apps/api run uvicorn app.main:app --reload --host 127.0.0.1 --port 8000"
+    "dev:api": "bash -c 'set -a && . ./scripts/ports.sh && set +a && pnpm sync:api && uv --directory apps/api run uvicorn app.main:app --reload --host 127.0.0.1 --port \"$API_PORT\"'",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -25,6 +34,7 @@
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "globals": "^17.6.0",
     "prettier": "^3.0.0",
+    "husky": "^9.1.7",
     "turbo": "^2.0.0",
     "typescript": "^5.5.0",
     "typescript-eslint": "^8.59.4"

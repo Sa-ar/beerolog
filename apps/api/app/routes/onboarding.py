@@ -1,9 +1,8 @@
 """Onboarding + persisted BaselineTaste routes (slice #76).
 
-- POST /onboarding: accepts the 7-question quiz answers, composes
+- POST /onboarding: accepts the quiz answers, composes
   dials + synthetic preference text, embeds, persists BaselineTaste.
 - GET /me/baseline-taste: returns the persisted dials.
-- PATCH /me/baseline-taste: edits any subset of dials, re-embeds, persists.
 
 The API does NOT introduce a new user table — it uses the Clerk
 subject as the foreign key on user_baseline_taste, the same way ratings
@@ -21,19 +20,18 @@ from beerolog_icon_service.service import resolve_taste_profile_icons
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.api_contracts import (
-    BaselineTasteDials,
     BaselineTasteRecord,
     OnboardingAnswers,
-    PatchBaselineTasteRequest,
     TasteProfileIcon,
     TasteProfileIcons,
+    TasteProfilePersona,
 )
 from app.auth import get_current_user
 from app.config import settings
 from app.services import baseline_taste
-from app.services.baseline_dials_text import dials_to_text
 from app.services.baseline_taste_repo import BaselineTasteRepo, BaselineTasteSnapshot
 from app.services.embedding_service import EmbeddingClient, get_embedding_client
+from app.services.persona import GPTPersonaGenerator, PersonaGenerator
 
 logger = logging.getLogger(__name__)
 
@@ -69,6 +67,12 @@ def _icon_generator_dep() -> IconGenerator | None:
     return GPTIconGenerator(api_key=settings.openai_api_key, model=settings.icon_model)
 
 
+def _persona_generator_dep() -> PersonaGenerator | None:
+    if not settings.openai_api_key:
+        return None
+    return GPTPersonaGenerator(api_key=settings.openai_api_key, model=settings.persona_model)
+
+
 @router.post(
     "/onboarding",
     response_model=BaselineTasteRecord,
@@ -82,17 +86,27 @@ async def complete_onboarding(
     client: EmbeddingClient = Depends(_embedding_client_dep),
     icon_repo: IconRepo = Depends(get_icon_repo),
     icon_generator: IconGenerator | None = Depends(_icon_generator_dep),
+    persona_generator: PersonaGenerator | None = Depends(_persona_generator_dep),
 ) -> BaselineTasteRecord:
     dials = baseline_taste.compose_dials(answers)
     text = baseline_taste.compose_text(answers)
     embedding = await client.embed(text)
+    persona = await persona_generator.generate(dials=dials) if persona_generator else None
     saved = await repo.save(
         user_id=user["sub"],
         bubbles=dials.bubbles,
         bitterness=dials.bitterness,
+        sweetness=dials.sweetness,
+        body=dials.body,
+        abv_affinity=dials.abv_affinity,
         flavor_family=dials.flavor_family,
         novelty_affinity=dials.novelty_affinity,
         embedding=embedding,
+        model_version=baseline_taste.TASTE_MODEL_VERSION,
+        persona_title_en=persona.title_en if persona else None,
+        persona_blurb_en=persona.blurb_en if persona else None,
+        persona_title_he=persona.title_he if persona else None,
+        persona_blurb_he=persona.blurb_he if persona else None,
     )
     return await _record_from_snapshot(saved, icon_repo=icon_repo, icon_generator=icon_generator)
 
@@ -117,50 +131,6 @@ async def get_my_baseline_taste(
     return await _record_from_snapshot(snap, icon_repo=icon_repo, icon_generator=icon_generator)
 
 
-@router.patch(
-    "/me/baseline-taste",
-    response_model=BaselineTasteRecord,
-    operation_id="patchMyBaselineTaste",
-)
-async def patch_my_baseline_taste(
-    body: PatchBaselineTasteRequest,
-    user: dict = Depends(get_current_user),
-    repo: BaselineTasteRepo = Depends(get_baseline_taste_repo),
-    client: EmbeddingClient = Depends(_embedding_client_dep),
-    icon_repo: IconRepo = Depends(get_icon_repo),
-    icon_generator: IconGenerator | None = Depends(_icon_generator_dep),
-) -> BaselineTasteRecord:
-    existing = await repo.get(user["sub"])
-    if existing is None:
-        raise HTTPException(
-            status_code=404,
-            detail="BaselineTaste not set. Complete onboarding first.",
-        )
-    bubbles = body.bubbles if body.bubbles is not None else existing.bubbles
-    bitterness = body.bitterness if body.bitterness is not None else existing.bitterness
-    flavor_family = body.flavor_family if body.flavor_family is not None else existing.flavor_family
-    novelty_affinity = (
-        body.novelty_affinity if body.novelty_affinity is not None else existing.novelty_affinity
-    )
-
-    text = _text_from_dials(
-        bubbles=bubbles,
-        bitterness=bitterness,
-        flavor_family=flavor_family,
-        novelty_affinity=novelty_affinity,
-    )
-    embedding = await client.embed(text)
-    saved = await repo.save(
-        user_id=user["sub"],
-        bubbles=bubbles,
-        bitterness=bitterness,
-        flavor_family=flavor_family,
-        novelty_affinity=novelty_affinity,
-        embedding=embedding,
-    )
-    return await _record_from_snapshot(saved, icon_repo=icon_repo, icon_generator=icon_generator)
-
-
 async def _record_from_snapshot(
     snap: BaselineTasteSnapshot,
     *,
@@ -176,11 +146,27 @@ async def _record_from_snapshot(
         user_id=snap.user_id,
         bubbles=snap.bubbles,
         bitterness=snap.bitterness,
+        sweetness=snap.sweetness,
+        body=snap.body,
+        abv_affinity=snap.abv_affinity,
         flavor_family=snap.flavor_family,
         novelty_affinity=snap.novelty_affinity,
+        model_version=snap.model_version,
+        persona=_persona_from_snapshot(snap),
         embedding_fresh_at=snap.embedding_fresh_at,
         updated_at=snap.updated_at,
         icons=icons,
+    )
+
+
+def _persona_from_snapshot(snap: BaselineTasteSnapshot) -> TasteProfilePersona | None:
+    if snap.persona_title_en is None or snap.persona_title_he is None:
+        return None
+    return TasteProfilePersona(
+        title_en=snap.persona_title_en,
+        blurb_en=snap.persona_blurb_en or "",
+        title_he=snap.persona_title_he,
+        blurb_he=snap.persona_blurb_he or "",
     )
 
 
@@ -218,21 +204,4 @@ async def _resolve_icons(
             )
             for icon in bundle.flavors
         ],
-    )
-
-
-def _text_from_dials(
-    *,
-    bubbles: float,
-    bitterness: float,
-    flavor_family: dict[str, float],
-    novelty_affinity: float,
-) -> str:
-    return dials_to_text(
-        BaselineTasteDials(
-            bubbles=bubbles,
-            bitterness=bitterness,
-            flavor_family=flavor_family,
-            novelty_affinity=novelty_affinity,
-        )
     )

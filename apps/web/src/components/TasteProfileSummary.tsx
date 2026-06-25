@@ -6,10 +6,12 @@ import {
   dialDescriptor,
   flavorTitle,
   noveltyLabel,
+  personaForLang,
   topFlavorFamilies,
   type BaselineTaste,
 } from '../lib/baseline-taste'
 import { SessionQuickPick } from './SessionQuickPick'
+import { TasteRadar } from './TasteRadar'
 
 type TasteProfileSummaryProps = {
   greeting: string
@@ -21,15 +23,36 @@ export function TasteProfileSummary({ greeting, baseline }: TasteProfileSummaryP
   const flavors = topFlavorFamilies(t, baseline)
   const title = flavorTitle(t, baseline)
   const heroSvg = resolveProfileHeroSvg(baseline, baseline.icons)
+  const persona = personaForLang(baseline, i18n.language)
+  const radarAxes = [
+    { key: 'bitterness', value: baseline.bitterness },
+    { key: 'sweetness', value: baseline.sweetness ?? 0.5 },
+    { key: 'body', value: baseline.body ?? 0.5 },
+    { key: 'hoppy', value: baseline.flavor_family.hoppy ?? 0 },
+    { key: 'malty', value: baseline.flavor_family.malty ?? 0 },
+    { key: 'roasty', value: baseline.flavor_family.roasty ?? 0 },
+    { key: 'sour', value: baseline.flavor_family.sour ?? 0 },
+    { key: 'novelty', value: baseline.novelty_affinity },
+  ]
+  const radarLabels: Record<string, string> = {
+    bitterness: t('profile.dials.bitterness.label'),
+    sweetness: t('profile.dials.sweetness.label'),
+    body: t('profile.dials.body.label'),
+    hoppy: t('flavors.hoppy'),
+    malty: t('flavors.malty'),
+    roasty: t('flavors.roasty'),
+    sour: t('flavors.sour'),
+    novelty: t('profile.dials.novelty.label'),
+  }
   const updated = new Date(baseline.updated_at).toLocaleDateString(
     i18n.language.startsWith('he') ? 'he-IL' : 'en-US',
     { month: 'short', day: 'numeric', year: 'numeric' },
   )
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-8 animate-[fadeIn_320ms_ease-out]">
       <section className="space-y-1">
-        <p className="text-sm font-semibold uppercase tracking-wide text-brand-600">
+        <p className="text-sm font-semibold uppercase tracking-wide text-brand-300">
           {greeting}
         </p>
         <h1 className="text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
@@ -37,16 +60,16 @@ export function TasteProfileSummary({ greeting, baseline }: TasteProfileSummaryP
         </h1>
       </section>
 
-      <Card className="overflow-hidden border-brand-200 bg-gradient-to-br from-brand-50 via-white to-amber-50/80 p-0 shadow-md">
+      <Card className="overflow-hidden border border-brand-700/50 bg-[hsl(25_24%_7%)] p-0 shadow-md">
         <div className="flex items-start gap-4 p-6 pb-4">
           <span
-            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-brand-100"
+            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-neutral-100 shadow-sm ring-1 ring-brand-700/40"
             aria-hidden
           >
             {heroSvg ? <GeneratedTasteIcon svg={heroSvg} className="h-9 w-9" /> : null}
           </span>
           <div className="min-w-0 space-y-1">
-            <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">
+            <p className="text-xs font-semibold uppercase tracking-wide text-brand-300">
               {t('profile.title')}
             </p>
             {title ? (
@@ -65,14 +88,29 @@ export function TasteProfileSummary({ greeting, baseline }: TasteProfileSummaryP
           ))}
         </div>
 
-        <div className="border-t border-brand-100/80 bg-white/60 px-6 py-3">
+        <div className="border-t border-brand-700/30 bg-neutral-100/40 px-6 py-3">
           <p className="text-xs text-neutral-500">
             {t('profile.summary.lastUpdated', { date: updated })}
           </p>
         </div>
       </Card>
 
-      <Card className="border-brand-200 bg-white p-6 shadow-sm">
+      <Card className="space-y-4 p-6">
+        {persona ? (
+          <div className="space-y-1 text-center">
+            <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+              {t('profile.persona.heading')}
+            </p>
+            <h2 data-testid="persona-title" className="text-xl font-bold text-neutral-900">
+              {persona.title}
+            </h2>
+            <p className="text-sm text-neutral-600">{persona.blurb}</p>
+          </div>
+        ) : null}
+        <TasteRadar axes={radarAxes} labels={radarLabels} ariaLabel={t('profile.radar.aria')} />
+      </Card>
+
+      <Card className="border border-brand-700/40 p-6 shadow-sm">
         <SessionQuickPick baseline={baseline} />
       </Card>
 
@@ -95,6 +133,20 @@ export function TasteProfileSummary({ greeting, baseline }: TasteProfileSummaryP
             low={t('profile.dials.bitterness.low')}
             mid={t('profile.dials.bitterness.mid')}
             high={t('profile.dials.bitterness.high')}
+          />
+          <TasteDial
+            label={t('profile.dials.sweetness.label')}
+            value={baseline.sweetness ?? 0.5}
+            low={t('profile.dials.sweetness.low')}
+            mid={t('profile.dials.sweetness.mid')}
+            high={t('profile.dials.sweetness.high')}
+          />
+          <TasteDial
+            label={t('profile.dials.body.label')}
+            value={baseline.body ?? 0.5}
+            low={t('profile.dials.body.low')}
+            mid={t('profile.dials.body.mid')}
+            high={t('profile.dials.body.high')}
           />
           <TasteDial
             label={t('profile.dials.novelty.label')}
@@ -144,9 +196,9 @@ function TasteDial({
           {descriptor} · {percent}%
         </span>
       </div>
-      <div className="h-2.5 overflow-hidden rounded-full bg-neutral-100">
+      <div className="h-2.5 overflow-hidden rounded-full bg-neutral-200">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-brand-400 to-brand-600 transition-all"
+          className="h-full rounded-full bg-gradient-to-r rtl:bg-gradient-to-l from-brand-500 to-brand-300 transition-all"
           style={{ width: `${percent}%` }}
         />
       </div>

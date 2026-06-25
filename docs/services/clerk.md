@@ -90,5 +90,5 @@ The `CLERK_PUBLISHABLE_KEY` encodes the frontend API domain. The API uses this t
 When a new Vercel deployment URL is known:
 
 1. Clerk Dashboard → Domains → Allowed origins → add the new URL
-2. Update Railway `CORS_ALLOWED_ORIGINS` to include the same origin
+2. Update the `beerolog-api` Vercel project's `CORS_ALLOWED_ORIGINS` to include the same origin
 3. Verify sign-in completes end-to-end from that origin

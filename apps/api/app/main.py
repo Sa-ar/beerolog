@@ -10,7 +10,16 @@ from app.config import settings
 from app.db import close_pool, get_pool
 from app.errors import BeerologError
 from app.observability import configure_logging, instrument_requests, logger
-from app.routes import debug, health, icons, onboarding, ratings, recommendations, users
+from app.routes import (
+    debug,
+    guest_recommendations,
+    health,
+    icons,
+    onboarding,
+    ratings,
+    recommendations,
+    users,
+)
 from app.services.account_repo import AsyncpgAccountRepo
 from app.services.baseline_taste_repo import AsyncpgBaselineTasteRepo
 from app.services.icon_repo import AsyncpgIconRepo
@@ -65,6 +74,7 @@ app.include_router(health.router)
 app.include_router(icons.router)
 app.include_router(onboarding.router)
 app.include_router(recommendations.router)
+app.include_router(guest_recommendations.router)
 app.include_router(ratings.router)
 app.include_router(users.router)
 app.include_router(debug.router)

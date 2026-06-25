@@ -4,10 +4,42 @@ import type { TasteProfileIcons } from '@beerolog/icons'
 export type BaselineTaste = {
   bubbles: number
   bitterness: number
+  sweetness?: number
+  body?: number
+  abv_affinity?: number
   flavor_family: Record<string, number>
   novelty_affinity: number
+  model_version?: number
+  persona?: TastePersona | null
   updated_at: string
   icons?: TasteProfileIcons | null
+}
+
+export type TastePersona = {
+  title_en: string
+  blurb_en: string
+  title_he: string
+  blurb_he: string
+}
+
+// Pick the persona in the active UI language (Hebrew or English).
+export function personaForLang(
+  baseline: BaselineTaste,
+  lang: string,
+): { title: string; blurb: string } | null {
+  const p = baseline.persona
+  if (!p) return null
+  return lang.startsWith('he')
+    ? { title: p.title_he, blurb: p.blurb_he }
+    : { title: p.title_en, blurb: p.blurb_en }
+}
+
+// Mirror of TASTE_MODEL_VERSION in the API; profiles below this are stale and
+// must retake the (improved) quiz.
+export const TASTE_MODEL_VERSION = 2
+
+export function isStaleProfile(baseline: BaselineTaste): boolean {
+  return (baseline.model_version ?? 0) < TASTE_MODEL_VERSION
 }
 
 export function timeAwareGreeting(t: TFunction, firstName?: string | null): string {

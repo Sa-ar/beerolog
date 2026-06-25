@@ -82,13 +82,46 @@
         "title": "AccountExport",
         "type": "object"
       },
+      "AdventureLevel": {
+        "enum": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "title": "AdventureLevel",
+        "type": "string"
+      },
+      "AvoidCue": {
+        "enum": [
+          "too_bitter",
+          "too_sweet",
+          "too_heavy",
+          "too_dark"
+        ],
+        "title": "AvoidCue",
+        "type": "string"
+      },
       "BaselineTasteDials": {
         "description": "User-facing, editable taste dials derived from onboarding answers.",
         "properties": {
+          "abv_affinity": {
+            "default": 0.5,
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Abv Affinity",
+            "type": "number"
+          },
           "bitterness": {
             "maximum": 1.0,
             "minimum": 0.0,
             "title": "Bitterness",
+            "type": "number"
+          },
+          "body": {
+            "default": 0.5,
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Body",
             "type": "number"
           },
           "bubbles": {
@@ -111,6 +144,13 @@
             "minimum": 0.0,
             "title": "Novelty Affinity",
             "type": "number"
+          },
+          "sweetness": {
+            "default": 0.5,
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Sweetness",
+            "type": "number"
           }
         },
         "required": [
@@ -125,8 +165,16 @@
       "BaselineTasteRecord": {
         "description": "Persisted BaselineTaste returned by /me/baseline-taste.",
         "properties": {
+          "abv_affinity": {
+            "title": "Abv Affinity",
+            "type": "number"
+          },
           "bitterness": {
             "title": "Bitterness",
+            "type": "number"
+          },
+          "body": {
+            "title": "Body",
             "type": "number"
           },
           "bubbles": {
@@ -154,8 +202,26 @@
               }
             ]
           },
+          "model_version": {
+            "title": "Model Version",
+            "type": "integer"
+          },
           "novelty_affinity": {
             "title": "Novelty Affinity",
+            "type": "number"
+          },
+          "persona": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TasteProfilePersona"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sweetness": {
+            "title": "Sweetness",
             "type": "number"
           },
           "updated_at": {
@@ -171,8 +237,12 @@
           "user_id",
           "bubbles",
           "bitterness",
+          "sweetness",
+          "body",
+          "abv_affinity",
           "flavor_family",
           "novelty_affinity",
+          "model_version",
           "embedding_fresh_at",
           "updated_at"
         ],
@@ -211,22 +281,21 @@
         "title": "CatalogIconItem",
         "type": "object"
       },
-      "CitrusPick": {
+      "ChocoPref": {
         "enum": [
-          "grapefruit",
-          "orange",
-          "lemonade",
+          "dark_90",
+          "dark_70",
+          "milk",
           "none"
         ],
-        "title": "CitrusPick",
+        "title": "ChocoPref",
         "type": "string"
       },
       "CoffeeStyle": {
         "enum": [
           "black",
-          "espresso",
-          "hafuch",
-          "iced_sweet",
+          "milk_based",
+          "sweet",
           "none"
         ],
         "title": "CoffeeStyle",
@@ -382,6 +451,119 @@
         "title": "ExportRating",
         "type": "object"
       },
+      "FlavorCue": {
+        "enum": [
+          "grapefruit",
+          "caramel",
+          "pine",
+          "tropical",
+          "banana_bread",
+          "citrus_zest",
+          "coffee",
+          "bread_crust"
+        ],
+        "title": "FlavorCue",
+        "type": "string"
+      },
+      "GuestRecommendationsResponse": {
+        "properties": {
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/GuestRecommendedBeer"
+            },
+            "title": "Results",
+            "type": "array"
+          },
+          "unlocked_count": {
+            "title": "Unlocked Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "results",
+          "unlocked_count"
+        ],
+        "title": "GuestRecommendationsResponse",
+        "type": "object"
+      },
+      "GuestRecommendedBeer": {
+        "description": "Slimmed result for the public guest preview.\n\nDeliberately decoupled from the authed RecommendedBeer: no score\nbreakdown, a plain integer match_percent, and a plain `why` string.",
+        "properties": {
+          "abv": {
+            "title": "Abv",
+            "type": "number"
+          },
+          "brewery": {
+            "title": "Brewery",
+            "type": "string"
+          },
+          "color": {
+            "enum": [
+              "pale",
+              "gold",
+              "amber",
+              "brown",
+              "dark"
+            ],
+            "title": "Color",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "match_percent": {
+            "title": "Match Percent",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "name_hebrew": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name Hebrew"
+          },
+          "style": {
+            "title": "Style",
+            "type": "string"
+          },
+          "why": {
+            "title": "Why",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "brewery",
+          "style",
+          "abv",
+          "color",
+          "match_percent",
+          "why"
+        ],
+        "title": "GuestRecommendedBeer",
+        "type": "object"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -485,24 +667,59 @@
       },
       "OnboardingAnswers": {
         "properties": {
-          "citrus": {
-            "$ref": "#/components/schemas/CitrusPick"
+          "adventure": {
+            "$ref": "#/components/schemas/AdventureLevel"
+          },
+          "avoids": {
+            "items": {
+              "$ref": "#/components/schemas/AvoidCue"
+            },
+            "maxItems": 4,
+            "title": "Avoids",
+            "type": "array"
+          },
+          "chocolate": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ChocoPref"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "coffee": {
             "$ref": "#/components/schemas/CoffeeStyle"
           },
-          "novelty_seeking": {
-            "title": "Novelty Seeking",
-            "type": "boolean"
+          "flavor_cues": {
+            "items": {
+              "$ref": "#/components/schemas/FlavorCue"
+            },
+            "maxItems": 8,
+            "title": "Flavor Cues",
+            "type": "array"
           },
           "smoked_foods": {
             "$ref": "#/components/schemas/LovePref"
           },
-          "snack": {
-            "$ref": "#/components/schemas/SnackPick"
-          },
           "sour_foods": {
             "$ref": "#/components/schemas/LovePref"
+          },
+          "sour_wild": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourWild"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "strength": {
+            "$ref": "#/components/schemas/StrengthPref"
+          },
+          "sweet_tooth": {
+            "$ref": "#/components/schemas/SweetPref"
           },
           "water": {
             "$ref": "#/components/schemas/Carbonation"
@@ -511,74 +728,13 @@
         "required": [
           "coffee",
           "water",
-          "novelty_seeking",
-          "snack",
           "sour_foods",
-          "citrus",
-          "smoked_foods"
+          "smoked_foods",
+          "sweet_tooth",
+          "strength",
+          "adventure"
         ],
         "title": "OnboardingAnswers",
-        "type": "object"
-      },
-      "PatchBaselineTasteRequest": {
-        "properties": {
-          "bitterness": {
-            "anyOf": [
-              {
-                "maximum": 1.0,
-                "minimum": 0.0,
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Bitterness"
-          },
-          "bubbles": {
-            "anyOf": [
-              {
-                "maximum": 1.0,
-                "minimum": 0.0,
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Bubbles"
-          },
-          "flavor_family": {
-            "anyOf": [
-              {
-                "additionalProperties": {
-                  "maximum": 1.0,
-                  "minimum": 0.0,
-                  "type": "number"
-                },
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Flavor Family"
-          },
-          "novelty_affinity": {
-            "anyOf": [
-              {
-                "maximum": 1.0,
-                "minimum": 0.0,
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Novelty Affinity"
-          }
-        },
-        "title": "PatchBaselineTasteRequest",
         "type": "object"
       },
       "RatingRecord": {
@@ -926,14 +1082,30 @@
         "title": "SessionIntent",
         "type": "object"
       },
-      "SnackPick": {
+      "SourWild": {
         "enum": [
-          "dark_chocolate",
-          "halva",
-          "fresh_fruit",
-          "milk_chocolate"
+          "bright",
+          "funky"
         ],
-        "title": "SnackPick",
+        "title": "SourWild",
+        "type": "string"
+      },
+      "StrengthPref": {
+        "enum": [
+          "light",
+          "medium",
+          "strong"
+        ],
+        "title": "StrengthPref",
+        "type": "string"
+      },
+      "SweetPref": {
+        "enum": [
+          "rich",
+          "balanced",
+          "dry"
+        ],
+        "title": "SweetPref",
         "type": "string"
       },
       "TasteProfileIcon": {
@@ -983,6 +1155,35 @@
           "flavors"
         ],
         "title": "TasteProfileIcons",
+        "type": "object"
+      },
+      "TasteProfilePersona": {
+        "description": "LLM-generated, cosmetic taste persona, persisted per language.",
+        "properties": {
+          "blurb_en": {
+            "title": "Blurb En",
+            "type": "string"
+          },
+          "blurb_he": {
+            "title": "Blurb He",
+            "type": "string"
+          },
+          "title_en": {
+            "title": "Title En",
+            "type": "string"
+          },
+          "title_he": {
+            "title": "Title He",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title_en",
+          "blurb_en",
+          "title_he",
+          "blurb_he"
+        ],
+        "title": "TasteProfilePersona",
         "type": "object"
       },
       "ValidationError": {
@@ -1091,6 +1292,47 @@
         ]
       }
     },
+    "/guest-recommendations": {
+      "post": {
+        "operationId": "postGuestRecommendations",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OnboardingAnswers"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuestRecommendationsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Post Guest Recommendations",
+        "tags": [
+          "guest"
+        ]
+      }
+    },
     "/health": {
       "get": {
         "operationId": "getHealth",
@@ -1195,50 +1437,6 @@
           }
         ],
         "summary": "Get My Baseline Taste",
-        "tags": [
-          "onboarding"
-        ]
-      },
-      "patch": {
-        "operationId": "patchMyBaselineTaste",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PatchBaselineTasteRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BaselineTasteRecord"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Patch My Baseline Taste",
         "tags": [
           "onboarding"
         ]

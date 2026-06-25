@@ -9,17 +9,24 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TryRouteImport } from './routes/try'
 import { Route as RecommendationsRouteImport } from './routes/recommendations'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AccountIndexRouteImport } from './routes/account.index'
+import { Route as SignupSplatRouteImport } from './routes/signup.$'
 import { Route as SigninSplatRouteImport } from './routes/signin.$'
 import { Route as LegalSlugRouteImport } from './routes/legal.$slug'
 import { Route as AccountSettingsRouteImport } from './routes/account.settings'
 import { Route as AccountSecurityRouteImport } from './routes/account.security'
 import { Route as AccountProfileRouteImport } from './routes/account.profile'
 
+const TryRoute = TryRouteImport.update({
+  id: '/try',
+  path: '/try',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RecommendationsRoute = RecommendationsRouteImport.update({
   id: '/recommendations',
   path: '/recommendations',
@@ -44,6 +51,11 @@ const AccountIndexRoute = AccountIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AccountRoute,
+} as any)
+const SignupSplatRoute = SignupSplatRouteImport.update({
+  id: '/signup/$',
+  path: '/signup/$',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const SigninSplatRoute = SigninSplatRouteImport.update({
   id: '/signin/$',
@@ -76,22 +88,26 @@ export interface FileRoutesByFullPath {
   '/account': typeof AccountRouteWithChildren
   '/onboarding': typeof OnboardingRoute
   '/recommendations': typeof RecommendationsRoute
+  '/try': typeof TryRoute
   '/account/profile': typeof AccountProfileRoute
   '/account/security': typeof AccountSecurityRoute
   '/account/settings': typeof AccountSettingsRoute
   '/legal/$slug': typeof LegalSlugRoute
   '/signin/$': typeof SigninSplatRoute
+  '/signup/$': typeof SignupSplatRoute
   '/account/': typeof AccountIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/onboarding': typeof OnboardingRoute
   '/recommendations': typeof RecommendationsRoute
+  '/try': typeof TryRoute
   '/account/profile': typeof AccountProfileRoute
   '/account/security': typeof AccountSecurityRoute
   '/account/settings': typeof AccountSettingsRoute
   '/legal/$slug': typeof LegalSlugRoute
   '/signin/$': typeof SigninSplatRoute
+  '/signup/$': typeof SignupSplatRoute
   '/account': typeof AccountIndexRoute
 }
 export interface FileRoutesById {
@@ -100,11 +116,13 @@ export interface FileRoutesById {
   '/account': typeof AccountRouteWithChildren
   '/onboarding': typeof OnboardingRoute
   '/recommendations': typeof RecommendationsRoute
+  '/try': typeof TryRoute
   '/account/profile': typeof AccountProfileRoute
   '/account/security': typeof AccountSecurityRoute
   '/account/settings': typeof AccountSettingsRoute
   '/legal/$slug': typeof LegalSlugRoute
   '/signin/$': typeof SigninSplatRoute
+  '/signup/$': typeof SignupSplatRoute
   '/account/': typeof AccountIndexRoute
 }
 export interface FileRouteTypes {
@@ -114,22 +132,26 @@ export interface FileRouteTypes {
     | '/account'
     | '/onboarding'
     | '/recommendations'
+    | '/try'
     | '/account/profile'
     | '/account/security'
     | '/account/settings'
     | '/legal/$slug'
     | '/signin/$'
+    | '/signup/$'
     | '/account/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/onboarding'
     | '/recommendations'
+    | '/try'
     | '/account/profile'
     | '/account/security'
     | '/account/settings'
     | '/legal/$slug'
     | '/signin/$'
+    | '/signup/$'
     | '/account'
   id:
     | '__root__'
@@ -137,11 +159,13 @@ export interface FileRouteTypes {
     | '/account'
     | '/onboarding'
     | '/recommendations'
+    | '/try'
     | '/account/profile'
     | '/account/security'
     | '/account/settings'
     | '/legal/$slug'
     | '/signin/$'
+    | '/signup/$'
     | '/account/'
   fileRoutesById: FileRoutesById
 }
@@ -150,12 +174,21 @@ export interface RootRouteChildren {
   AccountRoute: typeof AccountRouteWithChildren
   OnboardingRoute: typeof OnboardingRoute
   RecommendationsRoute: typeof RecommendationsRoute
+  TryRoute: typeof TryRoute
   LegalSlugRoute: typeof LegalSlugRoute
   SigninSplatRoute: typeof SigninSplatRoute
+  SignupSplatRoute: typeof SignupSplatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/try': {
+      id: '/try'
+      path: '/try'
+      fullPath: '/try'
+      preLoaderRoute: typeof TryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/recommendations': {
       id: '/recommendations'
       path: '/recommendations'
@@ -190,6 +223,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/account/'
       preLoaderRoute: typeof AccountIndexRouteImport
       parentRoute: typeof AccountRoute
+    }
+    '/signup/$': {
+      id: '/signup/$'
+      path: '/signup/$'
+      fullPath: '/signup/$'
+      preLoaderRoute: typeof SignupSplatRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/signin/$': {
       id: '/signin/$'
@@ -251,8 +291,10 @@ const rootRouteChildren: RootRouteChildren = {
   AccountRoute: AccountRouteWithChildren,
   OnboardingRoute: OnboardingRoute,
   RecommendationsRoute: RecommendationsRoute,
+  TryRoute: TryRoute,
   LegalSlugRoute: LegalSlugRoute,
   SigninSplatRoute: SigninSplatRoute,
+  SignupSplatRoute: SignupSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

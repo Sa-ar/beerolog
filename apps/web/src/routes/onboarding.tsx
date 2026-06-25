@@ -1,7 +1,8 @@
 /**
- * /onboarding — captures the 7 quiz answers (PRD §Onboarding) and posts
- * them to POST /onboarding, which composes dials + embedding and persists
- * the user's BaselineTaste. Redirects to the dashboard on success.
+ * /onboarding — adaptive taste quiz. Walks the pure question graph
+ * (lib/onboarding-quiz) one question at a time via <QuizStepper>, then posts the
+ * answers to POST /onboarding, which composes dials + persona + embedding and
+ * persists the user's BaselineTaste. Redirects to the dashboard on success.
  */
 
 import { RedirectToSignIn, Show } from '@clerk/tanstack-react-start'
@@ -10,7 +11,9 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from '@beerolog/ui'
 import { apiFetch } from '../lib/api-fetch'
-import { QuizChips } from '../components/QuizChips'
+import { QuizStepper } from '../components/QuizStepper'
+import { PAGE_MAIN } from '../lib/page-shell'
+import { type Answers, prunedAnswers } from '../lib/onboarding-quiz'
 import { onboardingSaveErrorMessage } from '../lib/user-facing-errors'
 
 export const Route = createFileRoute('/onboarding')({
@@ -30,64 +33,23 @@ function OnboardingPage() {
   )
 }
 
-type Coffee = 'black' | 'espresso' | 'hafuch' | 'iced_sweet' | 'none'
-type Water = 'still' | 'light' | 'strong'
-type Snack = 'dark_chocolate' | 'halva' | 'fresh_fruit' | 'milk_chocolate'
-type Love = 'love' | 'okay' | 'avoid'
-type Citrus = 'grapefruit' | 'orange' | 'lemonade' | 'none'
-
-type Answers = {
-  coffee: Coffee | null
-  water: Water | null
-  novelty_seeking: boolean | null
-  snack: Snack | null
-  sour_foods: Love | null
-  citrus: Citrus | null
-  smoked_foods: Love | null
-}
-
-// Values mirror the API enums (app/api_contracts.py); labels come from
-// enums.<group>.<value> translation keys — never translate the wire value.
-const COFFEE_OPTS: Coffee[] = ['black', 'espresso', 'hafuch', 'iced_sweet', 'none']
-const WATER_OPTS: Water[] = ['still', 'light', 'strong']
-const SNACK_OPTS: Snack[] = ['dark_chocolate', 'halva', 'fresh_fruit', 'milk_chocolate']
-const LOVE_OPTS: Love[] = ['love', 'okay', 'avoid']
-const CITRUS_OPTS: Citrus[] = ['grapefruit', 'orange', 'lemonade', 'none']
-
 function OnboardingForm() {
   const navigate = useNavigate()
   const { t } = useTranslation()
-  const [a, setA] = useState<Answers>({
-    coffee: null,
-    water: null,
-    novelty_seeking: null,
-    snack: null,
-    sour_foods: null,
-    citrus: null,
-    smoked_foods: null,
-  })
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const complete =
-    a.coffee !== null &&
-    a.water !== null &&
-    a.novelty_seeking !== null &&
-    a.snack !== null &&
-    a.sour_foods !== null &&
-    a.citrus !== null &&
-    a.smoked_foods !== null
-
-  async function submit() {
-    if (!complete || submitting) return
+  async function submit(answers: Answers) {
+    if (submitting) return
     setSubmitting(true)
     setError(null)
     try {
       const res = await apiFetch('/onboarding', {
         method: 'POST',
-        body: JSON.stringify(a),
+        body: JSON.stringify(prunedAnswers(answers)),
       })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      localStorage.removeItem('beerolog_onboarding_quiz')
       navigate({ to: '/' })
     } catch (e) {
       setError(onboardingSaveErrorMessage(t, e))
@@ -97,101 +59,24 @@ function OnboardingForm() {
   }
 
   return (
-    <div style={{ maxWidth: 640, margin: '2rem auto', padding: '0 1rem' }}>
-      <h1>{t('onboarding.title')}</h1>
-      <p style={{ color: '#666' }}>{t('onboarding.intro')}</p>
+    <main className={`${PAGE_MAIN} py-6 sm:py-10`}>
+      <section className="mb-4 space-y-1 sm:mb-6">
+        <p className="text-sm font-semibold uppercase tracking-wide text-brand-300">
+          {t('onboarding.eyebrow')}
+        </p>
+        <h1 className="text-2xl font-bold tracking-tight text-neutral-900 sm:text-3xl">
+          {t('onboarding.title')}
+        </h1>
+        <p className="text-neutral-600">{t('onboarding.intro')}</p>
+      </section>
 
-      <QuizChips
-        title={t('onboarding.questions.coffee')}
-        group="coffee"
-        options={COFFEE_OPTS}
-        value={a.coffee}
-        onChange={(v) => setA({ ...a, coffee: v })}
-      />
-      <QuizChips
-        title={t('onboarding.questions.water')}
-        group="water"
-        options={WATER_OPTS}
-        value={a.water}
-        onChange={(v) => setA({ ...a, water: v })}
-      />
-      <YesNo
-        title={t('onboarding.questions.novelty')}
-        value={a.novelty_seeking}
-        onChange={(v) => setA({ ...a, novelty_seeking: v })}
-      />
-      <QuizChips
-        title={t('onboarding.questions.snack')}
-        group="snack"
-        options={SNACK_OPTS}
-        value={a.snack}
-        onChange={(v) => setA({ ...a, snack: v })}
-      />
-      <QuizChips
-        title={t('onboarding.questions.sour')}
-        group="love"
-        options={LOVE_OPTS}
-        value={a.sour_foods}
-        onChange={(v) => setA({ ...a, sour_foods: v })}
-      />
-      <QuizChips
-        title={t('onboarding.questions.citrus')}
-        group="citrus"
-        options={CITRUS_OPTS}
-        value={a.citrus}
-        onChange={(v) => setA({ ...a, citrus: v })}
-      />
-      <QuizChips
-        title={t('onboarding.questions.smoked')}
-        group="love"
-        options={LOVE_OPTS}
-        value={a.smoked_foods}
-        onChange={(v) => setA({ ...a, smoked_foods: v })}
-      />
-
-      {error ? (
-        <Alert variant="error" onRetry={() => void submit()}>
-          {error}
-        </Alert>
-      ) : null}
-
-      <button
-        type="button"
-        onClick={submit}
-        disabled={!complete || submitting}
-        style={{
-          marginTop: 16,
-          padding: '12px 24px',
-          background: complete ? '#0a7' : '#ccc',
-          color: 'white',
-          border: 0,
-          borderRadius: 8,
-          fontSize: 16,
-          cursor: complete && !submitting ? 'pointer' : 'not-allowed',
-        }}
+      <QuizStepper
+        onComplete={(answers) => void submit(answers)}
+        completing={submitting}
+        storageKey="beerolog_onboarding_quiz"
       >
-        {submitting ? t('onboarding.saving') : t('onboarding.save')}
-      </button>
-    </div>
-  )
-}
-
-function YesNo({
-  title,
-  value,
-  onChange,
-}: {
-  title: string
-  value: boolean | null
-  onChange: (v: boolean) => void
-}) {
-  return (
-    <QuizChips
-      title={title}
-      group="common"
-      options={['yes', 'no']}
-      value={value === null ? null : value ? 'yes' : 'no'}
-      onChange={(v) => onChange(v === 'yes')}
-    />
+        {error ? <Alert variant="error">{error}</Alert> : null}
+      </QuizStepper>
+    </main>
   )
 }

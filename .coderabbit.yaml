@@ -1,0 +1,22 @@
+# CodeRabbit AI review config — free tier, private-repo OK, no API key.
+# Advisory inline comments only; the hard blocking gate is the local pre-push hook.
+# Docs: https://docs.coderabbit.ai/getting-started/configure-coderabbit
+language: en-US
+reviews:
+  profile: chill # less noisy; we already have a strict local gate
+  request_changes_workflow: false # advisory only — never blocks merge
+  high_level_summary: true
+  poem: false
+  review_status: true
+  auto_review:
+    enabled: true
+    drafts: false
+    base_branches:
+      - main
+  path_filters:
+    - "!**/*.lock"
+    - "!**/pnpm-lock.yaml"
+    - "!**/migrations/meta/**"
+    - "!packages/db/data/**" # 363KB catalog JSON — not worth reviewing
+chat:
+  auto_reply: true
