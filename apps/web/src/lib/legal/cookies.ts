@@ -15,10 +15,13 @@ export interface CookieDefinition {
   purposeKey: string
 }
 
-// Canonical list of every cookie Beerolog actually sets. Analytics/marketing
+// Canonical list of every cookie present in the Beerolog experience, including
+// essential cookies set by our sign-in provider (Clerk). Analytics/marketing
 // cookies are intentionally absent — they must not be set without explicit
 // opt-in (see the cookie notice copy).
 export const COOKIE_REGISTRY: CookieDefinition[] = [
   { name: 'age_verified', classification: 'essential', durationDays: 365, purposeKey: 'ageVerified' },
   { name: 'lang', classification: 'functional', durationDays: 365, purposeKey: 'lang' },
+  // Set by Clerk to keep the user signed in; required for authenticated use.
+  { name: '__session', classification: 'essential', durationDays: 7, purposeKey: 'clerkSession' },
 ]

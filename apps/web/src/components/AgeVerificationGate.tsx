@@ -40,6 +40,7 @@ export function AgeVerificationGate({ initialVerified }: { initialVerified: bool
           <>
             <DialogTitle id="age-gate-title">{t('ageGate.title')}</DialogTitle>
             <DialogDescription id="age-gate-description">{t('ageGate.body')}</DialogDescription>
+            <p dir="auto" className="mt-3 text-sm font-medium text-amber-900">{t('footer.alcoholWarning')}</p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row-reverse">
               <Button type="button" className="w-full sm:w-auto" onClick={handleConfirm}>
                 {t('ageGate.confirm')}

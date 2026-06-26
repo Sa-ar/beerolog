@@ -39,6 +39,7 @@
   },
   "footer": {
     "responsibleDrinking": "Drink responsibly. Beerolog is for adults 18+ and does not sell alcohol.",
+    "alcoholWarning": "Warning: excessive alcohol consumption endangers life and is harmful to health!",
     "legal": "Legal",
     "privacy": "Privacy",
     "terms": "Terms",
@@ -53,7 +54,7 @@
       "intro": "This policy explains how Beerolog collects, uses, and discloses your personal data, and what rights you have regarding your data.",
       "sections": [
         { "heading": "Data Controller", "body": "Saar Davidson (privacy@beerolog.com) operates Beerolog and is the Data Controller responsible for your personal data. Address: Ramat Gan, Israel (Full physical address available upon request)." },
-        { "heading": "What we collect & Lawful basis", "body": "We collect your account identifier, email, and display name (shared via Clerk); your baseline taste metrics (taste dials, flavor family, novelty affinity); and your ratings and notes. Our lawful basis is Performance of a Contract (to provide recommendations) and Legitimate Interest (platform security)." },
+        { "heading": "What we collect & Lawful basis", "body": "We collect your account identifier, email, and display name (shared via Clerk); your baseline taste metrics (taste dials, flavor family, novelty affinity); and your ratings and notes. Our lawful basis is Performance of a Contract (to provide recommendations) and Legitimate Interest (platform security). When you scan a bar menu, the photo is used only to read the menu items shown and is not stored afterward; reading the menu may involve our inference provider (OpenAI), and the image is not used for any other purpose." },
         { "heading": "No sale of personal data; Anonymous aggregates", "body": "We do not sell your personal data (such as email or specific rating profiles linked to your identity). We may compile, analyze, and share completely anonymized, aggregated statistical insights derived from general platform usage, which cannot be traced back to any individual user." },
         { "heading": "Beerolog database vs. Authentication", "body": "Your sign-in credentials and session security are managed by our authentication provider, Clerk Inc. Your taste quiz answers, ratings, and account metadata are stored in Beerolog's secure database." },
         { "heading": "Temporary usage preferences", "body": "The vibe, ABV range, and free-text inputs you enter to get a recommendation are processed ephemerally for that request only and are not stored in our database as standalone records." },
@@ -74,7 +75,9 @@
         { "heading": "Data location & international transfers", "body": "By using the service, you acknowledge and agree that your personal data (including email, ratings, and taste profile) will be processed and stored on cloud servers outside of your home country, including in the United States and the European Union, which may have different data protection standards." },
         { "heading": "Termination & account deletion", "body": "You may terminate these terms at any time by permanently deleting your account from your settings panel. We reserve the right to suspend, restrict, or terminate your account at any time at our sole discretion, without liability, if we suspect a violation of these terms." },
         { "heading": "Governing law & jurisdiction", "body": "These terms are governed by the laws of the State of Israel. Any dispute arising under or in connection with these terms shall be subject to the exclusive jurisdiction of the competent courts of Tel Aviv, Israel." },
-        { "heading": "Changes to terms", "body": "We may update these terms from time to time. Material updates will be posted on this page. Your continued use of the service constitutes acceptance of the modified terms." }
+        { "heading": "Changes to terms", "body": "We may update these terms from time to time. Material updates will be posted on this page. Your continued use of the service constitutes acceptance of the modified terms." },
+        { "heading": "Sensitive information", "body": "Please do not enter sensitive personal information — such as health, medical, dietary-health, or pregnancy details — in the free-text fields. Beerolog does not need this information and asks you not to provide it." },
+        { "heading": "Language", "body": "Beerolog provides these terms and the privacy policy in Hebrew and English. In the event of any conflict or discrepancy between the versions, the Hebrew version prevails." }
       ]
     },
     "cookies": {
@@ -375,6 +378,7 @@
     "tellMore": "Tell us more",
     "optional": "(optional)",
     "placeholder": "Hot evening, sharing a platter, want something crisp…",
+    "sensitiveDataNote": "Please don't include health, medical, or other sensitive personal details.",
     "submit": "Get my top 5"
   },
   "why": {

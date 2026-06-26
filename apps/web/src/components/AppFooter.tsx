@@ -20,9 +20,10 @@ export function AppFooter() {
         dir="ltr"
         className={`${PAGE_FOOTER_SHELL} flex flex-col items-center gap-4 py-4 text-center sm:flex-row sm:items-center sm:justify-between sm:text-start`}
       >
-        <p dir="auto" className="text-xs text-neutral-500 sm:max-w-md">
-          {t('footer.responsibleDrinking')}
-        </p>
+        <div dir="auto" className="space-y-1 text-xs text-neutral-500 sm:max-w-md">
+          <p className="font-medium text-neutral-600">{t('footer.alcoholWarning')}</p>
+          <p>{t('footer.responsibleDrinking')}</p>
+        </div>
         <nav
           aria-label={t('footer.legal')}
           className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-sm text-neutral-600"
