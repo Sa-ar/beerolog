@@ -29,6 +29,20 @@
       "when": 1782100000000,
       "tag": "0003_taste_model_v2",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1782416645483,
+      "tag": "0004_lively_captain_america",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1782417605761,
+      "tag": "0005_awesome_ser_duncan",
+      "breakpoints": true
     }
   ]
 }

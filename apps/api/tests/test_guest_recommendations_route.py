@@ -134,9 +134,7 @@ def test_low_dim_catalog_falls_back_to_dials(monkeypatch) -> None:
 def test_over_embed_budget_falls_back_to_dials(monkeypatch) -> None:
     """When the paid-embed budget is spent, guests dial-score (no API call)."""
     guest_route._EMBED_CACHE.clear()
-    monkeypatch.setattr(guest_route, "_EMBED_BUDGET", 0)
-    monkeypatch.setattr(guest_route, "_embed_window_start", 0.0)
-    monkeypatch.setattr(guest_route, "_embed_window_count", 0)
+    monkeypatch.setattr(guest_route, "_EMBED_BUDGET", guest_route._RateBudget(0))
     fake = _FakeClient()
 
     async def _load() -> list[BeerCandidate]:
@@ -152,6 +150,163 @@ def test_over_embed_budget_falls_back_to_dials(monkeypatch) -> None:
     assert r.status_code == 200, r.text
     assert fake.calls == 0  # budget exhausted -> never embedded
     assert len(r.json()["results"]) > 0  # still served via dial scoring
+
+
+def test_db_cache_hit_serves_without_embedding(monkeypatch) -> None:
+    """A vector already in the DB cache is served without any OpenAI call."""
+    guest_route._EMBED_CACHE.clear()
+    fake = _FakeClient()
+    cached_vec = [1.0] + [0.0] * 1535
+
+    async def _load() -> list[BeerCandidate]:
+        return _embedded_catalog()
+
+    async def _fake_pool():
+        return object()
+
+    async def _get(pool, key):
+        return cached_vec
+
+    monkeypatch.setattr(settings, "database_url", "postgres://test")
+    monkeypatch.setattr(guest_route, "_load_catalog", _load)
+    monkeypatch.setattr(guest_route, "get_pool", _fake_pool)
+    monkeypatch.setattr(guest_route.embed_cache_repo, "get", _get)
+    app.dependency_overrides[guest_route._optional_embedding_client] = lambda: fake
+    try:
+        r = TestClient(app).post("/guest-recommendations", json=_PAYLOAD)
+    finally:
+        app.dependency_overrides.pop(guest_route._optional_embedding_client, None)
+
+    assert r.status_code == 200, r.text
+    assert fake.calls == 0  # served from DB L2, OpenAI never called
+    assert r.json()["results"][0]["id"] == "b1"
+
+
+def test_db_cache_write_through_on_miss(monkeypatch) -> None:
+    """A DB miss embeds once and writes the vector through to the DB cache."""
+    guest_route._EMBED_CACHE.clear()
+    monkeypatch.setattr(guest_route, "_EMBED_BUDGET", guest_route._RateBudget(60))
+    fake = _FakeClient()
+    puts: list[str] = []
+
+    async def _load() -> list[BeerCandidate]:
+        return _embedded_catalog()
+
+    async def _fake_pool():
+        return object()
+
+    async def _get(pool, key):
+        return None
+
+    async def _put(pool, key, vec):
+        puts.append(key)
+
+    monkeypatch.setattr(settings, "database_url", "postgres://test")
+    monkeypatch.setattr(guest_route, "_load_catalog", _load)
+    monkeypatch.setattr(guest_route, "get_pool", _fake_pool)
+    monkeypatch.setattr(guest_route.embed_cache_repo, "get", _get)
+    monkeypatch.setattr(guest_route.embed_cache_repo, "put", _put)
+    app.dependency_overrides[guest_route._optional_embedding_client] = lambda: fake
+    try:
+        r = TestClient(app).post("/guest-recommendations", json=_PAYLOAD)
+    finally:
+        app.dependency_overrides.pop(guest_route._optional_embedding_client, None)
+
+    assert r.status_code == 200, r.text
+    assert fake.calls == 1  # embedded once on the DB miss
+    assert len(puts) == 1 and len(puts[0]) == 64  # written through, sha256 hex key
+
+
+def test_records_guest_submission(monkeypatch) -> None:
+    """Each free submission is recorded anonymously, tagged source='free'."""
+    guest_route._EMBED_CACHE.clear()
+    recorded: list[tuple] = []
+
+    async def _fake_pool():
+        return object()
+
+    async def _record(pool, *, answers, shown_beer_ids, source="free"):
+        recorded.append((answers, shown_beer_ids, source))
+
+    monkeypatch.setattr(settings, "database_url", "postgres://test")
+    monkeypatch.setattr(guest_route, "get_pool", _fake_pool)
+    monkeypatch.setattr(guest_route.guest_submission_repo, "record", _record)
+
+    r = TestClient(app).post("/guest-recommendations", json=_PAYLOAD)
+    assert r.status_code == 200, r.text
+    assert len(recorded) == 1
+    answers, shown, source = recorded[0]
+    assert source == "free"
+    assert answers["coffee"] == "black"  # the raw submission is stored
+    assert shown == [b["id"] for b in r.json()["results"]]  # what we showed
+
+
+def test_over_record_budget_skips_write(monkeypatch) -> None:
+    """When the per-worker submission budget is spent, recording is skipped."""
+    recorded: list[tuple] = []
+
+    async def _fake_pool():
+        return object()
+
+    async def _record(pool, *, answers, shown_beer_ids, source="free"):
+        recorded.append((answers, shown_beer_ids))
+
+    monkeypatch.setattr(settings, "database_url", "postgres://test")
+    monkeypatch.setattr(guest_route, "_RECORD_BUDGET", guest_route._RateBudget(0))
+    monkeypatch.setattr(guest_route, "get_pool", _fake_pool)
+    monkeypatch.setattr(guest_route.guest_submission_repo, "record", _record)
+
+    r = TestClient(app).post("/guest-recommendations", json=_PAYLOAD)
+    assert r.status_code == 200, r.text
+    assert recorded == []  # budget exhausted -> no DB write
+
+
+def test_singleflight_collapses_concurrent_misses(monkeypatch) -> None:
+    """Two concurrent cold misses of the same combo share one OpenAI call."""
+    import asyncio
+
+    guest_route._EMBED_CACHE.clear()
+    monkeypatch.setattr(settings, "database_url", "")  # skip L2
+    monkeypatch.setattr(guest_route, "_EMBED_BUDGET", guest_route._RateBudget(60))
+    calls = {"n": 0}
+
+    class _SlowClient:
+        async def embed(self, text):
+            calls["n"] += 1
+            await asyncio.sleep(0.05)  # keep both requests in-flight
+            return [1.0] + [0.0] * 1535
+
+    async def _run():
+        c = _SlowClient()
+        return await asyncio.gather(
+            guest_route._cached_embed("same text", c),
+            guest_route._cached_embed("same text", c),
+        )
+
+    results = asyncio.run(_run())
+    assert calls["n"] == 1  # singleflight: one embed for two concurrent misses
+    assert results[0] == results[1]
+
+
+def test_l1_key_namespaced_by_model(monkeypatch) -> None:
+    """Changing the embedding model invalidates L1 (no stale-vector hit)."""
+    import asyncio
+
+    guest_route._EMBED_CACHE.clear()
+    monkeypatch.setattr(settings, "database_url", "")
+    monkeypatch.setattr(guest_route, "_EMBED_BUDGET", guest_route._RateBudget(60))
+    calls = {"n": 0}
+
+    class _C:
+        async def embed(self, text):
+            calls["n"] += 1
+            return [1.0] + [0.0] * 1535
+
+    c = _C()
+    asyncio.run(guest_route._cached_embed("t", c))
+    monkeypatch.setattr(settings, "embedding_model", "different-model")
+    asyncio.run(guest_route._cached_embed("t", c))
+    assert calls["n"] == 2  # different model -> different key -> re-embed, not stale L1
 
 
 def test_oversized_multiselect_returns_422() -> None:

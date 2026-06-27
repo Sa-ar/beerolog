@@ -170,3 +170,28 @@ export const beerRatings = pgTable(
     uniqueIndex('beer_ratings_user_beer_uniq').on(t.userId, t.beerId),
   ],
 )
+
+// Persistent cache of onboarding-questionnaire embeddings for the public guest
+// flow. The initial questionnaire has a finite answer space, so once each combo
+// has been embedded once it is read from here forever — OpenAI is never called
+// again for a known combo, across workers and restarts. Keyed by a hash of the
+// canonical synthetic preference text (baseline_taste.compose_text).
+export const guestEmbeddingCache = pgTable('guest_embedding_cache', {
+  promptHash: text('prompt_hash').primaryKey(),
+  embedding: vector('embedding', { dimensions: 1536 }).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+// Pseudonymous record of free (signed-out) questionnaire submissions, tagged at
+// the source. No per-person identifier is in the row — just the answers and which
+// beers we showed — but edge/hosting logs hold IP + request time, so a row is
+// correlatable to a person (pseudonymous, not anonymous). Captures the aggregate
+// answer distribution for quiz validation. Lower signal than registered users
+// (guests leave no ratings), but still useful for A/B-ing hypothesis questions.
+export const guestSubmissions = pgTable('guest_submissions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  answers: jsonb('answers').notNull(),
+  shownBeerIds: text('shown_beer_ids').array().notNull(),
+  source: text('source').notNull().default('free'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})

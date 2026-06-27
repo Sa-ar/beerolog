@@ -26,6 +26,16 @@ records the resulting durable decisions so they are not relitigated per change.
   stores. Deletion erases `users` + `user_baseline_taste` + `beer_ratings`;
   authentication/session data remains with Clerk and is handled by sign-out.
   The internal taste embedding is disclosed but not exported (not human-readable).
+- **Guest data (pseudonymous).** The signed-out preview persists each
+  questionnaire submission (`guest_submissions`) and caches questionnaire
+  embeddings (`guest_embedding_cache`). The rows carry no user identifier, IP, or
+  cookie, but edge/hosting logs capture IP + request time, so a submission is
+  correlatable to a person and is treated as **pseudonymous, not anonymous** — its
+  access/erasure scope and retention are a counsel determination, not assumed
+  out-of-scope. Disclosed in the privacy policy's guest-preview section. Abuse is
+  bounded today by per-worker app-level budgets (embed spend + submission
+  writes); a per-IP edge rate limit is planned (handler `# TODO: rate-limit`)
+  and required before public launch.
 - **Accessibility target.** Israeli Standard SI 5568 (WCAG 2.0 Level AA) across
   the supported sign-in, onboarding, and recommendation flows. Enforced by an
   automated gate (eslint-plugin-jsx-a11y + vitest-axe in CI) plus a repeatable

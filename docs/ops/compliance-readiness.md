@@ -17,9 +17,9 @@ Processing Agreement (or equivalent addendum) before launch. See the matching
 | Sub-processor | Purpose | Personal data shared | DPA / DPA addendum | Owner |
 | --- | --- | --- | --- | --- |
 | Clerk | Authentication & session | Email, display name, OAuth profile | [ ] signed | _pending_ |
-| Neon | Database / persistence | All Beerolog-stored data (account, taste profile, ratings) | [ ] signed | _pending_ |
+| Neon | Database / persistence | All Beerolog-stored data (account, taste profile, ratings; pseudonymous guest submissions + questionnaire embedding cache) | [ ] signed | _pending_ |
 | Vercel | Web + API hosting | Request metadata, IP at the edge | [ ] signed | _pending_ |
-| OpenAI | Model inference | Ephemeral session-intent prompts (no additional logging) | [ ] signed (DPA / zero-retention) | _pending_ |
+| OpenAI | Model inference | Ephemeral session-intent prompts + onboarding questionnaire text (guest + signed-in) for embedding; no additional logging | [ ] signed (DPA / zero-retention) | _pending_ |
 
 - [ ] Privacy policy (#103) sub-processor list matches this table exactly
 - [ ] Determination on Israel Privacy Protection Authority database

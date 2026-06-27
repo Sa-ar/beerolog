@@ -15,10 +15,12 @@ or rank_by_dials fallback -> GuestRecommendedBeer.
 
 from __future__ import annotations
 
+import asyncio
+import hashlib
 import logging
 import time
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends
 
 from app.api_contracts import (
     GuestRecommendationsResponse,
@@ -28,7 +30,8 @@ from app.api_contracts import (
 from app.config import settings
 from app.db import get_pool
 from app.placeholder_catalog import PLACEHOLDER_CATALOG
-from app.services import baseline_taste
+from app.services import baseline_taste, guest_submission_repo
+from app.services import guest_embedding_cache_repo as embed_cache_repo
 from app.services.catalog_repo import fetch_catalog
 from app.services.dial_match import rank_by_dials
 from app.services.embedding_service import (
@@ -41,39 +44,58 @@ from app.services.match_engine import BeerCandidate, rank
 router = APIRouter(tags=["guest"])
 logger = logging.getLogger(__name__)
 
-# ponytail: process-local cache — warms per worker, lost on restart. Bounded with
-# FIFO eviction because this endpoint is PUBLIC and unauthenticated: the cache key
-# (compose_text) includes order-sensitive multi-select fields, so the key space is
-# attacker-controllable, not the "small finite" space the happy path assumes. The
-# cap bounds worker memory (~MAX * 1536 floats); rate-limiting (see TODO below)
-# still owes the per-request OpenAI cost bound. Upgrade to a shared DB/pgvector
-# table only if running serverless or many workers at scale.
+# ponytail: process-local L1 cache — warms per worker, lost on restart. The key is
+# compose_text, which canonicalizes its multi-select fields (sorted + deduped), so
+# the key space is the finite onboarding answer space. FIFO-capped anyway to bound
+# worker memory (~MAX * 1536 floats) on this public endpoint. The durable L2 is the
+# guest_embedding_cache DB table, so a combo embedded once is never re-embedded
+# across workers or restarts.
 _EMBED_CACHE: dict[str, list[float]] = {}
 _EMBED_CACHE_MAX = 4096
 
-# Per-worker fixed-window budget on PAID embed calls (cache misses) — a stopgap
-# spend cap on this public, unauthenticated endpoint until gateway rate limiting
-# lands (see TODO in the handler). Over budget, guests dial-score instead. Not
-# per-IP: under a sustained flood legitimate users also degrade to dials until
-# the window resets. ponytail: global counter, swap for a real limiter at the
-# edge when one exists.
-_EMBED_BUDGET = 60
-_EMBED_WINDOW_S = 60.0
-_embed_window_start = 0.0
-_embed_window_count = 0
+
+def _l1_put(key: str, vec: list[float]) -> None:
+    if len(_EMBED_CACHE) >= _EMBED_CACHE_MAX:
+        _EMBED_CACHE.pop(next(iter(_EMBED_CACHE)))  # evict oldest (insertion order)
+    _EMBED_CACHE[key] = vec
 
 
-def _embed_budget_ok() -> bool:
-    """Reserve one paid-embed slot in the current window; False if exhausted."""
-    global _embed_window_start, _embed_window_count
-    now = time.monotonic()
-    if now - _embed_window_start >= _EMBED_WINDOW_S:
-        _embed_window_start = now
-        _embed_window_count = 0
-    if _embed_window_count >= _EMBED_BUDGET:
-        return False
-    _embed_window_count += 1
-    return True
+# In-flight paid-embed calls, keyed by cache key: singleflight so concurrent
+# cold misses of the same combo share one OpenAI call instead of each spending
+# budget. Self-bounded — entries are popped once the call resolves.
+_EMBED_INFLIGHT: dict[str, asyncio.Lock] = {}
+
+
+class _RateBudget:
+    """Per-worker fixed-window counter. A stopgap app-level cap on this public,
+    unauthenticated endpoint until per-IP edge rate limiting lands; not per-IP, so
+    under a sustained flood legitimate users hit the cap too until the window
+    resets. The cap is PER WORKER, so the process-wide total is limit x worker
+    count; only the planned edge limit is a global bound. ponytail: swap for a
+    real edge limiter when one exists."""
+
+    def __init__(self, limit: int, window_s: float = 60.0) -> None:
+        self._limit = limit
+        self._window_s = window_s
+        self._start = 0.0
+        self._count = 0
+
+    def take(self) -> bool:
+        """Reserve one slot in the current window; False if exhausted."""
+        now = time.monotonic()
+        if now - self._start >= self._window_s:
+            self._start = now
+            self._count = 0
+        if self._count >= self._limit:
+            return False
+        self._count += 1
+        return True
+
+
+# Caps PAID embed calls (cache miss -> OpenAI spend) and anonymous submission
+# writes (one DB INSERT each, otherwise unbounded on a public endpoint).
+_EMBED_BUDGET = _RateBudget(60)
+_RECORD_BUDGET = _RateBudget(600)
 
 
 def _optional_embedding_client() -> EmbeddingClient | None:
@@ -84,19 +106,67 @@ def _optional_embedding_client() -> EmbeddingClient | None:
 async def _cached_embed(text: str, client: EmbeddingClient) -> list[float] | None:
     """Cached embedding, or None when the paid-embed budget is exhausted.
 
-    Cache hits are free and always served; only a miss spends budget + an API
-    call. None signals the caller to fall back to dial scoring.
+    Lookup order: L1 in-process dict -> L2 persistent DB table -> paid OpenAI
+    call (budget-gated). Hits from either cache are free and always served; only
+    a full miss spends budget + an API call, then writes through to both tiers.
+    None signals the caller to fall back to dial scoring.
     """
-    vec = _EMBED_CACHE.get(text)
+    # Namespace the key by model + dim so a model/vector-size change yields fresh
+    # keys at BOTH tiers (L1 and L2) instead of serving stale cached vectors.
+    key = hashlib.sha256(f"{settings.embedding_model}|{EMBEDDING_DIM}|{text}".encode()).hexdigest()
+
+    vec = _EMBED_CACHE.get(key)
     if vec is not None:
         return vec
-    if not _embed_budget_ok():
-        return None
-    vec = await client.embed(text)
-    if len(_EMBED_CACHE) >= _EMBED_CACHE_MAX:
-        _EMBED_CACHE.pop(next(iter(_EMBED_CACHE)))  # evict oldest (insertion order)
-    _EMBED_CACHE[text] = vec
-    return vec
+
+    if settings.database_url:
+        try:
+            pool = await get_pool()
+            vec = await embed_cache_repo.get(pool, key)
+            if vec is not None:
+                _l1_put(key, vec)
+                return vec
+        except Exception:
+            logger.warning("guest embed cache read failed", exc_info=True)
+
+    # Singleflight the paid embed per key: concurrent cold misses of the same
+    # combo wait on one in-flight call rather than each spending budget + OpenAI.
+    lock = _EMBED_INFLIGHT.setdefault(key, asyncio.Lock())
+    try:
+        async with lock:
+            vec = _EMBED_CACHE.get(key)  # populated by the winner while we waited?
+            if vec is not None:
+                return vec
+            if not _EMBED_BUDGET.take():
+                return None
+            vec = await client.embed(text)
+            _l1_put(key, vec)
+            if settings.database_url:
+                try:
+                    pool = await get_pool()
+                    await embed_cache_repo.put(pool, key, vec)
+                except Exception:
+                    logger.warning("guest embed cache write failed", exc_info=True)
+            return vec
+    finally:
+        # Safe to drop: by now the cache is populated, so any newcomer hits L1/L2
+        # before reaching the lock. A lost race at worst allows one extra embed.
+        _EMBED_INFLIGHT.pop(key, None)
+
+
+async def _record_submission(answers: dict, shown_beer_ids: list[str]) -> None:
+    """Persist one pseudonymous free submission, AFTER the response is sent.
+
+    Budget-capped (bounds table growth on this public endpoint) and fully
+    error-swallowing, so it can never affect or slow the guest's result.
+    """
+    if not settings.database_url or not _RECORD_BUDGET.take():
+        return
+    try:
+        pool = await get_pool()
+        await guest_submission_repo.record(pool, answers=answers, shown_beer_ids=shown_beer_ids)
+    except Exception:
+        logger.warning("guest submission record failed", exc_info=True)
 
 
 def _calibrate_percent(score: float) -> int:
@@ -147,6 +217,7 @@ def _guest_beer(beer: BeerCandidate, match_percent: int) -> GuestRecommendedBeer
 )
 async def post_guest_recommendations(
     answers: OnboardingAnswers,
+    background_tasks: BackgroundTasks,
     client: EmbeddingClient | None = Depends(_optional_embedding_client),
 ) -> GuestRecommendationsResponse:
     # TODO: rate-limit (infra) — this endpoint is public and unauthenticated.
@@ -195,6 +266,15 @@ async def post_guest_recommendations(
             _guest_beer(s.beer, round(s.score * 100))
             for s in rank_by_dials(dials, catalog, limit=settings.guest_top_k)
         ]
+
+    # Record this pseudonymous free submission AFTER the response is sent (FastAPI
+    # background task) so the DB write never adds latency to — or stalls — the
+    # guest's result. Budget-capped + error-swallowing inside _record_submission.
+    background_tasks.add_task(
+        _record_submission,
+        answers.model_dump(mode="json"),
+        [r.id for r in results],
+    )
 
     return GuestRecommendationsResponse(
         results=results,
