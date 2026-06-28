@@ -10,6 +10,16 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
+    // Honor the `_`-prefix convention for intentionally-unused args/vars
+    // (e.g. a param kept for an API/signature but not yet used in the body).
+    rules: {
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' },
+      ],
+    },
+  },
+  {
     // Accessibility lint gate for the React surfaces.
     files: ['apps/web/src/**/*.{ts,tsx}', 'packages/ui/src/**/*.{ts,tsx}'],
     plugins: { 'jsx-a11y': jsxA11y },

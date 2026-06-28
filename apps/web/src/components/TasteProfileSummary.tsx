@@ -107,7 +107,11 @@ export function TasteProfileSummary({ greeting, baseline }: TasteProfileSummaryP
             <p className="text-sm text-neutral-600">{persona.blurb}</p>
           </div>
         ) : null}
-        <TasteRadar axes={radarAxes} labels={radarLabels} ariaLabel={t('profile.radar.aria')} />
+        <TasteRadar
+          axes={radarAxes}
+          labels={radarLabels}
+          ariaLabel={t('profile.radar.aria')}
+        />
       </Card>
 
       <Card className="border border-brand-700/40 p-6 shadow-sm">
