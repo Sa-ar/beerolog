@@ -67,12 +67,11 @@ _EMBED_INFLIGHT: dict[str, asyncio.Lock] = {}
 
 
 class _RateBudget:
-    """Per-worker fixed-window counter. A stopgap app-level cap on this public,
-    unauthenticated endpoint until per-IP edge rate limiting lands; not per-IP, so
-    under a sustained flood legitimate users hit the cap too until the window
-    resets. The cap is PER WORKER, so the process-wide total is limit x worker
-    count; only the planned edge limit is a global bound. ponytail: swap for a
-    real edge limiter when one exists."""
+    """Per-worker fixed-window counter. App-level backstop behind the per-IP
+    Vercel WAF rate-limit rule (docs/services/vercel-api.md); not per-IP, so under
+    a sustained flood legitimate users hit the cap too until the window resets.
+    The cap is PER WORKER, so the process-wide total is limit x worker count — the
+    WAF rule is the global, per-IP bound."""
 
     def __init__(self, limit: int, window_s: float = 60.0) -> None:
         self._limit = limit
@@ -220,7 +219,8 @@ async def post_guest_recommendations(
     background_tasks: BackgroundTasks,
     client: EmbeddingClient | None = Depends(_optional_embedding_client),
 ) -> GuestRecommendationsResponse:
-    # TODO: rate-limit (infra) — this endpoint is public and unauthenticated.
+    # Public + unauthenticated: edge-rate-limited per IP by a Vercel WAF rule
+    # (docs/services/vercel-api.md); the _RateBudget caps are app-level backstops.
     dials = baseline_taste.compose_dials(answers)
     catalog = await _load_catalog()
 

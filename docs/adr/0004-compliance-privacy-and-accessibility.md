@@ -32,16 +32,19 @@ records the resulting durable decisions so they are not relitigated per change.
   cookie, but edge/hosting logs capture IP + request time, so a submission is
   correlatable to a person and is treated as **pseudonymous, not anonymous** — its
   access/erasure scope and retention are a counsel determination, not assumed
-  out-of-scope. Disclosed in the privacy policy's guest-preview section. Abuse is
-  bounded today by per-worker app-level budgets (embed spend + submission
-  writes); a per-IP edge rate limit is planned (handler `# TODO: rate-limit`)
-  and required before public launch.
+  out-of-scope. Disclosed in the privacy policy's guest-preview section. The
+  per-IP edge bound is a Vercel WAF rate-limit rule on `/guest-recommendations`
+  (fixed-window, IP key — canonical rule in `docs/services/vercel-api.md`),
+  published manually in the dashboard; until it is published the only limits are
+  the per-worker app-level budgets (embed spend + submission writes), which then
+  remain as defense-in-depth behind it.
 - **Accessibility target.** Israeli Standard SI 5568 (WCAG 2.0 Level AA) across
   the supported sign-in, onboarding, and recommendation flows. Enforced by an
   automated gate (eslint-plugin-jsx-a11y + vitest-axe in CI) plus a repeatable
   manual checklist. Known gaps are disclosed in the accessibility statement.
 - **Launch blockers.** Missing privacy policy, missing accessibility statement,
-  and missing account-deletion path are launch blockers (see
+  missing account-deletion path, and an unpublished guest WAF rate-limit rule
+  (`docs/services/vercel-api.md`) are launch blockers (see
   `launch-definition-of-done.md` and `prelaunch-verification.md`).
 
 ## Consequences

@@ -75,6 +75,49 @@ curl https://beerolog-api.vercel.app/health/ready
 
 Unchanged — run the API with `pnpm dev:api` or `uvicorn` from `apps/api`. Vercel config only affects deployed environments.
 
+## Rate limiting (guest endpoint)
+
+`POST /guest-recommendations` is public and unauthenticated and makes a paid
+OpenAI embed call on a cache miss. The per-worker `_RateBudget` caps in the
+handler are app-level defense-in-depth; the real per-IP bound is a **Vercel WAF
+rate-limit rule** on the `beerolog-api` project — counted at the edge, before the
+function, and coordinated across serverless instances.
+
+Canonical rule (apply in the dashboard: project `beerolog-api` → **Firewall** →
+**Configure** → **+ New Rule**):
+
+| Field | Value |
+|---|---|
+| If — Request Path | `equals` `/guest-recommendations` |
+| If — Request Method | `equals` `POST` |
+| Then | **Rate Limit** |
+| Strategy | Fixed Window (all plans) |
+| Time Window | `60s` |
+| Request Limit | `30` |
+| Keys | `IP` |
+| Action | **Default** (returns `429` on exceed) |
+
+Then **Review Changes → Publish** (applies to production).
+
+Notes:
+
+- **Match the client path, not the rewrite.** The WAF evaluates the *incoming*
+  request, so match `/guest-recommendations`. `apps/api/vercel.json` rewrites
+  `/(.*) → /api` only *after* the firewall — do not match `/api`.
+- **Action.** **Default** returns `429` on exceed (what we want). **Deny** is a
+  harder `403` block; **Log** counts without blocking — start with **Log** for a
+  day to watch real traffic, then switch to **Default**.
+- Match `POST` only so CORS `OPTIONS` preflights aren't counted.
+- Counters are tracked **per region** (per edge PoP). A single client IP normally
+  hits one region, so its real cap is ~`30/min`; the per-region multiplier only
+  bites for traffic spread across regions (e.g. a botnet). Lower the limit if
+  needed.
+- **Publish applies to production.** If Preview/PR API deploys need the same
+  bound, configure it on those too (firewall config is per project/environment).
+- **Verify after publishing:** 31 rapid POSTs from one IP inside 60s — the 31st
+  should return `429`.
+- Hobby allows 1 rate-limit rule per project; Pro allows 40.
+
 ## Related
 
 - [vercel.md](vercel.md) — web (TanStack Start) deployment
