@@ -13,7 +13,10 @@ name: PR ephemeral env
 
 on:
   pull_request:
-    types: [opened, reopened, synchronize, closed]
+    # Previews are opt-in via the `preview` label: one Neon branch is held per
+    # labelled PR for its whole open life, and the Neon plan caps total branches.
+    # `labeled`/`unlabeled` let provision/teardown react to the label itself.
+    types: [opened, reopened, synchronize, labeled, unlabeled, closed]
 
 # One run per PR; a new push cancels the in-flight provision.
 concurrency:
@@ -32,11 +35,26 @@ env:
 
 jobs:
   provision:
-    if: github.event.action != 'closed'
+    # Only PRs explicitly labelled `preview` consume a Neon branch.
+    if: >-
+      github.event.action != 'closed' &&
+      contains(github.event.pull_request.labels.*.name, 'preview')
     runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+
+      # On `synchronize` (any push after the first) the pr-<n> branch already
+      # exists from the prior run, and create-branch-action 422s on a duplicate.
+      # Teardown only runs on `closed`, so reset here to make provision
+      # idempotent — each push gets a fresh clone of main's latest seed.
+      - name: Reset any stale Neon branch from a prior push
+        continue-on-error: true  # first push: nothing to delete
+        uses: neondatabase/delete-branch-action@v3
+        with:
+          project_id: ${{ vars.NEON_PROJECT_ID }}
+          branch: ${{ env.NEON_BRANCH }}
+          api_key: ${{ secrets.NEON_API_KEY }}
 
       - name: Create Neon branch (clones main's data, incl. seeded catalog)
         id: neon
@@ -110,7 +128,10 @@ jobs:
             })
 
   teardown:
-    if: github.event.action == 'closed'
+    # Free the Neon branch when the PR closes or the `preview` label is removed.
+    if: >-
+      github.event.action == 'closed' ||
+      (github.event.action == 'unlabeled' && github.event.label.name == 'preview')
     runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
     timeout-minutes: 5
     steps:
