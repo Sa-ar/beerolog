@@ -23,7 +23,7 @@ permissions: {}
 env:
   NEON_API: https://console.neon.tech/api/v2/projects/${{ vars.NEON_PROJECT_ID }}
   NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
-  KEEP: ${{ vars.NEON_KEEP_BRANCHES || 'preview/staging,vercel-dev' }}
+  KEEP: ${{ vars.NEON_KEEP_BRANCHES || 'preview,preview/staging,vercel-dev' }}
 
 jobs:
   sweep:

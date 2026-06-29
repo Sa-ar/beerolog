@@ -1,0 +1,75 @@
+# One-shot setup for the shared preview database (manual).
+# Creates a single `preview` Neon branch off production, points the API
+# project's Preview-scoped DATABASE_URL at it, and migrates it. After you
+# scope the Neon-Vercel integration off beerolog, all previews use this one
+# branch — no more per-deploy branches. Safe to re-run (idempotent).
+name: Setup shared preview DB
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: shared preview Neon branch name
+        type: string
+        default: preview
+
+jobs:
+  setup:
+    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
+    env:
+      NEON_API: https://console.neon.tech/api/v2/projects/${{ vars.NEON_PROJECT_ID }}
+      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+      VT: ${{ secrets.VERCEL_TOKEN }}
+      TEAM: ${{ vars.VERCEL_TEAM_ID }}
+      API_PRJ: ${{ vars.VERCEL_API_PROJECT_ID }}
+      BRANCH: ${{ inputs.branch }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Create branch, wire Vercel, migrate
+        run: |
+          set -euo pipefail
+          NH=(-H "Authorization: Bearer $NEON_API_KEY")
+          VH=(-H "Authorization: Bearer $VT")
+
+          # 1. find or create the shared preview branch (off production/default)
+          bid=$(curl -fsS "${NH[@]}" "$NEON_API/branches" \
+            | jq -r --arg n "$BRANCH" '.branches[] | select(.name==$n) | .id')
+          if [ -z "$bid" ]; then
+            parent=$(curl -fsS "${NH[@]}" "$NEON_API/branches" \
+              | jq -r '.branches[] | select(.default==true) | .id')
+            echo "creating $BRANCH off $parent"
+            resp=$(curl -fsS "${NH[@]}" -X POST "$NEON_API/branches" -H 'Content-Type: application/json' \
+              -d "$(jq -n --arg p "$parent" --arg n "$BRANCH" \
+                    '{branch:{name:$n,parent_id:$p},endpoints:[{type:"read_write"}]}')")
+            bid=$(echo "$resp" | jq -r '.branch.id')
+          fi
+          echo "branch id: $bid"
+
+          # 2. resolve connection strings (pooled for runtime, direct for migrate)
+          q="database_name=neondb&role_name=neondb_owner"
+          pooled=$(curl -fsS "${NH[@]}" "$NEON_API/connection_uri?branch_id=$bid&$q&pooled=true"  | jq -r .uri)
+          direct=$(curl -fsS "${NH[@]}" "$NEON_API/connection_uri?branch_id=$bid&$q&pooled=false" | jq -r .uri)
+          [ -n "$pooled" ] && [ "$pooled" != null ] || { echo "no pooled uri"; exit 1; }
+
+          # 3. set the API project's general Preview DATABASE_URL (delete any
+          #    existing branch-less preview one first, then create fresh)
+          old=$(curl -fsS "${VH[@]}" "https://api.vercel.com/v10/projects/$API_PRJ/env?teamId=$TEAM" \
+            | jq -r '.envs[] | select(.key=="DATABASE_URL" and (.gitBranch==null) and ((.target//[])|index("preview"))) | .id')
+          for id in $old; do
+            echo "removing old preview DATABASE_URL $id"
+            curl -fsS "${VH[@]}" -X DELETE "https://api.vercel.com/v10/projects/$API_PRJ/env/$id?teamId=$TEAM" >/dev/null
+          done
+          curl -fsS "${VH[@]}" -X POST "https://api.vercel.com/v10/projects/$API_PRJ/env?teamId=$TEAM" \
+            -H 'Content-Type: application/json' \
+            -d "$(jq -n --arg v "$pooled" '{key:"DATABASE_URL",value:$v,type:"encrypted",target:["preview"]}')" \
+            | jq -r '"set preview DATABASE_URL: \(.key) -> [\(.target|join(","))]"'
+
+          # 4. migrate the shared branch (direct connection)
+          DATABASE_URL="$direct" pnpm --filter @beerolog/db db:migrate
+          echo "done: $BRANCH ready (previews now share this branch)"
