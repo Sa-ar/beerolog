@@ -1,0 +1,46 @@
+# Reliable cleanup of the pr-<n> Neon branch + branch-scoped Vercel env vars
+# when a PR is closed/merged (or the `preview` label is removed).
+#
+# Uses `pull_request_target`, NOT `pull_request`: that event runs the workflow
+# file from the BASE branch (main) with secrets, regardless of the PR head
+# branch's contents or whether it was auto-deleted on merge. So this one file
+# on main authoritatively tears down EVERY PR — including old PRs that still
+# carry the pre-gate pr-env.yml — without rebasing them.
+#
+# Safe use of pull_request_target: we never check out or execute PR code. The
+# checkout below pulls the BASE ref (main, our own scripts) by default, and we
+# only pass the PR number/head-ref name to the Neon/Vercel APIs.
+name: PR env teardown
+
+on:
+  pull_request_target:
+    types: [closed, unlabeled]
+
+permissions:
+  contents: read
+
+jobs:
+  teardown:
+    if: >-
+      github.event.action == 'closed' ||
+      (github.event.action == 'unlabeled' && github.event.label.name == 'preview')
+    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
+    timeout-minutes: 5
+    env:
+      NEON_BRANCH: pr-${{ github.event.number }}
+      GIT_BRANCH: ${{ github.event.pull_request.head.ref }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_TEAM_ID: ${{ vars.VERCEL_TEAM_ID }}
+    steps:
+      - uses: actions/checkout@v4  # base ref (main) — our scripts, not PR code
+      - name: Delete Neon branch
+        uses: neondatabase/delete-branch-action@v3
+        continue-on-error: true  # already gone (never provisioned / double event)
+        with:
+          project_id: ${{ vars.NEON_PROJECT_ID }}
+          branch: ${{ env.NEON_BRANCH }}
+          api_key: ${{ secrets.NEON_API_KEY }}
+      - name: Remove branch-scoped Vercel env vars
+        run: |
+          ./.github/scripts/vercel-rm-env.sh "${{ vars.VERCEL_API_PROJECT_ID }}" DATABASE_URL "$GIT_BRANCH"
+          ./.github/scripts/vercel-rm-env.sh "${{ vars.VERCEL_WEB_PROJECT_ID }}" VITE_API_URL "$GIT_BRANCH"

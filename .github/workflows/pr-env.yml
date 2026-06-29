@@ -13,10 +13,10 @@ name: PR ephemeral env
 
 on:
   pull_request:
-    # Previews are opt-in via the `preview` label: one Neon branch is held per
-    # labelled PR for its whole open life, and the Neon plan caps total branches.
-    # `labeled`/`unlabeled` let provision/teardown react to the label itself.
-    types: [opened, reopened, synchronize, labeled, unlabeled, closed]
+    # Previews are opt-in via the `preview` label (provision only). Teardown on
+    # close/unlabel lives in pr-env-teardown.yml (pull_request_target) so it runs
+    # reliably from main regardless of the PR branch's workflow version.
+    types: [opened, reopened, synchronize, labeled]
 
 # One run per PR; a new push cancels the in-flight provision.
 concurrency:
@@ -127,22 +127,3 @@ jobs:
               issue_number: context.issue.number, body,
             })
 
-  teardown:
-    # Free the Neon branch when the PR closes or the `preview` label is removed.
-    if: >-
-      github.event.action == 'closed' ||
-      (github.event.action == 'unlabeled' && github.event.label.name == 'preview')
-    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v4
-      - name: Delete Neon branch
-        uses: neondatabase/delete-branch-action@v3
-        with:
-          project_id: ${{ vars.NEON_PROJECT_ID }}
-          branch: ${{ env.NEON_BRANCH }}
-          api_key: ${{ secrets.NEON_API_KEY }}
-      - name: Remove branch-scoped Vercel env vars
-        run: |
-          ./.github/scripts/vercel-rm-env.sh "${{ vars.VERCEL_API_PROJECT_ID }}" DATABASE_URL "$GIT_BRANCH"
-          ./.github/scripts/vercel-rm-env.sh "${{ vars.VERCEL_WEB_PROJECT_ID }}" VITE_API_URL "$GIT_BRANCH"
