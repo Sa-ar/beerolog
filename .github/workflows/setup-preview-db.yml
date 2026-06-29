@@ -68,7 +68,8 @@ jobs:
           curl -fsS "${VH[@]}" -X POST "https://api.vercel.com/v10/projects/$API_PRJ/env?teamId=$TEAM" \
             -H 'Content-Type: application/json' \
             -d "$(jq -n --arg v "$pooled" '{key:"DATABASE_URL",value:$v,type:"encrypted",target:["preview"]}')" \
-            | jq -r '"set preview DATABASE_URL: \(.key) -> [\(.target|join(","))]"'
+            >/dev/null
+          echo "set Preview DATABASE_URL on $API_PRJ -> $BRANCH"
 
           # 4. migrate the shared branch (direct connection)
           DATABASE_URL="$direct" pnpm --filter @beerolog/db db:migrate
