@@ -1,0 +1,33 @@
+name: Migrate dev DB
+# Apply Drizzle migrations to the shared preview/development Neon branch.
+# Manual button — run it after a schema change so the one shared preview DB
+# matches the deployed code. Mirror of migrate-prod.yml.
+#
+# Requires secret PREVIEW_DATABASE_URL = the shared branch's pooled connection
+# string (one-time, like PROD_DATABASE_URL). See docs/ops/dev-db.md.
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: migrate-dev
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    name: Apply Drizzle migrations to the shared dev branch
+    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: db:migrate (shared dev branch)
+        env:
+          DATABASE_URL: ${{ secrets.PREVIEW_DATABASE_URL }}
+        run: pnpm --filter @beerolog/db db:migrate
