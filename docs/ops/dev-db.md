@@ -1,50 +1,48 @@
 # Preview / development database
 
 One shared Neon branch backs **all** preview deployments — not a branch per PR.
-Simple, and it never hits the Neon branch quota. The trade-off: previews share
-schema and data, so a migration on the shared branch is visible to every
-preview at once (no per-PR isolation).
+Simple, and it never hits the Neon branch quota. Trade-off: previews share
+schema and data (no per-PR isolation), so a migration on the shared branch is
+visible to every preview at once.
 
-## Branches
+## Branches (at rest)
 
 | Neon branch | Used by |
 |---|---|
-| `production` | prod (DATABASE_URL = `PROD_DATABASE_URL`) |
-| `preview` (shared) | every Vercel preview deploy |
+| `production` | prod (`DATABASE_URL` = `PROD_DATABASE_URL`) |
+| `preview` | every Vercel preview deploy (shared) |
+| `preview/staging` | staging env |
+| `vercel-dev` | local dev |
 
-(Plus `preview/staging` for the staging env and `vercel-dev` for local dev.)
+## Workflows
 
-## One-time setup
+- **Setup shared preview DB** (`setup-preview-db.yml`, manual) — idempotent.
+  Creates the `preview` branch off production, points the API project's
+  Preview-scoped `DATABASE_URL` at it, and runs migrations. **Re-run it after a
+  schema change** to migrate the shared branch (it's the migrate button too).
+- **Neon branch sweep** (`neon-cleanup.yml`) — every 6h (+ manual) deletes every
+  branch except the default (`production`) and the keep-list
+  (`preview,preview/staging,vercel-dev`; override via repo var
+  `NEON_KEEP_BRANCHES`). Manual runs dry-run unless `apply` is ticked.
+- **Migrate prod DB** (`migrate-prod.yml`) — prod migrations, unchanged.
 
-1. **Create the shared branch** in the Neon console (branch off `production`),
-   named `preview`. Copy its **pooled** connection string.
-2. **GitHub secret:** add `PREVIEW_DATABASE_URL` = that pooled string.
-3. **Vercel** (both `beerolog` and `beerolog-api` projects): set a single
-   **Preview**-scoped `DATABASE_URL` env var = the same pooled string. Not
-   git-branch-scoped — one value for all previews.
-4. **Disable the Neon–Vercel integration's per-preview branching** so it stops
-   creating `preview/<branch>` branches: Vercel → team → Integrations → Neon
-   (the one scoped to *All Projects*, `icfg_tjOM…`) → scope it off `beerolog`
-   and `beerolog-api` (or disable preview branching). Production is unaffected
-   — prod `DATABASE_URL` is a standalone secret, not integration-owned.
+## Stopping per-deploy branch creation (one-time, dashboard)
 
-## Day-to-day
+The Neon–Vercel integration (`icfg_tjOM…`, scoped to **All Projects** in
+*Vercel*) creates a `preview/<branch>` branch per preview deploy. To stop it for
+beerolog without touching other projects:
 
-- After changing the schema / adding a migration, run the **Migrate dev DB**
-  workflow (Actions tab → manual trigger). It applies pending Drizzle
-  migrations to the shared branch.
-- Need true isolation for a risky migration? Create a throwaway Neon branch by
-  hand for that one case — no standing automation required.
+1. Vercel → team scope → **Integrations** → **Neon** → **Manage** → **Project
+   Access** → switch *All Projects* → **Specific Projects** → leave `beerolog`
+   and `beerolog-api` unchecked. (Alt: Vercel → **Storage** → the Neon DB →
+   disconnect those two projects.)
+2. Production is unaffected — prod `DATABASE_URL` is a standalone secret, not
+   integration-owned. Previews keep working against the shared `preview` branch
+   via the Preview `DATABASE_URL` set by `setup-preview-db.yml`.
 
-## Keeping the branch count down (automatic)
+Until that toggle is flipped, the 6h sweep keeps the churn under the quota.
 
-The Vercel-Neon integration keeps creating `preview/<branch>` branches per
-deploy and there's no toggle we can reach. `neon-cleanup.yml` ("Neon branch
-sweep") handles it: every 6h it deletes every branch except the default
-(`production`) and a keep-list (`preview/staging,vercel-dev`, override via repo
-variable `NEON_KEEP_BRANCHES`). So the quota never fills again.
+## Need true isolation for a risky migration?
 
-- Manual run = **dry-run** (lists what it would delete) unless you tick `apply`.
-- Scheduled runs always apply.
-- Deleting a preview branch drops that preview's DB until the PR is
-  redeployed (the integration recreates it on the next deploy).
+Spin up a throwaway Neon branch by hand for that one case — no standing
+automation required.
