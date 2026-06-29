@@ -1,73 +1,54 @@
-# Manual sweep of stale ephemeral Neon branches (the pr-<n> branches created by
-# pr-env.yml). Runs in CI so it uses the NEON_API_KEY secret — the key never
-# leaves GitHub. Dispatch from the Actions tab.
+name: Neon branch sweep
+# Keep only the default branch (production) + a small keep-list; delete every
+# other Neon branch. The Vercel-Neon integration keeps creating preview/<branch>
+# branches per deploy and there's no toggle we can reach, so sweep on a schedule
+# to stay under the Neon branch quota. It never deletes production or a keep
+# branch. Manual runs are a DRY-RUN unless you tick `apply`; scheduled runs
+# always apply.
 #
-#   mode: orphaned (default) -> delete every pr-<n> branch whose PR is NOT both
-#                               open AND labelled `preview`
-#   mode: all                -> delete every pr-<n> branch unconditionally
-name: Neon branch cleanup
-
+# Keep-list defaults to preview/staging,vercel-dev. Override with repo variable
+# NEON_KEEP_BRANCHES (comma-separated). production is always kept (it's default).
 on:
+  schedule:
+    - cron: '0 */6 * * *'  # every 6h
   workflow_dispatch:
     inputs:
-      mode:
-        description: list (inventory only) / orphaned / all
-        type: choice
-        options: [list, orphaned, all]
-        default: list
-      names:
-        description: "explicit branch names to delete (comma/space separated); overrides mode"
-        type: string
-        default: ""
+      apply:
+        description: actually delete (unticked = dry-run, list only)
+        type: boolean
+        default: false
 
-permissions:
-  pull-requests: read
+permissions: {}
+
+env:
+  NEON_API: https://console.neon.tech/api/v2/projects/${{ vars.NEON_PROJECT_ID }}
+  NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+  KEEP: ${{ vars.NEON_KEEP_BRANCHES || 'preview/staging,vercel-dev' }}
 
 jobs:
-  cleanup:
+  sweep:
     runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
-    env:
-      NEON_API: https://console.neon.tech/api/v2/projects/${{ vars.NEON_PROJECT_ID }}
-      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
-      GH_TOKEN: ${{ github.token }}
-      MODE: ${{ inputs.mode }}
-      NAMES: ${{ inputs.names }}
     steps:
-      - name: Delete stale pr-* Neon branches
+      - name: Sweep non-keep branches
         run: |
           set -euo pipefail
-          branches=$(curl -sf -H "Authorization: Bearer $NEON_API_KEY" "$NEON_API/branches")
-          echo "=== full branch inventory (name | default? | protected? | created) ==="
-          echo "$branches" | jq -r '.branches | sort_by(.created_at)[] | "\(.name)\t default=\(.default)\t protected=\(.protected)\t \(.created_at)"'
-          echo "total: $(echo "$branches" | jq '.branches | length')"
-          if [ "$MODE" = list ]; then echo "list mode — nothing deleted"; exit 0; fi
-          # Explicit-names override: delete exactly the branches named, ignoring mode.
-          if [ -n "${NAMES// /}" ]; then
-            for want in ${NAMES//,/ }; do
-              id=$(echo "$branches" | jq -r --arg n "$want" '.branches[] | select(.name==$n) | .id')
-              if [ -z "$id" ]; then echo "skip   $want (not found)"; continue; fi
-              echo "delete $want ($id)"
-              curl -sf -X DELETE -H "Authorization: Bearer $NEON_API_KEY" "$NEON_API/branches/$id" >/dev/null
-            done
-            echo "done"; exit 0
-          fi
-          echo "=== deleting pr-* (mode=$MODE) ==="
-          echo "$branches" | jq -r '.branches[] | select(.name|startswith("pr-")) | "\(.id) \(.name)"' |
-          while read -r id name; do
-            num=${name#pr-}
-            keep=false
-            if [ "$MODE" = orphaned ]; then
-              # keep only if PR <n> is open AND still carries the preview label
-              if gh pr view "$num" --repo "$GITHUB_REPOSITORY" --json state,labels \
-                   -q 'select(.state=="OPEN") | .labels[].name' 2>/dev/null | grep -qx preview; then
-                keep=true
-              fi
+          if [ "${{ github.event_name }}" = schedule ] || [ "${{ inputs.apply }}" = true ]; then
+            APPLY=1; else APPLY=0; fi
+          branches=$(curl -fsS -H "Authorization: Bearer $NEON_API_KEY" "$NEON_API/branches")
+          declare -A KEEPSET
+          IFS=',' read -ra arr <<< "$KEEP"
+          for k in "${arr[@]}"; do KEEPSET["$(echo "$k" | xargs)"]=1; done
+          echo "keep: production(default) + ${!KEEPSET[*]}   (apply=$APPLY)"
+          echo "$branches" | jq -r '.branches[] | "\(.id)\t\(.name)\t\(.default)"' |
+          while IFS=$'\t' read -r id name isdefault; do
+            if [ "$isdefault" = true ] || [ -n "${KEEPSET[$name]:-}" ]; then
+              echo "keep          $name"; continue
             fi
-            if [ "$keep" = true ]; then
-              echo "keep    $name"
+            if [ "$APPLY" = 1 ]; then
+              echo "delete        $name ($id)"
+              curl -fsS -X DELETE -H "Authorization: Bearer $NEON_API_KEY" "$NEON_API/branches/$id" >/dev/null
             else
-              echo "delete  $name ($id)"
-              curl -sf -X DELETE -H "Authorization: Bearer $NEON_API_KEY" "$NEON_API/branches/$id" >/dev/null
+              echo "would-delete  $name ($id)"
             fi
           done
           echo "done"

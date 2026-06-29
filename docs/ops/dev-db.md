@@ -36,8 +36,15 @@ preview at once (no per-PR isolation).
 - Need true isolation for a risky migration? Create a throwaway Neon branch by
   hand for that one case — no standing automation required.
 
-## Sweeping stale branches
+## Keeping the branch count down (automatic)
 
-`neon-cleanup.yml` (manual) lists/deletes leftover `pr-*` / `preview/*`
-branches — use it once to clear the old per-PR branches after the integration
-branching is disabled.
+The Vercel-Neon integration keeps creating `preview/<branch>` branches per
+deploy and there's no toggle we can reach. `neon-cleanup.yml` ("Neon branch
+sweep") handles it: every 6h it deletes every branch except the default
+(`production`) and a keep-list (`preview/staging,vercel-dev`, override via repo
+variable `NEON_KEEP_BRANCHES`). So the quota never fills again.
+
+- Manual run = **dry-run** (lists what it would delete) unless you tick `apply`.
+- Scheduled runs always apply.
+- Deleting a preview branch drops that preview's DB until the PR is
+  redeployed (the integration recreates it on the next deploy).
