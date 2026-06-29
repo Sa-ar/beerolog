@@ -1,0 +1,42 @@
+# One-time cutover: stop Vercel building (and Neon-branching) git-triggered
+# previews, so the gated pr-env.yml workflow is the only thing creating Neon
+# branches. Sets each project's "Ignored Build Step" to skip non-production
+# builds. `rollback` clears it. See docs/ops/pr-env.md.
+name: PR-env cutover (Vercel Ignored Build Step)
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: apply (skip preview builds) / rollback (restore)
+        type: choice
+        options: [apply, rollback]
+        default: apply
+
+jobs:
+  cutover:
+    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_TEAM_ID: ${{ vars.VERCEL_TEAM_ID }}
+      VERCEL_API_PROJECT_ID: ${{ vars.VERCEL_API_PROJECT_ID }}
+      VERCEL_WEB_PROJECT_ID: ${{ vars.VERCEL_WEB_PROJECT_ID }}
+      ACTION: ${{ inputs.action }}
+    steps:
+      - name: Patch Ignored Build Step on both projects
+        run: |
+          set -euo pipefail
+          if [ "$ACTION" = apply ]; then
+            CMD='bash -c '\''[ "$VERCEL_ENV" = production ] && exit 1 || exit 0'\'''
+            BODY=$(jq -n --arg c "$CMD" '{commandForIgnoringBuildStep:$c}')
+          else
+            BODY=$(jq -n '{commandForIgnoringBuildStep:null}')
+          fi
+          for P in "$VERCEL_API_PROJECT_ID" "$VERCEL_WEB_PROJECT_ID"; do
+            echo "patching project $P ($ACTION)"
+            curl -fsS -X PATCH \
+              "https://api.vercel.com/v9/projects/$P?teamId=$VERCEL_TEAM_ID" \
+              -H "Authorization: Bearer $VERCEL_TOKEN" -H 'Content-Type: application/json' \
+              -d "$BODY" | jq '{name, commandForIgnoringBuildStep}'
+          done
+          echo "done"
