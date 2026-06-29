@@ -1,0 +1,39 @@
+# Read-only diagnostic: identify which integration is installed and whether
+# production DATABASE_URL is integration-owned (decides if disconnecting the
+# Neon-Vercel preview integration is safe). Dispatch from the Actions tab.
+name: Vercel/Neon inspect (read-only)
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  inspect:
+    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_TEAM_ID: ${{ vars.VERCEL_TEAM_ID }}
+      VERCEL_API_PROJECT_ID: ${{ vars.VERCEL_API_PROJECT_ID }}
+      VERCEL_WEB_PROJECT_ID: ${{ vars.VERCEL_WEB_PROJECT_ID }}
+    steps:
+      - name: Inspect integrations + env ownership
+        run: |
+          set -euo pipefail
+          AUTH=(-H "Authorization: Bearer $VERCEL_TOKEN")
+          T="teamId=$VERCEL_TEAM_ID"
+
+          echo "=== installed integration configurations ==="
+          curl -fsS "${AUTH[@]}" "https://api.vercel.com/v1/integrations/configurations?view=account&$T" \
+            | jq -r '.[]? | "\(.slug)\t id=\(.id)\t projects=\(.projects // "all")"' || echo "(none / endpoint unavailable)"
+
+          echo "=== connected storage stores ==="
+          curl -fsS "${AUTH[@]}" "https://api.vercel.com/v1/storage/stores?$T" \
+            | jq -r '.stores[]? | "\(.name)\t type=\(.type)\t status=\(.status // "-")"' || echo "(none / endpoint unavailable)"
+
+          for P in "$VERCEL_API_PROJECT_ID" "$VERCEL_WEB_PROJECT_ID"; do
+            echo "=== project $P: DATABASE_URL / VITE_API_URL ownership ==="
+            # configurationId set => the var is OWNED by an integration (unsafe to disconnect for prod)
+            curl -fsS "${AUTH[@]}" "https://api.vercel.com/v10/projects/$P/env?$T" \
+              | jq -r '.envs[]? | select(.key=="DATABASE_URL" or .key=="VITE_API_URL")
+                       | "\(.key)\t target=\(.target|join(","))\t type=\(.type)\t integrationOwned=\(.configurationId != null)\t gitBranch=\(.gitBranch // "-")"'
+          done
+          echo "done"
