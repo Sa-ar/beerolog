@@ -11,10 +11,10 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: Which pr-* branches to delete
+        description: list (inventory only) / orphaned / all
         type: choice
-        options: [orphaned, all]
-        default: orphaned
+        options: [list, orphaned, all]
+        default: list
 
 permissions:
   pull-requests: read
@@ -32,6 +32,11 @@ jobs:
         run: |
           set -euo pipefail
           branches=$(curl -sf -H "Authorization: Bearer $NEON_API_KEY" "$NEON_API/branches")
+          echo "=== full branch inventory (name | default? | protected? | created) ==="
+          echo "$branches" | jq -r '.branches | sort_by(.created_at)[] | "\(.name)\t default=\(.default)\t protected=\(.protected)\t \(.created_at)"'
+          echo "total: $(echo "$branches" | jq '.branches | length')"
+          if [ "$MODE" = list ]; then echo "list mode — nothing deleted"; exit 0; fi
+          echo "=== deleting pr-* (mode=$MODE) ==="
           echo "$branches" | jq -r '.branches[] | select(.name|startswith("pr-")) | "\(.id) \(.name)"' |
           while read -r id name; do
             num=${name#pr-}
