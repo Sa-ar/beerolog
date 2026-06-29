@@ -1,0 +1,46 @@
+# Read-only deep probe: figure out exactly what creates the preview/* Neon
+# branches so we can stop it at the source without breaking other projects.
+name: Neon/Vercel probe (read-only)
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  probe:
+    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
+    env:
+      NEON_API: https://console.neon.tech/api/v2/projects/${{ vars.NEON_PROJECT_ID }}
+      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+      VT: ${{ secrets.VERCEL_TOKEN }}
+      TEAM: ${{ vars.VERCEL_TEAM_ID }}
+      API_PRJ: ${{ vars.VERCEL_API_PROJECT_ID }}
+      WEB_PRJ: ${{ vars.VERCEL_WEB_PROJECT_ID }}
+    steps:
+      - name: Probe
+        run: |
+          set -uo pipefail
+          A=(-H "Authorization: Bearer $VT")
+
+          echo "############ NEON branches (newest first) ############"
+          curl -fsS -H "Authorization: Bearer $NEON_API_KEY" "$NEON_API/branches" \
+            | jq -r '.branches | sort_by(.created_at) | reverse[] | "\(.created_at)  \(.name)  default=\(.default)"'
+
+          echo; echo "############ Vercel integration configurations ############"
+          curl -fsS "${A[@]}" "https://api.vercel.com/v1/integrations/configurations?view=account&teamId=$TEAM" \
+            | jq -r '.[]? | "slug=\(.slug) id=\(.id) projectSelection=\(.projectSelection // "?") projects=\(.projects // "all")"'
+
+          echo; echo "############ Vercel storage stores (Neon = type integration) ############"
+          curl -fsS "${A[@]}" "https://api.vercel.com/v1/storage/stores?teamId=$TEAM" \
+            | jq -r '.stores[]? | "name=\(.name) type=\(.type) store=\(.id // .store_id // "?") cfg=\(.integrationConfigurationId // "-")"'
+
+          for P in "$API_PRJ" "$WEB_PRJ"; do
+            echo; echo "############ project $P ############"
+            proj=$(curl -fsS "${A[@]}" "https://api.vercel.com/v9/projects/$P?teamId=$TEAM")
+            echo "$proj" | jq -r '"name=\(.name)"'
+            echo "-- git / preview settings --"
+            echo "$proj" | jq '{autoExposeSystemEnvs, gitForkProtection, gitLFS, link: (.link|{type, repo, productionBranch:.productionBranch, deployHooks:(.deployHooks|length)}), resourceConfig, paused: .paused}'
+            echo "-- connected stores / integrations on this project --"
+            curl -fsS "${A[@]}" "https://api.vercel.com/v1/storage/stores?teamId=$TEAM&projectId=$P" \
+              | jq -r '.stores[]? | "name=\(.name) type=\(.type) cfg=\(.integrationConfigurationId // "-")"' || echo "(none)"
+          done
+          echo; echo "done"
