@@ -1,0 +1,53 @@
+# Manual sweep of stale ephemeral Neon branches (the pr-<n> branches created by
+# pr-env.yml). Runs in CI so it uses the NEON_API_KEY secret — the key never
+# leaves GitHub. Dispatch from the Actions tab.
+#
+#   mode: orphaned (default) -> delete every pr-<n> branch whose PR is NOT both
+#                               open AND labelled `preview`
+#   mode: all                -> delete every pr-<n> branch unconditionally
+name: Neon branch cleanup
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Which pr-* branches to delete
+        type: choice
+        options: [orphaned, all]
+        default: orphaned
+
+permissions:
+  pull-requests: read
+
+jobs:
+  cleanup:
+    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
+    env:
+      NEON_API: https://console.neon.tech/api/v2/projects/${{ vars.NEON_PROJECT_ID }}
+      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+      GH_TOKEN: ${{ github.token }}
+      MODE: ${{ inputs.mode }}
+    steps:
+      - name: Delete stale pr-* Neon branches
+        run: |
+          set -euo pipefail
+          branches=$(curl -sf -H "Authorization: Bearer $NEON_API_KEY" "$NEON_API/branches")
+          echo "$branches" | jq -r '.branches[] | select(.name|startswith("pr-")) | "\(.id) \(.name)"' |
+          while read -r id name; do
+            num=${name#pr-}
+            keep=false
+            if [ "$MODE" = orphaned ]; then
+              # keep only if PR <n> is open AND still carries the preview label
+              if gh pr view "$num" --repo "$GITHUB_REPOSITORY" --json state,labels \
+                   -q 'select(.state=="OPEN") | .labels[].name' 2>/dev/null | grep -qx preview; then
+                keep=true
+              fi
+            fi
+            if [ "$keep" = true ]; then
+              echo "keep    $name"
+            else
+              echo "delete  $name ($id)"
+              curl -sf -X DELETE -H "Authorization: Bearer $NEON_API_KEY" "$NEON_API/branches/$id" >/dev/null
+            fi
+          done
+          echo "done"
