@@ -69,13 +69,13 @@ Tests still use in-memory overrides via FastAPI `dependency_overrides`, but the 
 | Method | Path | Description |
 |---|---|---|
 | `GET` | `/health` | Health check |
-| `POST` | `/recommendations` | Get beer recommendations for a flavor vector |
-| `GET` | `/users/me/profile` | Get flavor vector profile |
-| `PUT` | `/users/me/profile` | Save flavor vector profile |
-| `GET` | `/users/me/history` | Beer history |
-| `POST` | `/users/me/history` | Add to history |
-| `GET` | `/users/me/persona` | Get persona classification |
-| `POST` | `/users/me/rate` | Rate a beer (loved / fine / disliked) |
+| `POST` | `/recommendations` | Get beer recommendations for the signed-in user |
+| `POST` | `/guest-recommendations` | Anonymous preview recommendations |
+| `POST` | `/onboarding` | Submit the onboarding quiz; seeds the baseline taste |
+| `GET` | `/me/baseline-taste` | Get the persisted baseline taste + persona |
+| `POST` | `/ratings` | Rate a beer (loved / fine / disliked) |
+| `GET` | `/me/ratings` | List my ratings (paginated) |
+| `GET` | `/me/export` | Export my account data |
 
 ## Runtime operations
 

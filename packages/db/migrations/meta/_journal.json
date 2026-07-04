@@ -43,6 +43,13 @@
       "when": 1782417605761,
       "tag": "0005_awesome_ser_duncan",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1782670684238,
+      "tag": "0006_rating_3state",
+      "breakpoints": true
     }
   ]
 }

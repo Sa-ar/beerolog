@@ -3,6 +3,8 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field
 
+from app.ratings_vocab import RatingValue
+
 # ---------------------------------------------------------------------------
 # Health
 # ---------------------------------------------------------------------------
@@ -328,7 +330,8 @@ class GuestRecommendationsResponse(BaseModel):
 # ---------------------------------------------------------------------------
 
 
-RatingValue = Annotated[int, Field(ge=1, le=5)]
+# 3-state taste feedback vocabulary (RatingValue) is imported from
+# app.ratings_vocab at the top of this module.
 
 
 class CreateRatingRequest(BaseModel):
@@ -342,7 +345,7 @@ class RatingRecord(BaseModel):
     beer_id: str
     beer_name: str
     beer_brewery: str
-    rating: int
+    rating: RatingValue
     note: str | None
     created_at: str  # ISO-8601
 

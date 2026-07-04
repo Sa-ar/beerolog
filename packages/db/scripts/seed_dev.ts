@@ -129,11 +129,11 @@ async function main() {
   await db
     .insert(schema.beerRatings)
     .values([
-      { userId: DEMO_USER_ID, beerId: 'goldstar', rating: 4, note: 'Reliable.' },
-      { userId: DEMO_USER_ID, beerId: 'alexander-black', rating: 5, note: 'Loved the roast.' },
-      { userId: DEMO_USER_ID, beerId: 'lagunitas-ipa', rating: 5, note: null },
-      { userId: DEMO_USER_ID, beerId: 'guinness-draught', rating: 3, note: null },
-      { userId: DEMO_USER_ID, beerId: 'maccabee', rating: 2, note: 'Too plain.' },
+      { userId: DEMO_USER_ID, beerId: 'goldstar', rating: 'fine', note: 'Reliable.' },
+      { userId: DEMO_USER_ID, beerId: 'alexander-black', rating: 'loved', note: 'Loved the roast.' },
+      { userId: DEMO_USER_ID, beerId: 'lagunitas-ipa', rating: 'loved', note: null },
+      { userId: DEMO_USER_ID, beerId: 'guinness-draught', rating: 'fine', note: null },
+      { userId: DEMO_USER_ID, beerId: 'maccabee', rating: 'disliked', note: 'Too plain.' },
     ])
     .onConflictDoNothing()
 

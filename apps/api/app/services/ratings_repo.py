@@ -15,6 +15,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Protocol
 
+from app.ratings_vocab import RatingValue
+
 
 @dataclass(frozen=True)
 class RatingRow:
@@ -23,7 +25,7 @@ class RatingRow:
     beer_id: str
     beer_name: str
     beer_brewery: str
-    rating: int
+    rating: RatingValue
     note: str | None
     created_at: str
 
@@ -34,7 +36,7 @@ class RatingsRepo(Protocol):
         *,
         user_id: str,
         beer_id: str,
-        rating: int,
+        rating: RatingValue,
         note: str | None,
     ) -> RatingRow: ...
 
@@ -60,7 +62,7 @@ class AsyncpgRatingsRepo:
         *,
         user_id: str,
         beer_id: str,
-        rating: int,
+        rating: RatingValue,
         note: str | None,
     ) -> RatingRow:
         sql = """

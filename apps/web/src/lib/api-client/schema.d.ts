@@ -358,8 +358,11 @@ export interface components {
             beer_id: string;
             /** Note */
             note?: string | null;
-            /** Rating */
-            rating: number;
+            /**
+             * Rating
+             * @enum {string}
+             */
+            rating: "loved" | "fine" | "disliked";
         };
         /**
          * DominantComponent
@@ -518,8 +521,11 @@ export interface components {
             id: string;
             /** Note */
             note: string | null;
-            /** Rating */
-            rating: number;
+            /**
+             * Rating
+             * @enum {string}
+             */
+            rating: "loved" | "fine" | "disliked";
         };
         /** RatingsHistoryResponse */
         RatingsHistoryResponse: {

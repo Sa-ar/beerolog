@@ -26,7 +26,7 @@ class _MemoryRepo:
         return beer_id in self._beers
 
     async def upsert_rating(
-        self, *, user_id: str, beer_id: str, rating: int, note: str | None
+        self, *, user_id: str, beer_id: str, rating: str, note: str | None
     ) -> RatingRow:
         existing = self._rows.get((user_id, beer_id))
         row = RatingRow(
@@ -71,26 +71,28 @@ def client(repo: _MemoryRepo) -> TestClient:
 def test_create_rating_returns_201_and_record(client: TestClient) -> None:
     r = client.post(
         "/ratings",
-        json={"beer_id": "goldstar", "rating": 4, "note": "crisp and easy"},
+        json={"beer_id": "goldstar", "rating": "loved", "note": "crisp and easy"},
     )
     assert r.status_code == 201, r.text
     body = r.json()
     assert body["beer_id"] == "goldstar"
-    assert body["rating"] == 4
+    assert body["rating"] == "loved"
     assert body["note"] == "crisp and easy"
 
 
 def test_create_rating_rejects_unknown_beer(client: TestClient) -> None:
     r = client.post(
         "/ratings",
-        json={"beer_id": "made-up-beer", "rating": 3},
+        json={"beer_id": "made-up-beer", "rating": "fine"},
     )
     assert r.status_code == 404
     assert "Beer not found" in r.text
 
 
-def test_create_rating_rejects_out_of_range_values(client: TestClient) -> None:
-    for bad_rating in (0, 6, -1, 99):
+def test_create_rating_rejects_invalid_values(client: TestClient) -> None:
+    # Only the 3-state enum is accepted; wrong case, empty strings, numbers,
+    # and out-of-vocabulary words are all 422.
+    for bad_rating in (0, "", "amazing", "LOVED", "meh"):
         r = client.post(
             "/ratings",
             json={"beer_id": "goldstar", "rating": bad_rating},
@@ -99,21 +101,23 @@ def test_create_rating_rejects_out_of_range_values(client: TestClient) -> None:
 
 
 def test_create_rating_upserts_not_duplicates(client: TestClient, repo: _MemoryRepo) -> None:
-    r1 = client.post("/ratings", json={"beer_id": "goldstar", "rating": 4})
-    r2 = client.post("/ratings", json={"beer_id": "goldstar", "rating": 5, "note": "better today"})
+    r1 = client.post("/ratings", json={"beer_id": "goldstar", "rating": "loved"})
+    r2 = client.post(
+        "/ratings", json={"beer_id": "goldstar", "rating": "disliked", "note": "worse today"}
+    )
     assert r1.status_code == 201
     assert r2.status_code == 201
     # Same id → update
     assert r1.json()["id"] == r2.json()["id"]
-    assert r2.json()["rating"] == 5
-    assert r2.json()["note"] == "better today"
+    assert r2.json()["rating"] == "disliked"
+    assert r2.json()["note"] == "worse today"
     # Repo should contain exactly one row for this (user, beer)
     assert len(repo._rows) == 1
 
 
 def test_list_my_ratings_paginates(client: TestClient) -> None:
     for beer_id in ("goldstar", "alexander-blazer", "malka-stout"):
-        client.post("/ratings", json={"beer_id": beer_id, "rating": 3})
+        client.post("/ratings", json={"beer_id": beer_id, "rating": "fine"})
 
     r = client.get("/me/ratings?page=1&page_size=2")
     assert r.status_code == 200
@@ -130,7 +134,7 @@ def test_list_my_ratings_paginates(client: TestClient) -> None:
 def test_ratings_require_auth() -> None:
     """Without the auth override, hitting the route returns 401."""
     raw_client = TestClient(app)
-    r = raw_client.post("/ratings", json={"beer_id": "goldstar", "rating": 4})
+    r = raw_client.post("/ratings", json={"beer_id": "goldstar", "rating": "loved"})
     assert r.status_code == 401
 
 
@@ -146,6 +150,6 @@ def test_ratings_route_does_not_touch_user_baseline_taste(
     # Sanity: the in-memory repo exposes only _rows; if a future change added
     # a baseline-update side effect via this repo, the field set would expand.
     fields_before = set(vars(repo).keys())
-    client.post("/ratings", json={"beer_id": "goldstar", "rating": 5})
+    client.post("/ratings", json={"beer_id": "goldstar", "rating": "loved"})
     fields_after = set(vars(repo).keys())
     assert fields_before == fields_after

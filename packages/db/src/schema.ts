@@ -3,7 +3,8 @@
  *
  * - `beers`: one row per recipe; carries the 1536-D BeerEmbedding.
  * - `user_baseline_taste`: persisted, slowly-evolving taste profile.
- * - `beer_ratings`: integer 1–5 score (replaces the prior loved/fine/disliked enum).
+ * - `beer_ratings`: 3-state taste feedback (loved/fine/disliked). See
+ *   docs/prds/beer-rating-feedback.md — reverses the 0001 integer pivot.
  *
  * pgvector extension must be enabled — see migrations/0001_pivot_taste_profile_matcher.sql.
  */
@@ -51,6 +52,8 @@ export const beerSweetnessEnum = pgEnum('beer_sweetness', ['dry', 'balanced', 's
 export const notesLangEnum = pgEnum('notes_lang', ['he', 'en'])
 
 export const notesSourceEnum = pgEnum('notes_source', ['brewery', 'aggregator', 'synthetic'])
+
+export const ratingEnum = pgEnum('rating', ['loved', 'fine', 'disliked'])
 
 // ---------------------------------------------------------------------------
 // Users (Clerk-backed; matches the foundation auth wiring)
@@ -160,7 +163,7 @@ export const beerRatings = pgTable(
     beerId: text('beer_id')
       .notNull()
       .references(() => beers.id, { onDelete: 'cascade' }),
-    rating: integer('rating').notNull(),
+    rating: ratingEnum('rating').notNull(),
     note: text('note'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },

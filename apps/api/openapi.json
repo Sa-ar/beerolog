@@ -359,10 +359,13 @@
             "title": "Note"
           },
           "rating": {
-            "maximum": 5.0,
-            "minimum": 1.0,
+            "enum": [
+              "loved",
+              "fine",
+              "disliked"
+            ],
             "title": "Rating",
-            "type": "integer"
+            "type": "string"
           }
         },
         "required": [
@@ -771,8 +774,13 @@
             "title": "Note"
           },
           "rating": {
+            "enum": [
+              "loved",
+              "fine",
+              "disliked"
+            ],
             "title": "Rating",
-            "type": "integer"
+            "type": "string"
           }
         },
         "required": [
