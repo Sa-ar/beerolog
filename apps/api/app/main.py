@@ -8,6 +8,7 @@ from fastapi.responses import JSONResponse
 from app.api_contracts import TypedError
 from app.config import settings
 from app.db import close_pool, get_pool
+from app.dependencies import get_taste_feedback_service
 from app.errors import BeerologError
 from app.observability import configure_logging, instrument_requests, logger
 from app.routes import (
@@ -22,8 +23,10 @@ from app.routes import (
 )
 from app.services.account_repo import AsyncpgAccountRepo
 from app.services.baseline_taste_repo import AsyncpgBaselineTasteRepo
+from app.services.catalog_repo import AsyncpgBeerEmbeddingRepo
 from app.services.icon_repo import AsyncpgIconRepo
 from app.services.ratings_repo import AsyncpgRatingsRepo
+from app.services.taste_feedback_service import TasteFeedbackService
 
 configure_logging(settings.log_level)
 
@@ -51,6 +54,12 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
         app.dependency_overrides[ratings.get_ratings_repo] = lambda: AsyncpgRatingsRepo(pool)
         app.dependency_overrides[onboarding.get_icon_repo] = lambda: AsyncpgIconRepo(pool)
         app.dependency_overrides[users.get_account_repo] = lambda: AsyncpgAccountRepo(pool)
+        app.dependency_overrides[get_taste_feedback_service] = lambda: TasteFeedbackService(
+            baseline_repo=AsyncpgBaselineTasteRepo(pool),
+            beer_embeddings=AsyncpgBeerEmbeddingRepo(pool),
+            ratings_repo=AsyncpgRatingsRepo(pool),
+            settings=settings,
+        )
 
     try:
         yield

@@ -12,9 +12,17 @@ import pytest  # type: ignore[import-not-found]
 from fastapi.testclient import TestClient  # type: ignore[import-not-found]
 
 from app.auth import get_current_user
+from app.dependencies import get_taste_feedback_service
 from app.main import app
 from app.routes.ratings import get_ratings_repo
 from app.services.ratings_repo import RatingRow
+
+
+class _NoopFeedback:
+    """Ratings-route tests don't exercise the nudge; see test_taste_feedback_route."""
+
+    async def apply(self, *, user_id: str, beer_id: str, rating: str) -> None:
+        return None
 
 
 class _MemoryRepo:
@@ -61,11 +69,13 @@ def repo() -> _MemoryRepo:
 def client(repo: _MemoryRepo) -> TestClient:
     app.dependency_overrides[get_ratings_repo] = lambda: repo
     app.dependency_overrides[get_current_user] = lambda: FAKE_USER
+    app.dependency_overrides[get_taste_feedback_service] = lambda: _NoopFeedback()
     try:
         yield TestClient(app)
     finally:
         app.dependency_overrides.pop(get_ratings_repo, None)
         app.dependency_overrides.pop(get_current_user, None)
+        app.dependency_overrides.pop(get_taste_feedback_service, None)
 
 
 def test_create_rating_returns_201_and_record(client: TestClient) -> None:

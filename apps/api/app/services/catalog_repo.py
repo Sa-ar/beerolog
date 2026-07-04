@@ -6,6 +6,8 @@ them against the user's baseline + session embeddings.
 
 from __future__ import annotations
 
+from typing import Protocol
+
 from app.services.match_engine import BeerCandidate
 
 
@@ -15,6 +17,22 @@ def _parse_pgvector(value: object) -> list[float]:
     if isinstance(value, str):
         return [float(v) for v in value.strip("[]").split(",") if v]
     raise TypeError(f"Unsupported pgvector type: {type(value).__name__}")
+
+
+class BeerEmbeddingRepo(Protocol):
+    async def get_embedding(self, beer_id: str) -> list[float] | None: ...
+
+
+class AsyncpgBeerEmbeddingRepo:
+    """Loads a single beer's embedding by id, for the rating feedback nudge."""
+
+    def __init__(self, pool) -> None:
+        self._pool = pool
+
+    async def get_embedding(self, beer_id: str) -> list[float] | None:
+        async with self._pool.acquire() as conn:
+            row = await conn.fetchrow("SELECT embedding FROM beers WHERE id = $1", beer_id)
+        return _parse_pgvector(row["embedding"]) if row is not None else None
 
 
 async def fetch_catalog(pool) -> list[BeerCandidate]:

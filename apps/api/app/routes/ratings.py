@@ -14,7 +14,9 @@ from app.api_contracts import (
     RatingsHistoryResponse,
 )
 from app.auth import get_current_user
+from app.dependencies import get_taste_feedback_service
 from app.services.ratings_repo import RatingsRepo
+from app.services.taste_feedback_service import TasteFeedbackService
 
 router = APIRouter(tags=["ratings"])
 
@@ -37,6 +39,7 @@ async def create_rating(
     body: CreateRatingRequest,
     user: dict = Depends(get_current_user),
     repo: RatingsRepo = Depends(get_ratings_repo),
+    feedback: TasteFeedbackService = Depends(get_taste_feedback_service),
 ) -> RatingRecord:
     if not await repo.beer_exists(body.beer_id):
         raise HTTPException(status_code=404, detail=f"Beer not found: {body.beer_id}")
@@ -46,6 +49,8 @@ async def create_rating(
         rating=body.rating,
         note=body.note,
     )
+    # Immediate path (card rating): nudge the baseline now. `fine` is a no-op.
+    await feedback.apply(user_id=user["sub"], beer_id=body.beer_id, rating=body.rating)
     return RatingRecord(
         id=row.id,
         beer_id=row.beer_id,

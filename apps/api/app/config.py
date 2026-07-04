@@ -33,6 +33,17 @@ class Settings(BaseSettings):
     match_cos_floor: float = 0.20
     match_cos_ceiling: float = 0.50
     baseline_staleness_days: int = 7
+    # Rating feedback loop (PRD: beer-rating-feedback.md). All first-guess; tune
+    # against the persona harness. lr = learning rate for the embedding nudge.
+    nudge_base_lr: float = 0.08
+    nudge_cold_start_factor: float = 2.0  # boost for the first <5 ratings
+    nudge_lr_after_20: float = 0.04
+    nudge_lr_after_50: float = 0.02
+    nudge_per_rating_cap: float = 0.04  # max cosine-distance move per rating
+    # NoteAnalyzer (slice 6): LLM model + per-rating dial-delta cap.
+    note_model: str = "gpt-4o-mini"
+    note_dial_delta_cap: float = 0.05
+    note_min_chars: int = 8
     # Guest preview (public, OpenAI-free): how many results are unlocked before
     # sign-up, and how many to score/return from the dial-space matcher.
     guest_unlocked_count: int = 3

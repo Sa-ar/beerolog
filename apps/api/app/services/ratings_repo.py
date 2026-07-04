@@ -50,6 +50,8 @@ class RatingsRepo(Protocol):
         page_size: int,
     ) -> list[RatingRow]: ...
 
+    async def count_for_user(self, user_id: str) -> int: ...
+
 
 class AsyncpgRatingsRepo:
     """Default DB-backed implementation. Exercised only by integration tests."""
@@ -129,3 +131,10 @@ class AsyncpgRatingsRepo:
                 )
                 for r in rows
             ]
+
+    async def count_for_user(self, user_id: str) -> int:
+        async with self._pool.acquire() as conn:
+            row = await conn.fetchrow(
+                "SELECT count(*) AS n FROM beer_ratings WHERE user_id = $1", user_id
+            )
+        return int(row["n"]) if row is not None else 0
