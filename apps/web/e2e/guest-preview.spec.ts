@@ -21,10 +21,12 @@ async function walkQuiz(page: Page) {
   await pick(page, 'milk_based')
   await pick(page, 'dark_70')
 
-  // Back removes the last answer and re-asks it.
+  // Back revisits the previous answer (prefilled, not removed); confirming a
+  // revisit is explicit, so re-pick then Next to advance.
   await page.getByTestId('quiz-back').click()
   await expect(page.locator('label:has([data-value="dark_70"])')).toBeVisible()
   await pick(page, 'dark_70')
+  await page.getByTestId('quiz-next').click()
 
   await pick(page, 'strong') // fizzy or flat → bubbles
   await pick(page, 'rich') // sweet tooth → sweetness/body
