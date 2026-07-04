@@ -9,6 +9,7 @@ import math
 
 from app.services.match_engine import cosine
 from app.services.taste_feedback import (
+    apply_batch,
     apply_rating,
     effective_lr,
     nudge,
@@ -88,3 +89,41 @@ def test_effective_lr_cold_start_and_decay() -> None:
 
 def test_nudge_handles_zero_vector_safely() -> None:
     assert nudge([0.0, 0.0], [1.0, 0.0], 1, 0.1) is not None
+
+
+def test_apply_batch_moves_toward_loved_beers() -> None:
+    old = [1.0, 0.0, 0.0, 0.0]
+    beer = [0.0, 1.0, 0.0, 0.0]
+    new = apply_batch(old, [(beer, 1), (beer, 1)], lr=0.1, per_rating_cap=0.5)
+    assert cosine(new, beer) > cosine(old, beer)
+    assert math.isclose(_unit(new), 1.0, abs_tol=1e-9)
+
+
+def test_apply_batch_balances_loved_and_disliked() -> None:
+    old = [1.0, 0.0, 0.0, 0.0]
+    loved = [0.0, 1.0, 0.0, 0.0]
+    disliked = [0.0, 0.0, 1.0, 0.0]
+    new = apply_batch(old, [(loved, 1), (disliked, -1)], lr=0.1, per_rating_cap=0.5)
+    assert cosine(new, loved) > cosine(old, loved)
+    assert cosine(new, disliked) < cosine(old, disliked)
+
+
+def test_apply_batch_empty_or_all_fine_is_noop() -> None:
+    old = [0.3, 0.7, 0.1, 0.0]
+    assert apply_batch(old, [], lr=0.1, per_rating_cap=0.5) == old
+    assert apply_batch(old, [(old, 0)], lr=0.1, per_rating_cap=0.5) == old
+
+
+def test_apply_batch_net_zero_cancels() -> None:
+    old = [1.0, 0.0, 0.0, 0.0]
+    beer = [0.0, 1.0, 0.0, 0.0]
+    new = apply_batch(old, [(beer, 1), (beer, -1)], lr=0.1, per_rating_cap=0.5)
+    assert cosine(new, old) > 1.0 - 1e-9
+
+
+def test_apply_batch_bounded_by_cap() -> None:
+    old = [1.0, 0.0, 0.0, 0.0]
+    beer = [0.0, 1.0, 0.0, 0.0]
+    cap = 0.04
+    new = apply_batch(old, [(beer, 1)] * 10, lr=0.9, per_rating_cap=cap)
+    assert cosine(old, new) >= 1.0 - cap - 1e-6

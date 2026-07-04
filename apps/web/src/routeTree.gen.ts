@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TryRouteImport } from './routes/try'
 import { Route as RecommendationsRouteImport } from './routes/recommendations'
+import { Route as RateRouteImport } from './routes/rate'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
@@ -30,6 +31,11 @@ const TryRoute = TryRouteImport.update({
 const RecommendationsRoute = RecommendationsRouteImport.update({
   id: '/recommendations',
   path: '/recommendations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RateRoute = RateRouteImport.update({
+  id: '/rate',
+  path: '/rate',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OnboardingRoute = OnboardingRouteImport.update({
@@ -87,6 +93,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/account': typeof AccountRouteWithChildren
   '/onboarding': typeof OnboardingRoute
+  '/rate': typeof RateRoute
   '/recommendations': typeof RecommendationsRoute
   '/try': typeof TryRoute
   '/account/profile': typeof AccountProfileRoute
@@ -100,6 +107,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/onboarding': typeof OnboardingRoute
+  '/rate': typeof RateRoute
   '/recommendations': typeof RecommendationsRoute
   '/try': typeof TryRoute
   '/account/profile': typeof AccountProfileRoute
@@ -115,6 +123,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/account': typeof AccountRouteWithChildren
   '/onboarding': typeof OnboardingRoute
+  '/rate': typeof RateRoute
   '/recommendations': typeof RecommendationsRoute
   '/try': typeof TryRoute
   '/account/profile': typeof AccountProfileRoute
@@ -131,6 +140,7 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/onboarding'
+    | '/rate'
     | '/recommendations'
     | '/try'
     | '/account/profile'
@@ -144,6 +154,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/onboarding'
+    | '/rate'
     | '/recommendations'
     | '/try'
     | '/account/profile'
@@ -158,6 +169,7 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/onboarding'
+    | '/rate'
     | '/recommendations'
     | '/try'
     | '/account/profile'
@@ -173,6 +185,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AccountRoute: typeof AccountRouteWithChildren
   OnboardingRoute: typeof OnboardingRoute
+  RateRoute: typeof RateRoute
   RecommendationsRoute: typeof RecommendationsRoute
   TryRoute: typeof TryRoute
   LegalSlugRoute: typeof LegalSlugRoute
@@ -194,6 +207,13 @@ declare module '@tanstack/react-router' {
       path: '/recommendations'
       fullPath: '/recommendations'
       preLoaderRoute: typeof RecommendationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rate': {
+      id: '/rate'
+      path: '/rate'
+      fullPath: '/rate'
+      preLoaderRoute: typeof RateRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/onboarding': {
@@ -290,6 +310,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountRoute: AccountRouteWithChildren,
   OnboardingRoute: OnboardingRoute,
+  RateRoute: RateRoute,
   RecommendationsRoute: RecommendationsRoute,
   TryRoute: TryRoute,
   LegalSlugRoute: LegalSlugRoute,

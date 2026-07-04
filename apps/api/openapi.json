@@ -832,6 +832,69 @@
         "title": "RateDeckResponse",
         "type": "object"
       },
+      "RateSessionRequest": {
+        "properties": {
+          "swipes": {
+            "items": {
+              "$ref": "#/components/schemas/RateSwipe"
+            },
+            "title": "Swipes",
+            "type": "array"
+          }
+        },
+        "required": [
+          "swipes"
+        ],
+        "title": "RateSessionRequest",
+        "type": "object"
+      },
+      "RateSessionResponse": {
+        "properties": {
+          "recorded": {
+            "title": "Recorded",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "recorded"
+        ],
+        "title": "RateSessionResponse",
+        "type": "object"
+      },
+      "RateSwipe": {
+        "properties": {
+          "beer_id": {
+            "title": "Beer Id",
+            "type": "string"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "rating": {
+            "enum": [
+              "loved",
+              "fine",
+              "disliked"
+            ],
+            "title": "Rating",
+            "type": "string"
+          }
+        },
+        "required": [
+          "beer_id",
+          "rating"
+        ],
+        "title": "RateSwipe",
+        "type": "object"
+      },
       "RatingRecord": {
         "properties": {
           "beer_brewery": {
@@ -1696,6 +1759,52 @@
           }
         ],
         "summary": "Get Rate Deck",
+        "tags": [
+          "rate"
+        ]
+      }
+    },
+    "/rate/session": {
+      "post": {
+        "operationId": "postRateSession",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RateSessionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateSessionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Post Rate Session",
         "tags": [
           "rate"
         ]

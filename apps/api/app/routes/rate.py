@@ -8,16 +8,22 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Depends
 
-from app.api_contracts import DeckBeer, RateDeckResponse
+from app.api_contracts import (
+    DeckBeer,
+    RateDeckResponse,
+    RateSessionRequest,
+    RateSessionResponse,
+)
 from app.auth import get_current_user
 from app.config import settings
-from app.dependencies import get_deck_catalog
+from app.dependencies import get_deck_catalog, get_taste_feedback_service
 from app.routes.onboarding import get_baseline_taste_repo
 from app.routes.ratings import get_ratings_repo
 from app.services.baseline_taste_repo import BaselineTasteRepo
 from app.services.match_engine import BeerCandidate
 from app.services.rate_deck import build_deck
 from app.services.ratings_repo import RatingsRepo
+from app.services.taste_feedback_service import TasteFeedbackService
 
 router = APIRouter(prefix="/rate", tags=["rate"])
 
@@ -49,3 +55,27 @@ async def get_rate_deck(
             for b in deck
         ]
     )
+
+
+@router.post("/session", response_model=RateSessionResponse, operation_id="postRateSession")
+async def post_rate_session(
+    body: RateSessionRequest,
+    user: dict = Depends(get_current_user),
+    ratings_repo: RatingsRepo = Depends(get_ratings_repo),
+    feedback: TasteFeedbackService = Depends(get_taste_feedback_service),
+) -> RateSessionResponse:
+    # Deck path: persist every swipe, then apply ONE combined nudge from the
+    # pre-session baseline (avoids whipsawing the vector mid-deck).
+    recorded: list[tuple[str, str]] = []
+    for swipe in body.swipes:
+        if not await ratings_repo.beer_exists(swipe.beer_id):
+            continue
+        await ratings_repo.upsert_rating(
+            user_id=user["sub"],
+            beer_id=swipe.beer_id,
+            rating=swipe.rating,
+            note=swipe.note,
+        )
+        recorded.append((swipe.beer_id, swipe.rating))
+    await feedback.apply_batch(user_id=user["sub"], ratings=recorded)
+    return RateSessionResponse(recorded=len(recorded))

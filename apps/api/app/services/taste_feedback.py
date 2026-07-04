@@ -73,6 +73,25 @@ def _orthogonal_unit(v: list[float]) -> list[float]:
     return _normalize(resid)
 
 
+def _tangent_direction(cur: list[float], beer: list[float], signal: int) -> list[float] | None:
+    """Unit step direction (the beer component orthogonal to `cur`).
+
+    Moving +this increases similarity to the beer, -this decreases it. Returns
+    None when there is nothing to do (loved-collinear); for disliked-collinear
+    it falls back to a deterministic orthogonal direction so a dislike always
+    moves (the degeneracy guard).
+    """
+    b = _normalize(beer)
+    cos_cb = _dot(cur, b)
+    resid = [b[k] - cos_cb * cur[k] for k in range(len(cur))]
+    rnorm = _norm(resid)
+    if rnorm > _EPS:
+        return [r / rnorm for r in resid]
+    if signal > 0:
+        return None  # already collinear with a loved beer: nothing to learn
+    return _orthogonal_unit(cur)
+
+
 def nudge(current: list[float], beer: list[float], signal: int, lr: float) -> list[float]:
     """Move `current` toward (signal>0) or away from (signal<0) `beer`.
 
@@ -81,18 +100,9 @@ def nudge(current: list[float], beer: list[float], signal: int, lr: float) -> li
     if signal == 0:
         return list(current)
     cur = _normalize(current)
-    b = _normalize(beer)
-    cos_cb = _dot(cur, b)
-    resid = [b[k] - cos_cb * cur[k] for k in range(len(cur))]
-    rnorm = _norm(resid)
-    if rnorm > _EPS:
-        direction = [r / rnorm for r in resid]
-    elif signal > 0:
-        # Loved a beer already collinear with taste: nothing to learn.
+    direction = _tangent_direction(cur, beer, signal)
+    if direction is None:
         return cur
-    else:
-        # Disliked a beer collinear with taste: must still move (floor).
-        direction = _orthogonal_unit(cur)
     step = signal * lr
     moved = [cur[k] + step * direction[k] for k in range(len(cur))]
     return _normalize(moved)
@@ -132,3 +142,33 @@ def apply_rating(
         return list(current)
     moved = nudge(current, beer, signal, lr)
     return _limit_to_cone(current, moved, 1.0 - per_rating_cap)
+
+
+def apply_batch(
+    current: list[float],
+    targets: list[tuple[list[float], int]],
+    *,
+    lr: float,
+    per_rating_cap: float,
+) -> list[float]:
+    """Combine many swipes into ONE capped nudge from the pre-session profile.
+
+    Accumulates each swipe's signed tangent direction relative to `current`,
+    then takes a single step along the net direction. Avoids whipsawing the
+    vector mid-deck (PRD: deck batch path). Empty / all-fine / net-zero -> no-op.
+    """
+    cur = _normalize(current)
+    accum = [0.0] * len(cur)
+    for beer, signal in targets:
+        if signal == 0:
+            continue
+        direction = _tangent_direction(cur, beer, signal)
+        if direction is None:
+            continue
+        for k in range(len(cur)):
+            accum[k] += signal * direction[k]
+    if _norm(accum) < _EPS:
+        return list(current)
+    step_dir = _normalize(accum)
+    moved = _normalize([cur[k] + lr * step_dir[k] for k in range(len(cur))])
+    return _limit_to_cone(cur, moved, 1.0 - per_rating_cap)

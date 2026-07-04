@@ -191,6 +191,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/rate/session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Post Rate Session */
+        post: operations["postRateSession"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/ratings": {
         parameters: {
             query?: never;
@@ -552,6 +569,28 @@ export interface components {
         RateDeckResponse: {
             /** Beers */
             beers: components["schemas"]["DeckBeer"][];
+        };
+        /** RateSessionRequest */
+        RateSessionRequest: {
+            /** Swipes */
+            swipes: components["schemas"]["RateSwipe"][];
+        };
+        /** RateSessionResponse */
+        RateSessionResponse: {
+            /** Recorded */
+            recorded: number;
+        };
+        /** RateSwipe */
+        RateSwipe: {
+            /** Beer Id */
+            beer_id: string;
+            /** Note */
+            note?: string | null;
+            /**
+             * Rating
+             * @enum {string}
+             */
+            rating: "loved" | "fine" | "disliked";
         };
         /** RatingRecord */
         RatingRecord: {
@@ -1022,6 +1061,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RateDeckResponse"];
+                };
+            };
+        };
+    };
+    postRateSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RateSessionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RateSessionResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

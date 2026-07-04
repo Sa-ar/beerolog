@@ -370,3 +370,17 @@ class DeckBeer(BaseModel):
 
 class RateDeckResponse(BaseModel):
     beers: list[DeckBeer]
+
+
+class RateSwipe(BaseModel):
+    beer_id: str
+    rating: RatingValue
+    note: str | None = None
+
+
+class RateSessionRequest(BaseModel):
+    swipes: list[RateSwipe]
+
+
+class RateSessionResponse(BaseModel):
+    recorded: int
