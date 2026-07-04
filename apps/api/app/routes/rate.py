@@ -6,7 +6,7 @@ See docs/prds/beer-rating-feedback.md.
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends
 
 from app.api_contracts import (
     DeckBeer,
@@ -16,11 +16,16 @@ from app.api_contracts import (
 )
 from app.auth import get_current_user
 from app.config import settings
-from app.dependencies import get_deck_catalog, get_taste_feedback_service
+from app.dependencies import (
+    get_deck_catalog,
+    get_note_analyzer,
+    get_taste_feedback_service,
+)
 from app.routes.onboarding import get_baseline_taste_repo
 from app.routes.ratings import get_ratings_repo
 from app.services.baseline_taste_repo import BaselineTasteRepo
 from app.services.match_engine import BeerCandidate
+from app.services.note_analyzer import NoteAnalyzerProtocol
 from app.services.rate_deck import build_deck
 from app.services.ratings_repo import RatingsRepo
 from app.services.taste_feedback_service import TasteFeedbackService
@@ -60,9 +65,11 @@ async def get_rate_deck(
 @router.post("/session", response_model=RateSessionResponse, operation_id="postRateSession")
 async def post_rate_session(
     body: RateSessionRequest,
+    background_tasks: BackgroundTasks,
     user: dict = Depends(get_current_user),
     ratings_repo: RatingsRepo = Depends(get_ratings_repo),
     feedback: TasteFeedbackService = Depends(get_taste_feedback_service),
+    note_analyzer: NoteAnalyzerProtocol = Depends(get_note_analyzer),
 ) -> RateSessionResponse:
     # Deck path: persist every swipe, then apply ONE combined nudge from the
     # pre-session baseline (avoids whipsawing the vector mid-deck).
@@ -77,5 +84,13 @@ async def post_rate_session(
             note=swipe.note,
         )
         recorded.append((swipe.beer_id, swipe.rating))
+        if swipe.note:
+            background_tasks.add_task(
+                note_analyzer.analyze,
+                user_id=user["sub"],
+                beer_id=swipe.beer_id,
+                rating=swipe.rating,
+                note=swipe.note,
+            )
     await feedback.apply_batch(user_id=user["sub"], ratings=recorded)
     return RateSessionResponse(recorded=len(recorded))

@@ -8,7 +8,11 @@ from fastapi.responses import JSONResponse
 from app.api_contracts import TypedError
 from app.config import settings
 from app.db import close_pool, get_pool
-from app.dependencies import get_deck_catalog, get_taste_feedback_service
+from app.dependencies import (
+    get_deck_catalog,
+    get_note_analyzer,
+    get_taste_feedback_service,
+)
 from app.errors import BeerologError
 from app.observability import configure_logging, instrument_requests, logger
 from app.routes import (
@@ -24,8 +28,14 @@ from app.routes import (
 )
 from app.services.account_repo import AsyncpgAccountRepo
 from app.services.baseline_taste_repo import AsyncpgBaselineTasteRepo
-from app.services.catalog_repo import AsyncpgBeerEmbeddingRepo, fetch_catalog
+from app.services.catalog_repo import (
+    AsyncpgBeerDescriptorRepo,
+    AsyncpgBeerEmbeddingRepo,
+    fetch_catalog,
+)
+from app.services.embedding_service import get_embedding_client
 from app.services.icon_repo import AsyncpgIconRepo
+from app.services.note_analyzer import GPTNoteExtractor, NoteAnalyzer
 from app.services.ratings_repo import AsyncpgRatingsRepo
 from app.services.taste_feedback_service import TasteFeedbackService
 
@@ -66,6 +76,18 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
             return await fetch_catalog(pool)
 
         app.dependency_overrides[get_deck_catalog] = _deck_catalog
+
+        # Real LLM note analysis only when an OpenAI key is present; otherwise the
+        # default no-op analyzer applies (notes are still stored).
+        if settings.openai_api_key:
+            note_analyzer = NoteAnalyzer(
+                llm=GPTNoteExtractor(api_key=settings.openai_api_key, model=settings.note_model),
+                baseline_repo=AsyncpgBaselineTasteRepo(pool),
+                embedding_client=get_embedding_client(),
+                beer_descriptors=AsyncpgBeerDescriptorRepo(pool),
+                settings=settings,
+            )
+            app.dependency_overrides[get_note_analyzer] = lambda: note_analyzer
 
     try:
         yield

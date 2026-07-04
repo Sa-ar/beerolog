@@ -6,7 +6,7 @@ Store-only — no embedding mutation. See ADR-0003 and the PRD's
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
 
 from app.api_contracts import (
     CreateRatingRequest,
@@ -14,7 +14,8 @@ from app.api_contracts import (
     RatingsHistoryResponse,
 )
 from app.auth import get_current_user
-from app.dependencies import get_taste_feedback_service
+from app.dependencies import get_note_analyzer, get_taste_feedback_service
+from app.services.note_analyzer import NoteAnalyzerProtocol
 from app.services.ratings_repo import RatingsRepo
 from app.services.taste_feedback_service import TasteFeedbackService
 
@@ -37,9 +38,11 @@ def get_ratings_repo() -> RatingsRepo:
 )
 async def create_rating(
     body: CreateRatingRequest,
+    background_tasks: BackgroundTasks,
     user: dict = Depends(get_current_user),
     repo: RatingsRepo = Depends(get_ratings_repo),
     feedback: TasteFeedbackService = Depends(get_taste_feedback_service),
+    note_analyzer: NoteAnalyzerProtocol = Depends(get_note_analyzer),
 ) -> RatingRecord:
     if not await repo.beer_exists(body.beer_id):
         raise HTTPException(status_code=404, detail=f"Beer not found: {body.beer_id}")
@@ -51,6 +54,15 @@ async def create_rating(
     )
     # Immediate path (card rating): nudge the baseline now. `fine` is a no-op.
     await feedback.apply(user_id=user["sub"], beer_id=body.beer_id, rating=body.rating)
+    # Free-text analysis runs in the background so it never blocks the response.
+    if body.note:
+        background_tasks.add_task(
+            note_analyzer.analyze,
+            user_id=user["sub"],
+            beer_id=body.beer_id,
+            rating=body.rating,
+            note=body.note,
+        )
     return RatingRecord(
         id=row.id,
         beer_id=row.beer_id,

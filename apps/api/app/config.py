@@ -45,6 +45,8 @@ class Settings(BaseSettings):
     note_model: str = "gpt-4o-mini"
     note_dial_delta_cap: float = 0.05
     note_min_chars: int = 8
+    # Blend weight for the note-derived (dials) embedding vs the nudged one.
+    note_embedding_blend: float = 0.5
     # Guest preview (public, OpenAI-free): how many results are unlocked before
     # sign-up, and how many to score/return from the dial-space matcher.
     guest_unlocked_count: int = 3

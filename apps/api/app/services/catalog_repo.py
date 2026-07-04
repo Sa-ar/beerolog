@@ -35,6 +35,20 @@ class AsyncpgBeerEmbeddingRepo:
         return _parse_pgvector(row["embedding"]) if row is not None else None
 
 
+class AsyncpgBeerDescriptorRepo:
+    """Short human-readable beer descriptor for the NoteAnalyzer LLM prompt."""
+
+    def __init__(self, pool) -> None:
+        self._pool = pool
+
+    async def get_descriptor(self, beer_id: str) -> str | None:
+        async with self._pool.acquire() as conn:
+            row = await conn.fetchrow("SELECT name, style, abv FROM beers WHERE id = $1", beer_id)
+        if row is None:
+            return None
+        return f"{row['name']}, style {row['style']}, abv {row['abv']}%"
+
+
 async def fetch_catalog(pool) -> list[BeerCandidate]:
     sql = """
         SELECT id, name, name_hebrew, brewery, style, abv, market_tier, color,
