@@ -4,6 +4,74 @@
  */
 
 export interface paths {
+    "/availability": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Post Availability */
+        post: operations["postAvailability"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/availability/add": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Post Add Place */
+        post: operations["postAddPlace"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/availability/flag": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Post Availability Flag */
+        post: operations["postAvailabilityFlag"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/availability/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Post Availability Report */
+        post: operations["postAvailabilityReport"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/debug/recommendations": {
         parameters: {
             query?: never;
@@ -274,11 +342,114 @@ export interface components {
             /** Ratings */
             ratings: components["schemas"]["ExportRating"][];
         };
+        /** AddPlaceRequest */
+        AddPlaceRequest: {
+            /** Beer Id */
+            beer_id: string;
+            /**
+             * Force New
+             * @default false
+             */
+            force_new: boolean;
+            venue?: components["schemas"]["NewVenueInput"] | null;
+            /** Venue Id */
+            venue_id?: string | null;
+        };
+        /** AddPlaceResponse */
+        AddPlaceResponse: {
+            /** Reason */
+            reason?: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "created" | "attached" | "suggested" | "rejected";
+            /** Venue Id */
+            venue_id?: string | null;
+        };
         /**
          * AdventureLevel
          * @enum {string}
          */
         AdventureLevel: "low" | "medium" | "high";
+        /** AvailabilityFlagRequest */
+        AvailabilityFlagRequest: {
+            /** Beer Id */
+            beer_id: string;
+            /** Reason */
+            reason?: string | null;
+            /** Venue Id */
+            venue_id: string;
+        };
+        /** AvailabilityFlagResponse */
+        AvailabilityFlagResponse: {
+            /** Accepted */
+            accepted: boolean;
+            /**
+             * Hidden
+             * @default false
+             */
+            hidden: boolean;
+        };
+        /** AvailabilityReportRequest */
+        AvailabilityReportRequest: {
+            /** Beer Id */
+            beer_id: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "user_confirm" | "user_deny";
+            /** Venue Id */
+            venue_id: string;
+        };
+        /** AvailabilityReportResponse */
+        AvailabilityReportResponse: {
+            /** Accepted */
+            accepted: boolean;
+            /** Reason */
+            reason?: string | null;
+        };
+        /** AvailabilityRequest */
+        AvailabilityRequest: {
+            /** Area */
+            area?: string | null;
+            /** Beer Ids */
+            beer_ids: string[];
+        };
+        /** AvailabilityResponse */
+        AvailabilityResponse: {
+            /** Availability */
+            availability: {
+                [key: string]: components["schemas"]["AvailabilityVenue"][];
+            };
+        };
+        /** AvailabilityVenue */
+        AvailabilityVenue: {
+            /** Address */
+            address?: string | null;
+            /** Area */
+            area?: string | null;
+            /** City */
+            city: string;
+            /** Confidence */
+            confidence: number;
+            /** Id */
+            id: string;
+            /** Last Confirmed At */
+            last_confirmed_at?: string | null;
+            /** Name */
+            name: string;
+            /** Name Hebrew */
+            name_hebrew?: string | null;
+            /**
+             * Type
+             * @enum {string}
+             */
+            type: "shop" | "pub";
+            /** Url */
+            url?: string | null;
+        };
         /**
          * AvoidCue
          * @enum {string}
@@ -549,6 +720,22 @@ export interface components {
             /** Cos Floor */
             cos_floor: number;
         };
+        /** NewVenueInput */
+        NewVenueInput: {
+            /** Address */
+            address?: string | null;
+            /** Area */
+            area?: string | null;
+            /** City */
+            city: string;
+            /** Name */
+            name: string;
+            /**
+             * Type
+             * @enum {string}
+             */
+            type: "shop" | "pub";
+        };
         /** OnboardingAnswers */
         OnboardingAnswers: {
             adventure: components["schemas"]["AdventureLevel"];
@@ -807,6 +994,138 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    postAvailability: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AvailabilityRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AvailabilityResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    postAddPlace: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddPlaceRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AddPlaceResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    postAvailabilityFlag: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AvailabilityFlagRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AvailabilityFlagResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    postAvailabilityReport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AvailabilityReportRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AvailabilityReportResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     debugRecommendations: {
         parameters: {
             query?: never;

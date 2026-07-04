@@ -82,6 +82,86 @@
         "title": "AccountExport",
         "type": "object"
       },
+      "AddPlaceRequest": {
+        "properties": {
+          "beer_id": {
+            "title": "Beer Id",
+            "type": "string"
+          },
+          "force_new": {
+            "default": false,
+            "title": "Force New",
+            "type": "boolean"
+          },
+          "venue": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NewVenueInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "venue_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Venue Id"
+          }
+        },
+        "required": [
+          "beer_id"
+        ],
+        "title": "AddPlaceRequest",
+        "type": "object"
+      },
+      "AddPlaceResponse": {
+        "properties": {
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "status": {
+            "enum": [
+              "created",
+              "attached",
+              "suggested",
+              "rejected"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "venue_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Venue Id"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "AddPlaceResponse",
+        "type": "object"
+      },
       "AdventureLevel": {
         "enum": [
           "low",
@@ -90,6 +170,243 @@
         ],
         "title": "AdventureLevel",
         "type": "string"
+      },
+      "AvailabilityFlagRequest": {
+        "properties": {
+          "beer_id": {
+            "title": "Beer Id",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "venue_id": {
+            "title": "Venue Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "beer_id",
+          "venue_id"
+        ],
+        "title": "AvailabilityFlagRequest",
+        "type": "object"
+      },
+      "AvailabilityFlagResponse": {
+        "properties": {
+          "accepted": {
+            "title": "Accepted",
+            "type": "boolean"
+          },
+          "hidden": {
+            "default": false,
+            "title": "Hidden",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "accepted"
+        ],
+        "title": "AvailabilityFlagResponse",
+        "type": "object"
+      },
+      "AvailabilityReportRequest": {
+        "properties": {
+          "beer_id": {
+            "title": "Beer Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "user_confirm",
+              "user_deny"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "venue_id": {
+            "title": "Venue Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "beer_id",
+          "venue_id",
+          "kind"
+        ],
+        "title": "AvailabilityReportRequest",
+        "type": "object"
+      },
+      "AvailabilityReportResponse": {
+        "properties": {
+          "accepted": {
+            "title": "Accepted",
+            "type": "boolean"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "required": [
+          "accepted"
+        ],
+        "title": "AvailabilityReportResponse",
+        "type": "object"
+      },
+      "AvailabilityRequest": {
+        "properties": {
+          "area": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Area"
+          },
+          "beer_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Beer Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "beer_ids"
+        ],
+        "title": "AvailabilityRequest",
+        "type": "object"
+      },
+      "AvailabilityResponse": {
+        "properties": {
+          "availability": {
+            "additionalProperties": {
+              "items": {
+                "$ref": "#/components/schemas/AvailabilityVenue"
+              },
+              "type": "array"
+            },
+            "title": "Availability",
+            "type": "object"
+          }
+        },
+        "required": [
+          "availability"
+        ],
+        "title": "AvailabilityResponse",
+        "type": "object"
+      },
+      "AvailabilityVenue": {
+        "properties": {
+          "address": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address"
+          },
+          "area": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Area"
+          },
+          "city": {
+            "title": "City",
+            "type": "string"
+          },
+          "confidence": {
+            "title": "Confidence",
+            "type": "number"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "last_confirmed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Confirmed At"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "name_hebrew": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name Hebrew"
+          },
+          "type": {
+            "enum": [
+              "shop",
+              "pub"
+            ],
+            "title": "Type",
+            "type": "string"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type",
+          "city",
+          "confidence"
+        ],
+        "title": "AvailabilityVenue",
+        "type": "object"
       },
       "AvoidCue": {
         "enum": [
@@ -742,6 +1059,55 @@
           "cos_ceiling"
         ],
         "title": "MatchCalibration",
+        "type": "object"
+      },
+      "NewVenueInput": {
+        "properties": {
+          "address": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address"
+          },
+          "area": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Area"
+          },
+          "city": {
+            "title": "City",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "shop",
+              "pub"
+            ],
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "type",
+          "city"
+        ],
+        "title": "NewVenueInput",
         "type": "object"
       },
       "OnboardingAnswers": {
@@ -1434,6 +1800,185 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/availability": {
+      "post": {
+        "operationId": "postAvailability",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvailabilityRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvailabilityResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Post Availability",
+        "tags": [
+          "availability"
+        ]
+      }
+    },
+    "/availability/add": {
+      "post": {
+        "operationId": "postAddPlace",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddPlaceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddPlaceResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Post Add Place",
+        "tags": [
+          "availability"
+        ]
+      }
+    },
+    "/availability/flag": {
+      "post": {
+        "operationId": "postAvailabilityFlag",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvailabilityFlagRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvailabilityFlagResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Post Availability Flag",
+        "tags": [
+          "availability"
+        ]
+      }
+    },
+    "/availability/reports": {
+      "post": {
+        "operationId": "postAvailabilityReport",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvailabilityReportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvailabilityReportResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Post Availability Report",
+        "tags": [
+          "availability"
+        ]
+      }
+    },
     "/debug/recommendations": {
       "get": {
         "operationId": "debugRecommendations",

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { beerStoreSearchUrl } from './beer-store-search'
+import { beerStoreSearchUrl, venueMapsUrl } from './beer-store-search'
 
 describe('beerStoreSearchUrl', () => {
   it('includes the area when provided', () => {
@@ -20,5 +20,13 @@ describe('beerStoreSearchUrl', () => {
     expect(url).not.toContain('%20%20')
     const he = beerStoreSearchUrl('גולדסטאר', 'פאב', '')
     expect(he).toContain(encodeURIComponent('גולדסטאר פאב'))
+  })
+})
+
+describe('venueMapsUrl', () => {
+  it('joins the parts present and skips the blanks', () => {
+    const url = venueMapsUrl({ name: 'BeerBazaar', address: null, city: 'Tel Aviv' })
+    expect(url).toContain(encodeURIComponent('BeerBazaar Tel Aviv'))
+    expect(url).not.toContain('null')
   })
 })

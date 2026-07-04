@@ -9,7 +9,9 @@ import { deriveBeerColor, type BeerColor } from '../lib/beer-color'
 import { matchAlignmentPercents, type MatchCalibration } from '../lib/match-score'
 import { SAVE_STATUS, type SaveStatus } from '../lib/save-status'
 import type { AbvIntent } from '../lib/session-intent'
-import { beerStoreSearchUrl } from '../lib/beer-store-search'
+import { beerStoreSearchUrl, venueMapsUrl } from '../lib/beer-store-search'
+import { flagAvailability, reportAvailability, type Venue } from '../lib/beer-availability'
+import { AvailabilityAddPlace } from './AvailabilityAddPlace'
 
 type Breakdown = {
   baseline_cos?: number
@@ -51,6 +53,7 @@ type RecommendationBeerCardProps = {
   abvIntent?: AbvIntent | undefined
   calibration?: MatchCalibration
   searchArea?: string
+  venues?: Venue[] | undefined
 }
 
 export function RecommendationBeerCard({
@@ -62,9 +65,28 @@ export function RecommendationBeerCard({
   abvIntent,
   calibration,
   searchArea = '',
+  venues,
 }: RecommendationBeerCardProps) {
   const { t, i18n } = useTranslation()
   const isTopPick = rank === 1
+  // The recommendations page is signed-in-only, so reports can always be offered.
+  const [reported, setReported] = useState<Set<string>>(new Set())
+  const [reportErr, setReportErr] = useState<Set<string>>(new Set())
+  const report = (venueId: string, kind: 'user_confirm' | 'user_deny') => {
+    void reportAvailability(beer.id, venueId, kind).then((r) => {
+      if (r.accepted) {
+        setReported((prev) => new Set(prev).add(venueId))
+      } else {
+        setReportErr((prev) => new Set(prev).add(venueId))
+      }
+    })
+  }
+  const [flagged, setFlagged] = useState<Set<string>>(new Set())
+  const flag = (venueId: string) => {
+    void flagAvailability(beer.id, venueId).then((r) => {
+      if (r.accepted) setFlagged((prev) => new Set(prev).add(venueId))
+    })
+  }
   // Catalog names are bilingual; show Hebrew when the UI is Hebrew, fall back to English.
   const displayName =
     i18n.language.startsWith('he') && beer.name_hebrew ? beer.name_hebrew : beer.name
@@ -182,28 +204,107 @@ export function RecommendationBeerCard({
             </details>
           </div>
 
-          <div className="flex w-full flex-col gap-1.5">
-            <p className="text-xs font-medium text-neutral-500">
-              {t('recommendations.findNearby.title')}
-            </p>
-            <div className="flex flex-wrap justify-center gap-2 sm:justify-start">
-              {(['shop', 'pub'] as const).map((venue) => {
-                const venueTerm = t(`recommendations.findNearby.${venue}`)
-                return (
-                  <a
-                    key={venue}
-                    href={beerStoreSearchUrl(beer.name, venueTerm, searchArea)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-xs font-medium text-neutral-700 transition-colors hover:border-brand-400 hover:bg-brand-50"
-                  >
-                    <span aria-hidden>{venue === 'shop' ? '🛒' : '🍺'}</span>
-                    {venueTerm}
-                  </a>
-                )
-              })}
+          {venues && venues.length > 0 ? (
+            <div className="flex w-full flex-col gap-1.5">
+              <p className="text-xs font-medium text-neutral-500">
+                {t('recommendations.findNearby.availableAt')}
+              </p>
+              <ul className="w-full space-y-1">
+                {venues.map((v) => {
+                  const venueName =
+                    i18n.language.startsWith('he') && v.name_hebrew ? v.name_hebrew : v.name
+                  const place = [v.address, v.city].filter(Boolean).join(', ')
+                  return (
+                    <li key={v.id}>
+                      <a
+                        href={v.url || venueMapsUrl(v)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-xs text-neutral-700 hover:text-brand-600 hover:underline"
+                      >
+                        <span aria-hidden>{v.type === 'shop' ? '🛒' : '🍺'}</span>
+                        <span className="font-medium">{venueName}</span>
+                        {place ? <span className="text-neutral-500">— {place}</span> : null}
+                      </a>
+                      {v.last_confirmed_at ? (
+                        <p className="text-[11px] text-neutral-400">
+                          {t('recommendations.findNearby.confirmed', {
+                            date: new Date(v.last_confirmed_at).toLocaleDateString(
+                              i18n.language,
+                            ),
+                          })}
+                        </p>
+                      ) : null}
+                      {reportErr.has(v.id) ? (
+                        <span className="text-[11px] text-neutral-400">
+                          {t('recommendations.findNearby.reportFailed')}
+                        </span>
+                      ) : reported.has(v.id) ? (
+                        <span className="text-[11px] text-brand-600">
+                          {t('recommendations.findNearby.reportThanks')}
+                        </span>
+                      ) : (
+                        <span className="mt-0.5 flex gap-3">
+                          <button
+                            type="button"
+                            onClick={() => report(v.id, 'user_confirm')}
+                            className="text-[11px] text-neutral-500 hover:text-brand-600"
+                          >
+                            👍 {t('recommendations.findNearby.stillHere')}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => report(v.id, 'user_deny')}
+                            className="text-[11px] text-neutral-500 hover:text-brand-600"
+                          >
+                            🚫 {t('recommendations.findNearby.gone')}
+                          </button>
+                          {flagged.has(v.id) ? (
+                            <span className="text-[11px] text-neutral-400">
+                              {t('recommendations.findNearby.flagged')}
+                            </span>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => flag(v.id)}
+                              className="text-[11px] text-neutral-400 hover:text-red-600"
+                            >
+                              🚩 {t('recommendations.findNearby.flagWrong')}
+                            </button>
+                          )}
+                        </span>
+                      )}
+                    </li>
+                  )
+                })}
+              </ul>
             </div>
-          </div>
+          ) : (
+            <div className="flex w-full flex-col gap-1.5">
+              <p className="text-xs font-medium text-neutral-500">
+                {t('recommendations.findNearby.title')}
+              </p>
+              <div className="flex flex-wrap justify-center gap-2 sm:justify-start">
+                {(['shop', 'pub'] as const).map((venue) => {
+                  const venueTerm = t(`recommendations.findNearby.${venue}`)
+                  return (
+                    <a
+                      key={venue}
+                      href={beerStoreSearchUrl(beer.name, venueTerm, searchArea)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-xs font-medium text-neutral-700 transition-colors hover:border-brand-400 hover:bg-brand-50"
+                    >
+                      <span aria-hidden>{venue === 'shop' ? '🛒' : '🍺'}</span>
+                      {venueTerm}
+                    </a>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          <AvailabilityAddPlace beerId={beer.id} />
         </div>
       </div>
       <div className="border-t border-neutral-200 px-4 py-3 sm:px-6">

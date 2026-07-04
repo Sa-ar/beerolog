@@ -12,6 +12,8 @@ import { RecommendationBeerCard, type RecommendedBeer } from '../components/Reco
 import { RecommendationsLoadingState } from '../components/RecommendationsLoadingState'
 import { StatusCard } from '../components/StatusCard'
 import { apiFetch } from '../lib/api-fetch'
+import { fetchAvailability, type Venue } from '../lib/beer-availability'
+import { filterByAvailability } from '../lib/near-me-filter'
 import { clearGuestAnswers, readGuestAnswers } from '../lib/guest-answers'
 import { DEFAULT_MATCH_CALIBRATION, tonightMatchPercent } from '../lib/match-score'
 import { prunedAnswers } from '../lib/onboarding-quiz'
@@ -137,6 +139,30 @@ function RecommendationsContent() {
     }
   })
   const [loadError, setLoadError] = useState<string | null>(null)
+  const [availability, setAvailability] = useState<Record<string, Venue[]>>({})
+  const [availabilityLoaded, setAvailabilityLoaded] = useState(false)
+  const [nearMeOnly, setNearMeOnly] = useState(false)
+
+  // Fetch "available at" venues for the shown beers, re-running (debounced) when
+  // the area filter changes. Failures resolve to {} so cards fall back to the
+  // maps link.
+  useEffect(() => {
+    if (pageState.status !== 'ready') return
+    const ids = pageState.results.map((b) => b.id)
+    let cancelled = false
+    const handle = setTimeout(() => {
+      void fetchAvailability(ids, searchArea).then((map) => {
+        if (!cancelled) {
+          setAvailability(map)
+          setAvailabilityLoaded(true)
+        }
+      })
+    }, 300)
+    return () => {
+      cancelled = true
+      clearTimeout(handle)
+    }
+  }, [pageState, searchArea])
 
   useEffect(() => {
     const pending = readPendingSession()
@@ -316,6 +342,14 @@ function RecommendationsContent() {
   }
 
   const { results, hasMore } = pageState
+  // Only apply the near-me filter once availability has actually loaded;
+  // otherwise the in-flight `{}` would strip every beer and flash a false
+  // empty-state while the (debounced) fetch is still running.
+  const { beers: shownResults, empty: nearMeEmpty } = filterByAvailability(
+    results,
+    availability,
+    nearMeOnly && availabilityLoaded,
+  )
   const stored = readStoredRecommendations()
   const alpha = stored?.alpha ?? 0.4
   const calibration = stored?.calibration ?? DEFAULT_MATCH_CALIBRATION
@@ -330,7 +364,7 @@ function RecommendationsContent() {
           {t('recommendations.matchedEyebrow')}
         </p>
         <h1 className="text-2xl font-bold tracking-tight text-neutral-900 sm:text-3xl md:text-4xl">
-          {t('recommendations.heading', { count: results.length })}
+          {t('recommendations.heading', { count: shownResults.length })}
         </h1>
         <p className="max-w-xl text-sm text-neutral-600 sm:text-base">
           {t('recommendations.subhead')}
@@ -357,10 +391,24 @@ function RecommendationsContent() {
           className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-brand-400 focus:outline-none focus:ring-1 focus:ring-brand-400"
         />
         <p className="text-xs text-neutral-500">{t('recommendations.findNearby.areaHint')}</p>
+        <label className="mt-1 flex items-center gap-2 text-sm text-neutral-700">
+          <input
+            type="checkbox"
+            checked={nearMeOnly}
+            onChange={(e) => setNearMeOnly(e.target.checked)}
+          />
+          {t('recommendations.findNearby.nearMeToggle')}
+        </label>
       </section>
 
+      {nearMeEmpty ? (
+        <p className="rounded-xl border border-neutral-200 bg-neutral-50/60 p-4 text-sm text-neutral-600">
+          {t('recommendations.findNearby.nearMeEmpty')}
+        </p>
+      ) : null}
+
       <div className="flex flex-col gap-3 sm:gap-4">
-        {results.map((beer, index) => (
+        {shownResults.map((beer, index) => (
           <RecommendationBeerCard
             key={beer.id}
             beer={beer}
@@ -371,6 +419,7 @@ function RecommendationsContent() {
             abvIntent={abvIntent}
             calibration={calibration}
             searchArea={searchArea}
+            venues={availability[beer.id]}
           />
         ))}
       </div>

@@ -16,6 +16,7 @@ from app.dependencies import (
 from app.errors import BeerologError
 from app.observability import configure_logging, instrument_requests, logger
 from app.routes import (
+    availability,
     debug,
     guest_recommendations,
     health,
@@ -111,6 +112,7 @@ app.include_router(health.router)
 app.include_router(icons.router)
 app.include_router(onboarding.router)
 app.include_router(recommendations.router)
+app.include_router(availability.router)
 app.include_router(guest_recommendations.router)
 app.include_router(ratings.router)
 app.include_router(rate.router)

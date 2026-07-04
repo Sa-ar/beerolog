@@ -12,6 +12,7 @@
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "db:seed": "tsx scripts/seed_dev.ts",
+    "db:seed:venues": "tsx scripts/seed_venues.ts",
     "db:check": "tsx scripts/seed_dev.check.ts",
     "typecheck": "tsc --noEmit",
     "ingest:catalog": "tsx scripts/seed_catalog/ingest_catalog.ts",

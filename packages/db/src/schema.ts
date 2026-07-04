@@ -17,8 +17,10 @@ import {
   integer,
   jsonb,
   timestamp,
+  boolean,
   index,
   uniqueIndex,
+  primaryKey,
   customType,
 } from 'drizzle-orm/pg-core'
 
@@ -54,6 +56,12 @@ export const notesLangEnum = pgEnum('notes_lang', ['he', 'en'])
 export const notesSourceEnum = pgEnum('notes_source', ['brewery', 'aggregator', 'synthetic'])
 
 export const ratingEnum = pgEnum('rating', ['loved', 'fine', 'disliked'])
+
+export const venueTypeEnum = pgEnum('venue_type', ['shop', 'pub'])
+
+// 'curated' rows come from our seed; 'user' rows come from crowdsourced reports.
+export const availabilitySourceEnum = pgEnum('availability_source', ['curated', 'user'])
+
 
 // ---------------------------------------------------------------------------
 // Users (Clerk-backed; matches the foundation auth wiring)
@@ -147,6 +155,141 @@ export const icons = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [uniqueIndex('icons_purpose_uniq').on(t.purpose)],
+)
+
+// ---------------------------------------------------------------------------
+// Venues + availability ("where can I buy this beer")
+//
+// venues: liquor shops & pubs, located by free-text city/area (no geocoding).
+// beer_availability: which beers each venue stocks. last_verified_at is the
+// freshness signal user reports will bump in a later slice.
+// ---------------------------------------------------------------------------
+
+export const venues = pgTable(
+  'venues',
+  {
+    id: text('id').primaryKey(),
+    name: text('name').notNull(),
+    nameHebrew: text('name_hebrew'),
+    type: venueTypeEnum('type').notNull(),
+    city: text('city').notNull(),
+    area: text('area'),
+    address: text('address'),
+    url: text('url'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('venues_city_idx').on(t.city)],
+)
+
+export const beerAvailability = pgTable(
+  'beer_availability',
+  {
+    beerId: text('beer_id')
+      .notNull()
+      .references(() => beers.id, { onDelete: 'cascade' }),
+    venueId: text('venue_id')
+      .notNull()
+      .references(() => venues.id, { onDelete: 'cascade' }),
+    source: availabilitySourceEnum('source').notNull().default('curated'),
+    lastVerifiedAt: timestamp('last_verified_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.beerId, t.venueId] }),
+    index('beer_availability_beer_idx').on(t.beerId),
+  ],
+)
+
+export const availabilityKindEnum = pgEnum('availability_kind', [
+  'scrape_seen',
+  'scrape_absent',
+  'user_confirm',
+  'user_deny',
+  'user_add',
+])
+
+// Append-only signal log (ADR-0006). Confidence is recomputed from these rows,
+// never stored as a flag. Rows are only inserted, never updated.
+export const availabilitySignal = pgTable(
+  'availability_signal',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    beerId: text('beer_id')
+      .notNull()
+      .references(() => beers.id, { onDelete: 'cascade' }),
+    venueId: text('venue_id')
+      .notNull()
+      .references(() => venues.id, { onDelete: 'cascade' }),
+    kind: availabilityKindEnum('kind').notNull(),
+    // Magnitude, already trust-weighted at write time; sign comes from kind.
+    weight: real('weight').notNull(),
+    actor: text('actor').notNull(), // 'scrape:<source>' | 'user:<id>'
+    sourceUrl: text('source_url'),
+    observedAt: timestamp('observed_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('availability_signal_pair_idx').on(t.beerId, t.venueId)],
+)
+
+// Materialized read cache: confidence recomputed from the signal log.
+export const availabilityConfidence = pgTable(
+  'availability_confidence',
+  {
+    beerId: text('beer_id')
+      .notNull()
+      .references(() => beers.id, { onDelete: 'cascade' }),
+    venueId: text('venue_id')
+      .notNull()
+      .references(() => venues.id, { onDelete: 'cascade' }),
+    confidence: real('confidence').notNull(),
+    lastConfirmedAt: timestamp('last_confirmed_at', { withTimezone: true }),
+    recomputedAt: timestamp('recomputed_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.beerId, t.venueId] }),
+    index('availability_confidence_beer_idx').on(t.beerId),
+  ],
+)
+
+// User flags on a (beer, venue) pairing; enough unresolved flags hide it from
+// reads until an operator reviews (slice #166).
+export const availabilityFlag = pgTable(
+  'availability_flag',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    beerId: text('beer_id')
+      .notNull()
+      .references(() => beers.id, { onDelete: 'cascade' }),
+    venueId: text('venue_id')
+      .notNull()
+      .references(() => venues.id, { onDelete: 'cascade' }),
+    reporter: text('reporter').notNull(), // 'user:<id>'
+    reason: text('reason'),
+    resolved: boolean('resolved').notNull().default(false),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  // Unique per (pair, reporter): one effective flag per user, so a single user
+  // can't cross the hide threshold by flagging repeatedly. The (beerId, venueId)
+  // prefix still serves the read-path distinct-reporter count.
+  (t) => [uniqueIndex('availability_flag_pair_reporter_uniq').on(t.beerId, t.venueId, t.reporter)],
+)
+
+// Ambiguous scrape→catalog matches (0.80–0.92) awaiting human judgment (slice #161/#166).
+export const availabilityMatchReview = pgTable(
+  'availability_match_review',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    venueId: text('venue_id')
+      .notNull()
+      .references(() => venues.id, { onDelete: 'cascade' }),
+    beerId: text('beer_id')
+      .notNull()
+      .references(() => beers.id, { onDelete: 'cascade' }),
+    score: real('score').notNull(),
+    resolved: boolean('resolved').notNull().default(false),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('availability_match_review_open_idx').on(t.resolved)],
 )
 
 // ---------------------------------------------------------------------------

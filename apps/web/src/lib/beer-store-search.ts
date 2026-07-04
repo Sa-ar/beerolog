@@ -16,3 +16,13 @@ export function beerStoreSearchUrl(
   const query = `${beerName} ${venueTerm}${where}`.replace(/\s+/g, ' ').trim()
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`
 }
+
+// Maps link for a specific known venue ("take me to this exact place").
+export function venueMapsUrl(parts: {
+  name: string
+  address?: string | null
+  city?: string | null
+}): string {
+  const query = [parts.name, parts.address, parts.city].filter(Boolean).join(' ')
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`
+}

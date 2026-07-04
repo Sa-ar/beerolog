@@ -50,6 +50,13 @@
       "when": 1782670684238,
       "tag": "0006_rating_3state",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1783171403623,
+      "tag": "0007_curved_mariko_yashida",
+      "breakpoints": true
     }
   ]
 }
