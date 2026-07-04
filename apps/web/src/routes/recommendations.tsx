@@ -129,6 +129,13 @@ function RecommendationsContent() {
   const { t } = useTranslation()
   const [pageState, setPageState] = useState<PageState>(getInitialPageState)
   const [loadingMore, setLoadingMore] = useState(false)
+  const [searchArea, setSearchArea] = useState(() => {
+    try {
+      return localStorage.getItem('beerolog.searchArea') ?? ''
+    } catch {
+      return ''
+    }
+  })
   const [loadError, setLoadError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -330,6 +337,28 @@ function RecommendationsContent() {
         </p>
       </section>
 
+      <section className="flex flex-col gap-1.5 rounded-xl border border-neutral-200 bg-neutral-50/60 p-3 sm:p-4">
+        <label htmlFor="search-area" className="text-sm font-medium text-neutral-700">
+          {t('recommendations.findNearby.areaLabel')}
+        </label>
+        <input
+          id="search-area"
+          type="text"
+          value={searchArea}
+          onChange={(e) => {
+            setSearchArea(e.target.value)
+            try {
+              localStorage.setItem('beerolog.searchArea', e.target.value)
+            } catch {
+              /* ignore storage failures */
+            }
+          }}
+          placeholder={t('recommendations.findNearby.areaPlaceholder')}
+          className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-brand-400 focus:outline-none focus:ring-1 focus:ring-brand-400"
+        />
+        <p className="text-xs text-neutral-500">{t('recommendations.findNearby.areaHint')}</p>
+      </section>
+
       <div className="flex flex-col gap-3 sm:gap-4">
         {results.map((beer, index) => (
           <RecommendationBeerCard
@@ -341,6 +370,7 @@ function RecommendationsContent() {
             hasSession={hasSession}
             abvIntent={abvIntent}
             calibration={calibration}
+            searchArea={searchArea}
           />
         ))}
       </div>

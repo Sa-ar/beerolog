@@ -9,6 +9,7 @@ import { deriveBeerColor, type BeerColor } from '../lib/beer-color'
 import { matchAlignmentPercents, type MatchCalibration } from '../lib/match-score'
 import { SAVE_STATUS, type SaveStatus } from '../lib/save-status'
 import type { AbvIntent } from '../lib/session-intent'
+import { beerStoreSearchUrl } from '../lib/beer-store-search'
 
 type Breakdown = {
   baseline_cos?: number
@@ -49,6 +50,7 @@ type RecommendationBeerCardProps = {
   hasSession: boolean
   abvIntent?: AbvIntent | undefined
   calibration?: MatchCalibration
+  searchArea?: string
 }
 
 export function RecommendationBeerCard({
@@ -59,6 +61,7 @@ export function RecommendationBeerCard({
   hasSession,
   abvIntent,
   calibration,
+  searchArea = '',
 }: RecommendationBeerCardProps) {
   const { t, i18n } = useTranslation()
   const isTopPick = rank === 1
@@ -177,6 +180,29 @@ export function RecommendationBeerCard({
                 ))}
               </ul>
             </details>
+          </div>
+
+          <div className="flex w-full flex-col gap-1.5">
+            <p className="text-xs font-medium text-neutral-500">
+              {t('recommendations.findNearby.title')}
+            </p>
+            <div className="flex flex-wrap justify-center gap-2 sm:justify-start">
+              {(['shop', 'pub'] as const).map((venue) => {
+                const venueTerm = t(`recommendations.findNearby.${venue}`)
+                return (
+                  <a
+                    key={venue}
+                    href={beerStoreSearchUrl(beer.name, venueTerm, searchArea)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-xs font-medium text-neutral-700 transition-colors hover:border-brand-400 hover:bg-brand-50"
+                  >
+                    <span aria-hidden>{venue === 'shop' ? '🛒' : '🍺'}</span>
+                    {venueTerm}
+                  </a>
+                )
+              })}
+            </div>
           </div>
         </div>
       </div>

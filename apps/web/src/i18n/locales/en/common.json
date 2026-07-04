@@ -277,7 +277,7 @@
       "chocolate": "Dark chocolate — how dark?",
       "water": "Fizzy or flat?",
       "sweet_tooth": "Sweet tooth, or dry & crisp?",
-      "strength": "A few easy ones, or one strong one?",
+      "strength": "How strong do you like your drink — light or boozy?",
       "sour_foods": "Sour & vinegary things — pickles, kombucha?",
       "sour_wild": "Funky, wild, barnyard flavors too?",
       "smoked_foods": "Smoky foods — BBQ, smoked fish?",
@@ -318,9 +318,9 @@
     "fizz": { "strong": "Love the fizz", "light": "A little fizz", "still": "Prefer it flat" },
     "sweet": { "rich": "Sweet & rich", "balanced": "Balanced", "dry": "Dry & crisp" },
     "strength": {
-      "light": "A few light & easy",
+      "light": "Light & easy-drinking (low alcohol)",
       "medium": "Middle of the road",
-      "strong": "One strong one"
+      "strong": "Strong & boozy (high alcohol)"
     },
     "sour_wild": { "bright": "Bright & citrusy", "funky": "Funky & wild" },
     "adventure": {
@@ -401,6 +401,14 @@
     "missingTitle": "No picks yet",
     "missingDescription": "Pick tonight's vibe and we'll match five beers to how you feel right now.",
     "startSession": "Start a session",
+    "findNearby": {
+      "title": "Find it near me",
+      "shop": "Bottle shop",
+      "pub": "Pub",
+      "areaLabel": "Search area",
+      "areaPlaceholder": "e.g. Tel Aviv",
+      "areaHint": "Leave empty to use your current location."
+    },
     "matchedEyebrow": "Matched for you",
     "loadingAria": "Loading recommendations",
     "thinking": [
