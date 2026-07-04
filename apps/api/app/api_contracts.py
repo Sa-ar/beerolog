@@ -354,3 +354,19 @@ class RatingsHistoryResponse(BaseModel):
     ratings: list[RatingRecord]
     page: int
     page_size: int
+
+
+class DeckBeer(BaseModel):
+    id: str
+    name: str
+    name_hebrew: str | None = None
+    brewery: str
+    style: str
+    abv: float
+    market_tier: Literal["mainstream", "craft", "import"]
+    color: str | None = None
+    image_url: str | None = None
+
+
+class RateDeckResponse(BaseModel):
+    beers: list[DeckBeer]

@@ -40,6 +40,7 @@ class Settings(BaseSettings):
     nudge_lr_after_20: float = 0.04
     nudge_lr_after_50: float = 0.02
     nudge_per_rating_cap: float = 0.04  # max cosine-distance move per rating
+    deck_size: int = 12  # cards returned by GET /rate/deck
     # NoteAnalyzer (slice 6): LLM model + per-rating dial-delta cap.
     note_model: str = "gpt-4o-mini"
     note_dial_delta_cap: float = 0.05

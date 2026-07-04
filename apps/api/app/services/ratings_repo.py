@@ -52,6 +52,8 @@ class RatingsRepo(Protocol):
 
     async def count_for_user(self, user_id: str) -> int: ...
 
+    async def list_rated_beer_ids(self, user_id: str) -> set[str]: ...
+
 
 class AsyncpgRatingsRepo:
     """Default DB-backed implementation. Exercised only by integration tests."""
@@ -138,3 +140,8 @@ class AsyncpgRatingsRepo:
                 "SELECT count(*) AS n FROM beer_ratings WHERE user_id = $1", user_id
             )
         return int(row["n"]) if row is not None else 0
+
+    async def list_rated_beer_ids(self, user_id: str) -> set[str]:
+        async with self._pool.acquire() as conn:
+            rows = await conn.fetch("SELECT beer_id FROM beer_ratings WHERE user_id = $1", user_id)
+        return {r["beer_id"] for r in rows}

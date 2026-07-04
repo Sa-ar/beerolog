@@ -375,6 +375,82 @@
         "title": "CreateRatingRequest",
         "type": "object"
       },
+      "DeckBeer": {
+        "properties": {
+          "abv": {
+            "title": "Abv",
+            "type": "number"
+          },
+          "brewery": {
+            "title": "Brewery",
+            "type": "string"
+          },
+          "color": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Color"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "market_tier": {
+            "enum": [
+              "mainstream",
+              "craft",
+              "import"
+            ],
+            "title": "Market Tier",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "name_hebrew": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name Hebrew"
+          },
+          "style": {
+            "title": "Style",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "brewery",
+          "style",
+          "abv",
+          "market_tier"
+        ],
+        "title": "DeckBeer",
+        "type": "object"
+      },
       "DominantComponent": {
         "enum": [
           "baseline",
@@ -738,6 +814,22 @@
           "adventure"
         ],
         "title": "OnboardingAnswers",
+        "type": "object"
+      },
+      "RateDeckResponse": {
+        "properties": {
+          "beers": {
+            "items": {
+              "$ref": "#/components/schemas/DeckBeer"
+            },
+            "title": "Beers",
+            "type": "array"
+          }
+        },
+        "required": [
+          "beers"
+        ],
+        "title": "RateDeckResponse",
         "type": "object"
       },
       "RatingRecord": {
@@ -1580,6 +1672,32 @@
         "summary": "Complete Onboarding",
         "tags": [
           "onboarding"
+        ]
+      }
+    },
+    "/rate/deck": {
+      "get": {
+        "operationId": "getRateDeck",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateDeckResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Rate Deck",
+        "tags": [
+          "rate"
         ]
       }
     },

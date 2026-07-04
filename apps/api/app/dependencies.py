@@ -2,6 +2,7 @@ from fastapi import HTTPException, status
 
 from app.config import settings
 from app.db import get_pool
+from app.services.match_engine import BeerCandidate
 from app.services.taste_feedback_service import TasteFeedbackService
 
 
@@ -18,5 +19,13 @@ def get_taste_feedback_service() -> TasteFeedbackService:
     """Wired in production via lifespan; overridden in tests."""
     raise NotImplementedError(
         "TasteFeedbackService is not wired in this build. Override via "
+        "dependency_overrides in tests, or wire it in the lifespan."
+    )
+
+
+async def get_deck_catalog() -> list[BeerCandidate]:
+    """Wired in production via lifespan; overridden in tests."""
+    raise NotImplementedError(
+        "Deck catalog is not wired in this build. Override via "
         "dependency_overrides in tests, or wire it in the lifespan."
     )

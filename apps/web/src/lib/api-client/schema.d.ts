@@ -174,6 +174,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/rate/deck": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Rate Deck */
+        get: operations["getRateDeck"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/ratings": {
         parameters: {
             query?: never;
@@ -364,6 +381,30 @@ export interface components {
              */
             rating: "loved" | "fine" | "disliked";
         };
+        /** DeckBeer */
+        DeckBeer: {
+            /** Abv */
+            abv: number;
+            /** Brewery */
+            brewery: string;
+            /** Color */
+            color?: string | null;
+            /** Id */
+            id: string;
+            /** Image Url */
+            image_url?: string | null;
+            /**
+             * Market Tier
+             * @enum {string}
+             */
+            market_tier: "mainstream" | "craft" | "import";
+            /** Name */
+            name: string;
+            /** Name Hebrew */
+            name_hebrew?: string | null;
+            /** Style */
+            style: string;
+        };
         /**
          * DominantComponent
          * @enum {string}
@@ -506,6 +547,11 @@ export interface components {
             strength: components["schemas"]["StrengthPref"];
             sweet_tooth: components["schemas"]["SweetPref"];
             water: components["schemas"]["Carbonation"];
+        };
+        /** RateDeckResponse */
+        RateDeckResponse: {
+            /** Beers */
+            beers: components["schemas"]["DeckBeer"][];
         };
         /** RatingRecord */
         RatingRecord: {
@@ -956,6 +1002,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    getRateDeck: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RateDeckResponse"];
                 };
             };
         };
