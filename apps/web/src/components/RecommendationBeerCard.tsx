@@ -189,7 +189,15 @@ export function RecommendationBeerCard({
             {t('recommendations.rateSaved', 'Thanks — saved your rating')}
           </p>
         ) : (
-          <RatingTapper onRate={handleRate} disabled={rateStatus === SAVE_STATUS.saving} />
+          <RatingTapper
+            onRate={handleRate}
+            disabled={rateStatus === SAVE_STATUS.saving}
+            labels={{
+              loved: t('rate.tapper.loved', 'Loved it'),
+              fine: t('rate.tapper.fine', 'It was fine'),
+              disliked: t('rate.tapper.disliked', 'Not for me'),
+            }}
+          />
         )}
         {rateStatus === SAVE_STATUS.error && (
           <p role="alert" className="mt-2 text-sm text-red-600">

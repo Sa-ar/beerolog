@@ -34,7 +34,14 @@ export function RateBeerCard({
         {beer.brewery} · {beer.style} · {beer.abv}%
       </p>
       <div className="mt-5">
-        <RatingTapper onRate={rate} />
+        <RatingTapper
+          onRate={rate}
+          labels={{
+            loved: t('rate.tapper.loved', 'Loved it'),
+            fine: t('rate.tapper.fine', 'It was fine'),
+            disliked: t('rate.tapper.disliked', 'Not for me'),
+          }}
+        />
       </div>
       <div className="mt-4 text-start">
         <label htmlFor="rate-note" className="text-xs font-medium text-neutral-600">

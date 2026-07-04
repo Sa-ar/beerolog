@@ -14,9 +14,10 @@ const LINK_BUTTON =
   'mt-2 inline-flex h-11 items-center justify-center gap-2 rounded bg-brand-500 px-5 text-base font-medium text-[hsl(26_30%_10%)] transition-colors hover:bg-brand-600'
 
 function Shell({ children }: { children: React.ReactNode }) {
+  const { t } = useTranslation()
   return (
     <div className={`mx-auto max-w-md py-8 text-center ${PAGE_SHELL_X}`}>
-      <h1 className="mb-6 text-2xl font-bold text-neutral-900">Rate beers</h1>
+      <h1 className="mb-6 text-2xl font-bold text-neutral-900">{t('rate.title', 'Rate beers')}</h1>
       {children}
     </div>
   )

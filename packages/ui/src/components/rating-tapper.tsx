@@ -11,9 +11,11 @@ const OPTIONS: { value: Rating; label: string; emoji: string }[] = [
 interface RatingTapperProps {
   onRate: (rating: Rating) => void
   disabled?: boolean
+  /** Localized labels keyed by rating; falls back to the built-in English. */
+  labels?: Partial<Record<Rating, string>>
 }
 
-export function RatingTapper({ onRate, disabled }: RatingTapperProps) {
+export function RatingTapper({ onRate, disabled, labels }: RatingTapperProps) {
   return (
     <div className="flex gap-3">
       {OPTIONS.map((opt) => (
@@ -27,7 +29,7 @@ export function RatingTapper({ onRate, disabled }: RatingTapperProps) {
           )}
         >
           <span className="text-2xl">{opt.emoji}</span>
-          <span>{opt.label}</span>
+          <span>{labels?.[opt.value] ?? opt.label}</span>
         </button>
       ))}
     </div>
