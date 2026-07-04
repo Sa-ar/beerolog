@@ -1,9 +1,13 @@
 import type { TFunction } from 'i18next'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Badge, Card } from '@beerolog/ui'
+import type { Rating } from '@beerolog/types'
+import { Badge, Card, RatingTapper } from '@beerolog/ui'
+import { apiClient } from '../lib/api-client/client'
 import { BeerColorGlass } from './BeerColorGlass'
 import { deriveBeerColor, type BeerColor } from '../lib/beer-color'
 import { matchAlignmentPercents, type MatchCalibration } from '../lib/match-score'
+import { SAVE_STATUS, type SaveStatus } from '../lib/save-status'
 import type { AbvIntent } from '../lib/session-intent'
 
 type Breakdown = {
@@ -69,6 +73,17 @@ export function RecommendationBeerCard({
     abvIntent,
     calibration,
   )
+  // Immediate (card) rating path. Optimistic: show 'saving' at once, then the
+  // saved confirmation; on error keep the tapper so the user can retry.
+  const [rateStatus, setRateStatus] = useState<SaveStatus>(SAVE_STATUS.idle)
+
+  async function handleRate(rating: Rating) {
+    setRateStatus(SAVE_STATUS.saving)
+    const { error } = await apiClient.POST('/ratings', {
+      body: { beer_id: beer.id, rating },
+    })
+    setRateStatus(error ? SAVE_STATUS.error : SAVE_STATUS.saved)
+  }
 
   return (
     <Card
@@ -164,6 +179,23 @@ export function RecommendationBeerCard({
             </details>
           </div>
         </div>
+      </div>
+      <div className="border-t border-neutral-200 px-4 py-3 sm:px-6">
+        <p className="mb-2 text-xs font-medium text-neutral-600">
+          {t('recommendations.ratePrompt', 'Had this one? Rate it')}
+        </p>
+        {rateStatus === SAVE_STATUS.saved ? (
+          <p role="status" className="text-sm text-neutral-700">
+            {t('recommendations.rateSaved', 'Thanks — saved your rating')}
+          </p>
+        ) : (
+          <RatingTapper onRate={handleRate} disabled={rateStatus === SAVE_STATUS.saving} />
+        )}
+        {rateStatus === SAVE_STATUS.error && (
+          <p role="alert" className="mt-2 text-sm text-red-600">
+            {t('recommendations.rateError', "Couldn't save — tap to retry")}
+          </p>
+        )}
       </div>
     </Card>
   )
