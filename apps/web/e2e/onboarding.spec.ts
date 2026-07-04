@@ -33,8 +33,9 @@ async function signIn(page: Page) {
 }
 
 // Each quiz option carries data-value = the wire enum value (language-agnostic).
+// The input is sr-only; click the enclosing label like a real user would.
 async function pick(page: Page, value: string) {
-  await page.locator(`[data-value="${value}"]`).click()
+  await page.locator(`label:has([data-value="${value}"])`).click()
 }
 
 test('signed-in user walks the adaptive quiz and gets a radar + persona', async ({ page }) => {
@@ -53,7 +54,7 @@ test('signed-in user walks the adaptive quiz and gets a radar + persona', async 
 
   // Back removes the last answer and re-asks it.
   await page.getByTestId('quiz-back').click()
-  await expect(page.locator('[data-value="dark_70"]')).toBeVisible()
+  await expect(page.locator('label:has([data-value="dark_70"])')).toBeVisible()
   await pick(page, 'dark_70')
 
   await pick(page, 'strong') // fizzy or flat → bubbles
