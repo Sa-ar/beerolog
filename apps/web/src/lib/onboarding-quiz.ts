@@ -60,7 +60,7 @@ export const QUESTIONS: QuestionDef[] = [
   // Optional capstone flavor-cue grid.
   { id: 'flavor_cues', field: 'flavor_cues', type: 'multi', group: 'cue', optional: true,
     options: ['grapefruit', 'caramel', 'pine', 'tropical', 'banana_bread',
-      'citrus_zest', 'coffee', 'bread_crust'] },
+      'citrus_zest', 'bread_crust'] },
 ]
 
 const isAsked = (q: QuestionDef, a: Answers) => (q.shouldAsk ? q.shouldAsk(a) : true)
