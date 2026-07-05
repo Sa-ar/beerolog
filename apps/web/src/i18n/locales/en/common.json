@@ -276,7 +276,7 @@
       "coffee": "Your coffee order?",
       "chocolate": "Dark chocolate — how dark?",
       "water": "Fizzy or flat?",
-      "sweet_tooth": "Sweet tooth, or dry & crisp?",
+      "sweet_tooth": "Do you have a sweet tooth?",
       "strength": "How strong do you like your drink — light or boozy?",
       "sour_foods": "Sour & vinegary things — pickles, kombucha?",
       "sour_wild": "Funky, wild, barnyard flavors too?",
@@ -316,7 +316,7 @@
       "none": "Not a chocolate person"
     },
     "fizz": { "strong": "Love the fizz", "light": "A little fizz", "still": "Prefer it flat" },
-    "sweet": { "rich": "Sweet & rich", "balanced": "Balanced", "dry": "Dry & crisp" },
+    "sweet": { "rich": "Yes — I love sweet & rich", "balanced": "No strong preference", "dry": "I prefer light & not-sweet" },
     "strength": {
       "light": "Light & easy-drinking (low alcohol)",
       "medium": "Middle of the road",
