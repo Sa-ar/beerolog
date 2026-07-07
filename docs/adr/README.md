@@ -27,3 +27,4 @@ Write or update an ADR when a decision changes product boundary, system shape, o
 - `0004-compliance-privacy-and-accessibility.md`
 - `0005-richer-taste-model-and-adaptive-quiz.md`
 - `0006-availability-signal-log.md`
+- `0007-agent-ready-interfaces.md`

@@ -14,6 +14,7 @@ from app.dependencies import (
     get_taste_feedback_service,
 )
 from app.errors import BeerologError
+from app.mcp_server import mcp as mcp_server
 from app.observability import configure_logging, instrument_requests, logger
 from app.routes import (
     availability,
@@ -22,6 +23,7 @@ from app.routes import (
     health,
     icons,
     onboarding,
+    public_catalog,
     rate,
     ratings,
     recommendations,
@@ -91,7 +93,10 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
             app.dependency_overrides[get_note_analyzer] = lambda: note_analyzer
 
     try:
-        yield
+        # Run the MCP streamable-http session manager alongside the app so the
+        # mounted /mcp sub-app works (Starlette does not run mounted lifespans).
+        async with mcp_server.session_manager.run():
+            yield
     finally:
         await close_pool()
         logger.info("Beerolog API shutdown complete")
@@ -115,9 +120,14 @@ app.include_router(recommendations.router)
 app.include_router(availability.router)
 app.include_router(guest_recommendations.router)
 app.include_router(ratings.router)
+app.include_router(public_catalog.router)
 app.include_router(rate.router)
 app.include_router(users.router)
 app.include_router(debug.router)
+
+# Agent-ready MCP surface: tools shim the REST routes above. Mounted (not a
+# router) because it is a self-contained ASGI app with its own transport.
+app.mount("/mcp", mcp_server.streamable_http_app())
 
 
 @app.exception_handler(BeerologError)

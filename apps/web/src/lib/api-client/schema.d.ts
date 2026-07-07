@@ -72,6 +72,74 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/catalog": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Catalog */
+        get: operations["listCatalog"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/catalog/recommend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Recommend Catalog */
+        post: operations["recommendCatalog"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/catalog/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Search Catalog Route */
+        get: operations["searchCatalog"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/catalog/{beer_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Catalog Beer */
+        get: operations["getCatalogBeer"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/debug/recommendations": {
         parameters: {
             query?: never;
@@ -523,6 +591,29 @@ export interface components {
          * @enum {string}
          */
         Carbonation: "still" | "light" | "strong";
+        /** CatalogBeer */
+        CatalogBeer: {
+            /** Abv */
+            abv: number;
+            /** Adventurousness */
+            adventurousness: number;
+            /** Brewery */
+            brewery: string;
+            /** Color */
+            color: string;
+            /** Id */
+            id: string;
+            /** Image Url */
+            image_url?: string | null;
+            /** Market Tier */
+            market_tier: string;
+            /** Name */
+            name: string;
+            /** Name Hebrew */
+            name_hebrew?: string | null;
+            /** Style */
+            style: string;
+        };
         /** CatalogIconItem */
         CatalogIconItem: {
             /** Key */
@@ -531,6 +622,37 @@ export interface components {
             purpose: string;
             /** Svg */
             svg: string;
+        };
+        /** CatalogListResponse */
+        CatalogListResponse: {
+            /** Beers */
+            beers: components["schemas"]["CatalogBeer"][];
+            /** Page */
+            page: number;
+            /** Page Size */
+            page_size: number;
+            /** Total */
+            total: number;
+        };
+        /** CatalogRecommendRequest */
+        CatalogRecommendRequest: {
+            /**
+             * Limit
+             * @default 5
+             */
+            limit: number;
+            /** Preference Text */
+            preference_text: string;
+        };
+        /** CatalogRecommendResponse */
+        CatalogRecommendResponse: {
+            /** Results */
+            results: components["schemas"]["CatalogRecommendation"][];
+        };
+        /** CatalogRecommendation */
+        CatalogRecommendation: {
+            beer: components["schemas"]["CatalogBeer"];
+            why: components["schemas"]["WhyLine"];
         };
         /**
          * ChocoPref
@@ -1113,6 +1235,138 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AvailabilityReportResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    listCatalog: {
+        parameters: {
+            query?: {
+                page?: number;
+                page_size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogListResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    recommendCatalog: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CatalogRecommendRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogRecommendResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    searchCatalog: {
+        parameters: {
+            query?: {
+                q?: string | null;
+                style?: string | null;
+                brewery?: string | null;
+                min_abv?: number | null;
+                max_abv?: number | null;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogBeer"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    getCatalogBeer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                beer_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogBeer"];
                 };
             };
             /** @description Validation Error */

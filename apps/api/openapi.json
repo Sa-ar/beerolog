@@ -575,6 +575,76 @@
         "title": "Carbonation",
         "type": "string"
       },
+      "CatalogBeer": {
+        "properties": {
+          "abv": {
+            "title": "Abv",
+            "type": "number"
+          },
+          "adventurousness": {
+            "title": "Adventurousness",
+            "type": "number"
+          },
+          "brewery": {
+            "title": "Brewery",
+            "type": "string"
+          },
+          "color": {
+            "title": "Color",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "market_tier": {
+            "title": "Market Tier",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "name_hebrew": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name Hebrew"
+          },
+          "style": {
+            "title": "Style",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "brewery",
+          "style",
+          "abv",
+          "market_tier",
+          "color",
+          "adventurousness"
+        ],
+        "title": "CatalogBeer",
+        "type": "object"
+      },
       "CatalogIconItem": {
         "properties": {
           "key": {
@@ -596,6 +666,91 @@
           "svg"
         ],
         "title": "CatalogIconItem",
+        "type": "object"
+      },
+      "CatalogListResponse": {
+        "properties": {
+          "beers": {
+            "items": {
+              "$ref": "#/components/schemas/CatalogBeer"
+            },
+            "title": "Beers",
+            "type": "array"
+          },
+          "page": {
+            "title": "Page",
+            "type": "integer"
+          },
+          "page_size": {
+            "title": "Page Size",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "beers",
+          "page",
+          "page_size",
+          "total"
+        ],
+        "title": "CatalogListResponse",
+        "type": "object"
+      },
+      "CatalogRecommendRequest": {
+        "properties": {
+          "limit": {
+            "default": 5,
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "preference_text": {
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Preference Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "preference_text"
+        ],
+        "title": "CatalogRecommendRequest",
+        "type": "object"
+      },
+      "CatalogRecommendResponse": {
+        "properties": {
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/CatalogRecommendation"
+            },
+            "title": "Results",
+            "type": "array"
+          }
+        },
+        "required": [
+          "results"
+        ],
+        "title": "CatalogRecommendResponse",
+        "type": "object"
+      },
+      "CatalogRecommendation": {
+        "properties": {
+          "beer": {
+            "$ref": "#/components/schemas/CatalogBeer"
+          },
+          "why": {
+            "$ref": "#/components/schemas/WhyLine"
+          }
+        },
+        "required": [
+          "beer",
+          "why"
+        ],
+        "title": "CatalogRecommendation",
         "type": "object"
       },
       "ChocoPref": {
@@ -1976,6 +2131,276 @@
         "summary": "Post Availability Report",
         "tags": [
           "availability"
+        ]
+      }
+    },
+    "/catalog": {
+      "get": {
+        "operationId": "listCatalog",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Page Size",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Catalog",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/catalog/recommend": {
+      "post": {
+        "operationId": "recommendCatalog",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CatalogRecommendRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogRecommendResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Recommend Catalog",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/catalog/search": {
+      "get": {
+        "operationId": "searchCatalog",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "in": "query",
+            "name": "style",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Style"
+            }
+          },
+          {
+            "in": "query",
+            "name": "brewery",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Brewery"
+            }
+          },
+          {
+            "in": "query",
+            "name": "min_abv",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Min Abv"
+            }
+          },
+          {
+            "in": "query",
+            "name": "max_abv",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Max Abv"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CatalogBeer"
+                  },
+                  "title": "Response Searchcatalog",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Search Catalog Route",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/catalog/{beer_id}": {
+      "get": {
+        "operationId": "getCatalogBeer",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "beer_id",
+            "required": true,
+            "schema": {
+              "title": "Beer Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogBeer"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Catalog Beer",
+        "tags": [
+          "catalog"
         ]
       }
     },

@@ -12,6 +12,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert, Button, Card, CardContent } from '@beerolog/ui'
 import { GuestResults } from '../components/GuestResults'
+import { BeerJsonLd } from '../components/BeerJsonLd'
 import { QuizStepper } from '../components/QuizStepper'
 import { PAGE_MAIN } from '../lib/page-shell'
 import { type Answers, prunedAnswers } from '../lib/onboarding-quiz'
@@ -123,6 +124,7 @@ function TryPage() {
           <p className="text-sm text-neutral-600" data-testid="try-unlocked-count">
             {t('try.unlocked', { count: view.data.unlocked_count })}
           </p>
+          <BeerJsonLd beers={view.data.results} />
           <GuestResults
             results={view.data.results}
             unlockedCount={view.data.unlocked_count}

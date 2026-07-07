@@ -298,6 +298,47 @@ class RecommendationsResponse(BaseModel):
 
 
 # ---------------------------------------------------------------------------
+# Public catalog (agent-ready, unauthenticated)
+# ---------------------------------------------------------------------------
+
+
+class CatalogBeer(BaseModel):
+    # market_tier / color are plain str here (not Literal) so an unexpected DB
+    # value never 500s this public read surface.
+    id: str
+    name: str
+    name_hebrew: str | None = None
+    brewery: str
+    style: str
+    abv: float
+    market_tier: str
+    color: str
+    image_url: str | None = None
+    adventurousness: float
+
+
+class CatalogListResponse(BaseModel):
+    beers: list[CatalogBeer]
+    page: int
+    page_size: int
+    total: int
+
+
+class CatalogRecommendRequest(BaseModel):
+    preference_text: str = Field(min_length=1, max_length=500)
+    limit: int = Field(default=5, ge=1, le=20)
+
+
+class CatalogRecommendation(BaseModel):
+    beer: CatalogBeer
+    why: WhyLine
+
+
+class CatalogRecommendResponse(BaseModel):
+    results: list[CatalogRecommendation]
+
+
+# ---------------------------------------------------------------------------
 # Availability ("where can I buy this beer")
 # ---------------------------------------------------------------------------
 
