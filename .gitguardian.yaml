@@ -1,0 +1,7 @@
+version: 2
+secret:
+  ignored-matches:
+    # Local per-worktree dev Postgres default password — throwaway DB, no real
+    # data. See the note atop docker-compose.yml. Not a live credential.
+    - name: docker-compose local dev postgres default password
+      match: postgres
