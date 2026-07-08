@@ -26,8 +26,7 @@ class Settings(BaseSettings):
     api_secret: str = "dev-secret"
     cors_allowed_origins: list[str] = ["http://localhost:3000"]
     # Optional regex of browser origins allowed to call the API, in addition to
-    # cors_allowed_origins. Lets preview deployments allow Vercel's per-commit
-    # preview URLs without wildcarding the explicit production allowlist.
+    # cors_allowed_origins. Overrides the built-in Vercel preview-URL default.
     cors_allowed_origin_regex: str = ""
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
 
@@ -90,16 +89,13 @@ class Settings(BaseSettings):
         return value
 
     @property
-    def effective_cors_origin_regex(self) -> str | None:
+    def effective_cors_origin_regex(self) -> str:
         """Regex of allowed origins passed to CORSMiddleware. An explicit
-        CORS_ALLOWED_ORIGIN_REGEX wins; otherwise preview deployments auto-allow
-        this project's Vercel preview URLs so per-commit preview domains work
-        without manual config. Production never gets an implicit regex."""
-        if self.cors_allowed_origin_regex:
-            return self.cors_allowed_origin_regex
-        if self.app_env == "preview":
-            return VERCEL_PREVIEW_ORIGIN_REGEX
-        return None
+        CORS_ALLOWED_ORIGIN_REGEX wins; otherwise this project's Vercel preview
+        URLs are allowed in every environment so per-commit preview domains work
+        without manual config. The pattern is scoped to this project's Vercel org
+        (only the team can deploy there), so it can't match an attacker origin."""
+        return self.cors_allowed_origin_regex or VERCEL_PREVIEW_ORIGIN_REGEX
 
 
 @lru_cache

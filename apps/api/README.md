@@ -59,7 +59,7 @@ Tests still use in-memory overrides via FastAPI `dependency_overrides`, but the 
 | `CLERK_SECRET_KEY` | yes | — | Clerk secret key (`sk_test_...` for dev, `sk_live_...` for prod) |
 | `CLERK_PUBLISHABLE_KEY` | yes | — | Clerk publishable key; used to derive the JWKS URL for bearer token verification |
 | `CORS_ALLOWED_ORIGINS` | no | `http://localhost:3000` | Comma-separated browser origins allowed to call the API |
-| `CORS_ALLOWED_ORIGIN_REGEX` | no | — (auto for `preview`) | Regex of allowed browser origins, in addition to the list. `preview` deployments auto-allow this project's Vercel preview URLs |
+| `CORS_ALLOWED_ORIGIN_REGEX` | no | project Vercel previews | Regex of allowed browser origins, in addition to the list. This project's Vercel preview URLs are allowed by default; set to override |
 | `LOG_LEVEL` | no | `INFO` | Python log level for request logs and startup warnings |
 | `API_SECRET` | no | `dev-secret` | HS256 secret for deferred QR and challenge tokens |
 
