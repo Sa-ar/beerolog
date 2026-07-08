@@ -364,7 +364,6 @@ function RecommendationsContent() {
             hasSession={hasSession}
             abvIntent={abvIntent}
             calibration={calibration}
-            searchArea={searchArea}
             venues={availability[beer.id]}
           />
         ))}
