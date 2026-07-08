@@ -36,7 +36,7 @@ export function GuestResults({ results, unlockedCount }: GuestResultsProps) {
 
       {locked.length > 0 ? (
         <section className="space-y-4">
-          <Card className="border-brand-200 bg-gradient-to-br from-brand-50 via-white to-amber-50/80 p-5 text-center shadow-sm sm:p-6">
+          <Card className="border-brand-200 bg-gradient-to-br from-brand-50 to-amber-50/80 p-5 text-center shadow-sm sm:p-6">
             <h2 className="text-lg font-bold tracking-tight text-neutral-900">
               {t('try.lockedTitle', { count: locked.length })}
             </h2>

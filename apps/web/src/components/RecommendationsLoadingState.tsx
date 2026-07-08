@@ -37,7 +37,7 @@ function RecommendationCardSkeleton({ isTopPick }: { isTopPick: boolean }) {
       className={[
         'overflow-hidden',
         isTopPick
-          ? 'border-brand-300 bg-gradient-to-br from-brand-50 via-white to-amber-50/80 shadow-md'
+          ? 'border-brand-300 bg-gradient-to-br from-brand-50 to-amber-50/80 shadow-md'
           : 'border-neutral-200 bg-white shadow-sm',
       ].join(' ')}
     >
