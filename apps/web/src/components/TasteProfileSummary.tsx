@@ -26,6 +26,9 @@ export function TasteProfileSummary({ greeting, baseline }: TasteProfileSummaryP
   const title = flavorTitle(t, baseline)
   const heroSvg = resolveProfileHeroSvg(baseline, baseline.icons)
   const persona = personaForLang(baseline, i18n.language)
+  // One canonical identity: prefer the generated persona name, fall back to the
+  // deterministic flavor title. #226
+  const displayName = persona?.title ?? title
   const radarAxes = [
     { key: 'bitterness', value: baseline.bitterness },
     { key: 'sweetness', value: baseline.sweetness ?? 0.5 },
@@ -70,10 +73,14 @@ export function TasteProfileSummary({ greeting, baseline }: TasteProfileSummaryP
             <p className="text-xs font-semibold uppercase tracking-wide text-brand-300">
               {t('profile.title')}
             </p>
-            {title ? (
-              <h2 className="text-2xl font-bold tracking-tight text-neutral-900">{title}</h2>
+            {displayName ? (
+              <Heading level={2} data-testid="persona-title" className="text-2xl">
+                {displayName}
+              </Heading>
             ) : null}
-            <p className="text-base text-neutral-600">{noveltyLabel(t, baseline)}</p>
+            <p className="text-base text-neutral-600">
+              {persona?.blurb ?? noveltyLabel(t, baseline)}
+            </p>
           </div>
         </div>
 
@@ -94,17 +101,6 @@ export function TasteProfileSummary({ greeting, baseline }: TasteProfileSummaryP
       </Card>
 
       <Card className="space-y-4 p-6">
-        {persona ? (
-          <div className="space-y-1 text-center">
-            <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
-              {t('profile.persona.heading')}
-            </p>
-            <h2 data-testid="persona-title" className="text-xl font-bold text-neutral-900">
-              {persona.title}
-            </h2>
-            <p className="text-sm text-neutral-600">{persona.blurb}</p>
-          </div>
-        ) : null}
         <TasteRadar axes={radarAxes} labels={radarLabels} ariaLabel={t('profile.radar.aria')} />
       </Card>
 
