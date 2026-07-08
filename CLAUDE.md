@@ -43,3 +43,7 @@ Record triage category and readiness in the GitHub issue body (`Type` and `Curre
 ### Domain docs
 
 Beerolog is a single-context repo with shared vocabulary in `CONTEXT.md` and durable decisions in `docs/adr/`. See `docs/agents/domain.md`.
+
+### Frontend conventions
+
+Web code (`apps/web`, `packages/ui`) follows conventions distilled from review feedback: shared `Heading` primitive over inline headings, `const`-object enums with derived types, no component functions nested inside components, and `useDebouncedValue` + react-query for debounced search. See `docs/agents/frontend-conventions.md`.
