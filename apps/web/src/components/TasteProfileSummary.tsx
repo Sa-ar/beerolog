@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next'
 import { CatalogIcon, GeneratedTasteIcon, resolveProfileHeroSvg } from '@beerolog/icons'
 import { Badge, Button, Card, Heading } from '@beerolog/ui'
 import {
-  dialDescriptor,
   flavorTitle,
   noveltyLabel,
   personaForLang,
@@ -113,50 +112,6 @@ export function TasteProfileSummary({ greeting, baseline }: TasteProfileSummaryP
         <SessionQuickPick baseline={baseline} />
       </Card>
 
-      <Card className="space-y-5 p-6">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
-          {t('profile.summary.dials')}
-        </h2>
-
-        <div className="space-y-4">
-          <TasteDial
-            label={t('profile.dials.carbonation.label')}
-            value={baseline.bubbles}
-            low={t('profile.dials.carbonation.low')}
-            mid={t('profile.dials.carbonation.mid')}
-            high={t('profile.dials.carbonation.high')}
-          />
-          <TasteDial
-            label={t('profile.dials.bitterness.label')}
-            value={baseline.bitterness}
-            low={t('profile.dials.bitterness.low')}
-            mid={t('profile.dials.bitterness.mid')}
-            high={t('profile.dials.bitterness.high')}
-          />
-          <TasteDial
-            label={t('profile.dials.sweetness.label')}
-            value={baseline.sweetness ?? 0.5}
-            low={t('profile.dials.sweetness.low')}
-            mid={t('profile.dials.sweetness.mid')}
-            high={t('profile.dials.sweetness.high')}
-          />
-          <TasteDial
-            label={t('profile.dials.body.label')}
-            value={baseline.body ?? 0.5}
-            low={t('profile.dials.body.low')}
-            mid={t('profile.dials.body.mid')}
-            high={t('profile.dials.body.high')}
-          />
-          <TasteDial
-            label={t('profile.dials.novelty.label')}
-            value={baseline.novelty_affinity}
-            low={t('profile.dials.novelty.low')}
-            mid={t('profile.dials.novelty.mid')}
-            high={t('profile.dials.novelty.high')}
-          />
-        </div>
-      </Card>
-
       <section className="flex flex-col gap-3">
         {ratingCount != null ? (
           <p className="text-center text-sm text-neutral-600">
@@ -176,40 +131,6 @@ export function TasteProfileSummary({ greeting, baseline }: TasteProfileSummaryP
         </Link>
         <p className="text-center text-xs text-neutral-500">{t('profile.summary.retakeHint')}</p>
       </section>
-    </div>
-  )
-}
-
-function TasteDial({
-  label,
-  value,
-  low,
-  mid,
-  high,
-}: {
-  label: string
-  value: number
-  low: string
-  mid: string
-  high: string
-}) {
-  const descriptor = dialDescriptor(value, low, mid, high)
-  const percent = Math.round(value * 100)
-
-  return (
-    <div className="space-y-1.5">
-      <div className="flex items-baseline justify-between text-sm">
-        <span className="font-medium text-neutral-900">{label}</span>
-        <span className="text-neutral-500">
-          {descriptor} · {percent}%
-        </span>
-      </div>
-      <div className="h-2.5 overflow-hidden rounded-full bg-neutral-200">
-        <div
-          className="h-full rounded-full bg-gradient-to-r rtl:bg-gradient-to-l from-brand-500 to-brand-300 transition-all"
-          style={{ width: `${percent}%` }}
-        />
-      </div>
     </div>
   )
 }
