@@ -56,8 +56,13 @@ def _validate_azp(payload: dict) -> None:
     azp = payload.get("azp")
     if azp is None:
         return
-    if azp not in settings.cors_allowed_origins:
-        raise JWTError("Invalid authorized party")
+    # Accept the same origins CORS does: the explicit allowlist plus the Vercel
+    # preview-URL regex, so tokens minted on a preview frontend aren't rejected.
+    if azp in settings.cors_allowed_origins:
+        return
+    if re.match(settings.effective_cors_origin_regex, azp):
+        return
+    raise JWTError("Invalid authorized party")
 
 
 def _decode_clerk_token(token: str) -> dict:

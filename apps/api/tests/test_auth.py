@@ -104,3 +104,21 @@ def test_validate_azp_rejects_unknown_origin(monkeypatch):
 
     with pytest.raises(JWTError, match="authorized party"):
         auth._decode_clerk_token("token-value")
+
+
+def test_validate_azp_accepts_project_preview_origin(monkeypatch):
+    auth._clear_jwks_cache()
+    monkeypatch.setattr(settings, "clerk_publishable_key", "pk_test_ZXhhbXBsZS5hY2NvdW50cy5kZXYk")
+    monkeypatch.setattr(settings, "cors_allowed_origins", ["http://localhost:3000"])
+    monkeypatch.setattr(auth, "_fetch_jwks", lambda: {"keys": []})
+    monkeypatch.setattr(
+        auth.jwt,
+        "decode",
+        lambda *args, **kwargs: {
+            "sub": "user_clerk_abc",
+            "azp": "https://beerolog-git-tech-debt-deaf43-saars-projects-d2973f9d.vercel.app",
+        },
+    )
+
+    payload = auth._decode_clerk_token("token-value")
+    assert payload["sub"] == "user_clerk_abc"
