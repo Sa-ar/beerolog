@@ -1,4 +1,5 @@
 import type React from 'react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen, waitFor } from '@testing-library/react'
 import i18next from 'i18next'
 import { I18nextProvider, initReactI18next } from 'react-i18next'
@@ -29,8 +30,7 @@ vi.mock('@clerk/tanstack-react-start', () => ({
 import { Route } from './recommendations'
 import { GUEST_ANSWERS_KEY } from '../lib/guest-answers'
 
-const RecommendationsPage = (Route as unknown as { component: () => React.ReactElement })
-  .component
+const RecommendationsPage = (Route as unknown as { component: () => React.ReactElement }).component
 
 const i18n = i18next.createInstance()
 
@@ -45,10 +45,13 @@ beforeAll(async () => {
 })
 
 function renderPage() {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
-    <I18nextProvider i18n={i18n}>
-      <RecommendationsPage />
-    </I18nextProvider>,
+    <QueryClientProvider client={queryClient}>
+      <I18nextProvider i18n={i18n}>
+        <RecommendationsPage />
+      </I18nextProvider>
+    </QueryClientProvider>,
   )
 }
 
@@ -126,6 +129,9 @@ describe('/recommendations post-signup hydration', () => {
       if (path === '/recommendations' && init?.method === 'POST') {
         return Promise.resolve(recommendationsResponse())
       }
+      if (path === '/availability' && init?.method === 'POST') {
+        return Promise.resolve({ ok: true, status: 200, json: async () => ({ availability: {} }) })
+      }
       throw new Error(`unexpected apiFetch ${path}`)
     })
 
@@ -133,7 +139,11 @@ describe('/recommendations post-signup hydration', () => {
 
     await waitFor(() => expect(screen.getByText('Authed Lager')).toBeInTheDocument())
 
-    const paths = apiFetchMock.mock.calls.map((c) => c[0] as string)
+    // Availability is an orthogonal query fired once results render; assert the
+    // hydration sequence without it.
+    const paths = apiFetchMock.mock.calls
+      .map((c) => c[0] as string)
+      .filter((p) => p !== '/availability')
     expect(paths).toEqual(['/me/baseline-taste', '/onboarding', '/recommendations'])
 
     // POST /onboarding carried the stored guest answers.

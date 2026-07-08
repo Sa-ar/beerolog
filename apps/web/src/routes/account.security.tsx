@@ -1,7 +1,8 @@
 import { useReverification, useSession, useUser } from '@clerk/tanstack-react-start'
 import { Button, Card, CardContent } from '@beerolog/ui'
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { clerkErrorMessage } from '../lib/clerkError'
 
@@ -33,7 +34,6 @@ function SecurityPage() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [sessions, setSessions] = useState<ActiveSession[]>([])
 
   const updatePassword = useReverification(
     (params: { currentPassword?: string; newPassword: string; signOutOfOtherSessions?: boolean }) =>
@@ -41,15 +41,12 @@ function SecurityPage() {
   )
   const revokeSession = useReverification((s: ActiveSession) => s.revoke())
 
-  async function loadSessions() {
-    if (!user) return
-    const list = (await user.getSessions()) as unknown as ActiveSession[]
-    setSessions(list)
-  }
-
-  useEffect(() => {
-    void loadSessions()
-  }, [user?.id])
+  const sessionsQuery = useQuery({
+    queryKey: ['account', 'sessions', user?.id],
+    enabled: !!user,
+    queryFn: async () => (await user!.getSessions()) as unknown as ActiveSession[],
+  })
+  const sessions = sessionsQuery.data ?? []
 
   if (!isLoaded || !user) return null
 
@@ -68,7 +65,7 @@ function SecurityPage() {
       await updatePassword(params)
       setSaved(true)
       setPwd({ current: '', next: '', signOutOthers: false })
-      await loadSessions()
+      await sessionsQuery.refetch()
     } catch (err) {
       setError(clerkErrorMessage(err, t('account.security.error')))
     } finally {
@@ -80,7 +77,7 @@ function SecurityPage() {
     setError(null)
     try {
       await revokeSession(s)
-      await loadSessions()
+      await sessionsQuery.refetch()
     } catch (err) {
       setError(clerkErrorMessage(err, t('account.security.error')))
     }

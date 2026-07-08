@@ -6,13 +6,14 @@ import { RedirectToSignIn, Show } from '@clerk/tanstack-react-start'
 import { CatalogIcon } from '@beerolog/icons'
 import { Alert, Button, Card, Heading } from '@beerolog/ui'
 import { createFileRoute, Link } from '@tanstack/react-router'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { RecommendationBeerCard, type RecommendedBeer } from '../components/RecommendationBeerCard'
 import { RecommendationsLoadingState } from '../components/RecommendationsLoadingState'
 import { StatusCard } from '../components/StatusCard'
 import { apiFetch } from '../lib/api-fetch'
-import { fetchAvailability, type Venue } from '../lib/beer-availability'
+import { fetchAvailability } from '../lib/beer-availability'
 import { filterByAvailability } from '../lib/near-me-filter'
 import { clearGuestAnswers, readGuestAnswers } from '../lib/guest-answers'
 import { DEFAULT_MATCH_CALIBRATION, tonightMatchPercent } from '../lib/match-score'
@@ -50,11 +51,9 @@ function RecommendationsPage() {
   )
 }
 
-type PageState =
-  | { status: 'loading' }
-  | { status: 'ready'; results: RecommendedBeer[]; hasMore: boolean }
-  | { status: 'missing' }
-  | { status: 'error'; message: string; request: StoredSessionRequest }
+// Cached recommendations payload plus the derived "can load more" flag.
+// null = nothing to show (the missing/empty state).
+type RecsData = (RecommendationsPayload & { hasMore: boolean }) | null
 
 // Subset of BaselineTasteRecord (api_contracts) needed to build a baseline-only
 // recommendations request. Hand-mirrored — we don't couple to the generated client.
@@ -110,27 +109,79 @@ async function hydrateGuestAnswers(): Promise<RecommendationsPayload | null> {
   return payload
 }
 
-function getInitialPageState(): PageState {
-  if (readPendingSession()) {
-    return { status: 'loading' }
+// Resolve the initial recommendations: a pending session-start (from the
+// dashboard) wins, else post-signup guest-answer hydration, else whatever is
+// already stored. Throwing propagates to the query's error state (retryable via
+// refetch); guest-hydration failures fall back to stored/missing instead.
+async function resolveInitialRecommendations(
+  pendingRequest: StoredSessionRequest | null,
+): Promise<RecsData> {
+  const withHasMore = (payload: RecommendationsPayload): RecsData => ({
+    ...payload,
+    hasMore: hasMoreResultsAvailable(payload.results.length),
+  })
+
+  if (pendingRequest) {
+    return withHasMore(await startSession(pendingRequest.baseline, pendingRequest.session))
   }
 
-  const stored = readStoredRecommendations()
-  if (stored && stored.results.length > 0) {
-    return {
-      status: 'ready',
-      results: stored.results,
-      hasMore: hasMoreResultsAvailable(stored.results.length),
+  if (readGuestAnswers()) {
+    try {
+      const payload = await hydrateGuestAnswers()
+      if (payload) return withHasMore(payload)
+    } catch {
+      // Fall back to stored/missing below.
     }
   }
 
-  return { status: 'missing' }
+  const stored = readStoredRecommendations()
+  return stored && stored.results.length > 0 ? withHasMore(stored) : null
 }
 
 function RecommendationsContent() {
   const { t } = useTranslation()
-  const [pageState, setPageState] = useState<PageState>(getInitialPageState)
-  const [loadingMore, setLoadingMore] = useState(false)
+  const queryClient = useQueryClient()
+
+  // Consume a pending session-start once; the captured value drives both the
+  // initial query and retries (refetch), while sessionStorage is cleared so a
+  // page revisit doesn't re-run it.
+  const [pendingRequest] = useState<StoredSessionRequest | null>(() => {
+    const p = readPendingSession()
+    if (p) clearPendingSession()
+    return p
+  })
+  const recs = useQuery<RecsData, Error>({
+    queryKey: ['recommendations'],
+    queryFn: () => resolveInitialRecommendations(pendingRequest),
+    // Paint stored recs instantly unless we have a session to start or guest
+    // answers to hydrate — those show the loading state while their query runs.
+    initialData: (): RecsData | undefined => {
+      if (pendingRequest || readGuestAnswers()) return undefined
+      const stored = readStoredRecommendations()
+      return stored && stored.results.length > 0
+        ? { ...stored, hasMore: hasMoreResultsAvailable(stored.results.length) }
+        : undefined
+    },
+    initialDataUpdatedAt: 0,
+    // Session-start / hydration are one-shot; retry is explicit via refetch().
+    staleTime: Infinity,
+    retry: false,
+    refetchOnWindowFocus: false,
+  })
+
+  const loadMore = useMutation<
+    { results: RecommendedBeer[]; hasMore: boolean },
+    Error,
+    RecommendedBeer[]
+  >({
+    mutationFn: (current) => loadMoreRecommendations(current),
+    onSuccess: ({ results, hasMore }) => {
+      queryClient.setQueryData<RecsData>(['recommendations'], (prev) =>
+        prev ? { ...prev, results, hasMore } : prev,
+      )
+    },
+  })
+
   const [searchArea, setSearchArea] = useState(() => {
     try {
       return localStorage.getItem('beerolog.searchArea') ?? ''
@@ -138,162 +189,59 @@ function RecommendationsContent() {
       return ''
     }
   })
-  const [loadError, setLoadError] = useState<string | null>(null)
-  const [availability, setAvailability] = useState<Record<string, Venue[]>>({})
-  const [availabilityLoaded, setAvailabilityLoaded] = useState(false)
   const [nearMeOnly, setNearMeOnly] = useState(false)
 
-  // Fetch "available at" venues for the shown beers, re-running (debounced) when
-  // the area filter changes. Failures resolve to {} so cards fall back to the
-  // maps link.
+  // Debounce the area filter so typing doesn't refetch on every keystroke. This
+  // effect only derives a value — the fetch itself is a react-query query below.
+  const [debouncedArea, setDebouncedArea] = useState(searchArea)
   useEffect(() => {
-    if (pageState.status !== 'ready') return
-    const ids = pageState.results.map((b) => b.id)
-    let cancelled = false
-    const handle = setTimeout(() => {
-      void fetchAvailability(ids, searchArea).then((map) => {
-        if (!cancelled) {
-          setAvailability(map)
-          setAvailabilityLoaded(true)
-        }
-      })
-    }, 300)
-    return () => {
-      cancelled = true
-      clearTimeout(handle)
-    }
-  }, [pageState, searchArea])
+    const handle = setTimeout(() => setDebouncedArea(searchArea), 300)
+    return () => clearTimeout(handle)
+  }, [searchArea])
 
-  useEffect(() => {
-    const pending = readPendingSession()
-    let cancelled = false
+  const shownIds = recs.data?.results.map((b) => b.id) ?? []
+  // "Available at" venues for the shown beers. fetchAvailability resolves to {}
+  // on failure, so cards fall back to the maps link. placeholderData keeps the
+  // previous map visible while a new area refetches.
+  const availabilityQuery = useQuery({
+    queryKey: ['availability', shownIds, debouncedArea],
+    enabled: shownIds.length > 0,
+    queryFn: () => fetchAvailability(shownIds, debouncedArea),
+    placeholderData: (prev) => prev,
+  })
+  const availability = availabilityQuery.data ?? {}
+  const availabilityLoaded = availabilityQuery.isSuccess
 
-    // An in-flight session-start (from the dashboard) takes precedence and keeps
-    // its existing flow untouched.
-    if (pending) {
-      void (async () => {
-        try {
-          const data = await startSession(pending.baseline, pending.session)
-          if (cancelled) return
-          clearPendingSession()
-          setPageState({
-            status: 'ready',
-            results: data.results,
-            hasMore: hasMoreResultsAvailable(data.results.length),
-          })
-        } catch (e) {
-          if (cancelled) return
-          clearPendingSession()
-          setPageState({
-            status: 'error',
-            message: sessionStartErrorMessage(t, e),
-            request: pending,
-          })
-        }
-      })()
-      return () => {
-        cancelled = true
-      }
-    }
+  const loadError = loadMore.isError ? loadMoreErrorMessage(t, loadMore.error) : null
 
-    // No guest answers stored → nothing to hydrate; keep today's behavior exactly
-    // (renders stored recs or the missing/empty state), no extra profile fetch.
-    if (!readGuestAnswers()) {
-      return () => {
-        cancelled = true
-      }
-    }
-
-    // Guest answers present → attempt post-signup hydration (guest answers → full
-    // profile). Decoupled from the CTA: runs however the signed-in user got here.
-    setPageState({ status: 'loading' })
-    void (async () => {
-      let payload: RecommendationsPayload | null = null
-      try {
-        payload = await hydrateGuestAnswers()
-      } catch {
-        // Hydration failed (network/onboarding error) — fall back to whatever the
-        // normal flow shows (stored recs or the missing/empty state).
-      }
-      if (cancelled) return
-      if (payload) {
-        setPageState({
-          status: 'ready',
-          results: payload.results,
-          hasMore: hasMoreResultsAvailable(payload.results.length),
-        })
-      } else {
-        setPageState(getInitialPageState())
-      }
-    })()
-
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
-  async function handleRetrySession() {
-    if (pageState.status !== 'error') return
-    const { request } = pageState
-    setPageState({ status: 'loading' })
-    try {
-      const data = await startSession(request.baseline, request.session)
-      clearPendingSession()
-      setPageState({
-        status: 'ready',
-        results: data.results,
-        hasMore: hasMoreResultsAvailable(data.results.length),
-      })
-    } catch (e) {
-      clearPendingSession()
-      setPageState({
-        status: 'error',
-        message: sessionStartErrorMessage(t, e),
-        request,
-      })
-    }
-  }
-
-  async function handleLoadMore() {
-    if (pageState.status !== 'ready') return
-    setLoadingMore(true)
-    setLoadError(null)
-    try {
-      const { results: merged, hasMore: moreAvailable } = await loadMoreRecommendations(
-        pageState.results,
-      )
-      setPageState({ status: 'ready', results: merged, hasMore: moreAvailable })
-    } catch (e) {
-      setLoadError(loadMoreErrorMessage(t, e))
-    } finally {
-      setLoadingMore(false)
-    }
-  }
-
-  if (pageState.status === 'loading') {
+  if (recs.isPending) {
     return <RecommendationsLoadingState />
   }
 
-  if (pageState.status === 'error') {
+  if (recs.isError) {
     return (
-      <main className={`${PAGE_SHELL_X} flex flex-1 flex-col gap-6 py-8 sm:gap-8 sm:py-10 md:py-12`}>
+      <main
+        className={`${PAGE_SHELL_X} flex flex-1 flex-col gap-6 py-8 sm:gap-8 sm:py-10 md:py-12`}
+      >
         <section className="space-y-1">
           <p className="text-sm font-semibold uppercase tracking-wide text-brand-600">
             {t('recommendations.eyebrow')}
           </p>
-          <Heading className="text-2xl sm:text-3xl md:text-4xl">{t('recommendations.errorTitle')}</Heading>
+          <Heading className="text-2xl sm:text-3xl md:text-4xl">
+            {t('recommendations.errorTitle')}
+          </Heading>
         </section>
 
         <StatusCard
           variant="error"
           title={t('recommendations.errorTitle')}
-          description={pageState.message}
+          description={sessionStartErrorMessage(t, recs.error)}
           illustration={
             <CatalogIcon group="journey" iconKey="picks" className="h-36 w-44 opacity-60" />
           }
           action={
             <div className="flex w-full max-w-xs flex-col gap-3">
-              <Button className="w-full" size="lg" onClick={() => void handleRetrySession()}>
+              <Button className="w-full" size="lg" onClick={() => void recs.refetch()}>
                 {t('common.tryAgain')}
               </Button>
               <Link to="/" className="w-full">
@@ -308,23 +256,25 @@ function RecommendationsContent() {
     )
   }
 
-  if (pageState.status === 'missing') {
+  if (!recs.data) {
     return (
-      <main className={`${PAGE_SHELL_X} flex flex-1 flex-col gap-6 py-8 sm:gap-8 sm:py-10 md:py-12`}>
+      <main
+        className={`${PAGE_SHELL_X} flex flex-1 flex-col gap-6 py-8 sm:gap-8 sm:py-10 md:py-12`}
+      >
         <section className="space-y-1">
           <p className="text-sm font-semibold uppercase tracking-wide text-brand-600">
             {t('recommendations.eyebrow')}
           </p>
-          <Heading className="text-2xl sm:text-3xl md:text-4xl">{t('recommendations.missingTitle')}</Heading>
+          <Heading className="text-2xl sm:text-3xl md:text-4xl">
+            {t('recommendations.missingTitle')}
+          </Heading>
         </section>
 
         <StatusCard
           variant="empty"
           title={t('recommendations.missingTitle')}
           description={t('recommendations.missingDescription')}
-          illustration={
-            <CatalogIcon group="journey" iconKey="picks" className="h-36 w-44" />
-          }
+          illustration={<CatalogIcon group="journey" iconKey="picks" className="h-36 w-44" />}
           action={
             <Link to="/" className="w-full max-w-xs">
               <Button className="w-full" size="lg">
@@ -337,7 +287,7 @@ function RecommendationsContent() {
     )
   }
 
-  const { results, hasMore } = pageState
+  const { results, hasMore } = recs.data
   // Only apply the near-me filter once availability has actually loaded;
   // otherwise the in-flight `{}` would strip every beer and flash a false
   // empty-state while the (debounced) fetch is still running.
@@ -359,7 +309,9 @@ function RecommendationsContent() {
         <p className="text-sm font-semibold uppercase tracking-wide text-brand-600">
           {t('recommendations.matchedEyebrow')}
         </p>
-        <Heading className="text-2xl sm:text-3xl md:text-4xl">{t('recommendations.heading', { count: shownResults.length })}</Heading>
+        <Heading className="text-2xl sm:text-3xl md:text-4xl">
+          {t('recommendations.heading', { count: shownResults.length })}
+        </Heading>
         <p className="max-w-xl text-sm text-neutral-600 sm:text-base">
           {t('recommendations.subhead')}
         </p>
@@ -431,7 +383,7 @@ function RecommendationsContent() {
       {hasMore || loadError ? (
         <section className="border-t border-neutral-200 pt-8 pb-2">
           {loadError ? (
-            <Alert className="mb-4" variant="error" onRetry={() => void handleLoadMore()}>
+            <Alert className="mb-4" variant="error" onRetry={() => loadMore.mutate(results)}>
               {loadError}
             </Alert>
           ) : null}
@@ -439,11 +391,11 @@ function RecommendationsContent() {
             <div className="flex justify-center px-1 sm:px-0">
               <Button
                 size="lg"
-                disabled={loadingMore}
-                onClick={() => void handleLoadMore()}
+                disabled={loadMore.isPending}
+                onClick={() => loadMore.mutate(results)}
                 className="w-full max-w-md rounded-xl px-8 shadow-sm"
               >
-                {loadingMore
+                {loadMore.isPending
                   ? t('recommendations.loadingMore')
                   : t('recommendations.showMore', { count: RECS_PAGE_SIZE })}
               </Button>
