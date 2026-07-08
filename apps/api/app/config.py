@@ -4,6 +4,11 @@ from typing import Literal
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+# Vercel preview URLs for the beerolog web project (team slug
+# saars-projects-d2973f9d), e.g.
+# https://beerolog-git-<branch>-<hash>-saars-projects-d2973f9d.vercel.app
+VERCEL_PREVIEW_ORIGIN_REGEX = r"^https://beerolog-[a-z0-9-]+-saars-projects-d2973f9d\.vercel\.app$"
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -20,6 +25,10 @@ class Settings(BaseSettings):
     clerk_publishable_key: str = ""
     api_secret: str = "dev-secret"
     cors_allowed_origins: list[str] = ["http://localhost:3000"]
+    # Optional regex of browser origins allowed to call the API, in addition to
+    # cors_allowed_origins. Lets preview deployments allow Vercel's per-commit
+    # preview URLs without wildcarding the explicit production allowlist.
+    cors_allowed_origin_regex: str = ""
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
 
     # Taste-profile matcher knobs (PRD: taste-profile-matcher.md)
@@ -79,6 +88,18 @@ class Settings(BaseSettings):
         if isinstance(value, str):
             return [origin.strip() for origin in value.split(",") if origin.strip()]
         return value
+
+    @property
+    def effective_cors_origin_regex(self) -> str | None:
+        """Regex of allowed origins passed to CORSMiddleware. An explicit
+        CORS_ALLOWED_ORIGIN_REGEX wins; otherwise preview deployments auto-allow
+        this project's Vercel preview URLs so per-commit preview domains work
+        without manual config. Production never gets an implicit regex."""
+        if self.cors_allowed_origin_regex:
+            return self.cors_allowed_origin_regex
+        if self.app_env == "preview":
+            return VERCEL_PREVIEW_ORIGIN_REGEX
+        return None
 
 
 @lru_cache

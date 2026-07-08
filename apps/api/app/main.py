@@ -108,6 +108,7 @@ app.middleware("http")(instrument_requests)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_allowed_origins,
+    allow_origin_regex=settings.effective_cors_origin_regex,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
