@@ -118,12 +118,6 @@ export function TasteProfileSummary({ greeting, baseline }: TasteProfileSummaryP
             {t('profile.summary.ratingProgress', { count: ratingCount })}
           </p>
         ) : null}
-        <Link to="/rate">
-          <Button className="w-full" size="md">
-            {t('profile.summary.rateCta')}
-          </Button>
-        </Link>
-        <p className="text-center text-xs text-neutral-500">{t('profile.summary.rateHint')}</p>
         <Link to="/onboarding">
           <Button className="w-full" size="md" variant="outline">
             {t('profile.summary.retake')}

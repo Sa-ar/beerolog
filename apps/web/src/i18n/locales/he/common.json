@@ -5,7 +5,7 @@
     "tryAgain": "נסו שוב",
     "backToHome": "חזרה לדף הבית"
   },
-  "header": { "home": "בירולוג — דף הבית" },
+  "header": { "home": "בירולוג — דף הבית", "rate": "דרגו בירות" },
   "a11y": { "skipToContent": "דלג לתוכן" },
   "cookies": {
     "notice": {

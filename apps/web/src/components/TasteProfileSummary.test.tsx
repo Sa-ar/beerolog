@@ -35,10 +35,8 @@ const baseline: BaselineTaste = {
 const { TasteProfileSummary } = await import('./TasteProfileSummary')
 
 describe('TasteProfileSummary', () => {
-  it('links to /rate and shows rating progress', async () => {
+  it('shows rating progress (rate CTA now lives in the header)', async () => {
     renderWithI18n(<TasteProfileSummary greeting="Hi" baseline={baseline} />, 'en')
-    const link = await screen.findByRole('link', { name: /rate beers/i })
-    expect(link).toHaveAttribute('href', '/rate')
     expect(await screen.findByText(/7 beers rated/i)).toBeInTheDocument()
   })
 })

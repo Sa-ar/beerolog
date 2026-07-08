@@ -5,7 +5,7 @@
     "tryAgain": "Try again",
     "backToHome": "Back to home"
   },
-  "header": { "home": "Beerolog home" },
+  "header": { "home": "Beerolog home", "rate": "Rate beers" },
   "a11y": { "skipToContent": "Skip to content" },
   "cookies": {
     "notice": {

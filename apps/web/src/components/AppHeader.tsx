@@ -1,3 +1,4 @@
+import { Show } from '@clerk/tanstack-react-start'
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { PAGE_HEADER_SHELL } from '../lib/page-shell'
@@ -22,6 +23,14 @@ export function AppHeader() {
           </span>
         </Link>
         <nav className="flex shrink-0 items-center gap-4">
+          <Show when="signed-in">
+            <Link
+              to="/rate"
+              className="inline-flex min-h-11 items-center justify-center rounded-lg px-3 text-sm font-semibold text-brand-200 hover:bg-white/5"
+            >
+              {t('header.rate')}
+            </Link>
+          </Show>
           <AuthControls />
         </nav>
       </div>

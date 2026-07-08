@@ -4,7 +4,7 @@
 
 import { RedirectToSignIn, Show } from '@clerk/tanstack-react-start'
 import { CatalogIcon } from '@beerolog/icons'
-import { Alert, Button, Card, Heading } from '@beerolog/ui'
+import { Alert, Button, Heading } from '@beerolog/ui'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
@@ -316,16 +316,6 @@ function RecommendationsContent() {
           {t('recommendations.subhead')}
         </p>
       </section>
-
-      <Card className="flex flex-col gap-3 border-brand-200 bg-gradient-to-br from-brand-50 via-white to-amber-50/80 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
-        <div className="text-start">
-          <p className="font-semibold text-neutral-900">{t('recommendations.rateBannerTitle')}</p>
-          <p className="mt-1 text-sm text-neutral-600">{t('recommendations.rateBannerDetail')}</p>
-        </div>
-        <Link to="/rate" className="shrink-0">
-          <Button>{t('recommendations.rateBannerCta')}</Button>
-        </Link>
-      </Card>
 
       <section className="flex flex-col gap-1.5 rounded-xl border border-neutral-200 bg-neutral-50/60 p-3 sm:p-4">
         <label htmlFor="search-area" className="text-sm font-medium text-neutral-700">
