@@ -482,7 +482,17 @@
     "notePlaceholder": "e.g. loved the citrus, too bitter for me…",
     "sensitiveDataNote": "Free text may be analyzed to refine your taste. Avoid sensitive info.",
     "tapper": { "loved": "Loved it", "fine": "It was fine", "disliked": "Not for me" },
-    "dontKnow": "I don't know this beer"
+    "dontKnow": "I don't know this beer",
+    "mode": { "deck": "Suggested", "search": "Search" },
+    "search": {
+      "label": "Search for a specific beer",
+      "placeholder": "Beer name or brewery…",
+      "hint": "Type at least 2 letters to search.",
+      "searching": "Searching…",
+      "error": "Search failed. Try again.",
+      "empty": "No beers match “{{query}}”.",
+      "saved": "Rated ✓"
+    }
   },
   "errors": {
     "global": {
