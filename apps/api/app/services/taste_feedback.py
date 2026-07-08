@@ -19,7 +19,8 @@ import math
 from app.services.match_engine import cosine
 from app.services.ratings_repo import RatingValue
 
-_SIGNAL: dict[str, int] = {"loved": 1, "fine": 0, "disliked": -1}
+# `unknown` (#219) records a seen-but-unknown beer without moving the profile.
+_SIGNAL: dict[str, int] = {"loved": 1, "fine": 0, "disliked": -1, "unknown": 0}
 _EPS = 1e-9
 
 

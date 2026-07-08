@@ -689,7 +689,7 @@ export interface components {
              * Rating
              * @enum {string}
              */
-            rating: "loved" | "fine" | "disliked";
+            rating: "loved" | "fine" | "disliked" | "unknown";
         };
         /** DeckBeer */
         DeckBeer: {
@@ -899,7 +899,7 @@ export interface components {
              * Rating
              * @enum {string}
              */
-            rating: "loved" | "fine" | "disliked";
+            rating: "loved" | "fine" | "disliked" | "unknown";
         };
         /** RatingRecord */
         RatingRecord: {
@@ -919,7 +919,7 @@ export interface components {
              * Rating
              * @enum {string}
              */
-            rating: "loved" | "fine" | "disliked";
+            rating: "loved" | "fine" | "disliked" | "unknown";
         };
         /** RatingsHistoryResponse */
         RatingsHistoryResponse: {

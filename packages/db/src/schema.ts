@@ -55,7 +55,7 @@ export const notesLangEnum = pgEnum('notes_lang', ['he', 'en'])
 
 export const notesSourceEnum = pgEnum('notes_source', ['brewery', 'aggregator', 'synthetic'])
 
-export const ratingEnum = pgEnum('rating', ['loved', 'fine', 'disliked'])
+export const ratingEnum = pgEnum('rating', ['loved', 'fine', 'disliked', 'unknown'])
 
 export const venueTypeEnum = pgEnum('venue_type', ['shop', 'pub'])
 

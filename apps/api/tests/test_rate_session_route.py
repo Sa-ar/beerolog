@@ -124,6 +124,23 @@ def test_session_records_all_and_applies_one_combined_nudge() -> None:
     assert len(ratings_repo.rows) == 3
 
 
+def test_session_records_unknown_rating_without_nudging() -> None:
+    # "I don't know this beer" (#219): persisted so it drops out of future decks,
+    # but the taste profile is left untouched.
+    baseline = _BaselineRepo([1.0, 0.0, 0.0, 0.0])
+    before = list(baseline.snap.embedding)
+    client, ratings_repo = _client(baseline)
+    r = client.post(
+        "/rate/session",
+        json={"swipes": [{"beer_id": "A", "rating": "unknown"}]},
+    )
+    assert r.status_code == 200, r.text
+    assert r.json()["recorded"] == 1
+    assert len(ratings_repo.rows) == 1
+    assert next(iter(ratings_repo.rows.values())).rating == "unknown"
+    assert baseline.snap.embedding == before
+
+
 def test_session_skips_unknown_beers() -> None:
     baseline = _BaselineRepo([1.0, 0.0, 0.0, 0.0])
     client, ratings_repo = _client(baseline)

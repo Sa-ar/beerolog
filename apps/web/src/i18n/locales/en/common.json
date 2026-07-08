@@ -481,7 +481,8 @@
     "notePrompt": "Why? (optional)",
     "notePlaceholder": "e.g. loved the citrus, too bitter for me…",
     "sensitiveDataNote": "Free text may be analyzed to refine your taste. Avoid sensitive info.",
-    "tapper": { "loved": "Loved it", "fine": "It was fine", "disliked": "Not for me" }
+    "tapper": { "loved": "Loved it", "fine": "It was fine", "disliked": "Not for me" },
+    "dontKnow": "I don't know this beer"
   },
   "errors": {
     "global": {

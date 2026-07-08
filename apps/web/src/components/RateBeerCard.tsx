@@ -3,8 +3,8 @@
  * an optional free-text note. Owns its own note state — parent passes
  * `key={beer.id}` so it resets between beers.
  */
-import type { Rating } from '@beerolog/types'
-import { Card, RatingTapper } from '@beerolog/ui'
+import { RATINGS, type Rating } from '@beerolog/types'
+import { Button, Card, Heading, RatingTapper } from '@beerolog/ui'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { DeckBeer } from '../lib/rate-deck'
@@ -27,9 +27,17 @@ export function RateBeerCard({
     onRate(rating, note.trim() || undefined)
   }
 
+  // "I don't know this beer": records an `unknown` signal (no note) so the beer
+  // drops out of future decks without nudging the taste profile. #219
+  function skip() {
+    onRate(RATINGS.unknown)
+  }
+
   return (
     <Card className="border-neutral-200 bg-white p-6 text-center shadow-sm">
-      <h2 className="text-xl font-bold text-neutral-900">{displayName}</h2>
+      <Heading level={2} className="text-xl">
+        {displayName}
+      </Heading>
       <p className="text-sm text-neutral-600">
         {beer.brewery} · {beer.style} · {beer.abv}%
       </p>
@@ -59,6 +67,11 @@ export function RateBeerCard({
         <p className="mt-1 text-xs text-neutral-400">
           {t('rate.sensitiveDataNote', 'Free text may be analyzed to refine your taste. Avoid sensitive info.')}
         </p>
+      </div>
+      <div className="mt-4 text-center">
+        <Button variant="ghost" size="sm" onClick={skip}>
+          {t('rate.dontKnow', "I don't know this beer")}
+        </Button>
       </div>
     </Card>
   )

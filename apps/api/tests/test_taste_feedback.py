@@ -21,10 +21,12 @@ def _unit(v: list[float]) -> float:
     return math.sqrt(sum(x * x for x in v))
 
 
-def test_rating_signal_maps_three_state() -> None:
+def test_rating_signal_maps_vocabulary() -> None:
     assert rating_signal("loved") == 1
     assert rating_signal("fine") == 0
     assert rating_signal("disliked") == -1
+    # "I don't know this beer" (#219): recorded, but never nudges the profile.
+    assert rating_signal("unknown") == 0
 
 
 def test_loved_moves_toward_beer_and_stays_unit() -> None:

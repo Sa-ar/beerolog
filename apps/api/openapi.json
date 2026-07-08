@@ -834,7 +834,8 @@
             "enum": [
               "loved",
               "fine",
-              "disliked"
+              "disliked",
+              "unknown"
             ],
             "title": "Rating",
             "type": "string"
@@ -1403,7 +1404,8 @@
             "enum": [
               "loved",
               "fine",
-              "disliked"
+              "disliked",
+              "unknown"
             ],
             "title": "Rating",
             "type": "string"
@@ -1453,7 +1455,8 @@
             "enum": [
               "loved",
               "fine",
-              "disliked"
+              "disliked",
+              "unknown"
             ],
             "title": "Rating",
             "type": "string"

@@ -95,7 +95,17 @@ export type BeerStyle =
 // Ratings & Feedback
 // =============================================================================
 
-export type Rating = 'loved' | 'fine' | 'disliked'
+// Rating vocabulary as a const object so call sites reference RATINGS.unknown
+// rather than bare string literals; the union type is derived from it.
+// Mirror of the API's RatingValue (apps/api/app/ratings_vocab.py).
+export const RATINGS = {
+  loved: 'loved',
+  fine: 'fine',
+  disliked: 'disliked',
+  unknown: 'unknown',
+} as const
+
+export type Rating = (typeof RATINGS)[keyof typeof RATINGS]
 
 // =============================================================================
 // User & Persona
