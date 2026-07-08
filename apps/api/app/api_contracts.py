@@ -471,6 +471,7 @@ class RatingsHistoryResponse(BaseModel):
     ratings: list[RatingRecord]
     page: int
     page_size: int
+    total: int
 
 
 class DeckBeer(BaseModel):

@@ -1487,12 +1487,17 @@
             },
             "title": "Ratings",
             "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
           }
         },
         "required": [
           "ratings",
           "page",
-          "page_size"
+          "page_size",
+          "total"
         ],
         "title": "RatingsHistoryResponse",
         "type": "object"

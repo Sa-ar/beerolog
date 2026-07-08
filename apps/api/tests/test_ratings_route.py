@@ -56,6 +56,12 @@ class _MemoryRepo:
         start = (page - 1) * page_size
         return rows[start : start + page_size]
 
+    async def count_for_user(self, user_id: str) -> int:
+        return sum(1 for r in self._rows.values() if r.user_id == user_id)
+
+    async def list_rated_beer_ids(self, user_id: str) -> set[str]:
+        return {r.beer_id for r in self._rows.values() if r.user_id == user_id}
+
 
 FAKE_USER = {"sub": "user_test_123"}
 
@@ -134,6 +140,7 @@ def test_list_my_ratings_paginates(client: TestClient) -> None:
     body = r.json()
     assert body["page"] == 1
     assert body["page_size"] == 2
+    assert body["total"] == 3
     assert len(body["ratings"]) == 2
 
     r2 = client.get("/me/ratings?page=2&page_size=2")

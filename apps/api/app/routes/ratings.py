@@ -86,6 +86,7 @@ async def list_my_ratings(
     repo: RatingsRepo = Depends(get_ratings_repo),
 ) -> RatingsHistoryResponse:
     rows = await repo.list_for_user(user_id=user["sub"], page=page, page_size=page_size)
+    total = await repo.count_for_user(user["sub"])
     return RatingsHistoryResponse(
         ratings=[
             RatingRecord(
@@ -101,4 +102,5 @@ async def list_my_ratings(
         ],
         page=page,
         page_size=page_size,
+        total=total,
     )

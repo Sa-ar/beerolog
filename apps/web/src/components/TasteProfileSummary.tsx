@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { CatalogIcon, GeneratedTasteIcon, resolveProfileHeroSvg } from '@beerolog/icons'
-import { Badge, Button, Card } from '@beerolog/ui'
+import { Badge, Button, Card, Heading } from '@beerolog/ui'
 import {
   dialDescriptor,
   flavorTitle,
@@ -10,6 +10,7 @@ import {
   topFlavorFamilies,
   type BaselineTaste,
 } from '../lib/baseline-taste'
+import { useRatingCount } from '../lib/rating-count'
 import { SessionQuickPick } from './SessionQuickPick'
 import { TasteRadar } from './TasteRadar'
 
@@ -20,6 +21,8 @@ type TasteProfileSummaryProps = {
 
 export function TasteProfileSummary({ greeting, baseline }: TasteProfileSummaryProps) {
   const { t, i18n } = useTranslation()
+  const { data: ratingCount } = useRatingCount()
+
   const flavors = topFlavorFamilies(t, baseline)
   const title = flavorTitle(t, baseline)
   const heroSvg = resolveProfileHeroSvg(baseline, baseline.icons)
@@ -52,12 +55,8 @@ export function TasteProfileSummary({ greeting, baseline }: TasteProfileSummaryP
   return (
     <div className="flex flex-col gap-8 animate-[fadeIn_320ms_ease-out]">
       <section className="space-y-1">
-        <p className="text-sm font-semibold uppercase tracking-wide text-brand-300">
-          {greeting}
-        </p>
-        <h1 className="text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
-          {t('profile.summary.ready')}
-        </h1>
+        <p className="text-sm font-semibold uppercase tracking-wide text-brand-300">{greeting}</p>
+        <Heading className="text-3xl sm:text-4xl">{t('profile.summary.ready')}</Heading>
       </section>
 
       <Card className="overflow-hidden border border-brand-700/50 bg-[hsl(25_24%_7%)] p-0 shadow-md">
@@ -107,11 +106,7 @@ export function TasteProfileSummary({ greeting, baseline }: TasteProfileSummaryP
             <p className="text-sm text-neutral-600">{persona.blurb}</p>
           </div>
         ) : null}
-        <TasteRadar
-          axes={radarAxes}
-          labels={radarLabels}
-          ariaLabel={t('profile.radar.aria')}
-        />
+        <TasteRadar axes={radarAxes} labels={radarLabels} ariaLabel={t('profile.radar.aria')} />
       </Card>
 
       <Card className="border border-brand-700/40 p-6 shadow-sm">
@@ -163,14 +158,23 @@ export function TasteProfileSummary({ greeting, baseline }: TasteProfileSummaryP
       </Card>
 
       <section className="flex flex-col gap-3">
+        {ratingCount != null ? (
+          <p className="text-center text-sm text-neutral-600">
+            {t('profile.summary.ratingProgress', { count: ratingCount })}
+          </p>
+        ) : null}
+        <Link to="/rate">
+          <Button className="w-full" size="md">
+            {t('profile.summary.rateCta')}
+          </Button>
+        </Link>
+        <p className="text-center text-xs text-neutral-500">{t('profile.summary.rateHint')}</p>
         <Link to="/onboarding">
           <Button className="w-full" size="md" variant="outline">
             {t('profile.summary.retake')}
           </Button>
         </Link>
-        <p className="text-center text-xs text-neutral-500">
-          {t('profile.summary.retakeHint')}
-        </p>
+        <p className="text-center text-xs text-neutral-500">{t('profile.summary.retakeHint')}</p>
       </section>
     </div>
   )

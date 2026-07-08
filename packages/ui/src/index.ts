@@ -1,5 +1,6 @@
 export { Alert, type AlertProps } from './components/alert'
-export { Button, type ButtonProps } from './components/button'
+export { Button, buttonVariants, type ButtonProps } from './components/button'
+export { Heading, Text, type HeadingProps, type TextProps } from './components/typography'
 export { Card, CardHeader, CardContent } from './components/card'
 export { Badge, type BadgeProps } from './components/badge'
 export { RatingTapper } from './components/rating-tapper'

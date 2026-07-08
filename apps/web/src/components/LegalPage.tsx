@@ -1,4 +1,4 @@
-import { Card, CardContent } from '@beerolog/ui'
+import { Card, CardContent, Heading } from '@beerolog/ui'
 import { useTranslation } from 'react-i18next'
 import { PAGE_SHELL_X } from '../lib/page-shell'
 import type { LegalSlug } from '../lib/legal/registry'
@@ -23,7 +23,7 @@ export function LegalPage({ slug }: { slug: LegalSlug }) {
       <Card>
         <CardContent className="pt-6">
           <article>
-        <h1 className="text-2xl font-bold text-neutral-900">{t(`legal.${slug}.title`)}</h1>
+        <Heading className="text-2xl">{t(`legal.${slug}.title`)}</Heading>
         <p className="mt-2 text-neutral-700">{t(`legal.${slug}.intro`)}</p>
         {list.map((section, i) => (
           <section key={i} className="mt-6">

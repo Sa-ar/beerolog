@@ -10,7 +10,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Alert, Button, Card, CardContent } from '@beerolog/ui'
+import { Alert, Button, Card, CardContent, Heading } from '@beerolog/ui'
 import { GuestResults } from '../components/GuestResults'
 import { BeerJsonLd } from '../components/BeerJsonLd'
 import { QuizStepper } from '../components/QuizStepper'
@@ -84,9 +84,7 @@ function TryPage() {
         <p className="text-sm font-semibold uppercase tracking-wide text-brand-300">
           {t('try.eyebrow')}
         </p>
-        <h1 className="text-2xl font-bold tracking-tight text-neutral-900 sm:text-3xl">
-          {t('onboarding.title')}
-        </h1>
+        <Heading className="text-2xl sm:text-3xl">{t('onboarding.title')}</Heading>
         <p className="text-neutral-600">{t('try.intro')}</p>
       </section>
 

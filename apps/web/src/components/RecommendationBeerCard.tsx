@@ -1,4 +1,5 @@
 import type { TFunction } from 'i18next'
+import { Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Rating } from '@beerolog/types'
@@ -229,51 +230,55 @@ export function RecommendationBeerCard({
                       {v.last_confirmed_at ? (
                         <p className="text-[11px] text-neutral-400">
                           {t('recommendations.findNearby.confirmed', {
-                            date: new Date(v.last_confirmed_at).toLocaleDateString(
-                              i18n.language,
-                            ),
+                            date: new Date(v.last_confirmed_at).toLocaleDateString(i18n.language),
                           })}
                         </p>
                       ) : null}
-                      {reportErr.has(v.id) ? (
-                        <span className="text-[11px] text-neutral-400">
-                          {t('recommendations.findNearby.reportFailed')}
-                        </span>
-                      ) : reported.has(v.id) ? (
-                        <span className="text-[11px] text-brand-600">
-                          {t('recommendations.findNearby.reportThanks')}
-                        </span>
-                      ) : (
-                        <span className="mt-0.5 flex gap-3">
-                          <button
-                            type="button"
-                            onClick={() => report(v.id, 'user_confirm')}
-                            className="text-[11px] text-neutral-500 hover:text-brand-600"
-                          >
-                            👍 {t('recommendations.findNearby.stillHere')}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => report(v.id, 'user_deny')}
-                            className="text-[11px] text-neutral-500 hover:text-brand-600"
-                          >
-                            🚫 {t('recommendations.findNearby.gone')}
-                          </button>
-                          {flagged.has(v.id) ? (
+                      {(() => {
+                        if (reportErr.has(v.id))
+                          return (
                             <span className="text-[11px] text-neutral-400">
-                              {t('recommendations.findNearby.flagged')}
+                              {t('recommendations.findNearby.reportFailed')}
                             </span>
-                          ) : (
+                          )
+                        if (reported.has(v.id))
+                          return (
+                            <span className="text-[11px] text-brand-600">
+                              {t('recommendations.findNearby.reportThanks')}
+                            </span>
+                          )
+                        return (
+                          <span className="mt-0.5 flex gap-3">
                             <button
                               type="button"
-                              onClick={() => flag(v.id)}
-                              className="text-[11px] text-neutral-400 hover:text-red-600"
+                              onClick={() => report(v.id, 'user_confirm')}
+                              className="text-[11px] text-neutral-500 hover:text-brand-600"
                             >
-                              🚩 {t('recommendations.findNearby.flagWrong')}
+                              👍 {t('recommendations.findNearby.stillHere')}
                             </button>
-                          )}
-                        </span>
-                      )}
+                            <button
+                              type="button"
+                              onClick={() => report(v.id, 'user_deny')}
+                              className="text-[11px] text-neutral-500 hover:text-brand-600"
+                            >
+                              🚫 {t('recommendations.findNearby.gone')}
+                            </button>
+                            {flagged.has(v.id) ? (
+                              <span className="text-[11px] text-neutral-400">
+                                {t('recommendations.findNearby.flagged')}
+                              </span>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => flag(v.id)}
+                                className="text-[11px] text-neutral-400 hover:text-red-600"
+                              >
+                                🚩 {t('recommendations.findNearby.flagWrong')}
+                              </button>
+                            )}
+                          </span>
+                        )
+                      })()}
                     </li>
                   )
                 })}
@@ -312,9 +317,17 @@ export function RecommendationBeerCard({
           {t('recommendations.ratePrompt', 'Had this one? Rate it')}
         </p>
         {rateStatus === SAVE_STATUS.saved ? (
-          <p role="status" className="text-sm text-neutral-700">
-            {t('recommendations.rateSaved', 'Thanks — saved your rating')}
-          </p>
+          <div className="space-y-2">
+            <p role="status" className="text-sm text-neutral-700">
+              {t('recommendations.rateSaved', 'Thanks — saved your rating')}
+            </p>
+            <Link
+              to="/rate"
+              className="text-sm font-semibold text-brand-600 underline-offset-2 hover:underline"
+            >
+              {t('recommendations.rateDeckCta')}
+            </Link>
+          </div>
         ) : (
           <RatingTapper
             onRate={handleRate}
@@ -349,9 +362,7 @@ function whyText(t: TFunction, why: WhyLine): string {
   return t(`why.${why.code}`, params)
 }
 
-function tierBadgeVariant(
-  tier: RecommendedBeer['market_tier'],
-): 'default' | 'outline' | 'success' {
+function tierBadgeVariant(tier: RecommendedBeer['market_tier']): 'default' | 'outline' | 'success' {
   switch (tier) {
     case 'craft':
       return 'default'

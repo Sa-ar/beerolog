@@ -4,7 +4,7 @@
 
 export type RadarAxis = { key: string; value: number }
 
-const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v)
+const clamp01 = (v: number) => Math.min(1, Math.max(0, v))
 
 export type LabelPlacement = {
   textAnchor: 'start' | 'middle' | 'end'
@@ -53,11 +53,7 @@ export function toPointsString(points: [number, number][]): string {
   return points.map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`).join(' ')
 }
 
-export function distanceFromCenter(
-  cx: number,
-  cy: number,
-  point: [number, number],
-): number {
+export function distanceFromCenter(cx: number, cy: number, point: [number, number]): number {
   const [x, y] = point
   return Math.hypot(x - cx, y - cy)
 }

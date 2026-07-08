@@ -1,5 +1,5 @@
 import type { FormEvent, ReactNode } from 'react'
-import { Button, Card, CardContent } from '@beerolog/ui'
+import { Button, Card, CardContent, Heading } from '@beerolog/ui'
 import { useTranslation } from 'react-i18next'
 import { PAGE_MAIN } from '../lib/page-shell'
 
@@ -107,7 +107,7 @@ export function AuthLayout({
   return (
     <main className={`${PAGE_MAIN} items-center justify-center gap-6 py-10 sm:py-16`}>
       <div className="w-full max-w-md text-center">
-        <h1 className="text-2xl font-bold tracking-tight text-neutral-900 sm:text-3xl">{heading}</h1>
+        <Heading className="text-2xl sm:text-3xl">{heading}</Heading>
         <p className="mt-2 text-sm text-neutral-600 sm:text-base">{subtitle}</p>
       </div>
 

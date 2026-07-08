@@ -1,5 +1,6 @@
 import { ClerkProvider } from '@clerk/tanstack-react-start'
 import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
+import { QueryClientProvider } from '@tanstack/react-query'
 import { useMemo } from 'react'
 import { I18nextProvider } from 'react-i18next'
 import { Analytics } from '@vercel/analytics/react'
@@ -13,13 +14,13 @@ import { AuthTokenBridge } from '../components/AuthTokenBridge'
 import { GlobalErrorPage } from '../components/GlobalErrorPage'
 import { NotFoundPage } from '../components/NotFoundPage'
 import { createI18n } from '../i18n'
+import { getQueryClient } from '../lib/query-client'
 import { dirFor, getLang } from '../i18n/locale-cookie'
 import { getAgeVerified } from '../lib/age-consent-cookie'
 import '../styles.css'
 
 const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY ?? ''
-const apiUrl =
-  (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:8000'
+const apiUrl = (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:8000'
 
 export const Route = createRootRoute({
   loader: () => ({ lang: getLang(), ageVerified: getAgeVerified() }),
@@ -31,6 +32,7 @@ export const Route = createRootRoute({
 function RootDocument({ children }: { children: React.ReactNode }) {
   const { lang, ageVerified } = Route.useLoaderData()
   const i18n = useMemo(() => createI18n(lang), [lang])
+  const queryClient = getQueryClient()
   // signInUrl points Clerk's RedirectToSignIn (and friends) at our own /signin
   // page instead of Clerk's hosted Account Portal.
   const clerkProps = publishableKey ? { publishableKey, signInUrl: '/signin' } : {}
@@ -51,19 +53,21 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body className="flex min-h-dvh flex-col text-neutral-900">
         <I18nextProvider i18n={i18n}>
-          <SkipLink />
-          <ClerkProvider {...clerkProps}>
-            <IconCatalogProvider apiUrl={apiUrl}>
-              <AuthTokenBridge />
-              <AgeVerificationGate initialVerified={ageVerified} />
-              <AppHeader />
-              <div id="main-content" tabIndex={-1} className="flex flex-1 flex-col outline-none">
-                {children}
-              </div>
-              <AppFooter />
-              <CookieNotice />
-            </IconCatalogProvider>
-          </ClerkProvider>
+          <QueryClientProvider client={queryClient}>
+            <SkipLink />
+            <ClerkProvider {...clerkProps}>
+              <IconCatalogProvider apiUrl={apiUrl}>
+                <AuthTokenBridge />
+                <AgeVerificationGate initialVerified={ageVerified} />
+                <AppHeader />
+                <div id="main-content" tabIndex={-1} className="flex flex-1 flex-col outline-none">
+                  {children}
+                </div>
+                <AppFooter />
+                <CookieNotice />
+              </IconCatalogProvider>
+            </ClerkProvider>
+          </QueryClientProvider>
         </I18nextProvider>
         <Analytics />
         <Scripts />

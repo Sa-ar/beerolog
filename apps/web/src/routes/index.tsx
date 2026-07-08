@@ -1,8 +1,8 @@
 import { useAuth, useUser } from '@clerk/tanstack-react-start'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { Button } from '@beerolog/ui'
+import { Button, Heading } from '@beerolog/ui'
 import { PAGE_MAIN } from '../lib/page-shell'
 import { TasteProfileEmptyState } from '../components/TasteProfileEmptyState'
 import { TasteProfileErrorState } from '../components/TasteProfileErrorState'
@@ -21,12 +21,15 @@ export const Route = createFileRoute('/')({
 // Labels come from home.steps.<step>.{title,detail}; icon keyed by step.
 const STEPS = ['quiz', 'vibe', 'picks'] as const
 
-type ProfileState =
-  | { status: 'idle' }
-  | { status: 'loading' }
-  | { status: 'empty' }
-  | { status: 'ready'; baseline: BaselineTaste }
-  | { status: 'error'; reason: BaselineLoadErrorReason }
+// Carries the typed failure reason through react-query's error channel so the
+// error screen can show a specific message.
+class BaselineError extends Error {
+  constructor(readonly reason: BaselineLoadErrorReason) {
+    super(reason)
+  }
+}
+
+type BaselineResult = { ready: BaselineTaste } | { empty: true }
 
 function HomePage() {
   const { isLoaded, isSignedIn, user } = useUser()
@@ -70,66 +73,61 @@ function ChalkRule() {
 
 function SignedInHome({ firstName }: { firstName: string | null | undefined }) {
   const { getToken, isLoaded: authLoaded, userId } = useAuth()
-  const [profileState, setProfileState] = useState<ProfileState>({ status: 'idle' })
-  const [retryCount, setRetryCount] = useState(0)
   const { t } = useTranslation()
   const greeting = timeAwareGreeting(t, firstName)
 
-  useEffect(() => {
-    if (!authLoaded) return
-    let cancelled = false
-    // Seed from cache so the profile shows instantly; only show the loading
-    // screen on a true cold start (no cached profile yet).
-    const cached = readBaselineCache(userId)
-    // A cached profile from an older model is stale — force the new quiz.
-    const usableCache = cached && !isStaleProfile(cached) ? cached : null
-    setProfileState(usableCache ? { status: 'ready', baseline: usableCache } : { status: 'loading' })
-    void (async () => {
+  const profile = useQuery<BaselineResult, BaselineError>({
+    queryKey: ['baseline', userId],
+    enabled: authLoaded,
+    staleTime: 0,
+    retry: false,
+    // Seed from cache so the profile shows instantly; a stale-model cache is
+    // ignored so we force the improved quiz. initialDataUpdatedAt: 0 keeps it
+    // stale so we always revalidate in the background.
+    initialData: () => {
+      const cached = readBaselineCache(userId)
+      return cached && !isStaleProfile(cached) ? { ready: cached } : undefined
+    },
+    initialDataUpdatedAt: 0,
+    queryFn: async () => {
       const result = await loadBaselineTaste(() => getToken())
-      if (cancelled) return
-      if (result.status === 'ready') {
-        if (isStaleProfile(result.baseline)) {
-          clearBaselineCache(userId)
-          setProfileState({ status: 'empty' })
-          return
-        }
-        writeBaselineCache(userId, result.baseline)
-        setProfileState({ status: 'ready', baseline: result.baseline })
-        return
-      }
-      if (result.status === 'empty') {
+      if (result.status === 'error') throw new BaselineError(result.reason)
+      if (result.status === 'empty' || isStaleProfile(result.baseline)) {
         clearBaselineCache(userId)
-        setProfileState({ status: 'empty' })
-        return
+        return { empty: true }
       }
-      // Revalidation failed: keep showing the cached profile rather than flashing
-      // an error; only surface the error when we have nothing to show.
-      if (!usableCache) setProfileState({ status: 'error', reason: result.reason })
-    })()
-    return () => {
-      cancelled = true
-    }
-  }, [authLoaded, getToken, userId, retryCount])
+      writeBaselineCache(userId, result.baseline)
+      return { ready: result.baseline }
+    },
+  })
 
-  if (!authLoaded || profileState.status === 'loading' || profileState.status === 'idle') {
+  // Cold start (nothing cached, still fetching) shows the loading screen.
+  if (!authLoaded || profile.isPending) {
     return <TasteProfileLoadingState greeting={greeting} />
   }
 
-  if (profileState.status === 'error') {
+  // Revalidation failed with no cached profile to fall back on. When a cached
+  // profile exists react-query keeps it in `data`, so we fall through and keep
+  // showing it rather than flashing an error.
+  if (profile.isError && !profile.data) {
     return (
       <TasteProfileErrorState
         greeting={greeting}
-        reason={profileState.reason}
-        onRetry={() => setRetryCount((n) => n + 1)}
+        reason={profile.error.reason}
+        onRetry={() => void profile.refetch()}
       />
     )
   }
 
-  if (profileState.status === 'empty') {
+  if (profile.data && 'empty' in profile.data) {
     return <TasteProfileEmptyState greeting={greeting} />
   }
 
-  return <TasteProfileSummary greeting={greeting} baseline={profileState.baseline} />
+  if (!profile.data || !('ready' in profile.data)) {
+    return <TasteProfileLoadingState greeting={greeting} />
+  }
+
+  return <TasteProfileSummary greeting={greeting} baseline={profile.data.ready} />
 }
 
 function SessionLoading() {
@@ -160,9 +158,9 @@ function VisitorHome() {
           <p className="font-script text-2xl leading-none text-brand-300 sm:text-3xl">
             {t('home.eyebrow')}
           </p>
-          <h1 className="font-display text-4xl font-semibold uppercase tracking-[0.04em] text-neutral-900 sm:text-6xl">
+          <Heading className="font-display text-4xl font-semibold uppercase tracking-[0.04em] sm:text-6xl">
             {t('home.headline')}
-          </h1>
+          </Heading>
           <ChalkRule />
           <p className="mx-auto max-w-md text-base text-neutral-500">{t('home.subhead')}</p>
         </div>
@@ -192,7 +190,9 @@ function VisitorHome() {
                       className="flex-1 translate-y-[-0.25em] border-b border-dotted border-neutral-300"
                     />
                   </div>
-                  <p className="mt-1 ps-9 text-sm text-neutral-500">{t(`home.steps.${step}.detail`)}</p>
+                  <p className="mt-1 ps-9 text-sm text-neutral-500">
+                    {t(`home.steps.${step}.detail`)}
+                  </p>
                 </div>
               </li>
             ))}

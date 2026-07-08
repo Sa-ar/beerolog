@@ -1,6 +1,7 @@
 import { RedirectToSignIn, Show } from '@clerk/tanstack-react-start'
 import { Link, Outlet, createFileRoute } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
+import { Heading } from '@beerolog/ui'
 import { PAGE_SHELL_X } from '../lib/page-shell'
 
 export const Route = createFileRoute('/account')({
@@ -22,7 +23,7 @@ function AccountLayout() {
       </Show>
       <Show when="signed-in">
         <main className={`${PAGE_SHELL_X} py-8`}>
-          <h1 className="text-2xl font-bold text-neutral-900">{t('account.title')}</h1>
+          <Heading className="text-2xl">{t('account.title')}</Heading>
           <div className="mt-6 flex flex-col gap-6 sm:flex-row">
             <nav className="flex gap-1 sm:w-48 sm:flex-col" aria-label={t('account.title')}>
               {TABS.map((tab) => (

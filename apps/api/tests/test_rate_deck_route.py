@@ -106,7 +106,6 @@ def test_deck_with_baseline_excludes_rated() -> None:
 
 
 def test_deck_requires_auth() -> None:
-    # No get_current_user override -> real auth rejects.
     app.dependency_overrides[get_ratings_repo] = lambda: _RatingsRepo(set())
     app.dependency_overrides[get_baseline_taste_repo] = lambda: _BaselineRepo(None)
     app.dependency_overrides[get_deck_catalog] = lambda: CATALOG

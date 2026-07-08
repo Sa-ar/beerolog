@@ -929,6 +929,8 @@ export interface components {
             page_size: number;
             /** Ratings */
             ratings: components["schemas"]["RatingRecord"][];
+            /** Total */
+            total: number;
         };
         /** ReadinessResponse */
         ReadinessResponse: {

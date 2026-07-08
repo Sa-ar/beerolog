@@ -42,9 +42,15 @@ export function isStaleProfile(baseline: BaselineTaste): boolean {
   return (baseline.model_version ?? 0) < TASTE_MODEL_VERSION
 }
 
+function hourToTimeKey(hour: number): 'morning' | 'afternoon' | 'evening' {
+  if (hour < 12) return 'morning'
+  if (hour < 17) return 'afternoon'
+  return 'evening'
+}
+
 export function timeAwareGreeting(t: TFunction, firstName?: string | null): string {
   const hour = new Date().getHours()
-  const timeKey = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening'
+  const timeKey = hourToTimeKey(hour)
   const time = t(`greeting.${timeKey}`)
   return firstName ? t('greeting.named', { greeting: time, name: firstName }) : time
 }

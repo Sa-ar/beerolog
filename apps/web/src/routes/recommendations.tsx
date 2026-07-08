@@ -4,7 +4,7 @@
 
 import { RedirectToSignIn, Show } from '@clerk/tanstack-react-start'
 import { CatalogIcon } from '@beerolog/icons'
-import { Alert, Button } from '@beerolog/ui'
+import { Alert, Button, Card, Heading } from '@beerolog/ui'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -281,9 +281,7 @@ function RecommendationsContent() {
           <p className="text-sm font-semibold uppercase tracking-wide text-brand-600">
             {t('recommendations.eyebrow')}
           </p>
-          <h1 className="text-2xl font-bold tracking-tight text-neutral-900 sm:text-3xl md:text-4xl">
-            {t('recommendations.errorTitle')}
-          </h1>
+          <Heading className="text-2xl sm:text-3xl md:text-4xl">{t('recommendations.errorTitle')}</Heading>
         </section>
 
         <StatusCard
@@ -317,9 +315,7 @@ function RecommendationsContent() {
           <p className="text-sm font-semibold uppercase tracking-wide text-brand-600">
             {t('recommendations.eyebrow')}
           </p>
-          <h1 className="text-2xl font-bold tracking-tight text-neutral-900 sm:text-3xl md:text-4xl">
-            {t('recommendations.missingTitle')}
-          </h1>
+          <Heading className="text-2xl sm:text-3xl md:text-4xl">{t('recommendations.missingTitle')}</Heading>
         </section>
 
         <StatusCard
@@ -363,13 +359,21 @@ function RecommendationsContent() {
         <p className="text-sm font-semibold uppercase tracking-wide text-brand-600">
           {t('recommendations.matchedEyebrow')}
         </p>
-        <h1 className="text-2xl font-bold tracking-tight text-neutral-900 sm:text-3xl md:text-4xl">
-          {t('recommendations.heading', { count: shownResults.length })}
-        </h1>
+        <Heading className="text-2xl sm:text-3xl md:text-4xl">{t('recommendations.heading', { count: shownResults.length })}</Heading>
         <p className="max-w-xl text-sm text-neutral-600 sm:text-base">
           {t('recommendations.subhead')}
         </p>
       </section>
+
+      <Card className="flex flex-col gap-3 border-brand-200 bg-gradient-to-br from-brand-50 via-white to-amber-50/80 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+        <div className="text-start">
+          <p className="font-semibold text-neutral-900">{t('recommendations.rateBannerTitle')}</p>
+          <p className="mt-1 text-sm text-neutral-600">{t('recommendations.rateBannerDetail')}</p>
+        </div>
+        <Link to="/rate" className="shrink-0">
+          <Button>{t('recommendations.rateBannerCta')}</Button>
+        </Link>
+      </Card>
 
       <section className="flex flex-col gap-1.5 rounded-xl border border-neutral-200 bg-neutral-50/60 p-3 sm:p-4">
         <label htmlFor="search-area" className="text-sm font-medium text-neutral-700">

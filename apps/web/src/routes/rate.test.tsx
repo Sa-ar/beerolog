@@ -6,6 +6,22 @@ import { renderWithI18n } from '../test/render'
 const getMock = vi.fn()
 const postMock = vi.fn()
 
+vi.mock('@tanstack/react-router', () => ({
+  Link: ({
+    to,
+    children,
+    className,
+  }: {
+    to: string
+    children: React.ReactNode
+    className?: string
+  }) => (
+    <a href={to} className={className}>
+      {children}
+    </a>
+  ),
+}))
+
 vi.mock('../lib/api-client/client', () => ({
   apiClient: {
     GET: (...args: unknown[]) => getMock(...args),
@@ -39,7 +55,7 @@ describe('RateDeckFlow', () => {
     await user.click(screen.getByRole('button', { name: /loved it/i }))
 
     expect(await screen.findByText('Beer B')).toBeInTheDocument()
-    expect(postMock).not.toHaveBeenCalled() // not until the deck is done
+    expect(postMock).not.toHaveBeenCalled()
     await user.click(screen.getByRole('button', { name: /not for me/i }))
 
     await waitFor(() => expect(postMock).toHaveBeenCalledTimes(1))
@@ -52,6 +68,37 @@ describe('RateDeckFlow', () => {
       },
     })
     expect(await screen.findByRole('status')).toBeInTheDocument()
+    expect(screen.getByText(/saved 2 ratings/i)).toBeInTheDocument()
+  })
+
+  it('undoes the last swipe', async () => {
+    const user = userEvent.setup()
+    renderWithI18n(<RateDeckFlow />, 'en')
+
+    expect(await screen.findByText('Beer A')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /loved it/i }))
+    expect(await screen.findByText('Beer B')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /undo last/i }))
+    expect(await screen.findByText('Beer A')).toBeInTheDocument()
+    expect(screen.queryByText('Beer B')).not.toBeInTheDocument()
+  })
+
+  it('restarts the deck when rate more is clicked after completion', async () => {
+    const user = userEvent.setup()
+    renderWithI18n(<RateDeckFlow />, 'en')
+
+    expect(await screen.findByText('Beer A')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /loved it/i }))
+    expect(await screen.findByText('Beer B')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /not for me/i }))
+
+    await waitFor(() => expect(postMock).toHaveBeenCalledTimes(1))
+    getMock.mockClear()
+    await user.click(screen.getByRole('button', { name: /rate more beers/i }))
+
+    await waitFor(() => expect(getMock).toHaveBeenCalledWith('/rate/deck'))
+    expect(await screen.findByText('Beer A')).toBeInTheDocument()
   })
 
   it('shows an empty state when the deck has no beers', async () => {

@@ -203,7 +203,10 @@
       "lastUpdated": "Profile last updated {{date}}",
       "dials": "Your taste dials",
       "retake": "Refine my taste profile",
-      "retakeHint": "Every pick and rating makes your profile sharper."
+      "retakeHint": "Every pick and rating makes your profile sharper.",
+      "rateCta": "Rate beers",
+      "rateHint": "Quick swipe-through to sharpen your taste profile.",
+      "ratingProgress": "{{count}} beers rated — keep going to sharpen your profile."
     },
     "dials": {
       "carbonation": { "label": "Carbonation", "low": "Still", "mid": "Light fizz", "high": "Sparkling" },
@@ -225,7 +228,8 @@
     "steps": {
       "quiz": { "title": "Quick taste quiz", "detail": "Seven everyday questions — no beer jargon." },
       "vibe": { "title": "Tonight's vibe", "detail": "Refreshing or cozy, low or high ABV." },
-      "picks": { "title": "Your top 5 picks", "detail": "Matched to your saved taste profile." }
+      "picks": { "title": "Your top 5 picks", "detail": "Matched to your saved taste profile." },
+      "rate": { "title": "Rate beers you've tried", "detail": "Quick swipes that sharpen your taste profile." }
     }
   },
   "home": {
@@ -455,17 +459,25 @@
     },
     "ratePrompt": "Had this one? Rate it",
     "rateSaved": "Thanks — saved your rating",
-    "rateError": "Couldn't save — tap to retry"
+    "rateError": "Couldn't save — tap to retry",
+    "rateDeckCta": "Rate more in a quick deck →",
+    "rateBannerTitle": "Sharpen your taste profile",
+    "rateBannerDetail": "Rate a quick deck of beers — faster than one at a time here.",
+    "rateBannerCta": "Open rating deck"
   },
   "rate": {
     "title": "Rate beers",
+    "subtitle": "Each rating sharpens your recommendations.",
     "loading": "Loading beers…",
     "error": "Couldn't load the deck. Try again.",
     "empty": "No beers to rate right now — you've rated them all!",
     "backToRecs": "Back to recommendations",
     "saving": "Saving your ratings…",
     "done": "Thanks! Your taste profile just got sharper.",
+    "doneDetail": "Saved {{count}} ratings to your profile.",
     "seeRecs": "See fresh recommendations",
+    "rateMore": "Rate more beers",
+    "undo": "Undo last",
     "notePrompt": "Why? (optional)",
     "notePlaceholder": "e.g. loved the citrus, too bitter for me…",
     "sensitiveDataNote": "Free text may be analyzed to refine your taste. Avoid sensitive info.",

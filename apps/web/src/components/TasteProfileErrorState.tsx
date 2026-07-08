@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { Button } from '@beerolog/ui'
+import { Button, Heading } from '@beerolog/ui'
 import type { BaselineLoadErrorReason } from '../lib/user-facing-errors'
 import { describeBaselineLoadError } from '../lib/user-facing-errors'
 import { StatusCard } from './StatusCard'
@@ -24,9 +24,7 @@ export function TasteProfileErrorState({
         <p className="text-sm font-semibold uppercase tracking-wide text-brand-600">
           {greeting}
         </p>
-        <h1 className="text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
-          {t('profile.title')}
-        </h1>
+        <Heading className="text-3xl sm:text-4xl">{t('profile.title')}</Heading>
       </section>
 
       <StatusCard

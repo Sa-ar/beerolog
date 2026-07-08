@@ -1,10 +1,10 @@
 import { CatalogIcon } from '@beerolog/icons'
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import { Button, Card } from '@beerolog/ui'
+import { Button, Card, Heading } from '@beerolog/ui'
 import { StatusCard } from './StatusCard'
 
-const JOURNEY_STEPS = ['quiz', 'vibe', 'picks'] as const
+const JOURNEY_STEPS = ['quiz', 'vibe', 'picks', 'rate'] as const
 
 type TasteProfileEmptyStateProps = {
   greeting: string
@@ -18,9 +18,7 @@ export function TasteProfileEmptyState({ greeting }: TasteProfileEmptyStateProps
         <p className="text-sm font-semibold uppercase tracking-wide text-brand-600">
           {greeting}
         </p>
-        <h1 className="text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
-          {t('emptyProfile.headline')}
-        </h1>
+        <Heading className="text-3xl sm:text-4xl">{t('emptyProfile.headline')}</Heading>
         <p className="text-lg text-neutral-600">{t('emptyProfile.intro')}</p>
       </section>
 
@@ -48,7 +46,7 @@ export function TasteProfileEmptyState({ greeting }: TasteProfileEmptyStateProps
         <h2 className="text-center text-sm font-semibold uppercase tracking-wide text-neutral-500">
           {t('emptyProfile.whatNext')}
         </h2>
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {JOURNEY_STEPS.map((step, index) => (
             <Card
               key={step}

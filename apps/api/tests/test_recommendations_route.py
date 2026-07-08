@@ -7,6 +7,8 @@ and returns the expected response shape.
 
 from __future__ import annotations
 
+import hashlib
+
 import pytest  # type: ignore[import-not-found]
 from fastapi.testclient import TestClient  # type: ignore[import-not-found]
 
@@ -18,12 +20,13 @@ from app.services.baseline_taste_repo import BaselineTasteSnapshot
 
 
 class _StubEmbeddingClient:
-    """Returns a deterministic 8-D vector based on a hash of the text so
-    different inputs produce different outputs without needing OpenAI."""
+    """Returns a deterministic 8-D vector based on a stable hash of the text so
+    different inputs produce different outputs without needing OpenAI. Uses
+    sha256 (not the builtin hash) so results don't vary with PYTHONHASHSEED."""
 
     async def embed(self, text: str) -> list[float]:
-        h = hash(text)
-        return [((h >> (i * 4)) & 0xF) / 15.0 for i in range(8)]
+        digest = hashlib.sha256(text.encode()).digest()
+        return [digest[i] / 255.0 for i in range(8)]
 
 
 class _NullBaselineRepo:

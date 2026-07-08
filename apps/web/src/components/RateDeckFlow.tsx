@@ -3,32 +3,30 @@
  * submit on completion. Data + progression live in useRateDeck; this component
  * is presentation only.
  */
-import { ProgressRing } from '@beerolog/ui'
+import { Button, Heading, ProgressRing, buttonVariants } from '@beerolog/ui'
+import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { PAGE_SHELL_X } from '../lib/page-shell'
 import { useRateDeck } from '../lib/rate-deck'
 import { RateBeerCard } from './RateBeerCard'
 
-// Navigates, so it's a real <a> (accessibility) styled like the default Button.
-const LINK_BUTTON =
-  'mt-2 inline-flex h-11 items-center justify-center gap-2 rounded bg-brand-500 px-5 text-base font-medium text-[hsl(26_30%_10%)] transition-colors hover:bg-brand-600'
-
-function Shell({ children }: { children: React.ReactNode }) {
+function Shell({ children, subtitle }: { children: React.ReactNode; subtitle?: boolean }) {
   const { t } = useTranslation()
   return (
     <div className={`mx-auto max-w-md py-8 text-center ${PAGE_SHELL_X}`}>
-      <h1 className="mb-6 text-2xl font-bold text-neutral-900">{t('rate.title', 'Rate beers')}</h1>
-      {children}
+      <Heading className="text-2xl">{t('rate.title', 'Rate beers')}</Heading>
+      {subtitle ? <p className="mt-2 text-sm text-neutral-600">{t('rate.subtitle')}</p> : null}
+      <div className="mt-6">{children}</div>
     </div>
   )
 }
 
 export function RateDeckFlow() {
   const { t } = useTranslation()
-  const { state, rate } = useRateDeck()
+  const { state, rate, undo, restart } = useRateDeck()
 
   if (state.status === 'loading') {
-    return <Shell>{t('rate.loading', 'Loading beers…')}</Shell>
+    return <Shell subtitle>{t('rate.loading', 'Loading beers…')}</Shell>
   }
   if (state.status === 'submitting') {
     return <Shell>{t('rate.saving', 'Saving your ratings…')}</Shell>
@@ -37,6 +35,9 @@ export function RateDeckFlow() {
     return (
       <Shell>
         <p role="alert">{t('rate.error', "Couldn't load the deck. Try again.")}</p>
+        <Button className="mt-4" onClick={restart}>
+          {t('common.tryAgain')}
+        </Button>
       </Shell>
     )
   }
@@ -44,9 +45,9 @@ export function RateDeckFlow() {
     return (
       <Shell>
         <p>{t('rate.empty', "No beers to rate right now — you've rated them all!")}</p>
-        <a href="/recommendations" className="text-brand-600 underline">
+        <Link to="/recommendations" className="mt-3 inline-block text-brand-600 underline">
           {t('rate.backToRecs', 'Back to recommendations')}
-        </a>
+        </Link>
       </Shell>
     )
   }
@@ -56,9 +57,17 @@ export function RateDeckFlow() {
         <p role="status" className="text-lg font-semibold">
           {t('rate.done', 'Thanks! Your taste profile just got sharper.')}
         </p>
-        <a href="/recommendations" className={LINK_BUTTON}>
-          {t('rate.seeRecs', 'See fresh recommendations')}
-        </a>
+        <p className="mt-2 text-sm text-neutral-600">
+          {t('rate.doneDetail', { count: state.count })}
+        </p>
+        <div className="mt-4 flex flex-col items-center gap-3">
+          <Link to="/recommendations" className={buttonVariants()}>
+            {t('rate.seeRecs', 'See fresh recommendations')}
+          </Link>
+          <Button variant="outline" onClick={restart}>
+            {t('rate.rateMore', 'Rate more beers')}
+          </Button>
+        </div>
       </Shell>
     )
   }
@@ -66,8 +75,18 @@ export function RateDeckFlow() {
   const beer = state.deck[state.index]!
   const total = state.deck.length
   return (
-    <Shell>
-      <div className="mb-4 flex justify-center">
+    <Shell subtitle>
+      <div className="relative mb-4 flex justify-center">
+        {state.index > 0 ? (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={undo}
+            className="absolute left-0 top-1/2 -translate-y-1/2"
+          >
+            {t('rate.undo', 'Undo last')}
+          </Button>
+        ) : null}
         <ProgressRing value={state.index} max={total} label={`${state.index + 1}/${total}`} />
       </div>
       <RateBeerCard key={beer.id} beer={beer} onRate={rate} />

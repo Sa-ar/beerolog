@@ -10,6 +10,12 @@ vi.mock('../lib/api-client/client', () => ({
   apiClient: { POST: (...args: unknown[]) => postMock(...args) },
 }))
 
+vi.mock('@tanstack/react-router', () => ({
+  Link: ({ to, children }: { to: string; children: React.ReactNode }) => (
+    <a href={to}>{children}</a>
+  ),
+}))
+
 const { RecommendationBeerCard } = await import('./RecommendationBeerCard')
 
 const BEER: RecommendedBeer = {
@@ -58,6 +64,10 @@ describe('RecommendationBeerCard rating', () => {
       body: { beer_id: 'goldstar', rating: 'loved' },
     })
     expect(await screen.findByRole('status')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /rate more in a quick deck/i })).toHaveAttribute(
+      'href',
+      '/rate',
+    )
   })
 
   it('surfaces an error and lets the user retry', async () => {

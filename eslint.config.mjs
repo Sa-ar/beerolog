@@ -17,6 +17,8 @@ export default tseslint.config(
         'error',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' },
       ],
+      // Nested ternaries are hard to read; use early returns / if-else instead.
+      'no-nested-ternary': 'error',
     },
   },
   {
