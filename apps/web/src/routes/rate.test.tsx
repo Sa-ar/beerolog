@@ -42,11 +42,11 @@ beforeEach(() => {
   getMock.mockReset()
   postMock.mockReset()
   getMock.mockResolvedValue({ data: DECK, error: undefined })
-  postMock.mockResolvedValue({ data: { recorded: 2 }, error: undefined })
+  postMock.mockResolvedValue({ data: { id: 'r1', rating: 'loved' }, error: undefined })
 })
 
 describe('RateDeckFlow', () => {
-  it('walks the deck and batch-submits all swipes once at the end', async () => {
+  it('saves each swipe immediately so a partial deck still persists', async () => {
     const user = userEvent.setup()
     renderWithI18n(<RateDeckFlow />, 'en')
 
@@ -54,19 +54,22 @@ describe('RateDeckFlow', () => {
     await user.type(screen.getByRole('textbox'), 'tasty')
     await user.click(screen.getByRole('button', { name: /loved it/i }))
 
-    expect(await screen.findByText('Beer B')).toBeInTheDocument()
-    expect(postMock).not.toHaveBeenCalled()
-    await user.click(screen.getByRole('button', { name: /not for me/i }))
+    // Saved right away via /ratings — not held in a batch until the deck ends,
+    // so leaving mid-deck still persists what was rated.
+    await waitFor(() =>
+      expect(postMock).toHaveBeenCalledWith('/ratings', {
+        body: { beer_id: 'a', rating: 'loved', note: 'tasty' },
+      }),
+    )
 
-    await waitFor(() => expect(postMock).toHaveBeenCalledTimes(1))
-    expect(postMock).toHaveBeenCalledWith('/rate/session', {
-      body: {
-        swipes: [
-          { beer_id: 'a', rating: 'loved', note: 'tasty' },
-          { beer_id: 'b', rating: 'disliked' },
-        ],
-      },
-    })
+    expect(await screen.findByText('Beer B')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /not for me/i }))
+    await waitFor(() =>
+      expect(postMock).toHaveBeenCalledWith('/ratings', {
+        body: { beer_id: 'b', rating: 'disliked' },
+      }),
+    )
+
     expect(await screen.findByRole('status')).toBeInTheDocument()
     expect(screen.getByText(/saved 2 ratings/i)).toBeInTheDocument()
   })
@@ -93,7 +96,7 @@ describe('RateDeckFlow', () => {
     expect(await screen.findByText('Beer B')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: /not for me/i }))
 
-    await waitFor(() => expect(postMock).toHaveBeenCalledTimes(1))
+    await waitFor(() => expect(postMock).toHaveBeenCalledTimes(2))
     getMock.mockClear()
     await user.click(screen.getByRole('button', { name: /rate more beers/i }))
 

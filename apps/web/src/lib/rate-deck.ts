@@ -1,7 +1,9 @@
 /**
  * Deck data + progression for the /rate flow. The deck is server state
- * (react-query); index/swipes are local UI state; completion batch-submits via
- * a mutation. The route component only deals with presentation.
+ * (react-query); the current card index is local UI state. Each swipe is saved
+ * immediately (upsert via POST /ratings) so a partial deck still persists — no
+ * batch that's lost if you leave mid-deck. The route component is presentation
+ * only.
  */
 import type { Rating } from '@beerolog/types'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -23,8 +25,7 @@ export type RateDeckState =
   | { status: 'loading' }
   | { status: 'error' }
   | { status: 'empty' }
-  | { status: 'rating'; deck: DeckBeer[]; index: number; swipes: Swipe[] }
-  | { status: 'submitting' }
+  | { status: 'rating'; deck: DeckBeer[]; index: number }
   | { status: 'done'; count: number }
 
 const DECK_KEY = ['rate', 'deck'] as const
@@ -37,8 +38,9 @@ async function fetchDeck(): Promise<DeckBeer[]> {
 
 export function useRateDeck() {
   const queryClient = useQueryClient()
-  // Keep the deck fresh for the session instead of refetching on every mount
-  // (issue #1). Submitting invalidates it below so newly-rated beers drop out.
+  // Keep the deck fresh for the session instead of refetching on every mount.
+  // The deck is invalidated when a run finishes (below), not per swipe, so
+  // cards don't shift underfoot mid-deck.
   const deck = useQuery({
     queryKey: DECK_KEY,
     queryFn: fetchDeck,
@@ -46,57 +48,66 @@ export function useRateDeck() {
     retry: false,
   })
   const [index, setIndex] = useState(0)
-  const [swipes, setSwipes] = useState<Swipe[]>([])
+  const [finished, setFinished] = useState(false)
+  const [saveError, setSaveError] = useState(false)
 
-  const submit = useMutation({
-    mutationFn: async (all: Swipe[]) => {
-      const { data, error } = await apiClient.POST('/rate/session', { body: { swipes: all } })
-      if (error) throw new Error('Failed to submit ratings')
-      return data?.recorded ?? all.length
+  const save = useMutation({
+    mutationFn: async (swipe: Swipe) => {
+      const { error } = await apiClient.POST('/ratings', {
+        body: {
+          beer_id: swipe.beer_id,
+          rating: swipe.rating,
+          ...(swipe.note ? { note: swipe.note } : {}),
+        },
+      })
+      if (error) throw new Error('Failed to save rating')
     },
+    retry: 2,
+    onError: () => setSaveError(true),
     onSuccess: () => {
-      // Rated beers are now excluded server-side; drop the stale deck so a
-      // later visit doesn't resurface beers just rated.
-      void queryClient.invalidateQueries({ queryKey: DECK_KEY })
+      // Keep the "my ratings" surfaces fresh. The deck is NOT invalidated here
+      // (that happens once the run finishes) so the current cards stay put.
+      void queryClient.invalidateQueries({ queryKey: ['me', 'ratings', 'count'] })
+      void queryClient.invalidateQueries({ queryKey: ['me', 'ratings', 'map'] })
     },
   })
 
   const restart = useCallback(() => {
     setIndex(0)
-    setSwipes([])
-    submit.reset()
+    setFinished(false)
+    setSaveError(false)
     void queryClient.resetQueries({ queryKey: DECK_KEY })
-  }, [queryClient, submit])
+  }, [queryClient])
 
   function rate(rating: Rating, note?: string) {
     const beers = deck.data
-    if (!beers) return
+    if (!beers || finished) return
     const beer = beers[index]
     if (!beer) return
-    const next = [...swipes, { beer_id: beer.id, rating, ...(note ? { note } : {}) }]
-    setSwipes(next)
-    if (index + 1 >= beers.length) {
-      submit.mutate(next)
-    } else {
-      setIndex(index + 1)
+    save.mutate({ beer_id: beer.id, rating, ...(note ? { note } : {}) })
+    const nextIndex = index + 1
+    setIndex(nextIndex)
+    if (nextIndex >= beers.length) {
+      setFinished(true)
+      // Run complete: drop the stale deck so a later visit excludes what was
+      // just rated. Safe now because we no longer render cards from it.
+      void queryClient.invalidateQueries({ queryKey: DECK_KEY })
     }
   }
 
   function undo() {
-    if (index === 0) return
+    if (index === 0 || finished) return
+    // Step back to re-rate a mis-swipe; re-rating upserts over the saved value.
     setIndex(index - 1)
-    setSwipes(swipes.slice(0, -1))
   }
 
   const state = ((): RateDeckState => {
-    if (submit.isPending) return { status: 'submitting' }
-    if (submit.isSuccess) return { status: 'done', count: submit.data ?? swipes.length }
-    if (submit.isError) return { status: 'error' }
+    if (finished) return { status: 'done', count: index }
     if (deck.isPending) return { status: 'loading' }
     if (deck.isError || !deck.data) return { status: 'error' }
     if (deck.data.length === 0) return { status: 'empty' }
-    return { status: 'rating', deck: deck.data, index, swipes }
+    return { status: 'rating', deck: deck.data, index }
   })()
 
-  return { state, rate, undo, restart }
+  return { state, rate, undo, restart, saveError }
 }

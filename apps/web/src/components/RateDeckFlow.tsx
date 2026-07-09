@@ -24,7 +24,7 @@ function Shell({ children, subtitle }: { children: React.ReactNode; subtitle?: b
 
 export function RateDeckFlow() {
   const { t } = useTranslation()
-  const { state, rate, undo, restart } = useRateDeck()
+  const { state, rate, undo, restart, saveError } = useRateDeck()
 
   // Lock body scroll while actively rating so up/down swipes rate the card
   // instead of scrolling the page (#4).
@@ -39,9 +39,6 @@ export function RateDeckFlow() {
 
   if (state.status === 'loading') {
     return <Shell subtitle>{t('rate.loading', 'Loading beers…')}</Shell>
-  }
-  if (state.status === 'submitting') {
-    return <Shell>{t('rate.saving', 'Saving your ratings…')}</Shell>
   }
   if (state.status === 'error') {
     return (
@@ -72,6 +69,11 @@ export function RateDeckFlow() {
         <p className="mt-2 text-sm text-neutral-600">
           {t('rate.doneDetail', { count: state.count })}
         </p>
+        {saveError ? (
+          <p role="alert" className="mt-2 text-sm text-red-600">
+            {t('rate.saveWarning', "Some ratings couldn't be saved — check your connection.")}
+          </p>
+        ) : null}
         <div className="mt-4 flex flex-col items-center gap-3">
           <Link to="/recommendations" className={buttonVariants()}>
             {t('rate.seeRecs', 'See fresh recommendations')}
