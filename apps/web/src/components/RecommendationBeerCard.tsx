@@ -8,6 +8,7 @@ import { apiClient } from '../lib/api-client/client'
 import { BeerColorGlass } from './BeerColorGlass'
 import { deriveBeerColor, type BeerColor } from '../lib/beer-color'
 import { matchAlignmentPercents, type MatchCalibration } from '../lib/match-score'
+import { useMyRatings } from '../lib/my-ratings'
 import { SAVE_STATUS, type SaveStatus } from '../lib/save-status'
 import type { AbvIntent } from '../lib/session-intent'
 import { venueMapsUrl } from '../lib/beer-store-search'
@@ -100,6 +101,7 @@ export function RecommendationBeerCard({
   // Immediate (card) rating path. Optimistic: show 'saving' at once, then the
   // saved confirmation; on error keep the tapper so the user can retry.
   const [rateStatus, setRateStatus] = useState<SaveStatus>(SAVE_STATUS.idle)
+  const myRatings = useMyRatings()
 
   async function handleRate(rating: Rating) {
     setRateStatus(SAVE_STATUS.saving)
@@ -306,6 +308,7 @@ export function RecommendationBeerCard({
         ) : (
           <RatingTapper
             onRate={handleRate}
+            selected={myRatings[beer.id]}
             disabled={rateStatus === SAVE_STATUS.saving}
             labels={{
               loved: t('rate.tapper.loved', 'Loved it'),

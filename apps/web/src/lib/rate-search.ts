@@ -55,6 +55,7 @@ export function useRateOne() {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['me', 'ratings', 'count'] })
+      void queryClient.invalidateQueries({ queryKey: ['me', 'ratings', 'map'] })
       void queryClient.invalidateQueries({ queryKey: ['rate', 'deck'] })
     },
   })

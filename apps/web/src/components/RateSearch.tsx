@@ -7,6 +7,7 @@ import { Card, Heading, RatingTapper } from '@beerolog/ui'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { PAGE_SHELL_X } from '../lib/page-shell'
+import { useMyRatings } from '../lib/my-ratings'
 import { type SearchBeer, useBeerSearch, useRateOne } from '../lib/rate-search'
 import { useDebouncedValue } from '../lib/use-debounced-value'
 
@@ -19,6 +20,9 @@ export function RateSearch() {
   const debounced = useDebouncedValue(query.trim(), 250)
   const search = useBeerSearch(debounced)
   const rateOne = useRateOne()
+  // Server truth for already-rated beers; local `rated` overrides it after a
+  // change so the tap feels instant.
+  const myRatings = useMyRatings()
 
   function rate(beer: SearchBeer, rating: Rating) {
     setRated((prev) => ({ ...prev, [beer.id]: rating }))
@@ -46,7 +50,7 @@ export function RateSearch() {
           isPending={search.isPending}
           isError={search.isError}
           beers={search.data ?? []}
-          rated={rated}
+          rated={{ ...myRatings, ...rated }}
           onRate={rate}
         />
       </div>
@@ -120,20 +124,20 @@ function RateSearchResult({
       <p className="text-xs text-neutral-600">
         {beer.brewery} · {beer.style} · {beer.abv}%
       </p>
-      <div className="mt-3">
-        {rated ? (
+      <div className="mt-3 space-y-2">
+        <RatingTapper
+          onRate={(r) => onRate(beer, r)}
+          selected={rated}
+          labels={{
+            loved: t('rate.tapper.loved'),
+            fine: t('rate.tapper.fine'),
+            disliked: t('rate.tapper.disliked'),
+          }}
+        />
+        {rated && (
           <p role="status" className="text-sm font-medium text-brand-600">
             {t('rate.search.saved')}
           </p>
-        ) : (
-          <RatingTapper
-            onRate={(r) => onRate(beer, r)}
-            labels={{
-              loved: t('rate.tapper.loved'),
-              fine: t('rate.tapper.fine'),
-              disliked: t('rate.tapper.disliked'),
-            }}
-          />
         )}
       </div>
     </Card>

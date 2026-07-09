@@ -12,6 +12,7 @@ from app.api_contracts import (
     CreateRatingRequest,
     RatingRecord,
     RatingsHistoryResponse,
+    RatingsMapResponse,
 )
 from app.auth import get_current_user
 from app.dependencies import get_note_analyzer, get_taste_feedback_service
@@ -72,6 +73,20 @@ async def create_rating(
         note=row.note,
         created_at=row.created_at,
     )
+
+
+@router.get(
+    "/me/ratings/map",
+    response_model=RatingsMapResponse,
+    operation_id="getMyRatingsMap",
+)
+async def get_my_ratings_map(
+    user: dict = Depends(get_current_user),
+    repo: RatingsRepo = Depends(get_ratings_repo),
+) -> RatingsMapResponse:
+    # Whole map in one call so the frontend joins it into any beer list without
+    # paging the history endpoint.
+    return RatingsMapResponse(ratings=await repo.list_ratings_map(user["sub"]))
 
 
 @router.get(

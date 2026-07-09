@@ -54,6 +54,8 @@ class RatingsRepo(Protocol):
 
     async def list_rated_beer_ids(self, user_id: str) -> set[str]: ...
 
+    async def list_ratings_map(self, user_id: str) -> dict[str, RatingValue]: ...
+
 
 class AsyncpgRatingsRepo:
     """Default DB-backed implementation. Exercised only by integration tests."""
@@ -145,3 +147,10 @@ class AsyncpgRatingsRepo:
         async with self._pool.acquire() as conn:
             rows = await conn.fetch("SELECT beer_id FROM beer_ratings WHERE user_id = $1", user_id)
         return {r["beer_id"] for r in rows}
+
+    async def list_ratings_map(self, user_id: str) -> dict[str, RatingValue]:
+        async with self._pool.acquire() as conn:
+            rows = await conn.fetch(
+                "SELECT beer_id, rating FROM beer_ratings WHERE user_id = $1", user_id
+            )
+        return {r["beer_id"]: r["rating"] for r in rows}

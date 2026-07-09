@@ -474,6 +474,12 @@ class RatingsHistoryResponse(BaseModel):
     total: int
 
 
+class RatingsMapResponse(BaseModel):
+    # beer_id -> the current user's rating. The re-rate surfaces (search,
+    # recommendations) read this to show the existing rating from server truth.
+    ratings: dict[str, RatingValue]
+
+
 class DeckBeer(BaseModel):
     id: str
     name: str

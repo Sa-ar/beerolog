@@ -24,10 +24,18 @@ const BEER = {
   abv: 4.9,
 }
 
+let ratingsMap: Record<string, string> = {}
+
 beforeEach(() => {
   getMock.mockReset()
   postMock.mockReset()
-  getMock.mockResolvedValue({ data: [BEER], error: undefined })
+  ratingsMap = {}
+  getMock.mockImplementation((path: string) => {
+    if (path === '/me/ratings/map') {
+      return Promise.resolve({ data: { ratings: ratingsMap }, error: undefined })
+    }
+    return Promise.resolve({ data: [BEER], error: undefined }) // /catalog/search
+  })
   postMock.mockResolvedValue({ data: undefined, error: undefined })
 })
 
@@ -49,5 +57,22 @@ describe('RateSearch', () => {
       body: { beer_id: 'b1', rating: 'loved' },
     })
     expect(await screen.findByText(/rated/i)).toBeInTheDocument()
+  })
+
+  it('preselects an existing rating and lets it be changed', async () => {
+    // Server truth: this beer was already rated 'disliked'. Search must show it
+    // and still allow changing it (issue #3).
+    ratingsMap = { b1: 'disliked' }
+    const user = userEvent.setup()
+    renderWithI18n(<RateSearch />, 'en')
+
+    await user.type(screen.getByRole('searchbox'), 'gold')
+    const disliked = await screen.findByRole('button', { name: /not for me/i })
+    expect(disliked).toHaveAttribute('aria-pressed', 'true')
+
+    await user.click(screen.getByRole('button', { name: /loved it/i }))
+    expect(postMock).toHaveBeenCalledWith('/ratings', {
+      body: { beer_id: 'b1', rating: 'loved' },
+    })
   })
 })

@@ -62,6 +62,9 @@ class _MemoryRepo:
     async def list_rated_beer_ids(self, user_id: str) -> set[str]:
         return {r.beer_id for r in self._rows.values() if r.user_id == user_id}
 
+    async def list_ratings_map(self, user_id: str) -> dict[str, str]:
+        return {r.beer_id: r.rating for r in self._rows.values() if r.user_id == user_id}
+
 
 FAKE_USER = {"sub": "user_test_123"}
 
@@ -129,6 +132,25 @@ def test_create_rating_upserts_not_duplicates(client: TestClient, repo: _MemoryR
     assert r2.json()["note"] == "worse today"
     # Repo should contain exactly one row for this (user, beer)
     assert len(repo._rows) == 1
+
+
+def test_ratings_map_returns_beer_id_to_rating(client: TestClient) -> None:
+    # The re-rate surfaces (search, recommendations) read this map to show the
+    # user's current rating from server truth, not frontend state (issue #3).
+    client.post("/ratings", json={"beer_id": "goldstar", "rating": "loved"})
+    client.post("/ratings", json={"beer_id": "malka-stout", "rating": "disliked"})
+    r = client.get("/me/ratings/map")
+    assert r.status_code == 200, r.text
+    assert r.json()["ratings"] == {"goldstar": "loved", "malka-stout": "disliked"}
+
+
+def test_ratings_map_requires_auth() -> None:
+    app.dependency_overrides[get_ratings_repo] = lambda: _MemoryRepo(set())
+    try:
+        r = TestClient(app).get("/me/ratings/map")
+        assert r.status_code == 401
+    finally:
+        app.dependency_overrides.pop(get_ratings_repo, None)
 
 
 def test_list_my_ratings_paginates(client: TestClient) -> None:

@@ -1505,6 +1505,28 @@
         "title": "RatingsHistoryResponse",
         "type": "object"
       },
+      "RatingsMapResponse": {
+        "properties": {
+          "ratings": {
+            "additionalProperties": {
+              "enum": [
+                "loved",
+                "fine",
+                "disliked",
+                "unknown"
+              ],
+              "type": "string"
+            },
+            "title": "Ratings",
+            "type": "object"
+          }
+        },
+        "required": [
+          "ratings"
+        ],
+        "title": "RatingsMapResponse",
+        "type": "object"
+      },
       "ReadinessResponse": {
         "properties": {
           "components": {
@@ -2665,6 +2687,32 @@
           }
         ],
         "summary": "List My Ratings",
+        "tags": [
+          "ratings"
+        ]
+      }
+    },
+    "/me/ratings/map": {
+      "get": {
+        "operationId": "getMyRatingsMap",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RatingsMapResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get My Ratings Map",
         "tags": [
           "ratings"
         ]
