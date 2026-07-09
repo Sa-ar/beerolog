@@ -5,6 +5,7 @@
  */
 import { Button, Heading, ProgressRing, buttonVariants } from '@beerolog/ui'
 import { Link } from '@tanstack/react-router'
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { PAGE_SHELL_X } from '../lib/page-shell'
 import { useRateDeck } from '../lib/rate-deck'
@@ -24,6 +25,17 @@ function Shell({ children, subtitle }: { children: React.ReactNode; subtitle?: b
 export function RateDeckFlow() {
   const { t } = useTranslation()
   const { state, rate, undo, restart } = useRateDeck()
+
+  // Lock body scroll while actively rating so up/down swipes rate the card
+  // instead of scrolling the page (#4).
+  useEffect(() => {
+    if (state.status !== 'rating') return
+    const previous = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = previous
+    }
+  }, [state.status])
 
   if (state.status === 'loading') {
     return <Shell subtitle>{t('rate.loading', 'Loading beers…')}</Shell>
