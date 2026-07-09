@@ -66,6 +66,12 @@ def is_seedable(row: dict[str, Any]) -> bool:
         re.I,
     ):
         return False
+    if row.get("curated"):
+        # Hand-vetted canonical beers (e.g. Israeli mass-market lagers the craft
+        # retailers we scrape don't carry) bypass the retailer-source + Blob-image
+        # requirements. Public product facts + original notes only — Untappd
+        # content is still rejected by assert_no_untappd above.
+        return True
     src = row.get("sourceUrl") or ""
     if not src:
         return False
