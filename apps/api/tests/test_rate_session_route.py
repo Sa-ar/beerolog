@@ -43,6 +43,9 @@ class _RatingsRepo:
     async def count_for_user(self, user_id: str) -> int:
         return sum(1 for r in self.rows.values() if r.user_id == user_id)
 
+    async def list_rated_beer_ids(self, user_id: str) -> set[str]:
+        return {b for (u, b) in self.rows if u == user_id}
+
 
 class _BaselineRepo:
     def __init__(self, embedding: list[float]) -> None:
@@ -139,6 +142,37 @@ def test_session_records_unknown_rating_without_nudging() -> None:
     assert len(ratings_repo.rows) == 1
     assert next(iter(ratings_repo.rows.values())).rating == "unknown"
     assert baseline.snap.embedding == before
+
+
+def test_session_skips_already_rated_beers() -> None:
+    # Deck is new-beers-only. Server-side guard (never trust the frontend): a
+    # swipe for an already-rated beer is silently skipped, not upserted — so a
+    # stale swipe can't overwrite an existing rating (issue #3).
+    baseline = _BaselineRepo([1.0, 0.0, 0.0, 0.0])
+    client, ratings_repo = _client(baseline)
+    ratings_repo.rows[(FAKE_USER["sub"], "A")] = RatingRow(
+        id="A",
+        user_id=FAKE_USER["sub"],
+        beer_id="A",
+        beer_name="A",
+        beer_brewery="b",
+        rating="loved",
+        note=None,
+        created_at="2026-06-01T00:00:00+00:00",
+    )
+    r = client.post(
+        "/rate/session",
+        json={
+            "swipes": [
+                {"beer_id": "A", "rating": "disliked"},  # already rated -> skipped
+                {"beer_id": "C", "rating": "loved"},  # new -> recorded
+            ]
+        },
+    )
+    assert r.status_code == 200, r.text
+    assert r.json()["recorded"] == 1
+    assert ratings_repo.rows[(FAKE_USER["sub"], "A")].rating == "loved"  # untouched
+    assert (FAKE_USER["sub"], "C") in ratings_repo.rows
 
 
 def test_session_skips_unknown_beers() -> None:

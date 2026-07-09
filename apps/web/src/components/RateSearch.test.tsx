@@ -1,25 +1,41 @@
 import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { renderWithI18n } from '../test/render'
 
-const mutate = vi.fn()
+const getMock = vi.fn()
+const postMock = vi.fn()
 
-vi.mock('../lib/rate-search', () => ({
-  useBeerSearch: () => ({
-    data: [
-      { id: 'b1', name: 'Goldstar', name_hebrew: null, brewery: 'Tempo', style: 'lager', abv: 4.9 },
-    ],
-    isPending: false,
-    isError: false,
-  }),
-  useRateOne: () => ({ mutate }),
+vi.mock('../lib/api-client/client', () => ({
+  apiClient: {
+    GET: (...args: unknown[]) => getMock(...args),
+    POST: (...args: unknown[]) => postMock(...args),
+  },
 }))
 
 const { RateSearch } = await import('./RateSearch')
 
+const BEER = {
+  id: 'b1',
+  name: 'Goldstar',
+  name_hebrew: null,
+  brewery: 'Tempo',
+  style: 'lager',
+  abv: 4.9,
+}
+
+beforeEach(() => {
+  getMock.mockReset()
+  postMock.mockReset()
+  getMock.mockResolvedValue({ data: [BEER], error: undefined })
+  postMock.mockResolvedValue({ data: undefined, error: undefined })
+})
+
 describe('RateSearch', () => {
-  it('rates a searched beer directly and shows a saved state', async () => {
+  it('rates a searched beer via the upsert endpoint so an existing rating can be changed', async () => {
+    // Search must hit /ratings (upsert), NOT the deck's /rate/session — the deck
+    // guard skips already-rated beers, but search is where you change a rating
+    // (issue #3).
     const user = userEvent.setup()
     renderWithI18n(<RateSearch />, 'en')
 
@@ -29,7 +45,9 @@ describe('RateSearch', () => {
 
     await user.click(await screen.findByRole('button', { name: /loved it/i }))
 
-    expect(mutate).toHaveBeenCalledWith({ beerId: 'b1', rating: 'loved' })
+    expect(postMock).toHaveBeenCalledWith('/ratings', {
+      body: { beer_id: 'b1', rating: 'loved' },
+    })
     expect(await screen.findByText(/rated/i)).toBeInTheDocument()
   })
 })

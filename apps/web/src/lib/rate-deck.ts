@@ -37,7 +37,14 @@ async function fetchDeck(): Promise<DeckBeer[]> {
 
 export function useRateDeck() {
   const queryClient = useQueryClient()
-  const deck = useQuery({ queryKey: DECK_KEY, queryFn: fetchDeck, staleTime: 0, retry: false })
+  // Keep the deck fresh for the session instead of refetching on every mount
+  // (issue #1). Submitting invalidates it below so newly-rated beers drop out.
+  const deck = useQuery({
+    queryKey: DECK_KEY,
+    queryFn: fetchDeck,
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+  })
   const [index, setIndex] = useState(0)
   const [swipes, setSwipes] = useState<Swipe[]>([])
 
@@ -46,6 +53,11 @@ export function useRateDeck() {
       const { data, error } = await apiClient.POST('/rate/session', { body: { swipes: all } })
       if (error) throw new Error('Failed to submit ratings')
       return data?.recorded ?? all.length
+    },
+    onSuccess: () => {
+      // Rated beers are now excluded server-side; drop the stale deck so a
+      // later visit doesn't resurface beers just rated.
+      void queryClient.invalidateQueries({ queryKey: DECK_KEY })
     },
   })
 

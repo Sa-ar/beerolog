@@ -6,6 +6,8 @@ See docs/prds/beer-rating-feedback.md.
 
 from __future__ import annotations
 
+import logging
+
 from fastapi import APIRouter, BackgroundTasks, Depends
 
 from app.api_contracts import (
@@ -29,6 +31,8 @@ from app.services.note_analyzer import NoteAnalyzerProtocol
 from app.services.rate_deck import build_deck
 from app.services.ratings_repo import RatingsRepo
 from app.services.taste_feedback_service import TasteFeedbackService
+
+logger = logging.getLogger("beerolog.api")
 
 router = APIRouter(prefix="/rate", tags=["rate"])
 
@@ -73,8 +77,17 @@ async def post_rate_session(
 ) -> RateSessionResponse:
     # Deck path: persist every swipe, then apply ONE combined nudge from the
     # pre-session baseline (avoids whipsawing the vector mid-deck).
+    # Server-side guard: the deck is new-beers-only. Skip swipes for beers the
+    # user has already rated so a stale/replayed swipe can't overwrite an
+    # existing rating (issue #3 — never trust the frontend). Changing a rating
+    # happens through search/recommendations, not here.
+    rated_ids = await ratings_repo.list_rated_beer_ids(user["sub"])
+    skipped = 0
     recorded: list[tuple[str, str]] = []
     for swipe in body.swipes:
+        if swipe.beer_id in rated_ids:
+            skipped += 1
+            continue
         if not await ratings_repo.beer_exists(swipe.beer_id):
             continue
         await ratings_repo.upsert_rating(
@@ -92,5 +105,9 @@ async def post_rate_session(
                 rating=swipe.rating,
                 note=swipe.note,
             )
+    if skipped:
+        logger.info(
+            "rate/session skipped %d already-rated swipe(s) for user=%s", skipped, user["sub"]
+        )
     await feedback.apply_batch(user_id=user["sub"], ratings=recorded)
     return RateSessionResponse(recorded=len(recorded))

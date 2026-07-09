@@ -6,6 +6,8 @@ docs/prds/beer-rating-feedback.md (active-learning deck, v1).
 
 from __future__ import annotations
 
+from dataclasses import replace
+
 from app.services.match_engine import BeerCandidate
 from app.services.rate_deck import build_deck
 
@@ -75,3 +77,30 @@ def test_size_larger_than_catalog_returns_all_available() -> None:
     catalog = _catalog(5)
     deck = build_deck([1.0, 0.0, 0.0, 0.0], catalog, rated_ids={"b0"}, size=12)
     assert len(deck) == 4
+
+
+def test_prioritizes_known_tiers_before_craft() -> None:
+    # A craft beer is the single best cosine match, but recognizable (known)
+    # tiers must fill the deck first — see issue #2 ("beers I might know").
+    baseline = [1.0, 0.0, 0.0, 0.0]
+    craft_top = replace(_beer("craft_top", [1.0, 0.0, 0.0, 0.0]), market_tier="craft")
+    known = [
+        replace(_beer(f"k{i}", [0.6, 0.4, 0.0, 0.0]), market_tier="mainstream") for i in range(12)
+    ]
+    deck = build_deck(baseline, [craft_top, *known], rated_ids=set(), size=6)
+    ids = {b.id for b in deck}
+    assert "craft_top" not in ids  # known tiers filled all 6 slots first
+    assert len(ids) == 6
+
+
+def test_falls_back_to_craft_when_known_exhausted() -> None:
+    # Priority-fill, not hard-filter: once known beers run out, craft tops up so
+    # the deck is never short and every beer stays eventually reachable.
+    baseline = [1.0, 0.0, 0.0, 0.0]
+    known = [replace(_beer(f"k{i}", [1.0, 0.0, 0.0, 0.0]), market_tier="import") for i in range(2)]
+    craft = [replace(_beer(f"c{i}", [0.6, 0.4, 0.0, 0.0]), market_tier="craft") for i in range(10)]
+    deck = build_deck(baseline, [*known, *craft], rated_ids=set(), size=6)
+    ids = {b.id for b in deck}
+    assert {"k0", "k1"} <= ids  # both known beers included
+    assert sum(1 for b in deck if b.market_tier == "craft") == 4  # craft tops up
+    assert len(deck) == 6

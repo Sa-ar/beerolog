@@ -1,8 +1,9 @@
 /**
  * Search the catalog for a specific beer and rate it directly (#220), for users
  * who already know what they want to rate instead of working the suggested deck.
- * Search is react-query server state; rating a result submits a one-beer
- * /rate/session and invalidates the deck + rating count.
+ * Search is react-query server state; rating a result upserts via POST /ratings
+ * (not the deck's /rate/session, which skips already-rated beers) so an existing
+ * rating can be changed here, then invalidates the deck + rating count.
  */
 import type { Rating } from '@beerolog/types'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -47,8 +48,8 @@ export function useRateOne() {
       rating: Rating
       note?: string
     }) => {
-      const { error } = await apiClient.POST('/rate/session', {
-        body: { swipes: [{ beer_id: beerId, rating, ...(note ? { note } : {}) }] },
+      const { error } = await apiClient.POST('/ratings', {
+        body: { beer_id: beerId, rating, ...(note ? { note } : {}) },
       })
       if (error) throw new Error('Failed to save rating')
     },

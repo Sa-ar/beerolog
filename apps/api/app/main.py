@@ -31,6 +31,7 @@ from app.routes import (
 )
 from app.services.account_repo import AsyncpgAccountRepo
 from app.services.baseline_taste_repo import AsyncpgBaselineTasteRepo
+from app.services.catalog_cache import CatalogCache
 from app.services.catalog_repo import (
     AsyncpgBeerDescriptorRepo,
     AsyncpgBeerEmbeddingRepo,
@@ -75,10 +76,10 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
             settings=settings,
         )
 
-        async def _deck_catalog() -> list:
-            return await fetch_catalog(pool)
-
-        app.dependency_overrides[get_deck_catalog] = _deck_catalog
+        # The catalog changes only on import/deploy; cache it in-process so the
+        # deck stops refetching the full table + embeddings per request (#1).
+        catalog_cache = CatalogCache(lambda: fetch_catalog(pool), settings.deck_catalog_ttl_seconds)
+        app.dependency_overrides[get_deck_catalog] = catalog_cache.get
 
         # Real LLM note analysis only when an OpenAI key is present; otherwise the
         # default no-op analyzer applies (notes are still stored).
