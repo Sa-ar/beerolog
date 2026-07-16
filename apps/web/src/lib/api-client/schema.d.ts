@@ -880,6 +880,7 @@ export interface components {
         MenuScanRequest: {
             /** Image Base64 */
             image_base64: string;
+            session?: components["schemas"]["SessionIntent"] | null;
         };
         /** NewVenueInput */
         NewVenueInput: {

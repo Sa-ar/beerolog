@@ -9,11 +9,14 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from openai import AsyncOpenAI
 from pydantic import BaseModel, Field
 
+from app.api_contracts import AbvIntent, SessionIntent
 from app.auth import get_current_user
 from app.config import settings
 from app.dependencies import get_deck_catalog
 from app.routes.onboarding import get_baseline_taste_repo
+from app.services import session_intent as session_intent_svc
 from app.services.baseline_taste_repo import BaselineTasteRepo
+from app.services.embedding_service import EmbeddingClient, get_embedding_client
 from app.services.fuzzy_matcher import CatalogEntry
 from app.services.match_engine import BeerCandidate, rank
 from app.services.menu_scanner import scan_menu
@@ -24,6 +27,9 @@ router = APIRouter(prefix="/menu", tags=["menu"])
 
 class MenuScanRequest(BaseModel):
     image_base64: str = Field(min_length=1)
+    # Optional "what I'm feeling tonight" — re-weights the ranking via the same
+    # session path as /recommendations. Omitted → baseline-taste order.
+    session: SessionIntent | None = None
 
 
 class ScanResultItem(BaseModel):
@@ -60,6 +66,15 @@ def _vision_client_dep() -> OpenAILLMClient:
     return OpenAILLMClient(AsyncOpenAI(api_key=settings.openai_api_key))
 
 
+def _embedding_client_dep() -> EmbeddingClient | None:
+    """Embedding client for session-intent re-ranking. None (not 503) without a
+    key so a plain scan still works; only a scan *with* a session needs it.
+    Overridden in tests."""
+    if not settings.openai_api_key:
+        return None
+    return get_embedding_client()
+
+
 @router.post("/scan", response_model=list[ScanResultItem], operation_id="scanMenu")
 async def scan_menu_image(
     body: MenuScanRequest,
@@ -67,28 +82,46 @@ async def scan_menu_image(
     catalog: list[BeerCandidate] = Depends(get_deck_catalog),
     llm: OpenAILLMClient = Depends(_vision_client_dep),
     repo: BaselineTasteRepo = Depends(get_baseline_taste_repo),
+    emb: EmbeddingClient | None = Depends(_embedding_client_dep),
 ) -> list[ScanResultItem]:
     by_id = {b.id: b for b in catalog}
     entries = [CatalogEntry(id=b.id, name=b.name, brewery=b.brewery) for b in catalog]
     results = await scan_menu(body.image_base64, entries, llm)
+
+    # Optional tonight's-direction: embed it as the session vector and let the
+    # same matcher path as /recommendations re-weight the pool.
+    session_vec: list[float] | None = None
+    alpha = settings.match_alpha
+    abv_intent: AbvIntent | None = None
+    abv_weight = 0.0
+    if body.session is not None and emb is not None:
+        session_vec = await emb.embed(session_intent_svc.compose_text(body.session))
+        alpha = settings.match_session_alpha
+        if body.session.abv_intent != AbvIntent.any:
+            abv_intent = body.session.abv_intent
+            abv_weight = settings.match_abv_weight
 
     # Rank the scanned pool against the user's taste profile. The matched beers
     # ARE the candidate list for match_engine.rank(). Unranked when the user has
     # no baseline yet (graceful degrade to matched-only).
     matched = [by_id[r.match.id] for r in results if r.match and r.match.id in by_id]
     fit: dict[str, float] = {}
+    order: dict[str, int] = {}
     baseline = await repo.get(user["sub"])
     if baseline and matched:
         ranked = rank(
             baseline_embedding=baseline.embedding,
-            session_embedding=None,
+            session_embedding=session_vec,
             novelty_affinity=baseline.novelty_affinity,
             catalog=matched,
-            alpha=settings.match_alpha,
+            alpha=alpha,
             beta=settings.match_beta,
             top_k=len(matched),
+            abv_intent=abv_intent,
+            abv_weight=abv_weight,
         )
         fit = {m.beer.id: _fit_pct(m.baseline_cos) for m in ranked}
+        order = {m.beer.id: idx for idx, m in enumerate(ranked)}
 
     items = [
         ScanResultItem(
@@ -104,6 +137,7 @@ async def scan_menu_image(
         )
         for r in results
     ]
-    # Best taste-fit first; unmatched / unranked sink to the bottom.
-    items.sort(key=lambda i: i.taste_fit if i.taste_fit is not None else -1.0, reverse=True)
+    # Follow rank() order (baseline, or session-aware total when a direction is
+    # given); unranked / unmatched sink to the bottom, keeping scan order.
+    items.sort(key=lambda i: order.get(i.matched_id, len(order)) if i.matched_id else len(order))
     return items

@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient  # type: ignore[import-not-found]
 from app.auth import get_current_user
 from app.dependencies import get_deck_catalog
 from app.main import app
-from app.routes.menu import _vision_client_dep
+from app.routes.menu import _embedding_client_dep, _vision_client_dep
 from app.routes.onboarding import get_baseline_taste_repo
 from app.services.baseline_taste_repo import BaselineTasteSnapshot
 from app.services.match_engine import BeerCandidate
@@ -35,6 +35,16 @@ CATALOG = [
     _beer("1", "Guinness Draught", "Guinness", [1.0, 0.0]),
     _beer("2", "Heineken", "Heineken", [0.0, 1.0]),
 ]
+
+
+class _FakeEmb:
+    """Embedding client stub returning a fixed session vector."""
+
+    def __init__(self, vec: list[float]) -> None:
+        self._vec = vec
+
+    async def embed(self, text: str) -> list[float]:
+        return self._vec
 
 
 class _FakeRepo:
@@ -76,7 +86,13 @@ class _FakeLLM:
 @pytest.fixture(autouse=True)
 def _cleanup():
     yield
-    for dep in (get_current_user, get_deck_catalog, _vision_client_dep, get_baseline_taste_repo):
+    for dep in (
+        get_current_user,
+        get_deck_catalog,
+        _vision_client_dep,
+        get_baseline_taste_repo,
+        _embedding_client_dep,
+    ):
         app.dependency_overrides.pop(dep, None)
 
 
@@ -107,6 +123,22 @@ def test_scan_ranks_pool_by_taste_and_enriches():
     top = body[0]
     assert top["name"] == "Guinness Draught" and top["brewery"] == "Guinness"
     assert top["taste_fit"] > body[1]["taste_fit"]
+
+
+def test_scan_session_intent_reorders_pool():
+    # Baseline favors Guinness; the session vector favors Heineken -> with a
+    # tonight's-direction, Heineken ranks first.
+    client = _client(["Guinness Draught", "Heineken"])
+    app.dependency_overrides[_embedding_client_dep] = lambda: _FakeEmb([0.0, 1.0])
+    r = client.post(
+        "/menu/scan",
+        json={
+            "image_base64": "img",
+            "session": {"vibe": "refreshing", "abv_intent": "any"},
+        },
+    )
+    assert r.status_code == 200, r.text
+    assert [i["matched_id"] for i in r.json()] == ["2", "1"]
 
 
 def test_scan_degrades_without_baseline():

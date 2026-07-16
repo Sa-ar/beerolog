@@ -1223,6 +1223,16 @@
             "minLength": 1,
             "title": "Image Base64",
             "type": "string"
+          },
+          "session": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SessionIntent"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
