@@ -1348,6 +1348,32 @@
         "title": "MenuChatResponse",
         "type": "object"
       },
+      "MenuRankRequest": {
+        "properties": {
+          "beer_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Beer Ids",
+            "type": "array"
+          },
+          "session": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SessionIntent"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "beer_ids"
+        ],
+        "title": "MenuRankRequest",
+        "type": "object"
+      },
       "MenuScanRequest": {
         "properties": {
           "image_base64": {
@@ -3005,6 +3031,57 @@
           }
         ],
         "summary": "Menu Chat",
+        "tags": [
+          "menu"
+        ]
+      }
+    },
+    "/menu/rank": {
+      "post": {
+        "description": "Rank an explicit set of catalog beers against the user's taste \u2014 the manual\n'add a beer we missed' path. Same taste_fit scale as /menu/scan so results\nmerge cleanly into the same comparison list. Unknown ids are dropped.",
+        "operationId": "rankMenuBeers",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MenuRankRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ScanResultItem"
+                  },
+                  "title": "Response Rankmenubeers",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Rank Menu Beers",
         "tags": [
           "menu"
         ]

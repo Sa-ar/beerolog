@@ -1,7 +1,7 @@
 /**
- * /menu — snap a tap-board photo, extract beer names via vision, match them to
- * our catalog and rank the pool by taste (POST /menu/scan). Signed-in only.
- * An optional "tonight's direction" re-ranks the already-scanned pool.
+ * /menu — snap a tap-board photo, extract beer names via vision, rank every beer
+ * on the board by taste (POST /menu/scan), steer by tonight's direction, add
+ * beers we missed via catalog search, and chat about the pick. Signed-in only.
  */
 
 import { Button, Heading } from '@beerolog/ui'
@@ -12,20 +12,20 @@ import { useTranslation } from 'react-i18next'
 import { PAGE_MAIN } from '../lib/page-shell'
 import {
   useMenuChat,
+  useMenuRank,
   useScanMenu,
   type MenuChatMessage,
   type MenuChatPoolBeer,
+  type MenuScanResultItem,
+  type MenuSessionIntent,
 } from '../lib/menu-scan'
+import { useBeerSearch, type SearchBeer } from '../lib/rate-search'
+import { useDebouncedValue } from '../lib/use-debounced-value'
 import { VIBE_OPTIONS, type SessionVibe } from '../lib/session-intent'
 
 export const Route = createFileRoute('/menu')({
   component: MenuPage,
 })
-
-function scanButtonLabel(isPending: boolean, hasResults: boolean): string {
-  if (isPending) return 'Scanning menu…'
-  return hasResults ? 'Scan another photo' : 'Take or upload a photo'
-}
 
 function MenuPage() {
   return (
@@ -40,13 +40,20 @@ function MenuPage() {
   )
 }
 
-// ponytail: vibe is the primary session lever; abv_intent stays 'any' here so
-// we don't add a second picker. Add an ABV row if tonight's-strength matters.
-// Returns args for useScanMenu, omitting `session` entirely when no vibe is set
-// (exactOptionalPropertyTypes forbids passing `session: undefined`).
-function scanArgs(file: File, vibe: SessionVibe | null, freeText: string) {
-  if (vibe === null) return { file }
-  return { file, session: { vibe, abv_intent: 'any' as const, free_text: freeText.trim() } }
+// ponytail: vibe is the primary session lever; abv_intent stays 'any' so we
+// don't add a second picker. Returns undefined when no vibe is set.
+function sessionFor(vibe: SessionVibe | null, freeText: string): MenuSessionIntent | undefined {
+  if (vibe === null) return undefined
+  return { vibe, abv_intent: 'any', free_text: freeText.trim() }
+}
+
+function scanArgs(file: File, session: MenuSessionIntent | undefined) {
+  return session ? { file, session } : { file }
+}
+
+function scanButtonLabel(t: (k: string) => string, pending: boolean, hasResults: boolean): string {
+  if (pending) return t('menu.scanPending')
+  return hasResults ? t('menu.scanAgain') : t('menu.scanIdle')
 }
 
 function MenuScanFlow() {
@@ -59,16 +66,29 @@ function MenuScanFlow() {
   const [chatInput, setChatInput] = useState('')
   const [highlighted, setHighlighted] = useState<string[]>([])
   const [dismissed, setDismissed] = useState<Set<string>>(new Set())
+  const [addedIds, setAddedIds] = useState<string[]>([])
+  const [appliedSession, setAppliedSession] = useState<MenuSessionIntent | undefined>(undefined)
+
   const scan = useScanMenu()
   const chat = useMenuChat()
+  const rankAdded = useMenuRank(addedIds, appliedSession)
+
   const results = scan.data ?? []
+  const added = rankAdded.data ?? []
 
-  // Stable id for a board line so a dismissal survives re-ranking.
-  const dismissKey = (r: (typeof results)[number]) => r.matched_id ?? r.raw_text
-  const visible = results.filter((r) => !dismissed.has(dismissKey(r)))
+  const dismissKey = (r: MenuScanResultItem) => r.matched_id ?? r.raw_text
+  const scannedIds = new Set(results.map((r) => r.matched_id).filter((x): x is string => !!x))
+  const visibleScanned = results.filter((r) => !dismissed.has(dismissKey(r)))
+  const addedVisible = added.filter(
+    (r) => !dismissed.has(dismissKey(r)) && !(r.matched_id && scannedIds.has(r.matched_id)),
+  )
+  // One comparison list: scanned + manually added, best taste-fit first.
+  const comparison = [...visibleScanned, ...addedVisible].sort(
+    (a, b) => (b.taste_fit ?? -1) - (a.taste_fit ?? -1),
+  )
+  const inComparison = new Set(comparison.map((r) => r.matched_id).filter((x): x is string => !!x))
 
-  // Every beer on the board is fair game to chat about, matched or not.
-  const pool: MenuChatPoolBeer[] = visible.map((r) => ({
+  const pool: MenuChatPoolBeer[] = comparison.map((r) => ({
     id: r.matched_id ?? r.raw_text,
     name: r.name ?? r.raw_text,
     brewery: r.brewery ?? null,
@@ -82,7 +102,26 @@ function MenuScanFlow() {
     setMessages([])
     setHighlighted([])
     setDismissed(new Set())
-    scan.mutate(scanArgs(file, vibe, freeText))
+    setAddedIds([])
+    const session = sessionFor(vibe, freeText)
+    setAppliedSession(session)
+    scan.mutate(scanArgs(file, session))
+  }
+
+  function reRank() {
+    if (!lastFile) return
+    const session = sessionFor(vibe, freeText)
+    setAppliedSession(session)
+    scan.mutate(scanArgs(lastFile, session))
+  }
+
+  function addBeer(beer: SearchBeer) {
+    setDismissed((prev) => {
+      const next = new Set(prev)
+      next.delete(beer.id)
+      return next
+    })
+    setAddedIds((prev) => (prev.includes(beer.id) ? prev : [...prev, beer.id]))
   }
 
   function sendChat() {
@@ -102,12 +141,12 @@ function MenuScanFlow() {
     )
   }
 
+  const scanLabel = scanButtonLabel(t, scan.isPending, results.length > 0)
+
   return (
     <main className={`${PAGE_MAIN} py-8`}>
-      <Heading className="text-2xl">Scan a menu</Heading>
-      <p className="mt-2 text-sm text-neutral-600">
-        Snap a tap board and we&rsquo;ll rank the beers by your taste.
-      </p>
+      <Heading className="text-2xl">{t('menu.title')}</Heading>
+      <p className="mt-2 text-sm text-neutral-600">{t('menu.subtitle')}</p>
 
       <input
         ref={fileInputRef}
@@ -127,18 +166,18 @@ function MenuScanFlow() {
         disabled={scan.isPending}
         onClick={() => fileInputRef.current?.click()}
       >
-        {scanButtonLabel(scan.isPending, results.length > 0)}
+        {scanLabel}
       </Button>
 
       {scan.isError && (
         <p className="mt-4 rounded border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">
-          Could not scan that image. Please try again.
+          {t('menu.scanError')}
         </p>
       )}
 
-      {visible.length > 0 && (
+      {results.length > 0 && (
         <section className="mt-6 rounded-lg border border-neutral-200 bg-neutral-50 p-4">
-          <p className="text-sm font-medium text-neutral-900">What are you feeling tonight?</p>
+          <p className="text-sm font-medium text-neutral-900">{t('menu.tonight')}</p>
           <div className="mt-3 flex flex-wrap gap-2">
             {VIBE_OPTIONS.map((opt) => (
               <button
@@ -161,24 +200,26 @@ function MenuScanFlow() {
             value={freeText}
             maxLength={200}
             onChange={(e) => setFreeText(e.target.value)}
-            placeholder="e.g. something hoppy to pair with spicy food"
+            placeholder={t('menu.freeTextPlaceholder')}
             className="mt-3 w-full rounded border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-brand-500 focus:outline-none"
           />
           <Button
             className="mt-3"
             disabled={scan.isPending || vibe === null || lastFile === null}
-            onClick={() => lastFile && scan.mutate(scanArgs(lastFile, vibe, freeText))}
+            onClick={reRank}
           >
-            Re-rank for tonight
+            {t('menu.rerank')}
           </Button>
         </section>
       )}
 
-      {visible.length > 0 && (
+      {results.length > 0 && <AddBeerSearch inComparison={inComparison} onAdd={addBeer} />}
+
+      {comparison.length > 0 && (
         <ul className="mt-6 flex flex-col gap-3">
-          {visible.map((row, index) => (
+          {comparison.map((row, index) => (
             <li
-              key={`${row.raw_text}-${index}`}
+              key={`${dismissKey(row)}-${index}`}
               className={`flex items-center justify-between gap-3 rounded border p-4 ${
                 row.matched_id ? 'border-brand-400 bg-brand-50' : 'border-neutral-200 bg-neutral-50'
               } ${
@@ -192,19 +233,19 @@ function MenuScanFlow() {
                     ? [row.style, row.abv != null ? `${row.abv}%` : null]
                         .filter(Boolean)
                         .join(' · ')
-                    : 'not in our catalog · ranked by name'}
+                    : t('menu.notInCatalog')}
                 </p>
               </div>
               <div className="flex shrink-0 items-center gap-2">
                 {row.taste_fit != null && (
                   <span className="rounded-full bg-brand-600 px-2.5 py-1 text-xs font-semibold text-white">
-                    {Math.round(row.taste_fit * 100)}% your taste
+                    {t('menu.tasteBadge', { pct: Math.round(row.taste_fit * 100) })}
                   </span>
                 )}
                 <button
                   type="button"
-                  aria-label={`Remove ${row.name ?? row.raw_text}`}
-                  title="Not this one"
+                  aria-label={t('menu.remove', { name: row.name ?? row.raw_text })}
+                  title={t('menu.notThisOne')}
                   onClick={() => setDismissed((prev) => new Set(prev).add(dismissKey(row)))}
                   className="flex h-7 w-7 items-center justify-center rounded-full text-neutral-400 hover:bg-neutral-200 hover:text-neutral-700"
                 >
@@ -218,7 +259,7 @@ function MenuScanFlow() {
 
       {pool.length > 0 && (
         <section className="mt-6 rounded-lg border border-neutral-200 bg-neutral-50 p-4">
-          <p className="text-sm font-medium text-neutral-900">Ask about these beers</p>
+          <p className="text-sm font-medium text-neutral-900">{t('menu.chatTitle')}</p>
           {messages.length > 0 && (
             <ul className="mt-3 flex flex-col gap-2">
               {messages.map((m, i) => (
@@ -227,7 +268,7 @@ function MenuScanFlow() {
                   className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${
                     m.role === 'user'
                       ? 'self-end bg-brand-600 text-white'
-                      : 'self-start bg-white text-neutral-900 border border-neutral-200'
+                      : 'self-start border border-neutral-200 bg-white text-neutral-900'
                   }`}
                 >
                   {m.content}
@@ -242,16 +283,14 @@ function MenuScanFlow() {
               maxLength={300}
               onChange={(e) => setChatInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && sendChat()}
-              placeholder="e.g. which is the most sessionable?"
+              placeholder={t('menu.chatPlaceholder')}
               className="flex-1 rounded border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-brand-500 focus:outline-none"
             />
             <Button disabled={chat.isPending || chatInput.trim() === ''} onClick={sendChat}>
-              {chat.isPending ? 'Thinking…' : 'Send'}
+              {chat.isPending ? t('menu.thinking') : t('menu.send')}
             </Button>
           </div>
-          {chat.isError && (
-            <p className="mt-2 text-xs text-red-700">Couldn&rsquo;t get a reply. Try again.</p>
-          )}
+          {chat.isError && <p className="mt-2 text-xs text-red-700">{t('menu.chatError')}</p>}
         </section>
       )}
 
@@ -259,8 +298,67 @@ function MenuScanFlow() {
         to="/"
         className="mt-6 text-center text-xs text-neutral-400 underline hover:text-neutral-600"
       >
-        Back to home
+        {t('menu.back')}
       </Link>
     </main>
+  )
+}
+
+function AddBeerSearch({
+  inComparison,
+  onAdd,
+}: {
+  inComparison: Set<string>
+  onAdd: (beer: SearchBeer) => void
+}) {
+  const { t } = useTranslation()
+  const [query, setQuery] = useState('')
+  const debounced = useDebouncedValue(query.trim(), 250)
+  const search = useBeerSearch(debounced)
+  const results = search.data ?? []
+
+  return (
+    <section className="mt-6 rounded-lg border border-neutral-200 bg-neutral-50 p-4">
+      <p className="text-sm font-medium text-neutral-900">{t('menu.addTitle')}</p>
+      <input
+        type="text"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder={t('menu.addPlaceholder')}
+        className="mt-3 w-full rounded border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-brand-500 focus:outline-none"
+      />
+      {results.length > 0 && (
+        <ul className="mt-3 flex flex-col gap-2">
+          {results.map((b) => {
+            const already = inComparison.has(b.id)
+            return (
+              <li
+                key={b.id}
+                className="flex items-center justify-between gap-3 rounded border border-neutral-200 bg-white px-3 py-2"
+              >
+                <span className="min-w-0 truncate text-sm text-neutral-900">
+                  {b.name} <span className="text-neutral-500">· {b.brewery}</span>
+                </span>
+                <button
+                  type="button"
+                  disabled={already}
+                  onClick={() => {
+                    onAdd(b)
+                    setQuery('')
+                  }}
+                  className={`shrink-0 rounded-lg border px-3 py-1.5 text-xs font-semibold ${
+                    already
+                      ? 'border-neutral-200 text-neutral-400'
+                      : 'border-brand-500 bg-brand-600 text-white hover:bg-brand-700'
+                  }`}
+                >
+                  {already ? t('menu.added') : t('menu.add')}
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+    </section>
   )
 }

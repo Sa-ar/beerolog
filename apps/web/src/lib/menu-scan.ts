@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { apiClient } from './api-client/client'
 import type { components } from './api-client/schema'
 
@@ -47,6 +47,25 @@ export function useScanMenu() {
       if (error || !data) throw new Error('Menu scan failed')
       return data
     },
+  })
+}
+
+/** Rank an explicit set of catalog beers against the user's taste — the manual
+ * "add a beer we missed" path. Same taste_fit scale as the scan, so results
+ * merge into the same comparison list. Refetches when the id set or session
+ * changes; disabled when nothing is added. */
+export function useMenuRank(beerIds: string[], session?: MenuSessionIntent) {
+  return useQuery({
+    queryKey: ['menu', 'rank', [...beerIds].sort(), session ?? null],
+    queryFn: async (): Promise<MenuScanResultItem[]> => {
+      const { data, error } = await apiClient.POST('/menu/rank', {
+        body: { beer_ids: beerIds, ...(session ? { session } : {}) },
+      })
+      if (error || !data) throw new Error('Menu rank failed')
+      return data
+    },
+    enabled: beerIds.length > 0,
+    staleTime: 60_000,
   })
 }
 

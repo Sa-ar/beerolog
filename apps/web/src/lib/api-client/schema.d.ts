@@ -327,6 +327,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/menu/rank": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Rank Menu Beers
+         * @description Rank an explicit set of catalog beers against the user's taste — the manual
+         *     'add a beer we missed' path. Same taste_fit scale as /menu/scan so results
+         *     merge cleanly into the same comparison list. Unknown ids are dropped.
+         */
+        post: operations["rankMenuBeers"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/menu/scan": {
         parameters: {
             query?: never;
@@ -931,6 +953,12 @@ export interface components {
             beer_ids: string[];
             /** Reply */
             reply: string;
+        };
+        /** MenuRankRequest */
+        MenuRankRequest: {
+            /** Beer Ids */
+            beer_ids: string[];
+            session?: components["schemas"]["SessionIntent"] | null;
         };
         /** MenuScanRequest */
         MenuScanRequest: {
@@ -1754,6 +1782,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MenuChatResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    rankMenuBeers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MenuRankRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScanResultItem"][];
                 };
             };
             /** @description Validation Error */

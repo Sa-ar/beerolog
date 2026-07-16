@@ -82,6 +82,19 @@ def _menu_beer_text(name: str) -> str:
     return f"{name}. Beer on a bar tap list."
 
 
+async def _resolve_session(
+    session: SessionIntent | None, emb: EmbeddingClient | None
+) -> tuple[list[float] | None, float, AbvIntent | None, float]:
+    """Embed an optional tonight's-direction into the matcher's session inputs,
+    exactly as /recommendations does. No session (or no key) -> baseline only."""
+    if session is None or emb is None:
+        return None, settings.match_alpha, None, 0.0
+    session_vec = await emb.embed(session_intent_svc.compose_text(session))
+    abv_intent = session.abv_intent if session.abv_intent != AbvIntent.any else None
+    abv_weight = settings.match_abv_weight if abv_intent is not None else 0.0
+    return session_vec, settings.match_session_alpha, abv_intent, abv_weight
+
+
 def _synthetic_candidate(cand_id: str, name: str, embedding: list[float]) -> BeerCandidate:
     """Wrap an off-catalog board beer so the ranker can score it by taste. Neutral
     ABV / adventurousness so only taste similarity drives its position."""
@@ -141,18 +154,8 @@ async def scan_menu_image(
     entries = [CatalogEntry(id=b.id, name=b.name, brewery=b.brewery) for b in catalog]
     results = (await scan_menu(body.image_base64, entries, llm))[:MAX_MENU_BEERS]
 
-    # Optional tonight's-direction: embed it as the session vector and let the
-    # same matcher path as /recommendations re-weight the pool.
-    session_vec: list[float] | None = None
-    alpha = settings.match_alpha
-    abv_intent: AbvIntent | None = None
-    abv_weight = 0.0
-    if body.session is not None and emb is not None:
-        session_vec = await emb.embed(session_intent_svc.compose_text(body.session))
-        alpha = settings.match_session_alpha
-        if body.session.abv_intent != AbvIntent.any:
-            abv_intent = body.session.abv_intent
-            abv_weight = settings.match_abv_weight
+    # Optional tonight's-direction re-weights the pool via the /recommendations path.
+    session_vec, alpha, abv_intent, abv_weight = await _resolve_session(body.session, emb)
 
     # Every beer ON THE BOARD gets ranked — nothing dropped, nothing injected. A
     # confident catalog match lends its richer taste embedding + canonical name;
@@ -240,6 +243,61 @@ async def scan_menu_image(
             taste_fit=fit.get(row["cand_id"]) if row["cand_id"] else None,
         )
         for row in rows
+    ]
+
+
+class MenuRankRequest(BaseModel):
+    beer_ids: list[str]
+    session: SessionIntent | None = None
+
+
+@router.post("/rank", response_model=list[ScanResultItem], operation_id="rankMenuBeers")
+async def rank_menu_beers(
+    body: MenuRankRequest,
+    user: dict = Depends(get_current_user),
+    catalog: list[BeerCandidate] = Depends(get_deck_catalog),
+    repo: BaselineTasteRepo = Depends(get_baseline_taste_repo),
+    emb: EmbeddingClient | None = Depends(_embedding_client_dep),
+) -> list[ScanResultItem]:
+    """Rank an explicit set of catalog beers against the user's taste — the manual
+    'add a beer we missed' path. Same taste_fit scale as /menu/scan so results
+    merge cleanly into the same comparison list. Unknown ids are dropped."""
+    by_id = {b.id: b for b in catalog}
+    picked = [by_id[bid] for bid in dict.fromkeys(body.beer_ids) if bid in by_id]
+
+    session_vec, alpha, abv_intent, abv_weight = await _resolve_session(body.session, emb)
+    fit: dict[str, float] = {}
+    order: dict[str, int] = {}
+    baseline = await repo.get(user["sub"])
+    if baseline and picked:
+        ranked = rank(
+            baseline_embedding=baseline.embedding,
+            session_embedding=session_vec,
+            novelty_affinity=baseline.novelty_affinity,
+            catalog=picked,
+            alpha=alpha,
+            beta=settings.match_beta,
+            top_k=len(picked),
+            abv_intent=abv_intent,
+            abv_weight=abv_weight,
+        )
+        fit = {m.beer.id: _fit_pct(m.baseline_cos) for m in ranked}
+        order = {m.beer.id: i for i, m in enumerate(ranked)}
+
+    picked.sort(key=lambda b: order.get(b.id, len(order)))
+    return [
+        ScanResultItem(
+            raw_text=b.name,
+            matched_id=b.id,
+            confidence=1.0,
+            needs_review=False,
+            name=b.name,
+            brewery=b.brewery,
+            style=b.style,
+            abv=b.abv,
+            taste_fit=fit.get(b.id),
+        )
+        for b in picked
     ]
 
 

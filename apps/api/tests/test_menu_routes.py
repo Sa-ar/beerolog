@@ -178,6 +178,28 @@ def test_scan_ranks_unknown_beer_by_name():
     assert row["taste_fit"] is not None
 
 
+def test_rank_orders_picked_beers_by_taste():
+    # Baseline favors Guinness (id 2 aligns [1,0]); ask to rank both explicitly.
+    app.dependency_overrides[get_current_user] = lambda: {"sub": "u1"}
+    app.dependency_overrides[get_deck_catalog] = lambda: CATALOG
+    app.dependency_overrides[get_baseline_taste_repo] = lambda: _FakeRepo(_snapshot([1.0, 0.0]))
+    r = TestClient(app).post("/menu/rank", json={"beer_ids": ["2", "1"]})
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert [i["matched_id"] for i in body] == ["1", "2"]  # best taste-fit first
+    assert body[0]["name"] == "Guinness Draught"
+    assert body[0]["taste_fit"] is not None
+
+
+def test_rank_drops_unknown_ids():
+    app.dependency_overrides[get_current_user] = lambda: {"sub": "u1"}
+    app.dependency_overrides[get_deck_catalog] = lambda: CATALOG
+    app.dependency_overrides[get_baseline_taste_repo] = lambda: _FakeRepo(_snapshot([1.0, 0.0]))
+    r = TestClient(app).post("/menu/rank", json={"beer_ids": ["1", "does-not-exist"]})
+    assert r.status_code == 200, r.text
+    assert [i["matched_id"] for i in r.json()] == ["1"]
+
+
 class _FakeChat:
     def __init__(self, reply: ChatReply) -> None:
         self._reply = reply
