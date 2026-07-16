@@ -68,6 +68,7 @@ function MenuScanFlow() {
   const [dismissed, setDismissed] = useState<Set<string>>(new Set())
   const [addedIds, setAddedIds] = useState<string[]>([])
   const [appliedSession, setAppliedSession] = useState<MenuSessionIntent | undefined>(undefined)
+  const [chatOpen, setChatOpen] = useState(false)
 
   const scan = useScanMenu()
   const chat = useMenuChat()
@@ -144,7 +145,7 @@ function MenuScanFlow() {
   const scanLabel = scanButtonLabel(t, scan.isPending, results.length > 0)
 
   return (
-    <main className={`${PAGE_MAIN} py-8`}>
+    <main className={`${PAGE_MAIN} py-8 pb-28`}>
       <Heading className="text-2xl">{t('menu.title')}</Heading>
       <p className="mt-2 text-sm text-neutral-600">{t('menu.subtitle')}</p>
 
@@ -213,7 +214,7 @@ function MenuScanFlow() {
         </section>
       )}
 
-      {results.length > 0 && <AddBeerSearch inComparison={inComparison} onAdd={addBeer} />}
+      <AddBeerSearch inComparison={inComparison} onAdd={addBeer} />
 
       {comparison.length > 0 && (
         <ul className="mt-6 flex flex-col gap-3">
@@ -257,26 +258,51 @@ function MenuScanFlow() {
         </ul>
       )}
 
-      {pool.length > 0 && (
-        <section className="mt-6 rounded-lg border border-neutral-200 bg-neutral-50 p-4">
-          <p className="text-sm font-medium text-neutral-900">{t('menu.chatTitle')}</p>
-          {messages.length > 0 && (
-            <ul className="mt-3 flex flex-col gap-2">
-              {messages.map((m, i) => (
-                <li
-                  key={i}
-                  className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${
-                    m.role === 'user'
-                      ? 'self-end bg-brand-600 text-white'
-                      : 'self-start border border-neutral-200 bg-white text-neutral-900'
-                  }`}
-                >
-                  {m.content}
-                </li>
-              ))}
-            </ul>
-          )}
-          <div className="mt-3 flex gap-2">
+      {pool.length > 0 && !chatOpen && (
+        <button
+          type="button"
+          onClick={() => setChatOpen(true)}
+          className="fixed bottom-4 right-4 z-30 flex items-center gap-2 rounded-full bg-brand-600 px-4 py-3 text-sm font-semibold text-white shadow-lg hover:bg-brand-700"
+        >
+          <span aria-hidden>💬</span>
+          <span className="hidden sm:inline">{t('menu.chatOpen')}</span>
+        </button>
+      )}
+
+      {pool.length > 0 && chatOpen && (
+        <section className="fixed inset-x-4 bottom-4 z-30 flex max-h-[75vh] flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-xl sm:inset-x-auto sm:right-4 sm:w-96">
+          <header className="flex items-center justify-between border-b border-neutral-200 px-4 py-3">
+            <p className="text-sm font-medium text-neutral-900">{t('menu.chatTitle')}</p>
+            <button
+              type="button"
+              onClick={() => setChatOpen(false)}
+              aria-label={t('menu.close')}
+              className="flex h-7 w-7 items-center justify-center rounded-full text-neutral-400 hover:bg-neutral-200 hover:text-neutral-700"
+            >
+              ✕
+            </button>
+          </header>
+          <div className="flex-1 overflow-y-auto px-4 py-3">
+            {messages.length > 0 ? (
+              <ul className="flex flex-col gap-2">
+                {messages.map((m, i) => (
+                  <li
+                    key={i}
+                    className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${
+                      m.role === 'user'
+                        ? 'self-end bg-brand-600 text-white'
+                        : 'self-start border border-neutral-200 bg-white text-neutral-900'
+                    }`}
+                  >
+                    {m.content}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-xs text-neutral-500">{t('menu.chatHint')}</p>
+            )}
+          </div>
+          <div className="flex gap-2 border-t border-neutral-200 p-3">
             <input
               type="text"
               value={chatInput}
@@ -290,7 +316,7 @@ function MenuScanFlow() {
               {chat.isPending ? t('menu.thinking') : t('menu.send')}
             </Button>
           </div>
-          {chat.isError && <p className="mt-2 text-xs text-red-700">{t('menu.chatError')}</p>}
+          {chat.isError && <p className="px-3 pb-3 text-xs text-red-700">{t('menu.chatError')}</p>}
         </section>
       )}
 

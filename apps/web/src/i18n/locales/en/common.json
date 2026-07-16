@@ -31,6 +31,9 @@
     "send": "Send",
     "thinking": "Thinking…",
     "chatError": "Couldn't get a reply. Try again.",
+    "chatHint": "Ask anything about the beers above.",
+    "chatOpen": "Ask about the beers",
+    "close": "Close",
     "back": "Back to home"
   },
   "a11y": { "skipToContent": "Skip to content" },
