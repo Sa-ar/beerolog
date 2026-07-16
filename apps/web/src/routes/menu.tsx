@@ -7,7 +7,7 @@
 import { Button, Heading } from '@beerolog/ui'
 import { RedirectToSignIn, Show } from '@clerk/tanstack-react-start'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { PAGE_MAIN } from '../lib/page-shell'
 import {
@@ -73,6 +73,17 @@ function MenuScanFlow() {
   const scan = useScanMenu()
   const chat = useMenuChat()
   const rankAdded = useMenuRank(addedIds, appliedSession)
+
+  // Lock background scroll while the chat sheet is open on mobile; the desktop
+  // docked panel leaves the page scrollable.
+  useEffect(() => {
+    if (!chatOpen || !window.matchMedia('(max-width: 639px)').matches) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = prev
+    }
+  }, [chatOpen])
 
   const results = scan.data ?? []
   const added = rankAdded.data ?? []
@@ -267,6 +278,15 @@ function MenuScanFlow() {
           <span aria-hidden>💬</span>
           <span className="hidden sm:inline">{t('menu.chatOpen')}</span>
         </button>
+      )}
+
+      {pool.length > 0 && chatOpen && (
+        <button
+          type="button"
+          aria-label={t('menu.close')}
+          onClick={() => setChatOpen(false)}
+          className="fixed inset-0 z-20 bg-black/40 sm:hidden"
+        />
       )}
 
       {pool.length > 0 && chatOpen && (
