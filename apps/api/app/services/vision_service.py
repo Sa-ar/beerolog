@@ -3,7 +3,7 @@
 from openai import AsyncOpenAI
 
 _EXTRACT_PROMPT = (
-    "Extract every beer name listed on this menu or tap board image. "
+    "Extract every beer name listed on this menu image. "
     "Return one beer name per line with no numbering, bullets, or extra commentary."
 )
 

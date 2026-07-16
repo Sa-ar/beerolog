@@ -1,4 +1,4 @@
-"""Menu-scan surface. POST /menu/scan takes a tap-board photo, extracts beer
+"""Menu-scan surface. POST /menu/scan takes a photo of the menu, extracts beer
 names via vision, and fuzzy-matches them against the live catalog.
 Revived tracer for the venue/menu-scan direction. Signed-in only.
 """
@@ -61,8 +61,8 @@ class ScanResultItem(BaseModel):
 # A menu line only borrows a catalog beer's name/embedding when the match is
 # this strong; below it we keep the exact menu text (never relabel a beer).
 CONFIDENT_MATCH = 0.85
-# ponytail: cap the board so a huge/adversarial image can't fan out into
-# hundreds of embedding calls. Real tap lists are well under this.
+# ponytail: cap the menu so a huge/adversarial image can't fan out into
+# hundreds of embedding calls. Real menus are well under this.
 MAX_MENU_BEERS = 60
 
 
@@ -79,7 +79,7 @@ def _menu_beer_text(name: str) -> str:
     """Embedding text for a board beer we couldn't confidently match to the
     catalog. Anchors the bare name in the beer domain so it lands near real
     catalog beers in the embedding space."""
-    return f"{name}. Beer on a bar tap list."
+    return f"{name}. Beer on a menu."
 
 
 async def _resolve_session(
@@ -157,7 +157,7 @@ async def scan_menu_image(
     # Optional tonight's-direction re-weights the pool via the /recommendations path.
     session_vec, alpha, abv_intent, abv_weight = await _resolve_session(body.session, emb)
 
-    # Every beer ON THE BOARD gets ranked — nothing dropped, nothing injected. A
+    # Every beer ON THE MENU gets ranked — nothing dropped, nothing injected. A
     # confident catalog match lends its richer taste embedding + canonical name;
     # anything looser keeps the exact menu text and is embedded from its name, so
     # we never relabel a menu beer as a different catalog beer.

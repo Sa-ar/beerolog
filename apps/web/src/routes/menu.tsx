@@ -1,6 +1,6 @@
 /**
- * /menu — snap a tap-board photo, extract beer names via vision, rank every beer
- * on the board by taste (POST /menu/scan), steer by tonight's direction, add
+ * /menu — snap a photo of the menu, extract beer names via vision, rank every
+ * beer on it by taste (POST /menu/scan), steer by tonight's direction, add
  * beers we missed via catalog search, and chat about the pick. Signed-in only.
  */
 
