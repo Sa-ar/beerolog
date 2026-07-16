@@ -62,20 +62,15 @@ function MenuScanFlow() {
   const chat = useMenuChat()
   const results = scan.data ?? []
 
-  const pool: MenuChatPoolBeer[] = results.flatMap((r) =>
-    r.matched_id
-      ? [
-          {
-            id: r.matched_id,
-            name: r.name ?? r.raw_text,
-            brewery: r.brewery ?? null,
-            style: r.style ?? null,
-            abv: r.abv ?? null,
-            taste_fit: r.taste_fit ?? null,
-          },
-        ]
-      : [],
-  )
+  // Every beer on the board is fair game to chat about, matched or not.
+  const pool: MenuChatPoolBeer[] = results.map((r) => ({
+    id: r.matched_id ?? r.raw_text,
+    name: r.name ?? r.raw_text,
+    brewery: r.brewery ?? null,
+    style: r.style ?? null,
+    abv: r.abv ?? null,
+    taste_fit: r.taste_fit ?? null,
+  }))
 
   function runScan(file: File) {
     setLastFile(file)
@@ -181,17 +176,17 @@ function MenuScanFlow() {
               className={`flex items-center justify-between gap-3 rounded border p-4 ${
                 row.matched_id ? 'border-brand-400 bg-brand-50' : 'border-neutral-200 bg-neutral-50'
               } ${
-                row.matched_id && highlighted.includes(row.matched_id)
-                  ? 'ring-2 ring-brand-500'
-                  : ''
+                highlighted.includes(row.matched_id ?? row.raw_text) ? 'ring-2 ring-brand-500' : ''
               }`}
             >
               <div>
                 <p className="text-sm font-medium text-neutral-900">{row.name ?? row.raw_text}</p>
                 <p className="mt-1 text-xs text-neutral-500">
                   {row.matched_id
-                    ? `${Math.round(row.confidence * 100)}% match${row.needs_review ? ' · please confirm' : ''}`
-                    : 'Not in our catalog — skipped'}
+                    ? [row.style, row.abv != null ? `${row.abv}%` : null]
+                        .filter(Boolean)
+                        .join(' · ')
+                    : 'not in our catalog · ranked by name'}
                 </p>
               </div>
               {row.taste_fit != null && (

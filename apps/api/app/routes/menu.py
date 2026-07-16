@@ -5,6 +5,7 @@ Revived tracer for the venue/menu-scan direction. Signed-in only.
 
 from __future__ import annotations
 
+import asyncio
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -57,6 +58,14 @@ class ScanResultItem(BaseModel):
     taste_fit: float | None = None
 
 
+# A menu line only borrows a catalog beer's name/embedding when the match is
+# this strong; below it we keep the exact menu text (never relabel a beer).
+CONFIDENT_MATCH = 0.85
+# ponytail: cap the board so a huge/adversarial image can't fan out into
+# hundreds of embedding calls. Real tap lists are well under this.
+MAX_MENU_BEERS = 60
+
+
 def _fit_pct(baseline_cos: float) -> float:
     """Rescale raw cosine to a user-facing 0..1 fit, same anchors as the
     recommendations surface (settings.match_cos_floor/ceiling)."""
@@ -64,6 +73,30 @@ def _fit_pct(baseline_cos: float) -> float:
     if span <= 0:
         return 0.0
     return max(0.0, min(1.0, (baseline_cos - settings.match_cos_floor) / span))
+
+
+def _menu_beer_text(name: str) -> str:
+    """Embedding text for a board beer we couldn't confidently match to the
+    catalog. Anchors the bare name in the beer domain so it lands near real
+    catalog beers in the embedding space."""
+    return f"{name}. Beer on a bar tap list."
+
+
+def _synthetic_candidate(cand_id: str, name: str, embedding: list[float]) -> BeerCandidate:
+    """Wrap an off-catalog board beer so the ranker can score it by taste. Neutral
+    ABV / adventurousness so only taste similarity drives its position."""
+    return BeerCandidate(
+        id=cand_id,
+        name=name,
+        brewery="",
+        style="",
+        abv=5.0,
+        market_tier="",
+        color="",
+        image_url=None,
+        adventurousness=0.5,
+        embedding=embedding,
+    )
 
 
 def _vision_client_dep() -> OpenAILLMClient:
@@ -106,7 +139,7 @@ async def scan_menu_image(
 ) -> list[ScanResultItem]:
     by_id = {b.id: b for b in catalog}
     entries = [CatalogEntry(id=b.id, name=b.name, brewery=b.brewery) for b in catalog]
-    results = await scan_menu(body.image_base64, entries, llm)
+    results = (await scan_menu(body.image_base64, entries, llm))[:MAX_MENU_BEERS]
 
     # Optional tonight's-direction: embed it as the session vector and let the
     # same matcher path as /recommendations re-weight the pool.
@@ -121,46 +154,93 @@ async def scan_menu_image(
             abv_intent = body.session.abv_intent
             abv_weight = settings.match_abv_weight
 
-    # Rank the scanned pool against the user's taste profile. The matched beers
-    # ARE the candidate list for match_engine.rank(). Unranked when the user has
-    # no baseline yet (graceful degrade to matched-only).
-    matched = [by_id[r.match.id] for r in results if r.match and r.match.id in by_id]
+    # Every beer ON THE BOARD gets ranked — nothing dropped, nothing injected. A
+    # confident catalog match lends its richer taste embedding + canonical name;
+    # anything looser keeps the exact menu text and is embedded from its name, so
+    # we never relabel a menu beer as a different catalog beer.
+    def _confident(r) -> bool:
+        return bool(r.match and r.confidence >= CONFIDENT_MATCH and r.match.id in by_id)
+
+    unknown_texts = [r.raw_text for r in results if not _confident(r)]
+    unknown_emb: dict[str, list[float]] = {}
+    if unknown_texts and emb is not None:
+        vecs = await asyncio.gather(*(emb.embed(_menu_beer_text(t)) for t in unknown_texts))
+        unknown_emb = dict(zip(unknown_texts, vecs))
+
+    # One row per board line, plus the candidate list handed to the ranker.
+    rows: list[dict] = []
+    rankable: list[BeerCandidate] = []
+    for idx, r in enumerate(results):
+        if _confident(r):
+            beer = by_id[r.match.id]
+            rankable.append(beer)
+            rows.append(
+                {
+                    "cand_id": beer.id,
+                    "raw_text": r.raw_text,
+                    "matched_id": beer.id,
+                    "confidence": r.confidence,
+                    "name": beer.name,
+                    "brewery": beer.brewery,
+                    "style": beer.style,
+                    "abv": beer.abv,
+                }
+            )
+        else:
+            cand_id = f"menu:{idx}"
+            vec = unknown_emb.get(r.raw_text)
+            if vec is not None:
+                rankable.append(_synthetic_candidate(cand_id, r.raw_text, vec))
+            rows.append(
+                {
+                    "cand_id": cand_id if vec is not None else None,
+                    "raw_text": r.raw_text,
+                    "matched_id": None,
+                    "confidence": r.confidence,
+                    "name": r.raw_text,
+                    "brewery": None,
+                    "style": None,
+                    "abv": None,
+                }
+            )
+
     fit: dict[str, float] = {}
     order: dict[str, int] = {}
     baseline = await repo.get(user["sub"])
-    if baseline and matched:
+    if baseline and rankable:
         ranked = rank(
             baseline_embedding=baseline.embedding,
             session_embedding=session_vec,
             novelty_affinity=baseline.novelty_affinity,
-            catalog=matched,
+            catalog=rankable,
             alpha=alpha,
             beta=settings.match_beta,
-            top_k=len(matched),
+            top_k=len(rankable),
             abv_intent=abv_intent,
             abv_weight=abv_weight,
         )
         fit = {m.beer.id: _fit_pct(m.baseline_cos) for m in ranked}
-        order = {m.beer.id: idx for idx, m in enumerate(ranked)}
+        order = {m.beer.id: i for i, m in enumerate(ranked)}
 
-    items = [
+    # Best taste-fit first; anything we couldn't rank (no baseline / no key) keeps
+    # board order at the bottom but is still returned.
+    rows.sort(
+        key=lambda row: order.get(row["cand_id"], len(order)) if row["cand_id"] else len(order)
+    )
+    return [
         ScanResultItem(
-            raw_text=r.raw_text,
-            matched_id=r.match.id if r.match else None,
-            confidence=r.confidence,
-            needs_review=r.needs_review,
-            name=r.match.name if r.match else None,
-            brewery=r.match.brewery if r.match else None,
-            style=by_id[r.match.id].style if r.match and r.match.id in by_id else None,
-            abv=by_id[r.match.id].abv if r.match and r.match.id in by_id else None,
-            taste_fit=fit.get(r.match.id) if r.match else None,
+            raw_text=row["raw_text"],
+            matched_id=row["matched_id"],
+            confidence=row["confidence"],
+            needs_review=row["matched_id"] is None,
+            name=row["name"],
+            brewery=row["brewery"],
+            style=row["style"],
+            abv=row["abv"],
+            taste_fit=fit.get(row["cand_id"]) if row["cand_id"] else None,
         )
-        for r in results
+        for row in rows
     ]
-    # Follow rank() order (baseline, or session-aware total when a direction is
-    # given); unranked / unmatched sink to the bottom, keeping scan order.
-    items.sort(key=lambda i: order.get(i.matched_id, len(order)) if i.matched_id else len(order))
-    return items
 
 
 class ChatPoolBeer(BaseModel):

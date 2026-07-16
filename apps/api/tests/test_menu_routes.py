@@ -153,12 +153,29 @@ def test_scan_degrades_without_baseline():
     assert body[0]["taste_fit"] is None
 
 
-def test_scan_flags_unmatched_beer():
+def test_scan_includes_unknown_beer_unranked_without_key():
+    # A beer not in our catalog is NEVER dropped: with no embedding client it
+    # can't be taste-ranked, but it's still returned with its exact menu text.
     r = _client(["Xyzzy Quantum Stout"]).post("/menu/scan", json={"image_base64": "img"})
     assert r.status_code == 200, r.text
     body = r.json()
+    assert len(body) == 1
     assert body[0]["matched_id"] is None
-    assert body[0]["needs_review"] is True
+    assert body[0]["name"] == "Xyzzy Quantum Stout"
+    assert body[0]["taste_fit"] is None
+
+
+def test_scan_ranks_unknown_beer_by_name():
+    # Off-catalog beer gets a taste_fit from its name embedding — ranked, not
+    # dropped, and never relabeled as a catalog beer.
+    client = _client(["Tuborg Green"])
+    app.dependency_overrides[_embedding_client_dep] = lambda: _FakeEmb([1.0, 0.0])
+    r = client.post("/menu/scan", json={"image_base64": "img"})
+    assert r.status_code == 200, r.text
+    row = r.json()[0]
+    assert row["matched_id"] is None
+    assert row["name"] == "Tuborg Green"
+    assert row["taste_fit"] is not None
 
 
 class _FakeChat:
