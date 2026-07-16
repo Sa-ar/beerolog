@@ -5,6 +5,8 @@ Revived tracer for the venue/menu-scan direction. Signed-in only.
 
 from __future__ import annotations
 
+from typing import Literal
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from openai import AsyncOpenAI
 from pydantic import BaseModel, Field
@@ -19,6 +21,14 @@ from app.services.baseline_taste_repo import BaselineTasteRepo
 from app.services.embedding_service import EmbeddingClient, get_embedding_client
 from app.services.fuzzy_matcher import CatalogEntry
 from app.services.match_engine import BeerCandidate, rank
+from app.services.menu_chat import (
+    ChatReply,
+    ChatTurn,
+    GPTMenuChat,
+    MenuChatLLM,
+    PoolBeer,
+    chat_over_pool,
+)
 from app.services.menu_scanner import scan_menu
 from app.services.vision_service import OpenAILLMClient
 
@@ -64,6 +74,16 @@ def _vision_client_dep() -> OpenAILLMClient:
             detail="Menu scan requires an OpenAI API key",
         )
     return OpenAILLMClient(AsyncOpenAI(api_key=settings.openai_api_key))
+
+
+def _menu_chat_dep() -> MenuChatLLM:
+    """Per-request menu-chat LLM adapter. Overridden in tests."""
+    if not settings.openai_api_key:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Menu chat requires an OpenAI API key",
+        )
+    return GPTMenuChat(api_key=settings.openai_api_key, model=settings.note_model)
 
 
 def _embedding_client_dep() -> EmbeddingClient | None:
@@ -141,3 +161,49 @@ async def scan_menu_image(
     # given); unranked / unmatched sink to the bottom, keeping scan order.
     items.sort(key=lambda i: order.get(i.matched_id, len(order)) if i.matched_id else len(order))
     return items
+
+
+class ChatPoolBeer(BaseModel):
+    id: str
+    name: str
+    brewery: str | None = None
+    style: str | None = None
+    abv: float | None = None
+    taste_fit: float | None = None
+
+
+class ChatMessage(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str = Field(min_length=1)
+
+
+class MenuChatRequest(BaseModel):
+    pool: list[ChatPoolBeer]
+    messages: list[ChatMessage] = Field(min_length=1)
+
+
+class MenuChatResponse(BaseModel):
+    reply: str
+    beer_ids: list[str]
+
+
+@router.post("/chat", response_model=MenuChatResponse, operation_id="menuChat")
+async def menu_chat(
+    body: MenuChatRequest,
+    _user: dict = Depends(get_current_user),
+    llm: MenuChatLLM = Depends(_menu_chat_dep),
+) -> MenuChatResponse:
+    pool = [
+        PoolBeer(
+            id=b.id,
+            name=b.name,
+            brewery=b.brewery,
+            style=b.style,
+            abv=b.abv,
+            taste_fit=b.taste_fit,
+        )
+        for b in body.pool
+    ]
+    turns = [ChatTurn(role=m.role, content=m.content) for m in body.messages]
+    reply: ChatReply = await chat_over_pool(pool, turns, llm)
+    return MenuChatResponse(reply=reply.reply, beer_ids=reply.beer_ids)

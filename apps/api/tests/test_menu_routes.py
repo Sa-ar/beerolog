@@ -8,10 +8,11 @@ from fastapi.testclient import TestClient  # type: ignore[import-not-found]
 from app.auth import get_current_user
 from app.dependencies import get_deck_catalog
 from app.main import app
-from app.routes.menu import _embedding_client_dep, _vision_client_dep
+from app.routes.menu import _embedding_client_dep, _menu_chat_dep, _vision_client_dep
 from app.routes.onboarding import get_baseline_taste_repo
 from app.services.baseline_taste_repo import BaselineTasteSnapshot
 from app.services.match_engine import BeerCandidate
+from app.services.menu_chat import ChatReply
 
 
 def _beer(bid: str, name: str, brewery: str, embedding: list[float]) -> BeerCandidate:
@@ -158,6 +159,56 @@ def test_scan_flags_unmatched_beer():
     body = r.json()
     assert body[0]["matched_id"] is None
     assert body[0]["needs_review"] is True
+
+
+class _FakeChat:
+    def __init__(self, reply: ChatReply) -> None:
+        self._reply = reply
+
+    async def converse(self, *, pool, messages) -> ChatReply:
+        return self._reply
+
+
+def test_chat_returns_grounded_reply():
+    app.dependency_overrides[get_current_user] = lambda: {"sub": "u1"}
+    # LLM cites one real id and one off-pool id; only the real one comes back.
+    app.dependency_overrides[_menu_chat_dep] = lambda: _FakeChat(
+        ChatReply(reply="Go with the Guinness.", beer_ids=["2", "nope"])
+    )
+    r = TestClient(app).post(
+        "/menu/chat",
+        json={
+            "pool": [{"id": "1", "name": "Heineken"}, {"id": "2", "name": "Guinness"}],
+            "messages": [{"role": "user", "content": "what's rich and dark?"}],
+        },
+    )
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["reply"] == "Go with the Guinness."
+    assert body["beer_ids"] == ["2"]
+    app.dependency_overrides.pop(_menu_chat_dep, None)
+
+
+def test_chat_requires_auth():
+    app.dependency_overrides[_menu_chat_dep] = lambda: _FakeChat(ChatReply(reply="", beer_ids=[]))
+    r = TestClient(app).post(
+        "/menu/chat",
+        json={"pool": [], "messages": [{"role": "user", "content": "hi"}]},
+    )
+    assert r.status_code == 401
+    app.dependency_overrides.pop(_menu_chat_dep, None)
+
+
+def test_chat_503_without_openai_key(monkeypatch):
+    from app.routes import menu as menu_module
+
+    monkeypatch.setattr(menu_module.settings, "openai_api_key", "")
+    app.dependency_overrides[get_current_user] = lambda: {"sub": "u1"}
+    r = TestClient(app).post(
+        "/menu/chat",
+        json={"pool": [], "messages": [{"role": "user", "content": "hi"}]},
+    )
+    assert r.status_code == 503
 
 
 def test_scan_requires_auth():

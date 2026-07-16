@@ -753,6 +753,91 @@
         "title": "CatalogRecommendation",
         "type": "object"
       },
+      "ChatMessage": {
+        "properties": {
+          "content": {
+            "minLength": 1,
+            "title": "Content",
+            "type": "string"
+          },
+          "role": {
+            "enum": [
+              "user",
+              "assistant"
+            ],
+            "title": "Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
+          "content"
+        ],
+        "title": "ChatMessage",
+        "type": "object"
+      },
+      "ChatPoolBeer": {
+        "properties": {
+          "abv": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abv"
+          },
+          "brewery": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brewery"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "style": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Style"
+          },
+          "taste_fit": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Taste Fit"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "ChatPoolBeer",
+        "type": "object"
+      },
       "ChocoPref": {
         "enum": [
           "dark_90",
@@ -1215,6 +1300,52 @@
           "cos_ceiling"
         ],
         "title": "MatchCalibration",
+        "type": "object"
+      },
+      "MenuChatRequest": {
+        "properties": {
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/ChatMessage"
+            },
+            "minItems": 1,
+            "title": "Messages",
+            "type": "array"
+          },
+          "pool": {
+            "items": {
+              "$ref": "#/components/schemas/ChatPoolBeer"
+            },
+            "title": "Pool",
+            "type": "array"
+          }
+        },
+        "required": [
+          "pool",
+          "messages"
+        ],
+        "title": "MenuChatRequest",
+        "type": "object"
+      },
+      "MenuChatResponse": {
+        "properties": {
+          "beer_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Beer Ids",
+            "type": "array"
+          },
+          "reply": {
+            "title": "Reply",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reply",
+          "beer_ids"
+        ],
+        "title": "MenuChatResponse",
         "type": "object"
       },
       "MenuScanRequest": {
@@ -2830,6 +2961,52 @@
         "summary": "Get My Ratings Map",
         "tags": [
           "ratings"
+        ]
+      }
+    },
+    "/menu/chat": {
+      "post": {
+        "operationId": "menuChat",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MenuChatRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MenuChatResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Menu Chat",
+        "tags": [
+          "menu"
         ]
       }
     },

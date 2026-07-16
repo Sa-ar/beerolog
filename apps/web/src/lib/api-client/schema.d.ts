@@ -310,6 +310,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/menu/chat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Menu Chat */
+        post: operations["menuChat"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/menu/scan": {
         parameters: {
             query?: never;
@@ -688,6 +705,31 @@ export interface components {
             beer: components["schemas"]["CatalogBeer"];
             why: components["schemas"]["WhyLine"];
         };
+        /** ChatMessage */
+        ChatMessage: {
+            /** Content */
+            content: string;
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "user" | "assistant";
+        };
+        /** ChatPoolBeer */
+        ChatPoolBeer: {
+            /** Abv */
+            abv?: number | null;
+            /** Brewery */
+            brewery?: string | null;
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /** Style */
+            style?: string | null;
+            /** Taste Fit */
+            taste_fit?: number | null;
+        };
         /**
          * ChocoPref
          * @enum {string}
@@ -875,6 +917,20 @@ export interface components {
             cos_ceiling: number;
             /** Cos Floor */
             cos_floor: number;
+        };
+        /** MenuChatRequest */
+        MenuChatRequest: {
+            /** Messages */
+            messages: components["schemas"]["ChatMessage"][];
+            /** Pool */
+            pool: components["schemas"]["ChatPoolBeer"][];
+        };
+        /** MenuChatResponse */
+        MenuChatResponse: {
+            /** Beer Ids */
+            beer_ids: string[];
+            /** Reply */
+            reply: string;
         };
         /** MenuScanRequest */
         MenuScanRequest: {
@@ -1674,6 +1730,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RatingsMapResponse"];
+                };
+            };
+        };
+    };
+    menuChat: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MenuChatRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MenuChatResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
