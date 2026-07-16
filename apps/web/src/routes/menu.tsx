@@ -75,12 +75,19 @@ function MenuScanFlow() {
   const rankAdded = useMenuRank(addedIds, appliedSession)
 
   // Lock background scroll while the chat sheet is open on mobile; the desktop
-  // docked panel leaves the page scrollable.
+  // docked panel leaves the page scrollable. Tracks the breakpoint live so a
+  // resize/rotation across it toggles the lock without reopening.
   useEffect(() => {
-    if (!chatOpen || !window.matchMedia('(max-width: 639px)').matches) return
+    if (!chatOpen) return
+    const mq = window.matchMedia('(max-width: 639px)')
     const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
+    const apply = () => {
+      document.body.style.overflow = mq.matches ? 'hidden' : prev
+    }
+    apply()
+    mq.addEventListener('change', apply)
     return () => {
+      mq.removeEventListener('change', apply)
       document.body.style.overflow = prev
     }
   }, [chatOpen])
