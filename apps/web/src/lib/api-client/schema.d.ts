@@ -310,6 +310,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/menu/scan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Scan Menu Image */
+        post: operations["scanMenu"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/onboarding": {
         parameters: {
             query?: never;
@@ -859,6 +876,11 @@ export interface components {
             /** Cos Floor */
             cos_floor: number;
         };
+        /** MenuScanRequest */
+        MenuScanRequest: {
+            /** Image Base64 */
+            image_base64: string;
+        };
         /** NewVenueInput */
         NewVenueInput: {
             /** Address */
@@ -1024,6 +1046,30 @@ export interface components {
             /** Style */
             style: string;
             why: components["schemas"]["WhyLine"];
+        };
+        /** ScanResultItem */
+        ScanResultItem: {
+            /** Abv */
+            abv?: number | null;
+            /** Brewery */
+            brewery?: string | null;
+            /** Confidence */
+            confidence: number;
+            /** Matched Id */
+            matched_id?: string | null;
+            /** Name */
+            name?: string | null;
+            /**
+             * Needs Review
+             * @default false
+             */
+            needs_review: boolean;
+            /** Raw Text */
+            raw_text: string;
+            /** Style */
+            style?: string | null;
+            /** Taste Fit */
+            taste_fit?: number | null;
         };
         /** ScoreBreakdown */
         ScoreBreakdown: {
@@ -1627,6 +1673,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RatingsMapResponse"];
+                };
+            };
+        };
+    };
+    scanMenu: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MenuScanRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScanResultItem"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

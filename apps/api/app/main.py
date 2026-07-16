@@ -22,6 +22,7 @@ from app.routes import (
     guest_recommendations,
     health,
     icons,
+    menu,
     onboarding,
     public_catalog,
     rate,
@@ -117,6 +118,7 @@ app.add_middleware(
 
 app.include_router(health.router)
 app.include_router(icons.router)
+app.include_router(menu.router)
 app.include_router(onboarding.router)
 app.include_router(recommendations.router)
 app.include_router(availability.router)
