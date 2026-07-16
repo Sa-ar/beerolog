@@ -10,7 +10,12 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { PAGE_MAIN } from '../lib/page-shell'
-import { useScanMenu } from '../lib/menu-scan'
+import {
+  useMenuChat,
+  useScanMenu,
+  type MenuChatMessage,
+  type MenuChatPoolBeer,
+} from '../lib/menu-scan'
 import { VIBE_OPTIONS, type SessionVibe } from '../lib/session-intent'
 
 export const Route = createFileRoute('/menu')({
@@ -50,12 +55,50 @@ function MenuScanFlow() {
   const [lastFile, setLastFile] = useState<File | null>(null)
   const [vibe, setVibe] = useState<SessionVibe | null>(null)
   const [freeText, setFreeText] = useState('')
+  const [messages, setMessages] = useState<MenuChatMessage[]>([])
+  const [chatInput, setChatInput] = useState('')
+  const [highlighted, setHighlighted] = useState<string[]>([])
   const scan = useScanMenu()
+  const chat = useMenuChat()
   const results = scan.data ?? []
+
+  const pool: MenuChatPoolBeer[] = results.flatMap((r) =>
+    r.matched_id
+      ? [
+          {
+            id: r.matched_id,
+            name: r.name ?? r.raw_text,
+            brewery: r.brewery ?? null,
+            style: r.style ?? null,
+            abv: r.abv ?? null,
+            taste_fit: r.taste_fit ?? null,
+          },
+        ]
+      : [],
+  )
 
   function runScan(file: File) {
     setLastFile(file)
+    setMessages([])
+    setHighlighted([])
     scan.mutate(scanArgs(file, vibe, freeText))
+  }
+
+  function sendChat() {
+    const content = chatInput.trim()
+    if (!content || chat.isPending) return
+    const next: MenuChatMessage[] = [...messages, { role: 'user', content }]
+    setMessages(next)
+    setChatInput('')
+    chat.mutate(
+      { pool, messages: next },
+      {
+        onSuccess: (data) => {
+          setMessages([...next, { role: 'assistant', content: data.reply }])
+          setHighlighted(data.beer_ids)
+        },
+      },
+    )
   }
 
   return (
@@ -137,6 +180,10 @@ function MenuScanFlow() {
               key={`${row.raw_text}-${index}`}
               className={`flex items-center justify-between gap-3 rounded border p-4 ${
                 row.matched_id ? 'border-brand-400 bg-brand-50' : 'border-neutral-200 bg-neutral-50'
+              } ${
+                row.matched_id && highlighted.includes(row.matched_id)
+                  ? 'ring-2 ring-brand-500'
+                  : ''
               }`}
             >
               <div>
@@ -155,6 +202,45 @@ function MenuScanFlow() {
             </li>
           ))}
         </ul>
+      )}
+
+      {pool.length > 0 && (
+        <section className="mt-6 rounded-lg border border-neutral-200 bg-neutral-50 p-4">
+          <p className="text-sm font-medium text-neutral-900">Ask about these beers</p>
+          {messages.length > 0 && (
+            <ul className="mt-3 flex flex-col gap-2">
+              {messages.map((m, i) => (
+                <li
+                  key={i}
+                  className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${
+                    m.role === 'user'
+                      ? 'self-end bg-brand-600 text-white'
+                      : 'self-start bg-white text-neutral-900 border border-neutral-200'
+                  }`}
+                >
+                  {m.content}
+                </li>
+              ))}
+            </ul>
+          )}
+          <div className="mt-3 flex gap-2">
+            <input
+              type="text"
+              value={chatInput}
+              maxLength={300}
+              onChange={(e) => setChatInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && sendChat()}
+              placeholder="e.g. which is the most sessionable?"
+              className="flex-1 rounded border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-brand-500 focus:outline-none"
+            />
+            <Button disabled={chat.isPending || chatInput.trim() === ''} onClick={sendChat}>
+              {chat.isPending ? 'Thinking…' : 'Send'}
+            </Button>
+          </div>
+          {chat.isError && (
+            <p className="mt-2 text-xs text-red-700">Couldn&rsquo;t get a reply. Try again.</p>
+          )}
+        </section>
       )}
 
       <Link

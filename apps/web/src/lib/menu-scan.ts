@@ -4,6 +4,9 @@ import type { components } from './api-client/schema'
 
 export type MenuScanResultItem = components['schemas']['ScanResultItem']
 export type MenuSessionIntent = components['schemas']['SessionIntent']
+export type MenuChatMessage = components['schemas']['ChatMessage']
+export type MenuChatPoolBeer = components['schemas']['ChatPoolBeer']
+export type MenuChatResponse = components['schemas']['MenuChatResponse']
 
 function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -42,6 +45,26 @@ export function useScanMenu() {
         body: { image_base64, ...(session ? { session } : {}) },
       })
       if (error || !data) throw new Error('Menu scan failed')
+      return data
+    },
+  })
+}
+
+/** Conversational surface: chat about the scanned pool. Stateless — the caller
+ * passes the pool + full message history each turn; server holds nothing. */
+export function useMenuChat() {
+  return useMutation({
+    mutationFn: async ({
+      pool,
+      messages,
+    }: {
+      pool: MenuChatPoolBeer[]
+      messages: MenuChatMessage[]
+    }): Promise<MenuChatResponse> => {
+      const { data, error } = await apiClient.POST('/menu/chat', {
+        body: { pool, messages },
+      })
+      if (error || !data) throw new Error('Menu chat failed')
       return data
     },
   })
