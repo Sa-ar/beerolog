@@ -58,12 +58,17 @@ function MenuScanFlow() {
   const [messages, setMessages] = useState<MenuChatMessage[]>([])
   const [chatInput, setChatInput] = useState('')
   const [highlighted, setHighlighted] = useState<string[]>([])
+  const [dismissed, setDismissed] = useState<Set<string>>(new Set())
   const scan = useScanMenu()
   const chat = useMenuChat()
   const results = scan.data ?? []
 
+  // Stable id for a board line so a dismissal survives re-ranking.
+  const dismissKey = (r: (typeof results)[number]) => r.matched_id ?? r.raw_text
+  const visible = results.filter((r) => !dismissed.has(dismissKey(r)))
+
   // Every beer on the board is fair game to chat about, matched or not.
-  const pool: MenuChatPoolBeer[] = results.map((r) => ({
+  const pool: MenuChatPoolBeer[] = visible.map((r) => ({
     id: r.matched_id ?? r.raw_text,
     name: r.name ?? r.raw_text,
     brewery: r.brewery ?? null,
@@ -76,6 +81,7 @@ function MenuScanFlow() {
     setLastFile(file)
     setMessages([])
     setHighlighted([])
+    setDismissed(new Set())
     scan.mutate(scanArgs(file, vibe, freeText))
   }
 
@@ -130,7 +136,7 @@ function MenuScanFlow() {
         </p>
       )}
 
-      {results.length > 0 && (
+      {visible.length > 0 && (
         <section className="mt-6 rounded-lg border border-neutral-200 bg-neutral-50 p-4">
           <p className="text-sm font-medium text-neutral-900">What are you feeling tonight?</p>
           <div className="mt-3 flex flex-wrap gap-2">
@@ -168,9 +174,9 @@ function MenuScanFlow() {
         </section>
       )}
 
-      {results.length > 0 && (
+      {visible.length > 0 && (
         <ul className="mt-6 flex flex-col gap-3">
-          {results.map((row, index) => (
+          {visible.map((row, index) => (
             <li
               key={`${row.raw_text}-${index}`}
               className={`flex items-center justify-between gap-3 rounded border p-4 ${
@@ -189,11 +195,22 @@ function MenuScanFlow() {
                     : 'not in our catalog · ranked by name'}
                 </p>
               </div>
-              {row.taste_fit != null && (
-                <span className="shrink-0 rounded-full bg-brand-600 px-2.5 py-1 text-xs font-semibold text-white">
-                  {Math.round(row.taste_fit * 100)}% your taste
-                </span>
-              )}
+              <div className="flex shrink-0 items-center gap-2">
+                {row.taste_fit != null && (
+                  <span className="rounded-full bg-brand-600 px-2.5 py-1 text-xs font-semibold text-white">
+                    {Math.round(row.taste_fit * 100)}% your taste
+                  </span>
+                )}
+                <button
+                  type="button"
+                  aria-label={`Remove ${row.name ?? row.raw_text}`}
+                  title="Not this one"
+                  onClick={() => setDismissed((prev) => new Set(prev).add(dismissKey(row)))}
+                  className="flex h-7 w-7 items-center justify-center rounded-full text-neutral-400 hover:bg-neutral-200 hover:text-neutral-700"
+                >
+                  ✕
+                </button>
+              </div>
             </li>
           ))}
         </ul>
