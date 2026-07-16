@@ -61,6 +61,23 @@ export function TasteProfileSummary({ greeting, baseline }: TasteProfileSummaryP
         <Heading className="text-3xl sm:text-4xl">{t('profile.summary.ready')}</Heading>
       </section>
 
+      <Link to="/menu" className="block">
+        <Card className="flex items-center gap-4 border border-brand-500 bg-brand-50 p-6 shadow-sm transition-colors hover:bg-brand-100">
+          <span className="text-3xl" aria-hidden>
+            📷
+          </span>
+          <div className="min-w-0 flex-1">
+            <Heading level={2} className="text-xl">
+              {t('menu.dashboardCta')}
+            </Heading>
+            <p className="mt-1 text-sm text-neutral-600">{t('menu.dashboardHint')}</p>
+          </div>
+          <span aria-hidden className="shrink-0 text-xl text-brand-600">
+            →
+          </span>
+        </Card>
+      </Link>
+
       <Card className="overflow-hidden border border-brand-700/50 bg-[hsl(25_24%_7%)] p-0 shadow-md">
         <div className="flex items-start gap-4 p-6 pb-4">
           <span

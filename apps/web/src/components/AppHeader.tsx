@@ -22,8 +22,14 @@ export function AppHeader() {
             <BeerologLogo />
           </span>
         </Link>
-        <nav className="flex shrink-0 items-center gap-4">
+        <nav className="flex shrink-0 items-center gap-2 sm:gap-3">
           <Show when="signed-in">
+            <Link
+              to="/menu"
+              className="inline-flex min-h-11 items-center justify-center rounded-lg bg-brand-500 px-3 text-sm font-semibold text-neutral-950 hover:bg-brand-400"
+            >
+              {t('header.scan')}
+            </Link>
             <Link
               to="/rate"
               className="inline-flex min-h-11 items-center justify-center rounded-lg px-3 text-sm font-semibold text-brand-200 hover:bg-white/5"

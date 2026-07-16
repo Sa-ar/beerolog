@@ -5,7 +5,11 @@
     "tryAgain": "Try again",
     "backToHome": "Back to home"
   },
-  "header": { "home": "Beerolog home", "rate": "Rate beers" },
+  "header": { "home": "Beerolog home", "rate": "Rate beers", "scan": "Scan menu" },
+  "menu": {
+    "dashboardCta": "Scan a menu",
+    "dashboardHint": "Snap a tap board and we'll rank what's on it by your taste — the fastest way to pick your next beer."
+  },
   "a11y": { "skipToContent": "Skip to content" },
   "cookies": {
     "notice": {
