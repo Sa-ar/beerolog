@@ -109,10 +109,22 @@ async function hydrateGuestAnswers(): Promise<RecommendationsPayload | null> {
   return payload
 }
 
+// Baseline picks from the signed-in user's persisted taste profile. This is the
+// returning-user path: no session, no guest answers, empty sessionStorage still
+// yields picks. 404 (no profile yet) is the one genuine empty state -> null.
+async function baselineRecommendationsFromProfile(): Promise<RecommendationsPayload | null> {
+  const res = await apiFetch('/me/baseline-taste')
+  if (!res.ok) return null
+  const record = (await res.json()) as BaselineTasteRecord
+  return fetchBaselineRecommendations(baselineFromRecord(record))
+}
+
 // Resolve the initial recommendations: a pending session-start (from the
 // dashboard) wins, else post-signup guest-answer hydration, else whatever is
-// already stored. Throwing propagates to the query's error state (retryable via
-// refetch); guest-hydration failures fall back to stored/missing instead.
+// already stored, else baseline picks from the saved profile. A failed session
+// or hydration degrades to baseline picks rather than a dead-end, so "started a
+// session, got nothing" still lands the user on picks. Only a missing profile
+// (404) yields the empty state; a genuine outage propagates to the error state.
 async function resolveInitialRecommendations(
   pendingRequest: StoredSessionRequest | null,
 ): Promise<RecsData> {
@@ -122,7 +134,11 @@ async function resolveInitialRecommendations(
   })
 
   if (pendingRequest) {
-    return withHasMore(await startSession(pendingRequest.baseline, pendingRequest.session))
+    try {
+      return withHasMore(await startSession(pendingRequest.baseline, pendingRequest.session))
+    } catch {
+      // Session start failed — fall through to baseline picks below.
+    }
   }
 
   if (readGuestAnswers()) {
@@ -130,12 +146,15 @@ async function resolveInitialRecommendations(
       const payload = await hydrateGuestAnswers()
       if (payload) return withHasMore(payload)
     } catch {
-      // Fall back to stored/missing below.
+      // Fall back to stored/baseline/missing below.
     }
   }
 
   const stored = readStoredRecommendations()
-  return stored && stored.results.length > 0 ? withHasMore(stored) : null
+  if (stored && stored.results.length > 0) return withHasMore(stored)
+
+  const baseline = await baselineRecommendationsFromProfile()
+  return baseline ? withHasMore(baseline) : null
 }
 
 function RecommendationsContent() {

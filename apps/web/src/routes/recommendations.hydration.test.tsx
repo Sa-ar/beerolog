@@ -154,27 +154,74 @@ describe('/recommendations post-signup hydration', () => {
     expect(localStorage.getItem(GUEST_ANSWERS_KEY)).toBeNull()
   })
 
-  it('existing profile (GET 200): no POST /onboarding, guest answers cleared', async () => {
+  it('existing profile (GET 200): serves baseline picks without POST /onboarding, guest answers cleared', async () => {
     localStorage.setItem(GUEST_ANSWERS_KEY, JSON.stringify(GUEST_ANSWERS))
 
-    apiFetchMock.mockImplementation((path: string) => {
+    apiFetchMock.mockImplementation((path: string, init?: { method?: string }) => {
       if (path === '/me/baseline-taste') {
         return Promise.resolve({
           ok: true,
           status: 200,
-          json: async () => ({ user_id: 'u1', bubbles: 0.5 }),
+          json: async () => ({
+            user_id: 'u1',
+            bubbles: 0.5,
+            bitterness: 0.6,
+            flavor_family: { hoppy: 0.7 },
+            novelty_affinity: 0.8,
+          }),
         })
+      }
+      if (path === '/recommendations' && init?.method === 'POST') {
+        return Promise.resolve(recommendationsResponse())
+      }
+      if (path === '/availability' && init?.method === 'POST') {
+        return Promise.resolve({ ok: true, status: 200, json: async () => ({ availability: {} }) })
       }
       throw new Error(`unexpected apiFetch ${path}`)
     })
 
     renderPage()
 
-    // Stale guest answers are discarded even when nothing else happens.
-    await waitFor(() => expect(localStorage.getItem(GUEST_ANSWERS_KEY)).toBeNull())
+    // Returning user with a saved profile sees baseline picks, not the dead-end.
+    await waitFor(() => expect(screen.getByText('Authed Lager')).toBeInTheDocument())
 
+    // Stale guest answers are discarded; no re-onboarding for an existing profile.
+    expect(localStorage.getItem(GUEST_ANSWERS_KEY)).toBeNull()
     const paths = apiFetchMock.mock.calls.map((c) => c[0] as string)
     expect(paths).not.toContain('/onboarding')
+  })
+
+  it('no session, no guest answers, existing profile: serves baseline picks (returning user)', async () => {
+    apiFetchMock.mockImplementation((path: string, init?: { method?: string }) => {
+      if (path === '/me/baseline-taste') {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({
+            user_id: 'u1',
+            bubbles: 0.5,
+            bitterness: 0.6,
+            flavor_family: { hoppy: 0.7 },
+            novelty_affinity: 0.8,
+          }),
+        })
+      }
+      if (path === '/recommendations' && init?.method === 'POST') {
+        return Promise.resolve(recommendationsResponse())
+      }
+      if (path === '/availability' && init?.method === 'POST') {
+        return Promise.resolve({ ok: true, status: 200, json: async () => ({ availability: {} }) })
+      }
+      throw new Error(`unexpected apiFetch ${path}`)
+    })
+
+    renderPage()
+
+    await waitFor(() => expect(screen.getByText('Authed Lager')).toBeInTheDocument())
+    const paths = apiFetchMock.mock.calls
+      .map((c) => c[0] as string)
+      .filter((p) => p !== '/availability')
+    expect(paths).toEqual(['/me/baseline-taste', '/recommendations'])
   })
 
   it('no guest answers: no profile GET-triggered onboarding, existing behavior unchanged', async () => {
