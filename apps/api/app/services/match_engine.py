@@ -40,8 +40,47 @@ class MatchResult:
     abv_score: float
     abv_fits_intent: bool | None
     novelty_score: float
+    avoid_score: float
     total_score: float
     dominant_component: DominantComponent
+
+
+# Color -> darkness/roastiness proxy. Shared by the dial-space matcher and the
+# avoid-penalty below so both read a beer's flavor the same way.
+COLOR_DARKNESS = {"pale": 0.1, "gold": 0.2, "amber": 0.45, "brown": 0.7, "dark": 0.9}
+
+
+def beer_flavor_strengths(beer: BeerCandidate) -> dict[str, float]:
+    """Project a beer into flavor-family strengths in [0, 1] from style keywords
+    and color. Single source of truth for both dial_match and the avoid-penalty.
+    """
+    style = beer.style.lower()
+    darkness = COLOR_DARKNESS.get(beer.color, 0.4)
+
+    def has(*words: str) -> bool:
+        return any(w in style for w in words)
+
+    hoppy = 0.85 if has("ipa") else 0.6 if has("pale ale") else 0.3
+    # Roasted/coffee-forward: explicit coffee styles rank highest, then stout/porter.
+    roasty = (
+        0.9
+        if has("coffee", "espresso", "mocha", "imperial stout")
+        else 0.85
+        if has("stout", "porter")
+        else max(0.2, darkness * 0.6)
+    )
+    malty = 0.75 if has("amber", "bock", "brown", "stout", "porter", "lager") else 0.45
+    fruity = 0.8 if has("ipa", "pale ale", "saison", "wit", "weizen", "hefe") else 0.25
+    sour = 0.85 if has("gose", "sour", "lambic", "berliner") else 0.1
+    smoky = 0.8 if has("smoke", "rauch") else 0.05
+    return {
+        "fruity": fruity,
+        "hoppy": hoppy,
+        "malty": malty,
+        "roasty": roasty,
+        "smoky": smoky,
+        "sour": sour,
+    }
 
 
 def cosine(a: list[float], b: list[float]) -> float:
@@ -92,6 +131,9 @@ def rank(
     top_k: int = 5,
     abv_intent: AbvIntent | None = None,
     abv_weight: float = 0.0,
+    user_flavor: dict[str, float] | None = None,
+    avoid_weight: float = 0.0,
+    avoid_neutral: float = 0.35,
 ) -> list[MatchResult]:
     """Rank candidates.
 
@@ -111,7 +153,21 @@ def rank(
         abv_term = abv_term_for_beer(beer.abv, abv_intent, abv_weight)
         abv_fits = abv_fits_intent_for_beer(beer.abv, abv_intent, abv_weight)
         novelty_term = beta * (novelty_affinity - 0.5) * beer.adventurousness
-        total = baseline_term + session_term + abv_term + novelty_term
+
+        # Graded avoid-penalty: for each flavor family the user rates BELOW
+        # neutral, subtract in proportion to how far below x how strong the beer
+        # is in that family. Soft down-rank (never a hard exclusion), scaled by
+        # dislike intensity. See docs/quiz-roasted-dislike-research.md.
+        avoid_term = 0.0
+        if user_flavor and avoid_weight:
+            strengths = beer_flavor_strengths(beer)
+            deficit_sum = sum(
+                max(0.0, avoid_neutral - user_strength) * strengths.get(family, 0.0)
+                for family, user_strength in user_flavor.items()
+            )
+            avoid_term = avoid_weight * deficit_sum
+
+        total = baseline_term + session_term + abv_term + novelty_term - avoid_term
 
         components = {
             DominantComponent.baseline: baseline_term,
@@ -135,6 +191,7 @@ def rank(
                 abv_score=abv_term,
                 abv_fits_intent=abv_fits,
                 novelty_score=novelty_term,
+                avoid_score=avoid_term,
                 total_score=total,
                 dominant_component=dominant,
             )

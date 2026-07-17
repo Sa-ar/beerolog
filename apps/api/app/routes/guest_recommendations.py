@@ -243,6 +243,9 @@ async def post_guest_recommendations(
                     alpha=settings.match_alpha,
                     beta=settings.match_beta,
                     top_k=settings.guest_top_k,
+                    user_flavor=dials.flavor_family,
+                    avoid_weight=settings.match_avoid_weight,
+                    avoid_neutral=settings.match_avoid_neutral,
                 )
                 if baseline_vec is not None
                 else []

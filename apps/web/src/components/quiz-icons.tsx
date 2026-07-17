@@ -52,6 +52,7 @@ const SCALE: Record<string, Record<string, number>> = {
   strength: { light: 1, medium: 2, strong: 3 },
   sweet: { dry: 1, balanced: 2, rich: 3 },
   adventure: { low: 1, medium: 2, high: 3 },
+  bitter: { wince: 1, some: 2, love: 3 },
 }
 
 const CUP = 'M6 9h10v3a4 4 0 0 1-4 4H10a4 4 0 0 1-4-4z'

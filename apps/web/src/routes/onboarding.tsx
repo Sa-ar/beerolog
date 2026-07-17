@@ -2,7 +2,7 @@
  * /onboarding — adaptive taste quiz. Walks the pure question graph
  * (lib/onboarding-quiz) one question at a time via <QuizStepper>, then posts the
  * answers to POST /onboarding, which composes dials + persona + embedding and
- * persists the user's BaselineTaste. Redirects to the dashboard on success.
+ * persists the user's BaselineTaste. Redirects to recommendations on success.
  */
 
 import { RedirectToSignIn, Show } from '@clerk/tanstack-react-start'
@@ -50,7 +50,7 @@ function OnboardingForm() {
       })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       localStorage.removeItem('beerolog_onboarding_quiz')
-      navigate({ to: '/' })
+      navigate({ to: '/recommendations' })
     } catch (e) {
       setError(onboardingSaveErrorMessage(t, e))
     } finally {

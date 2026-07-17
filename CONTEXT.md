@@ -7,8 +7,9 @@ Beerolog helps a person learn their taste, get strong beer recommendations, and 
 ## Supported MVP
 
 - The supported runtime surface is the signed-in solo flow.
-- A user can sign in, scan a bar menu, complete the quiz, get menu-scoped recommendations, rate beers, and keep an evolving taste profile.
-- Core in-scope systems are auth, menu photo scan, profile, menu-scoped recommendations, ratings/history, and persona.
+- A user can sign in, complete the quiz, scan a bar menu, get catalog or menu-scoped recommendations (optionally session-scoped via vibe/ABV intent), rate beers, and keep an evolving taste profile.
+- Core in-scope systems are auth, menu photo scan (`/menu`), profile, recommendations, ratings/history, and persona.
+- Managed venue QR / tap-list operator workflows remain deferred (see ADR 0001 and `docs/prds/venue-and-menu-scan.md`).
 
 ## Deferred surfaces
 

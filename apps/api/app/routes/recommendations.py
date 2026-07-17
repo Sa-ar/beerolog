@@ -99,10 +99,12 @@ async def post_recommendations(
         catalog = await get_embedded_catalog(client)
 
     novelty_affinity = body.baseline.novelty_affinity
+    user_flavor = body.baseline.flavor_family
     if user is not None:
         snap = await repo.get(user["sub"])
         if snap is not None:
             novelty_affinity = snap.novelty_affinity
+            user_flavor = snap.flavor_family
             # Persisted ABV appetite as a soft default when tonight has no explicit ABV intent.
             if abv_intent is None:
                 abv_intent = abv_band.band_for_affinity(snap.abv_affinity)
@@ -118,6 +120,9 @@ async def post_recommendations(
         top_k=body.top_k,
         abv_intent=abv_intent,
         abv_weight=abv_weight,
+        user_flavor=user_flavor,
+        avoid_weight=settings.match_avoid_weight,
+        avoid_neutral=settings.match_avoid_neutral,
     )
 
     return RecommendationsResponse(

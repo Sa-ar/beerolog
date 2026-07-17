@@ -660,6 +660,11 @@ export interface components {
             user_id: string;
         };
         /**
+         * BitternessDirect
+         * @enum {string}
+         */
+        BitternessDirect: "love" | "some" | "wince";
+        /**
          * Carbonation
          * @enum {string}
          */
@@ -987,10 +992,12 @@ export interface components {
             adventure: components["schemas"]["AdventureLevel"];
             /** Avoids */
             avoids?: components["schemas"]["AvoidCue"][];
+            bitterness_direct?: components["schemas"]["BitternessDirect"] | null;
             chocolate?: components["schemas"]["ChocoPref"] | null;
             coffee: components["schemas"]["CoffeeStyle"];
             /** Flavor Cues */
             flavor_cues?: components["schemas"]["FlavorCue"][];
+            roasted?: components["schemas"]["RoastedPref"] | null;
             smoked_foods: components["schemas"]["LovePref"];
             sour_foods: components["schemas"]["LovePref"];
             sour_wild?: components["schemas"]["SourWild"] | null;
@@ -1132,6 +1139,11 @@ export interface components {
             style: string;
             why: components["schemas"]["WhyLine"];
         };
+        /**
+         * RoastedPref
+         * @enum {string}
+         */
+        RoastedPref: "love" | "like" | "neutral" | "dislike" | "hate";
         /** ScanResultItem */
         ScanResultItem: {
             /** Abv */

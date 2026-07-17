@@ -5,8 +5,10 @@ import { useMemo } from 'react'
 import { I18nextProvider } from 'react-i18next'
 import { Analytics } from '@vercel/analytics/react'
 import { IconCatalogProvider } from '@beerolog/icons'
+import { AppBottomNav } from '../components/AppBottomNav'
 import { AppFooter } from '../components/AppFooter'
 import { AppHeader } from '../components/AppHeader'
+import { AppSidebar } from '../components/AppSidebar'
 import { AgeVerificationGate } from '../components/AgeVerificationGate'
 import { CookieNotice } from '../components/CookieNotice'
 import { SkipLink } from '../components/SkipLink'
@@ -59,10 +61,20 @@ function RootDocument({ children }: { children: React.ReactNode }) {
               <IconCatalogProvider apiUrl={apiUrl}>
                 <AuthTokenBridge />
                 <AgeVerificationGate initialVerified={ageVerified} />
-                <AppHeader />
-                <div id="main-content" tabIndex={-1} className="flex flex-1 flex-col outline-none">
-                  {children}
+                <div className="flex min-h-0 flex-1 flex-col">
+                  <AppHeader />
+                  <div className="flex min-h-0 flex-1">
+                    <AppSidebar />
+                    <div
+                      id="main-content"
+                      tabIndex={-1}
+                      className="flex min-w-0 flex-1 flex-col pb-[calc(4rem+env(safe-area-inset-bottom))] outline-none md:pb-0"
+                    >
+                      {children}
+                    </div>
+                  </div>
                 </div>
+                <AppBottomNav />
                 <AppFooter />
                 <CookieNotice />
               </IconCatalogProvider>

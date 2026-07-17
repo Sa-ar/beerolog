@@ -78,6 +78,10 @@ export function TasteProfileSummary({ greeting, baseline }: TasteProfileSummaryP
         </Card>
       </Link>
 
+      <Card className="border border-brand-700/40 p-6 shadow-sm" data-testid="session-hero">
+        <SessionQuickPick baseline={baseline} />
+      </Card>
+
       <Card className="overflow-hidden border border-brand-700/50 bg-[hsl(25_24%_7%)] p-0 shadow-md">
         <div className="flex items-start gap-4 p-6 pb-4">
           <span
@@ -117,26 +121,23 @@ export function TasteProfileSummary({ greeting, baseline }: TasteProfileSummaryP
         </div>
       </Card>
 
-      <Card className="space-y-4 p-6">
-        <TasteRadar axes={radarAxes} labels={radarLabels} ariaLabel={t('profile.radar.aria')} />
-      </Card>
-
-      <Card className="border border-brand-700/40 p-6 shadow-sm">
-        <SessionQuickPick baseline={baseline} />
-      </Card>
-
-      <section className="flex flex-col gap-3">
-        {ratingCount != null ? (
-          <p className="text-center text-sm text-neutral-600">
-            {t('profile.summary.ratingProgress', { count: ratingCount })}
-          </p>
-        ) : null}
-        <Link to="/onboarding">
-          <Button className="w-full" size="md" variant="outline">
-            {t('profile.summary.retake')}
-          </Button>
-        </Link>
-        <p className="text-center text-xs text-neutral-500">{t('profile.summary.retakeHint')}</p>
+      <section className="flex flex-col gap-6" data-testid="taste-details">
+        <Card className="space-y-4 p-6">
+          <TasteRadar axes={radarAxes} labels={radarLabels} ariaLabel={t('profile.radar.aria')} />
+        </Card>
+        <div className="flex flex-col gap-3">
+          {ratingCount != null ? (
+            <p className="text-center text-sm text-neutral-600">
+              {t('profile.summary.ratingProgress', { count: ratingCount })}
+            </p>
+          ) : null}
+          <Link to="/onboarding">
+            <Button className="w-full" size="md" variant="outline">
+              {t('profile.summary.retake')}
+            </Button>
+          </Link>
+          <p className="text-center text-xs text-neutral-500">{t('profile.summary.retakeHint')}</p>
+        </div>
       </section>
     </div>
   )

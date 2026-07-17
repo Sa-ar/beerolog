@@ -8,6 +8,10 @@ vi.mock('@tanstack/react-router', () => ({
   Link: ({ children }: { children: ReactNode }) => <a href="/legal/cookies">{children}</a>,
 }))
 
+vi.mock('@clerk/tanstack-react-start', () => ({
+  useAuth: () => ({ isSignedIn: false }),
+}))
+
 const { CookieNotice } = await import('./CookieNotice')
 
 beforeEach(() => {

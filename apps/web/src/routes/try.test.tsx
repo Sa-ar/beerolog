@@ -69,8 +69,10 @@ describe('/try guest preview', () => {
     renderTry()
 
     await clickValue(user, 'black') // coffee
+    await clickValue(user, 'some') // bitterness_direct
     await clickValue(user, 'strong') // water
     await clickValue(user, 'dry') // sweet_tooth
+    await clickValue(user, 'neutral') // roasted
     await clickValue(user, 'strong') // strength
     await clickValue(user, 'okay') // sour_foods
     await clickValue(user, 'okay') // smoked_foods
@@ -87,8 +89,10 @@ describe('/try guest preview', () => {
     const stored = JSON.parse(localStorage.getItem(GUEST_ANSWERS_KEY) as string)
     expect(stored).toEqual({
       coffee: 'black',
+      bitterness_direct: 'some',
       water: 'strong',
       sweet_tooth: 'dry',
+      roasted: 'neutral',
       strength: 'strong',
       sour_foods: 'okay',
       smoked_foods: 'okay',

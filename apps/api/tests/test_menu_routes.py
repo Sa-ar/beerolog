@@ -156,7 +156,10 @@ def test_scan_degrades_without_baseline():
 def test_scan_includes_unknown_beer_unranked_without_key():
     # A beer not in our catalog is NEVER dropped: with no embedding client it
     # can't be taste-ranked, but it's still returned with its exact menu text.
-    r = _client(["Xyzzy Quantum Stout"]).post("/menu/scan", json={"image_base64": "img"})
+    # Stub emb=None explicitly — a real key in .env would otherwise rank by name.
+    client = _client(["Xyzzy Quantum Stout"])
+    app.dependency_overrides[_embedding_client_dep] = lambda: None
+    r = client.post("/menu/scan", json={"image_base64": "img"})
     assert r.status_code == 200, r.text
     body = r.json()
     assert len(body) == 1

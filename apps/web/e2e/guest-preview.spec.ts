@@ -28,8 +28,10 @@ async function walkQuiz(page: Page) {
   await pick(page, 'dark_70')
   await page.getByTestId('quiz-next').click()
 
+  await pick(page, 'some') // direct bitterness anchor
   await pick(page, 'strong') // fizzy or flat → bubbles
   await pick(page, 'rich') // sweet tooth → sweetness/body
+  await pick(page, 'neutral') // roasted flavor → roasty
   await pick(page, 'medium') // session strength → abv_affinity
   await pick(page, 'love') // sour → triggers the wild/funky refinement
   await pick(page, 'bright') // sour_wild

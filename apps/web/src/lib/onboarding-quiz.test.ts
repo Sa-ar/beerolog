@@ -13,7 +13,7 @@ describe('onboarding quiz graph', () => {
   })
 
   it('skips the chocolate confirm when coffee is unambiguous (black)', () => {
-    expect(nextQuestion({ coffee: 'black' })?.id).toBe('water')
+    expect(nextQuestion({ coffee: 'black' })?.id).toBe('bitterness_direct')
   })
 
   it('asks the chocolate confirm when coffee is ambiguous (milk_based)', () => {
@@ -23,8 +23,10 @@ describe('onboarding quiz graph', () => {
   it('asks the sour-wild refinement only when sour is loved', () => {
     const base: Answers = {
       coffee: 'black',
+      bitterness_direct: 'some',
       water: 'strong',
       sweet_tooth: 'dry',
+      roasted: 'neutral',
       strength: 'strong',
     }
     expect(nextQuestion({ ...base, sour_foods: 'love' })?.id).toBe('sour_wild')
@@ -34,8 +36,10 @@ describe('onboarding quiz graph', () => {
   it('asks the CATA avoid question only on an extreme avoid', () => {
     const base: Answers = {
       coffee: 'black',
+      bitterness_direct: 'some',
       water: 'strong',
       sweet_tooth: 'dry',
+      roasted: 'neutral',
       strength: 'strong',
       sour_foods: 'avoid',
       smoked_foods: 'okay',
@@ -47,14 +51,16 @@ describe('onboarding quiz graph', () => {
     expect(nextQuestion(noAvoid)?.id).toBe('flavor_cues')
   })
 
-  it('the unbranched core path is 7 always-shown questions', () => {
+  it('the unbranched core path is 9 always-shown questions', () => {
     const core = QUESTIONS.filter(
       (q) => !q.shouldAsk && !q.optional,
     ).map((q) => q.id)
     expect(core).toEqual([
       'coffee',
+      'bitterness_direct',
       'water',
       'sweet_tooth',
+      'roasted',
       'strength',
       'sour_foods',
       'smoked_foods',
@@ -65,8 +71,10 @@ describe('onboarding quiz graph', () => {
   it('is complete only when every active question is answered', () => {
     const a: Answers = {
       coffee: 'black',
+      bitterness_direct: 'some',
       water: 'strong',
       sweet_tooth: 'dry',
+      roasted: 'neutral',
       strength: 'strong',
       sour_foods: 'okay',
       smoked_foods: 'okay',

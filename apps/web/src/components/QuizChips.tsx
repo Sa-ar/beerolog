@@ -46,6 +46,7 @@ export function ChalkTick() {
 // auto-advance to pointer use and leave keyboard users an explicit Next.
 export function QuizChips<T extends string>({
   title,
+  subtitle,
   group,
   options,
   value,
@@ -53,6 +54,8 @@ export function QuizChips<T extends string>({
   onPointerPick,
 }: {
   title: string
+  // Optional "why we ask" rationale shown under the prompt.
+  subtitle?: string | undefined
   group: string
   options: T[]
   value: T | null
@@ -62,9 +65,14 @@ export function QuizChips<T extends string>({
   const { t } = useTranslation()
   return (
     <div role="radiogroup" aria-label={title} data-testid="quiz-question" className="mt-6">
-      <h2 className="mb-3 font-display text-xl font-semibold uppercase tracking-wide text-neutral-900">
+      <h2 className={`${subtitle ? 'mb-1' : 'mb-3'} font-display text-xl font-semibold uppercase tracking-wide text-neutral-900`}>
         {title}
       </h2>
+      {subtitle ? (
+        <p className="mb-3 text-sm font-normal normal-case tracking-normal text-neutral-500">
+          {subtitle}
+        </p>
+      ) : null}
       <div className={`grid gap-3 ${optionGrid(options.length)}`}>
         {options.map((opt) => {
           const selected = value === opt

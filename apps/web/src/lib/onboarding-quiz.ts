@@ -6,8 +6,10 @@
 export type Answers = {
   coffee?: 'black' | 'milk_based' | 'sweet' | 'none'
   chocolate?: 'dark_90' | 'dark_70' | 'milk' | 'none'
+  bitterness_direct?: 'love' | 'some' | 'wince'
   water?: 'still' | 'light' | 'strong'
   sweet_tooth?: 'rich' | 'balanced' | 'dry'
+  roasted?: 'love' | 'like' | 'neutral' | 'dislike' | 'hate'
   strength?: 'light' | 'medium' | 'strong'
   sour_foods?: 'love' | 'okay' | 'avoid'
   sour_wild?: 'bright' | 'funky'
@@ -38,10 +40,16 @@ export const QUESTIONS: QuestionDef[] = [
   { id: 'chocolate', field: 'chocolate', type: 'single', group: 'choco',
     options: ['dark_90', 'dark_70', 'milk', 'none'],
     shouldAsk: (a) => a.coffee === 'milk_based' || a.coffee === 'none' },
+  // Direct bitterness anchor — always asked; the coffee proxy is noisy on its own.
+  { id: 'bitterness_direct', field: 'bitterness_direct', type: 'single', group: 'bitter',
+    options: ['love', 'some', 'wince'] },
   { id: 'water', field: 'water', type: 'single', group: 'fizz',
     options: ['strong', 'light', 'still'] },
   { id: 'sweet_tooth', field: 'sweet_tooth', type: 'single', group: 'sweet',
     options: ['rich', 'balanced', 'dry'] },
+  // Graded roasted/coffee-FLAVOR like→dislike; owns the roasty dial (incl. dislike).
+  { id: 'roasted', field: 'roasted', type: 'single', group: 'roasted',
+    options: ['love', 'like', 'neutral', 'dislike', 'hate'] },
   { id: 'strength', field: 'strength', type: 'single', group: 'strength',
     options: ['light', 'medium', 'strong'] },
   { id: 'sour_foods', field: 'sour_foods', type: 'single', group: 'love',

@@ -566,6 +566,15 @@
         "title": "BaselineTasteRecord",
         "type": "object"
       },
+      "BitternessDirect": {
+        "enum": [
+          "love",
+          "some",
+          "wince"
+        ],
+        "title": "BitternessDirect",
+        "type": "string"
+      },
       "Carbonation": {
         "enum": [
           "still",
@@ -1460,6 +1469,16 @@
             "title": "Avoids",
             "type": "array"
           },
+          "bitterness_direct": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BitternessDirect"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "chocolate": {
             "anyOf": [
               {
@@ -1480,6 +1499,16 @@
             "maxItems": 8,
             "title": "Flavor Cues",
             "type": "array"
+          },
+          "roasted": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RoastedPref"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "smoked_foods": {
             "$ref": "#/components/schemas/LovePref"
@@ -1897,6 +1926,17 @@
         ],
         "title": "RecommendedBeer",
         "type": "object"
+      },
+      "RoastedPref": {
+        "enum": [
+          "love",
+          "like",
+          "neutral",
+          "dislike",
+          "hate"
+        ],
+        "title": "RoastedPref",
+        "type": "string"
       },
       "ScanResultItem": {
         "properties": {

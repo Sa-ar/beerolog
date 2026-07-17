@@ -37,6 +37,10 @@ class Settings(BaseSettings):
     match_beta: float = 0.3
     # Bonus/penalty applied when beer ABV matches/mismatches session abv_intent
     match_abv_weight: float = 0.15
+    # Penalty for beers strong in a flavor family the user rates below neutral
+    # (research: docs/quiz-roasted-dislike-research.md). Soft, graded, capped.
+    match_avoid_weight: float = 0.4
+    match_avoid_neutral: float = 0.35
     # Affine rescaling anchors for user-facing match % (probe: probe_cosine_calibration)
     match_cos_floor: float = 0.20
     match_cos_ceiling: float = 0.50

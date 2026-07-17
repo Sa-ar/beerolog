@@ -13,12 +13,14 @@ from app.api_contracts import (
     AdventureLevel,
     AvoidCue,
     BaselineTasteDials,
+    BitternessDirect,
     Carbonation,
     ChocoPref,
     CoffeeStyle,
     FlavorCue,
     LovePref,
     OnboardingAnswers,
+    RoastedPref,
     SourWild,
     StrengthPref,
     SweetPref,
@@ -26,7 +28,7 @@ from app.api_contracts import (
 
 # Bumped whenever the quiz/scoring model changes shape. Profiles persisted with a
 # lower version are treated as stale and routed back through onboarding.
-TASTE_MODEL_VERSION = 2
+TASTE_MODEL_VERSION = 3
 
 # Coffee sweetener is the single strongest bitterness-liking proxy (UK Biobank):
 # black skews high, sweetened skews low.
@@ -42,6 +44,23 @@ _CHOCO_BITTER = {
     ChocoPref.milk: 0.30,
     ChocoPref.none: 0.50,
 }
+# Direct bitterness self-report. Sensory-science evidence shows the coffee proxy
+# is noisy and sometimes inverted, so when this is present it leads the dial.
+_BITTERNESS_DIRECT = {
+    BitternessDirect.love: 0.9,
+    BitternessDirect.some: 0.5,
+    BitternessDirect.wince: 0.1,
+}
+# Graded roasted/coffee-flavor preference → roasty dial, full range. Neutral sits
+# at 0.4 (above the 0.3 "no data" default) so an explicit neutral and absence stay
+# distinct; dislike/hate land clearly below the matcher's avoid neutral (0.35).
+_ROASTED_ROASTY = {
+    RoastedPref.love: 0.9,
+    RoastedPref.like: 0.7,
+    RoastedPref.neutral: 0.4,
+    RoastedPref.dislike: 0.2,
+    RoastedPref.hate: 0.05,
+}
 _WATER_BUBBLES = {Carbonation.still: 0.1, Carbonation.light: 0.5, Carbonation.strong: 0.9}
 _LOVE_WEIGHT = {LovePref.love: 0.9, LovePref.okay: 0.5, LovePref.avoid: 0.1}
 _SWEETNESS = {SweetPref.rich: 0.85, SweetPref.balanced: 0.5, SweetPref.dry: 0.15}
@@ -56,9 +75,13 @@ def compose_dials(answers: OnboardingAnswers) -> BaselineTasteDials:
     avoids = set(answers.avoids)
     cues = set(answers.flavor_cues)
 
+    # Coffee/chocolate are proxies; when the user answers the direct bitterness
+    # question it leads (0.7) and the proxy only refines (0.3).
     bitterness = _COFFEE_BITTER[answers.coffee]
     if answers.chocolate is not None:
         bitterness = max(bitterness, _CHOCO_BITTER[answers.chocolate])
+    if answers.bitterness_direct is not None:
+        bitterness = 0.7 * _BITTERNESS_DIRECT[answers.bitterness_direct] + 0.3 * bitterness
     if AvoidCue.too_bitter in avoids:
         bitterness = min(bitterness, 0.3)
 
@@ -95,13 +118,17 @@ def compose_dials(answers: OnboardingAnswers) -> BaselineTasteDials:
         if cues & {FlavorCue.grapefruit, FlavorCue.pine, FlavorCue.citrus_zest}
         else (0.5 if answers.coffee == CoffeeStyle.black else 0.35)
     )
-    roasty = 0.3
-    if (
-        answers.coffee == CoffeeStyle.black
-        or answers.chocolate in (ChocoPref.dark_90, ChocoPref.dark_70)
-        or FlavorCue.coffee in cues
-    ):
-        roasty = 0.8
+    if answers.roasted is not None:
+        # Direct graded roasted/coffee-flavor answer owns the dial end-to-end.
+        roasty = _ROASTED_ROASTY[answers.roasted]
+    else:
+        roasty = 0.3
+        if (
+            answers.coffee == CoffeeStyle.black
+            or answers.chocolate in (ChocoPref.dark_90, ChocoPref.dark_70)
+            or FlavorCue.coffee in cues
+        ):
+            roasty = 0.8
     if AvoidCue.too_dark in avoids:
         roasty = min(roasty, 0.3)
     fruity = 0.7 if cues & {FlavorCue.tropical, FlavorCue.banana_bread} else 0.3
@@ -143,6 +170,18 @@ _CHOCO_PHRASE = {
     ChocoPref.dark_70: "enjoys dark chocolate",
     ChocoPref.milk: "prefers milk chocolate",
     ChocoPref.none: "is not a chocolate person",
+}
+_BITTERNESS_DIRECT_PHRASE = {
+    BitternessDirect.love: "loves bitter drinks like strong black coffee, tonic water, and grapefruit",
+    BitternessDirect.some: "enjoys a little bitterness",
+    BitternessDirect.wince: "dislikes bitter flavors",
+}
+_ROASTED_PHRASE = {
+    RoastedPref.love: "loves roasted, coffee, and dark-chocolate flavors",
+    RoastedPref.like: "enjoys roasted and coffee flavors",
+    RoastedPref.neutral: "is neutral about roasted and coffee flavors",
+    RoastedPref.dislike: "prefers to avoid roasted and coffee flavors",
+    RoastedPref.hate: "strongly dislikes roasted, coffee, and dark-roast flavors",
 }
 _WATER_PHRASE = {
     Carbonation.still: "prefers still, flat drinks",
@@ -208,6 +247,10 @@ def compose_text(answers: OnboardingAnswers) -> str:
     parts.append(_COFFEE_PHRASE[answers.coffee] + ".")
     if answers.chocolate is not None:
         parts.append(_CHOCO_PHRASE[answers.chocolate] + ".")
+    if answers.bitterness_direct is not None:
+        parts.append(_BITTERNESS_DIRECT_PHRASE[answers.bitterness_direct] + ".")
+    if answers.roasted is not None:
+        parts.append(_ROASTED_PHRASE[answers.roasted] + ".")
     parts.append(_WATER_PHRASE[answers.water] + ".")
     parts.append(_SWEET_PHRASE[answers.sweet_tooth] + ".")
     parts.append(_STRENGTH_PHRASE[answers.strength] + ".")

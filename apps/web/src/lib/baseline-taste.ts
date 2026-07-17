@@ -36,7 +36,7 @@ export function personaForLang(
 
 // Mirror of TASTE_MODEL_VERSION in the API; profiles below this are stale and
 // must retake the (improved) quiz.
-export const TASTE_MODEL_VERSION = 2
+export const TASTE_MODEL_VERSION = 3
 
 export function isStaleProfile(baseline: BaselineTaste): boolean {
   return (baseline.model_version ?? 0) < TASTE_MODEL_VERSION

@@ -220,6 +220,23 @@ def test_onboarding_persists_dials(client: TestClient, repo: _MemoryRepo) -> Non
     assert FAKE_USER["sub"] in repo._rows
 
 
+def test_bitterness_direct_leads_over_coffee_proxy(client: TestClient) -> None:
+    # Black coffee + very dark chocolate alone score bitterness ~0.95; a direct
+    # "wince" must pull it down (0.7*0.1 + 0.3*0.95 = 0.355), proving the direct
+    # answer leads and the coffee/chocolate proxy only refines.
+    r = client.post("/onboarding", json={**_HOP_HEAD_ANSWERS, "bitterness_direct": "wince"})
+    assert r.status_code == 201, r.text
+    assert r.json()["bitterness"] < 0.5
+
+
+def test_roasted_dislike_drops_roasty_dial(client: TestClient) -> None:
+    # "hate" roasted flavor must drive roasty near zero even though the base
+    # answers include black coffee + dark chocolate (which otherwise push it high).
+    r = client.post("/onboarding", json={**_HOP_HEAD_ANSWERS, "roasted": "hate"})
+    assert r.status_code == 201, r.text
+    assert r.json()["flavor_family"]["roasty"] <= 0.1
+
+
 def test_onboarding_persists_current_model_version(client: TestClient) -> None:
     r = client.post("/onboarding", json=_HOP_HEAD_ANSWERS)
     assert r.status_code == 201, r.text

@@ -302,6 +302,7 @@ function SingleView({
     <div className="space-y-5 animate-[fadeIn_200ms_ease-out]">
       <QuizChips<string>
         title={t(`onboarding.questions.${q.id}`)}
+        subtitle={t(`onboarding.subtitles.${q.id}`, { defaultValue: '' }) || undefined}
         group={q.group}
         options={q.options}
         value={pending}
@@ -368,14 +369,21 @@ function MultiView({
       aria-label={t(`onboarding.questions.${q.id}`)}
       className="space-y-5 animate-[fadeIn_200ms_ease-out]"
     >
-      <p className="font-display text-xl font-semibold uppercase tracking-wide text-neutral-900">
-        {t(`onboarding.questions.${q.id}`)}
-        {q.optional ? (
-          <span className="ms-2 text-sm font-normal normal-case tracking-normal text-neutral-500">
-            {t('onboarding.optional')}
-          </span>
+      <div className="space-y-1">
+        <p className="font-display text-xl font-semibold uppercase tracking-wide text-neutral-900">
+          {t(`onboarding.questions.${q.id}`)}
+          {q.optional ? (
+            <span className="ms-2 text-sm font-normal normal-case tracking-normal text-neutral-500">
+              {t('onboarding.optional')}
+            </span>
+          ) : null}
+        </p>
+        {t(`onboarding.subtitles.${q.id}`, { defaultValue: '' }) ? (
+          <p className="text-sm font-normal normal-case tracking-normal text-neutral-500">
+            {t(`onboarding.subtitles.${q.id}`, { defaultValue: '' })}
+          </p>
         ) : null}
-      </p>
+      </div>
       <div className={`grid gap-3 ${optionGrid(q.options.length)}`}>
         {q.options.map((option) => {
           const on = selected.includes(option)

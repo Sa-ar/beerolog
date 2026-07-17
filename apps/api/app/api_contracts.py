@@ -70,6 +70,22 @@ class SourWild(StrEnum):
     funky = "funky"
 
 
+class BitternessDirect(StrEnum):
+    love = "love"
+    some = "some"
+    wince = "wince"
+
+
+class RoastedPref(StrEnum):
+    # Graded like→dislike for roasted/coffee/dark-roast FLAVOR (bipolar, with a
+    # real neutral and a strong-aversion anchor). Distinct from bitterness.
+    love = "love"
+    like = "like"
+    neutral = "neutral"
+    dislike = "dislike"
+    hate = "hate"
+
+
 class SweetPref(StrEnum):
     rich = "rich"
     balanced = "balanced"
@@ -110,6 +126,13 @@ class OnboardingAnswers(BaseModel):
     coffee: CoffeeStyle
     # Conditional bitterness confirm — asked only when coffee is ambiguous.
     chocolate: ChocoPref | None = None
+    # Direct bitterness anchor — a plain-language check that does not lean on the
+    # noisy coffee proxy. Always asked in the quiz; optional here so older
+    # payloads (and tests) that omit it stay valid.
+    bitterness_direct: BitternessDirect | None = None
+    # Graded roasted/coffee-FLAVOR preference. Owns the roasty dial across the
+    # full range incl. dislike; optional so older payloads stay valid.
+    roasted: RoastedPref | None = None
     water: Carbonation
     sour_foods: LovePref
     # Conditional refinement — asked only when sour_foods == love.

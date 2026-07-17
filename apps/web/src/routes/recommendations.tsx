@@ -265,7 +265,7 @@ function RecommendationsContent() {
               </Button>
               <Link to="/" className="w-full">
                 <Button className="w-full" size="md" variant="outline">
-                  {t('recommendations.backToDashboard')}
+                  {t('recommendations.startTonightsPicks')}
                 </Button>
               </Link>
             </div>
@@ -334,6 +334,12 @@ function RecommendationsContent() {
         <p className="max-w-xl text-sm text-neutral-600 sm:text-base">
           {t('recommendations.subhead')}
         </p>
+        <Link
+          to="/"
+          className="inline-flex text-sm font-semibold text-brand-300 underline-offset-2 hover:underline"
+        >
+          {t('recommendations.adjustTonight')}
+        </Link>
       </section>
 
       <section className="flex flex-col gap-1.5 rounded-xl border border-neutral-200 bg-neutral-50/60 p-3 sm:p-4">

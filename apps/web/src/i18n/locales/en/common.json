@@ -5,9 +5,17 @@
     "tryAgain": "Try again",
     "backToHome": "Back to home"
   },
-  "header": { "home": "Beerolog home", "rate": "Rate beers", "scan": "Scan menu" },
+  "header": { "home": "Beerolog home" },
+  "nav": {
+    "primary": "Primary",
+    "home": "Tonight",
+    "scan": "Scan menu",
+    "picks": "Picks",
+    "rate": "Rate beers"
+  },
   "menu": {
     "account": "Account menu",
+    "accountLink": "Account",
     "logout": "Log out",
     "dashboardCta": "Scan a menu",
     "dashboardHint": "Snap a photo of the menu and we'll rank what's on it by your taste — the fastest way to pick your next beer.",
@@ -318,7 +326,8 @@
       "retakeHint": "Every pick and rating makes your profile sharper.",
       "rateCta": "Rate beers",
       "rateHint": "Quick swipe-through to sharpen your taste profile.",
-      "ratingProgress": "{{count}} beers rated — keep going to sharpen your profile."
+      "ratingProgress": "{{count}} beers rated — keep going to sharpen your profile.",
+      "tasteDetails": "See taste details"
     },
     "dials": {
       "carbonation": {
@@ -400,17 +409,24 @@
     "saving": "Saving…",
     "save": "Create my taste profile",
     "questions": {
-      "coffee": "Your coffee order?",
-      "chocolate": "Dark chocolate — how dark?",
-      "water": "Fizzy or flat?",
-      "sweet_tooth": "Do you have a sweet tooth?",
-      "strength": "How strong do you like your drink — light or boozy?",
+      "coffee": "What's your usual coffee order?",
+      "chocolate": "When you eat chocolate, how dark do you usually go?",
+      "bitterness_direct": "Strong black coffee, tonic water, grapefruit — love it or wince?",
+      "water": "Sparkling water — how fizzy do you usually like it?",
+      "sweet_tooth": "How sweet do you like your drinks?",
+      "roasted": "Dark-roasted flavors — coffee, espresso, dark chocolate?",
+      "strength": "How strong do you usually like your drink — light or boozy?",
       "sour_foods": "Sour & vinegary things — pickles, kombucha?",
-      "sour_wild": "Funky, wild, barnyard flavors too?",
+      "sour_wild": "When something's sour, how do you like it?",
       "smoked_foods": "Smoky foods — BBQ, smoked fish?",
       "adventure": "How adventurous are you with new flavors?",
       "avoids": "What usually puts you off?",
-      "flavor_cues": "Tap everything that's you"
+      "flavor_cues": "Which of these flavors do you love?"
+    },
+    "subtitles": {
+      "coffee": "This hints at how much bitterness you enjoy.",
+      "sour_foods": "Hints at how you'll take tart, sour beers.",
+      "avoids": "So we can steer clear."
     }
   },
   "try": {
@@ -431,10 +447,10 @@
   "enums": {
     "common": { "yes": "Yes", "no": "No" },
     "coffee": {
-      "black": "Black",
+      "black": "Black — bitter's fine",
       "milk_based": "With milk",
-      "sweet": "Sweet & creamy",
-      "none": "I don't do coffee"
+      "sweet": "Sweet & mild",
+      "none": "I don't drink coffee"
     },
     "choco": {
       "dark_90": "90%+ dark",
@@ -442,21 +458,19 @@
       "milk": "Milk chocolate",
       "none": "Not a chocolate person"
     },
+    "bitter": { "love": "Love the bitter kick", "some": "A little's fine", "wince": "Not for me" },
     "fizz": { "strong": "Love the fizz", "light": "A little fizz", "still": "Prefer it flat" },
-    "sweet": {
-      "rich": "Yes — I love sweet & rich",
-      "balanced": "No strong preference",
-      "dry": "I prefer light & not-sweet"
-    },
+    "sweet": { "rich": "I love sweet drinks", "balanced": "A little sweetness is nice", "dry": "I like it dry, not sweet" },
+    "roasted": { "love": "Love them", "like": "Like them", "neutral": "No strong feelings", "dislike": "Not really for me", "hate": "Really dislike them" },
     "strength": {
-      "light": "Light & easy-drinking (low alcohol)",
-      "medium": "Middle of the road",
-      "strong": "Strong & boozy (high alcohol)"
+      "light": "Light & low-alcohol",
+      "medium": "Around 5% — the usual",
+      "strong": "Strong & boozy"
     },
-    "sour_wild": { "bright": "Bright & citrusy", "funky": "Funky & wild" },
+    "sour_wild": { "bright": "Bright & fruity (think lemon)", "funky": "Earthy & funky (think aged cheese)" },
     "adventure": {
       "high": "Give me the weirdest thing",
-      "medium": "Sometimes",
+      "medium": "I'll try new things sometimes",
       "low": "Stick to what I know"
     },
     "avoid": {
@@ -481,7 +495,7 @@
       "fresh_fruit": "Fresh fruit",
       "milk_chocolate": "Milk chocolate"
     },
-    "love": { "love": "Love them", "okay": "They're okay", "avoid": "Avoid them" },
+    "love": { "love": "Love them", "okay": "Now and then", "avoid": "Avoid them" },
     "citrus": {
       "grapefruit": "Grapefruit",
       "orange": "Orange",
@@ -532,10 +546,12 @@
   "recommendations": {
     "eyebrow": "Recommendations",
     "errorTitle": "Couldn't load your picks",
-    "backToDashboard": "Back to dashboard",
+    "backToDashboard": "Start tonight's picks",
+    "startTonightsPicks": "Start tonight's picks",
+    "adjustTonight": "Adjust tonight",
     "missingTitle": "No picks yet",
     "missingDescription": "Pick tonight's vibe and we'll match five beers to how you feel right now.",
-    "startSession": "Start a session",
+    "startSession": "Start tonight's picks",
     "findNearby": {
       "title": "Find it near me",
       "availableAt": "Available at",

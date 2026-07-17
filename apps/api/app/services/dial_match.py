@@ -13,7 +13,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from app.api_contracts import BaselineTasteDials
-from app.services.match_engine import BeerCandidate, cosine
+from app.services.match_engine import (
+    COLOR_DARKNESS,
+    BeerCandidate,
+    beer_flavor_strengths,
+    cosine,
+)
 
 # Canonical, FIXED order of the 12 dial dimensions. The first six are the
 # flavor_family keys in stable sorted order; the rest are the scalar dials.
@@ -53,15 +58,6 @@ def dials_to_vector(dials: BaselineTasteDials) -> list[float]:
 # kept deliberately simple and clamped to [0, 1] so they sit in the same space
 # as the user dials.
 
-# Color -> roastiness / darkness proxy. Drives roasty + body + (inverse) bubbles.
-_COLOR_DARKNESS = {
-    "pale": 0.1,
-    "gold": 0.2,
-    "amber": 0.45,
-    "brown": 0.7,
-    "dark": 0.9,
-}
-
 
 def _clamp(x: float) -> float:
     return max(0.0, min(1.0, x))
@@ -79,19 +75,14 @@ def beer_dials(beer: BeerCandidate) -> list[float]:
     flavor_family weights come from style keywords; the scalar dials come from
     color (darkness), style, abv, and adventurousness. All values in [0, 1].
     """
-    style = beer.style.lower()
-    darkness = _COLOR_DARKNESS.get(beer.color, 0.4)
-
-    def has(*words: str) -> bool:
-        return any(w in style for w in words)
-
-    # --- flavor_family weights (style-keyword driven) ---
-    hoppy = 0.85 if has("ipa") else 0.6 if has("pale ale") else 0.3
-    roasty = 0.85 if has("stout", "porter") else max(0.2, darkness * 0.6)
-    malty = 0.75 if has("amber", "bock", "brown", "stout", "porter", "lager") else 0.45
-    fruity = 0.8 if has("ipa", "pale ale", "saison", "wit", "weizen", "hefe") else 0.25
-    sour = 0.85 if has("gose", "sour", "lambic", "berliner") else 0.1
-    smoky = 0.8 if has("smoke", "rauch") else 0.05
+    darkness = COLOR_DARKNESS.get(beer.color, 0.4)
+    flavor = beer_flavor_strengths(beer)
+    hoppy, roasty, malty, sour = (
+        flavor["hoppy"],
+        flavor["roasty"],
+        flavor["malty"],
+        flavor["sour"],
+    )
 
     # --- scalar dials ---
     # Lighter, paler beers read as more carbonated/crisp; dark ales less so.
@@ -105,14 +96,6 @@ def beer_dials(beer: BeerCandidate) -> list[float]:
     abv_affinity = _abv_affinity(beer.abv)
     novelty_affinity = _clamp(beer.adventurousness)
 
-    flavor = {
-        "fruity": fruity,
-        "hoppy": hoppy,
-        "malty": malty,
-        "roasty": roasty,
-        "smoky": smoky,
-        "sour": sour,
-    }
     vec = [_clamp(flavor[key]) for key in _FLAVOR_KEYS]
     vec.extend(
         [

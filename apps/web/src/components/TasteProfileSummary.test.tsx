@@ -30,13 +30,25 @@ const baseline: BaselineTaste = {
   flavor_family: { malty: 0.5 },
   novelty_affinity: 0.5,
   updated_at: '2026-06-01T00:00:00+00:00',
+  persona: {
+    title_en: 'Malty comfort',
+    blurb_en: 'Warm and familiar.',
+    title_he: 'נוחות מאלטית',
+    blurb_he: 'חמים ומוכר.',
+  },
 }
 
 const { TasteProfileSummary } = await import('./TasteProfileSummary')
 
 describe('TasteProfileSummary', () => {
-  it('shows rating progress (rate CTA now lives in the header)', async () => {
+  it('shows scan CTA, session quick-pick, identity, and taste details always open', () => {
     renderWithI18n(<TasteProfileSummary greeting="Hi" baseline={baseline} />, 'en')
-    expect(await screen.findByText(/7 beers rated/i)).toBeInTheDocument()
+
+    expect(screen.getByRole('link', { name: /scan a menu/i })).toHaveAttribute('href', '/menu')
+    expect(screen.getByTestId('session-quick-pick')).toBeInTheDocument()
+    expect(screen.getByTestId('persona-title')).toHaveTextContent('Malty comfort')
+    expect(screen.getByTestId('taste-radar')).toBeInTheDocument()
+    expect(screen.getByText(/7 beers rated/i)).toBeInTheDocument()
+    expect(screen.queryByText(/see taste details/i)).not.toBeInTheDocument()
   })
 })

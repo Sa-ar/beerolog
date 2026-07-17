@@ -3,17 +3,14 @@ import { Link } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-// Branded replacement for Clerk's default <UserButton />. Avatar trigger opens a
-// menu that deep-links into each account tab plus a logout item.
-// ponytail: ~50 lines of useState + a click-outside effect; no headless-menu dep
-// for one menu. Add Radix only if we need typeahead/roving focus later.
-const MENU_TABS = [
-  { to: '/account/profile', key: 'profile' },
-  { to: '/account/security', key: 'security' },
-  { to: '/account/settings', key: 'settings' },
-] as const
+type UserMenuProps = {
+  /** When `up`, the menu opens above the avatar (sidebar footer). */
+  menuPlacement?: 'down' | 'up'
+}
 
-export function UserMenu() {
+// Branded replacement for Clerk's default <UserButton />. Avatar opens Account +
+// Sign out; account tabs live only in the /account shell.
+export function UserMenu({ menuPlacement = 'down' }: UserMenuProps) {
   const { t } = useTranslation()
   const { user } = useUser()
   const { signOut } = useClerk()
@@ -61,23 +58,24 @@ export function UserMenu() {
       {open && (
         <div
           role="menu"
-          className="absolute end-0 z-20 mt-2 w-56 overflow-hidden rounded-xl border border-neutral-200 bg-white py-1 shadow-lg"
+          className={`absolute z-20 w-56 overflow-hidden rounded-xl border border-neutral-200 bg-white py-1 shadow-lg ${
+            menuPlacement === 'up'
+              ? 'bottom-full start-0 mb-2'
+              : 'end-0 top-full mt-2'
+          }`}
         >
           <div className="border-b border-neutral-100 px-4 py-3">
             <p className="truncate text-sm font-semibold text-neutral-900">{name}</p>
             {email && <p className="truncate text-xs text-neutral-500">{email}</p>}
           </div>
-          {MENU_TABS.map((tab) => (
-            <Link
-              key={tab.key}
-              to={tab.to}
-              role="menuitem"
-              onClick={() => setOpen(false)}
-              className="block px-4 py-2 text-sm text-neutral-700 hover:bg-white/5"
-            >
-              {t(`account.tabs.${tab.key}`)}
-            </Link>
-          ))}
+          <Link
+            to="/account/profile"
+            role="menuitem"
+            onClick={() => setOpen(false)}
+            className="block px-4 py-2 text-sm text-neutral-700 hover:bg-white/5"
+          >
+            {t('menu.accountLink')}
+          </Link>
           <button
             type="button"
             role="menuitem"

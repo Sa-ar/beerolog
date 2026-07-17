@@ -60,8 +60,10 @@ describe('QuizStepper', () => {
     // Unambiguous core path (coffee=black skips chocolate; sour=okay skips
     // sour_wild; no extreme avoid skips the CATA).
     await clickValue(user, 'black') // coffee
+    await clickValue(user, 'some') // bitterness_direct
     await clickValue(user, 'strong') // water
     await clickValue(user, 'dry') // sweet_tooth
+    await clickValue(user, 'neutral') // roasted
     await clickValue(user, 'strong') // strength
     await clickValue(user, 'okay') // sour_foods
     await clickValue(user, 'okay') // smoked_foods
@@ -76,8 +78,10 @@ describe('QuizStepper', () => {
     const answers = onComplete.mock.calls[0]![0] as Answers
     expect(prunedAnswers(answers)).toEqual({
       coffee: 'black',
+      bitterness_direct: 'some',
       water: 'strong',
       sweet_tooth: 'dry',
+      roasted: 'neutral',
       strength: 'strong',
       sour_foods: 'okay',
       smoked_foods: 'okay',
@@ -122,8 +126,8 @@ describe('QuizStepper', () => {
   it('restores in-progress answers from localStorage', () => {
     localStorage.setItem('quiz_key', JSON.stringify({ coffee: 'black' }))
     renderStepper(vi.fn(), 'quiz_key')
-    // coffee was restored, so the next unanswered question (water) is shown.
-    expect(screen.getByLabelText(en.onboarding.questions.water)).toBeInTheDocument()
+    // coffee was restored, so the next unanswered question (bitterness_direct) shows.
+    expect(screen.getByLabelText(en.onboarding.questions.bitterness_direct)).toBeInTheDocument()
   })
 
   it('ignores a corrupt (array) persisted payload', () => {
@@ -148,8 +152,8 @@ describe('QuizStepper', () => {
     const onComplete = vi.fn()
     renderStepper(onComplete)
 
-    await clickValue(user, 'black') // coffee answered -> now on water
-    expect(screen.getByLabelText(en.onboarding.questions.water)).toBeInTheDocument()
+    await clickValue(user, 'black') // coffee answered -> now on bitterness_direct
+    expect(screen.getByLabelText(en.onboarding.questions.bitterness_direct)).toBeInTheDocument()
 
     await user.click(screen.getByTestId('quiz-back'))
     // Back on the coffee question; back button no longer shown at the start.
