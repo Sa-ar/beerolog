@@ -64,6 +64,13 @@
       "when": 1783507417239,
       "tag": "0008_neat_doctor_strange",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1784000000000,
+      "tag": "0009_rating_enum_backfill",
+      "breakpoints": true
     }
   ]
 }
