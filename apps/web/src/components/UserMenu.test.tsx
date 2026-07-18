@@ -53,4 +53,16 @@ describe('UserMenu', () => {
     expect(screen.queryByRole('menuitem', { name: /security/i })).not.toBeInTheDocument()
     expect(screen.queryByRole('menuitem', { name: /settings/i })).not.toBeInTheDocument()
   })
+
+  it('keeps the header trigger avatar-only (no name/email until menu opens)', () => {
+    renderWithI18n(<UserMenu />, 'en')
+    expect(screen.queryByText('Ada Lovelace')).not.toBeInTheDocument()
+    expect(screen.queryByText('ada@example.com')).not.toBeInTheDocument()
+  })
+
+  it('shows name and email on the sidebar trigger when available', () => {
+    renderWithI18n(<UserMenu menuPlacement="up" />, 'en')
+    expect(screen.getByText('Ada Lovelace')).toBeInTheDocument()
+    expect(screen.getByText('ada@example.com')).toBeInTheDocument()
+  })
 })

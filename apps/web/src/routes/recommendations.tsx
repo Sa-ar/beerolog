@@ -120,11 +120,12 @@ async function baselineRecommendationsFromProfile(): Promise<RecommendationsPayl
 }
 
 // Resolve the initial recommendations: a pending session-start (from the
-// dashboard) wins, else post-signup guest-answer hydration, else whatever is
-// already stored, else baseline picks from the saved profile. A failed session
-// or hydration degrades to baseline picks rather than a dead-end, so "started a
-// session, got nothing" still lands the user on picks. Only a missing profile
-// (404) yields the empty state; a genuine outage propagates to the error state.
+// dashboard) wins, else post-signup guest-answer hydration, else a stored
+// tonight-session page (so load-more survives remount), else fresh baseline
+// picks from the saved profile. Baseline-only sessionStorage is NOT reused as
+// the final answer — that froze the same five beers forever. A failed session
+// or hydration degrades to baseline picks rather than a dead-end. Only a
+// missing profile (404) yields the empty state; a genuine outage propagates.
 async function resolveInitialRecommendations(
   pendingRequest: StoredSessionRequest | null,
 ): Promise<RecsData> {
@@ -133,9 +134,11 @@ async function resolveInitialRecommendations(
     hasMore: hasMoreResultsAvailable(payload.results.length),
   })
 
-  if (pendingRequest) {
+  if (pendingRequest?.session) {
     try {
-      return withHasMore(await startSession(pendingRequest.baseline, pendingRequest.session))
+      return withHasMore(
+        await startSession(pendingRequest.baseline, pendingRequest.session),
+      )
     } catch {
       // Session start failed — fall through to baseline picks below.
     }
@@ -150,8 +153,12 @@ async function resolveInitialRecommendations(
     }
   }
 
+  // Keep a tonight-session page (incl. load-more) across remounts. Baseline-only
+  // caches are skipped so revisits re-rank against the live profile/catalog.
   const stored = readStoredRecommendations()
-  if (stored && stored.results.length > 0) return withHasMore(stored)
+  if (stored?.request?.session && stored.results.length > 0) {
+    return withHasMore(stored)
+  }
 
   const baseline = await baselineRecommendationsFromProfile()
   return baseline ? withHasMore(baseline) : null
@@ -320,7 +327,7 @@ function RecommendationsContent() {
   const calibration = stored?.calibration ?? DEFAULT_MATCH_CALIBRATION
   const beta = stored?.beta ?? 0.3
   const hasSession = Boolean(stored?.request?.session)
-  const abvIntent = stored?.request?.session.abv_intent
+  const abvIntent = stored?.request?.session?.abv_intent
 
   return (
     <main className={`${PAGE_SHELL_X} flex flex-1 flex-col gap-6 py-8 sm:gap-8 sm:py-10 md:py-12`}>

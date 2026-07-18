@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 type UserMenuProps = {
-  /** When `up`, the menu opens above the avatar (sidebar footer). */
+  /** When `up`, menu opens above the trigger and shows name/email (sidebar footer). */
   menuPlacement?: 'down' | 'up'
 }
 
@@ -38,6 +38,8 @@ export function UserMenu({ menuPlacement = 'down' }: UserMenuProps) {
   const name = user.fullName ?? user.username ?? user.primaryEmailAddress?.emailAddress ?? ''
   const email = user.primaryEmailAddress?.emailAddress ?? ''
   const initials = (user.firstName?.[0] ?? name[0] ?? '?').toUpperCase()
+  const showDetails = menuPlacement === 'up'
+  const detailEmail = email && email !== name ? email : ''
 
   return (
     <div ref={ref} className="relative">
@@ -47,13 +49,29 @@ export function UserMenu({ menuPlacement = 'down' }: UserMenuProps) {
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label={t('menu.account')}
-        className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-amber-700 text-sm font-semibold text-[#fff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
+        className={
+          showDetails
+            ? 'flex w-full min-h-11 items-center gap-3 rounded-lg px-2 text-start text-brand-200/90 transition-colors hover:bg-white/5 hover:text-brand-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500'
+            : 'flex items-center rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500'
+        }
       >
-        {user.hasImage ? (
-          <img src={user.imageUrl} alt="" className="h-full w-full object-cover" />
-        ) : (
-          initials
-        )}
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-amber-700 text-sm font-semibold text-[#fff]">
+          {user.hasImage ? (
+            <img src={user.imageUrl} alt="" className="h-full w-full object-cover" />
+          ) : (
+            initials
+          )}
+        </span>
+        {showDetails && (name || detailEmail) ? (
+          <span className="min-w-0 flex-1">
+            {name ? (
+              <span className="block truncate text-sm font-semibold">{name}</span>
+            ) : null}
+            {detailEmail ? (
+              <span className="block truncate text-xs text-brand-200/70">{detailEmail}</span>
+            ) : null}
+          </span>
+        ) : null}
       </button>
       {open && (
         <div

@@ -18,9 +18,11 @@ export type SessionRequest = {
   free_text?: string
 }
 
+/** Stored so load-more can re-POST. Session is optional — baseline-only picks
+ * (returning user / post-onboarding) still need a request for pagination. */
 export type StoredSessionRequest = {
   baseline: SessionBaseline
-  session: SessionRequest
+  session?: SessionRequest
 }
 
 export type RecommendationsPayload = {
@@ -123,8 +125,8 @@ function resolveSessionRequest(stored: RecommendationsPayload): StoredSessionReq
 }
 
 // Baseline-only fetch (no tonight session intent) — used by post-signup
-// hydration on /recommendations. Persists results the same way startSession
-// does so the existing render + load-more flow picks them up unchanged.
+// hydration and the returning-user path on /recommendations. Persists a
+// baseline request (no session) so load-more can page with a higher top_k.
 export async function fetchBaselineRecommendations(
   baseline: SessionBaseline,
 ): Promise<RecommendationsPayload> {
@@ -135,11 +137,9 @@ export async function fetchBaselineRecommendations(
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   const data = (await res.json()) as Omit<RecommendationsPayload, 'request'>
   const results = data.results.map(normalizeRecommendedBeer)
-  sessionStorage.setItem(
-    RECS_STORAGE_KEY,
-    JSON.stringify({ ...data, results } satisfies RecommendationsPayload),
-  )
-  return { ...data, results }
+  const request: StoredSessionRequest = { baseline }
+  persistSessionResults(request, { ...data, results })
+  return { ...data, results, request }
 }
 
 export async function startSession(
@@ -178,7 +178,9 @@ export async function loadMoreRecommendations(
     method: 'POST',
     body: JSON.stringify({
       baseline: request.baseline,
-      session: { ...request.session, free_text: request.session.free_text ?? '' },
+      ...(request.session
+        ? { session: { ...request.session, free_text: request.session.free_text ?? '' } }
+        : {}),
       top_k: nextTopK,
     }),
   })
