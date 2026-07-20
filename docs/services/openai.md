@@ -16,10 +16,10 @@ Set it as `OPENAI_API_KEY` in `apps/api/.env`.
 | User profile embeddings (stored in `user_profiles.embedding`) | `text-embedding-3-small` (1536 dims) |
 | Menu image scanning — extract beer names from a photo (deferred venue/scan surface) | `gpt-4o` |
 | Taste profile icons (GPT SVG, stored in `icons`) | `gpt-4o-mini` |
-| Recommendation explanations — one sentence per beer | `gpt-4o` |
+| Recommendation explanations — one short sentence per beer (batched) | `gpt-4o-mini` |
 
 ## Usage notes
 
 - Embeddings are generated when beers are added to the catalog or when user profiles are first created/migrated
-- GPT-4o calls happen at request time for recommendation explanations; menu scanning remains documented here as deferred venue/scan work.
+- Recommendation why-lines: one batched `gpt-4o-mini` call per `POST /recommendations`, grounded on structured match facts, in the client `locale` (`en` \| `he`). On timeout/failure the API falls back to deterministic template codes. Menu scanning remains documented here as deferred venue/scan work.
 - No streaming is used

@@ -13,6 +13,8 @@ def test_defaults_match_pivot_prd() -> None:
     assert s.match_cos_ceiling == 0.50
     assert s.baseline_staleness_days == 7
     assert s.embedding_model == "text-embedding-3-large"
+    assert s.why_model == "gpt-4o-mini"
+    assert s.why_timeout_seconds == 4.0
 
 
 def test_cors_origins_split_from_csv() -> None:

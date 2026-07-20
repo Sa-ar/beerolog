@@ -38,6 +38,11 @@ export const RECS_STORAGE_KEY = 'beerolog_last_recs'
 export const RECS_PENDING_KEY = 'beerolog_pending_session'
 const RECS_REQUEST_KEY = 'beerolog_last_recs_request'
 
+/** Map i18n language to the API locale for LLM why-lines. */
+export function recommendationsLocale(language?: string): 'en' | 'he' {
+  return language?.toLowerCase().startsWith('he') ? 'he' : 'en'
+}
+
 // Values only; labels/hints come from enums.vibe.<value>.{label,hint} translation keys.
 export const VIBE_OPTIONS: SessionVibe[] = ['refreshing', 'cozy', 'adventurous', 'familiar']
 
@@ -73,6 +78,13 @@ export function readStoredRecommendations(): RecommendationsPayload | null {
     const parsed = JSON.parse(raw) as RecommendationsPayload
     const request = parsed.request ?? readLegacyRequest() ?? undefined
     const results = (parsed.results ?? []).map(normalizeRecommendedBeer)
+
+    // Pre-facts payloads lack why.facts — discard so the page re-fetches with
+    // match explanations instead of painting stale "Matches your usual style."
+    if (results.length > 0 && results.every((b) => !(b.why?.facts && b.why.facts.length > 0))) {
+      sessionStorage.removeItem(RECS_STORAGE_KEY)
+      return null
+    }
 
     const payload: RecommendationsPayload = {
       alpha: parsed.alpha ?? 0.4,
@@ -129,10 +141,11 @@ function resolveSessionRequest(stored: RecommendationsPayload): StoredSessionReq
 // baseline request (no session) so load-more can page with a higher top_k.
 export async function fetchBaselineRecommendations(
   baseline: SessionBaseline,
+  locale: 'en' | 'he' = 'en',
 ): Promise<RecommendationsPayload> {
   const res = await apiFetch('/recommendations', {
     method: 'POST',
-    body: JSON.stringify({ baseline, top_k: RECS_PAGE_SIZE }),
+    body: JSON.stringify({ baseline, top_k: RECS_PAGE_SIZE, locale }),
   })
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   const data = (await res.json()) as Omit<RecommendationsPayload, 'request'>
@@ -145,6 +158,7 @@ export async function fetchBaselineRecommendations(
 export async function startSession(
   baseline: SessionBaseline,
   session: SessionRequest,
+  locale: 'en' | 'he' = 'en',
 ): Promise<RecommendationsPayload> {
   const sessionBody = { ...session, free_text: session.free_text ?? '' }
   const request: StoredSessionRequest = { baseline, session: sessionBody }
@@ -154,6 +168,7 @@ export async function startSession(
       baseline,
       session: sessionBody,
       top_k: RECS_PAGE_SIZE,
+      locale,
     }),
   })
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
@@ -165,6 +180,7 @@ export async function startSession(
 
 export async function loadMoreRecommendations(
   currentResults: RecommendedBeer[],
+  locale: 'en' | 'he' = 'en',
 ): Promise<{ results: RecommendedBeer[]; hasMore: boolean }> {
   const stored = readStoredRecommendations()
   if (!stored) {
@@ -182,6 +198,7 @@ export async function loadMoreRecommendations(
         ? { session: { ...request.session, free_text: request.session.free_text ?? '' } }
         : {}),
       top_k: nextTopK,
+      locale,
     }),
   })
   if (!res.ok) throw new Error(`HTTP ${res.status}`)

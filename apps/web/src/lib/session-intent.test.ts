@@ -29,7 +29,11 @@ function beer(id: string, name: string) {
     abv: 5,
     color: 'gold' as const,
     image_url: null,
-    why: { code: 'baseline', params: {} },
+    why: {
+      code: 'baseline',
+      params: {},
+      facts: [{ code: 'taste_close' }],
+    },
     breakdown: {
       baseline_cos: 0.5,
       session_cos: 0,
@@ -90,11 +94,27 @@ describe('baseline recommendations + load more', () => {
     expect(loadMoreBody).toEqual({
       baseline: BASELINE,
       top_k: RECS_PAGE_SIZE * 2,
+      locale: 'en',
     })
     expect(loadMoreBody.session).toBeUndefined()
   })
 
   it('fails load-more only when nothing is stored at all', async () => {
     await expect(loadMoreRecommendations([])).rejects.toThrow(/No saved picks/)
+  })
+
+  it('discards stored recs that lack match facts so the page re-fetches', async () => {
+    const { readStoredRecommendations } = await import('./session-intent')
+    sessionStorage.setItem(
+      RECS_STORAGE_KEY,
+      JSON.stringify({
+        results: [{ ...beer('old', 'Old'), why: { code: 'baseline', params: {} } }],
+        alpha: 0.6,
+        beta: 0.3,
+        request: { baseline: BASELINE },
+      }),
+    )
+    expect(readStoredRecommendations()).toBeNull()
+    expect(sessionStorage.getItem(RECS_STORAGE_KEY)).toBeNull()
   })
 })

@@ -85,6 +85,9 @@ class Settings(BaseSettings):
     embedding_model: str = "text-embedding-3-large"
     icon_model: str = "gpt-4o-mini"
     persona_model: str = "gpt-4o-mini"
+    # Batched why-line explanations on POST /recommendations.
+    why_model: str = "gpt-4o-mini"
+    why_timeout_seconds: float = 4.0
 
     @field_validator("availability_scrape_sources", "cors_allowed_origins", mode="before")
     @classmethod

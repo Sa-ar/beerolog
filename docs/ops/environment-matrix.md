@@ -6,6 +6,7 @@ This file is the durable source of truth for the Beerolog launch environment con
 |---|---|---|---|---|---|---|
 | Web | `VITE_API_URL` | yes | Full URL, e.g. `https://beerolog-api.vercel.app` | operator | Vercel env vars (web project) | Must match the API Vercel deployment URL |
 | Web | `VITE_CLERK_PUBLISHABLE_KEY` | yes | `pk_test_...` (dev) / `pk_live_...` (prod) | operator | Vercel env vars | Obtained from Clerk Dashboard → API Keys |
+| Web | `VITE_FEATURE_FIND_NEARBY_SEARCH` | no | `true` to enable; unset or any other value = off | operator | Vercel env vars (web project) | Gates the recommendations Search area + near-me filter UI; venue list and add-place stay available |
 | API | `APP_ENV` | yes | `development` / `production` | operator | Vercel env vars (`beerolog-api`) | Controls startup validation strictness |
 | API | `DATABASE_URL` | yes | PostgreSQL connection string (pooled) | operator | Vercel env vars (`beerolog-api`) | Neon pooled connection string |
 | API | `OPENAI_API_KEY` | yes | `sk-...` | operator | Vercel env vars (`beerolog-api`) | OpenAI secret key |

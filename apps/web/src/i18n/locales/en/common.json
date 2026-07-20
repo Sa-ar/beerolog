@@ -535,13 +535,32 @@
     "abv_any": "Matches your alcohol preference for tonight.",
     "novelty_positive": "A bolder pick than usual — you said you wanted to explore.",
     "novelty_negative": "A safe familiar choice — close to what you normally like.",
+    "namedFallback": "{{name}} ({{brewery}}) — {{reason}}",
     "vibeWord": {
       "refreshing": "refreshing",
       "cozy": "cozy",
       "adventurous": "adventurous",
       "familiar": "familiar"
     },
-    "abvWord": { "low": "low", "medium": "medium", "high": "high" }
+    "abvWord": { "low": "low", "medium": "medium", "high": "high" },
+    "flavorWord": {
+      "hoppy": "hoppy",
+      "malty": "malty",
+      "roasty": "roasty",
+      "fruity": "fruity",
+      "sour": "sour",
+      "smoky": "smoky"
+    },
+    "fact": {
+      "style": "Style: {{style}}",
+      "taste_close": "Close to your saved taste profile",
+      "flavor_overlap": "Aligns with the {{flavor}} side of your profile",
+      "session_vibe": "Fits tonight's {{vibe}} vibe",
+      "abv_fit": "ABV fits your {{abv}} pick for tonight",
+      "abv_fit_profile": "ABV fits your usual alcohol preference",
+      "novelty_boost": "A bit more adventurous than your usual picks",
+      "novelty_safe": "A safer, more familiar choice for you"
+    }
   },
   "recommendations": {
     "eyebrow": "Recommendations",
@@ -590,6 +609,7 @@
     "heading_one": "Your top {{count}} pick",
     "heading_other": "Your top {{count}} picks",
     "subhead": "Ranked for your saved taste profile and tonight's session intent.",
+    "subheadBaseline": "Ranked for your saved taste profile.",
     "loadingMore": "Loading more picks…",
     "showMore": "Show {{count}} more picks",
     "topPick": "Top pick",

@@ -1790,6 +1790,15 @@
             ],
             "title": "Beta"
           },
+          "locale": {
+            "default": "en",
+            "enum": [
+              "en",
+              "he"
+            ],
+            "title": "Locale",
+            "type": "string"
+          },
           "session": {
             "anyOf": [
               {
@@ -2262,8 +2271,8 @@
         "title": "Vibe",
         "type": "string"
       },
-      "WhyLine": {
-        "description": "Language-neutral recommendation explanation.\n\nThe API picks the code + params; the frontend renders the localized\nsentence (key why.<code>). Keeps copy in one place and the embedding\ntemplates English-only.",
+      "WhyFact": {
+        "description": "Language-neutral match fact for the details accordion / LLM grounding.",
         "properties": {
           "code": {
             "title": "Code",
@@ -2275,6 +2284,45 @@
             },
             "title": "Params",
             "type": "object"
+          }
+        },
+        "required": [
+          "code"
+        ],
+        "title": "WhyFact",
+        "type": "object"
+      },
+      "WhyLine": {
+        "description": "Recommendation explanation.\n\n`code` + `params` are always set (template fallback / analytics). The\nfrontend renders `t('why.' + code)` when `text` is absent. When the LLM\npath succeeds, `text` is a short sentence already in the request locale.\n`facts` power the \"how we matched\" details panel.",
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "facts": {
+            "items": {
+              "$ref": "#/components/schemas/WhyFact"
+            },
+            "title": "Facts",
+            "type": "array"
+          },
+          "params": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Params",
+            "type": "object"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
           }
         },
         "required": [

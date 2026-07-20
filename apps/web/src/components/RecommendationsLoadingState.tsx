@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Card } from '@beerolog/ui'
+import { BeerCardMedia } from './BeerCardMedia'
 import { PAGE_SHELL_X } from '../lib/page-shell'
 import { RECS_PAGE_SIZE } from '../lib/session-intent'
 
@@ -41,22 +42,19 @@ function RecommendationCardSkeleton({ isTopPick }: { isTopPick: boolean }) {
           : 'border-neutral-200 bg-white shadow-sm',
       ].join(' ')}
     >
-      <div className="flex animate-pulse flex-col items-center gap-4 p-4 sm:flex-row sm:items-start sm:gap-4 sm:p-6">
-        <div className="flex shrink-0 flex-col items-center gap-2 self-center sm:self-start">
+      <div className="flex animate-pulse flex-col sm:flex-row sm:items-stretch">
+        <div className="order-1 flex shrink-0 flex-col items-center gap-2 self-center px-4 pt-4 sm:self-start sm:p-6 sm:pe-0">
           <div className="h-10 w-10 rounded-full bg-neutral-200" />
           <div className="h-6 w-20 rounded-full bg-neutral-200" />
         </div>
 
-        <div className="flex w-full min-w-0 flex-1 flex-col items-center gap-3 text-center sm:items-start sm:text-left">
-          <div className="flex w-full flex-col items-center gap-3 sm:flex-row sm:items-start sm:gap-4">
-            <div className="order-2 min-w-0 flex-1 space-y-2 sm:order-1">
-              {isTopPick ? <div className="mx-auto h-3 w-16 rounded bg-neutral-200 sm:mx-0" /> : null}
-              <div className="mx-auto h-6 w-48 max-w-full rounded bg-neutral-200 sm:mx-0" />
-              <div className="mx-auto h-4 w-32 rounded bg-neutral-100 sm:mx-0" />
-            </div>
-            <div className="order-1 shrink-0 sm:order-2">
-              <div className="h-20 w-20 rounded-xl bg-neutral-200 sm:h-16 sm:w-16 sm:rounded-2xl" />
-            </div>
+        <BeerCardMedia skeleton />
+
+        <div className="order-3 flex w-full min-w-0 flex-1 flex-col items-center gap-3 p-4 text-center sm:order-2 sm:items-start sm:p-6 sm:ps-4 sm:text-left">
+          <div className="min-w-0 w-full space-y-2">
+            {isTopPick ? <div className="mx-auto h-3 w-16 rounded bg-neutral-200 sm:mx-0" /> : null}
+            <div className="mx-auto h-6 w-48 max-w-full rounded bg-neutral-200 sm:mx-0" />
+            <div className="mx-auto h-4 w-32 rounded bg-neutral-100 sm:mx-0" />
           </div>
 
           <div className="flex flex-wrap justify-center gap-1.5 sm:justify-start sm:gap-2">

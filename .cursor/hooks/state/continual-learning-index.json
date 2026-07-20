@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-07-18T18:02:44.968396+00:00",
+  "lastUpdated": "2026-07-20T20:40:04.664283+00:00",
   "transcripts": {
     "/Users/saardavidson/.cursor/projects/Users-saardavidson-Dev-beerolog/agent-transcripts/0070bd7a-8d58-442e-8f81-b68727c3fb05/0070bd7a-8d58-442e-8f81-b68727c3fb05.jsonl": 1781740578,
     "/Users/saardavidson/.cursor/projects/Users-saardavidson-Dev-beerolog/agent-transcripts/017b927a-52f1-4d3e-aebe-737e1d3a6437/017b927a-52f1-4d3e-aebe-737e1d3a6437.jsonl": 1781738939,
@@ -15,6 +15,7 @@
     "/Users/saardavidson/.cursor/projects/Users-saardavidson-Dev-beerolog/agent-transcripts/1a242b7c-c5cb-40f5-a04a-0a88c54da2a6/subagents/7d304b36-675e-424d-95bd-ca5c0623be80.jsonl": 1781703349,
     "/Users/saardavidson/.cursor/projects/Users-saardavidson-Dev-beerolog/agent-transcripts/1d89f120-bc1f-4851-8481-ceb59754280d/1d89f120-bc1f-4851-8481-ceb59754280d.jsonl": 1781740929,
     "/Users/saardavidson/.cursor/projects/Users-saardavidson-Dev-beerolog/agent-transcripts/25359c1b-2d35-4048-b093-90759b1acc44/25359c1b-2d35-4048-b093-90759b1acc44.jsonl": 1781740532,
+    "/Users/saardavidson/.cursor/projects/Users-saardavidson-Dev-beerolog/agent-transcripts/2fbcae18-ff9c-4af0-9468-9a7107cd6647/2fbcae18-ff9c-4af0-9468-9a7107cd6647.jsonl": 1784578557,
     "/Users/saardavidson/.cursor/projects/Users-saardavidson-Dev-beerolog/agent-transcripts/32efaf55-4546-4921-87ee-1f6090417e36/32efaf55-4546-4921-87ee-1f6090417e36.jsonl": 1779833794,
     "/Users/saardavidson/.cursor/projects/Users-saardavidson-Dev-beerolog/agent-transcripts/32efaf55-4546-4921-87ee-1f6090417e36/subagents/0076dadb-f712-40ec-bacc-e11f876a3581.jsonl": 1779818874,
     "/Users/saardavidson/.cursor/projects/Users-saardavidson-Dev-beerolog/agent-transcripts/32efaf55-4546-4921-87ee-1f6090417e36/subagents/140c3894-d8d7-4e8a-9a61-be47c3b6fe22.jsonl": 1779818328,
@@ -52,8 +53,8 @@
     "/Users/saardavidson/.cursor/projects/Users-saardavidson-Dev-beerolog/agent-transcripts/466415f9-5e0b-4c86-9f0d-522f25c9bb16/466415f9-5e0b-4c86-9f0d-522f25c9bb16.jsonl": 1781701045,
     "/Users/saardavidson/.cursor/projects/Users-saardavidson-Dev-beerolog/agent-transcripts/4750ea68-67d8-4166-8a9b-39bd199f3707/4750ea68-67d8-4166-8a9b-39bd199f3707.jsonl": 1781796216,
     "/Users/saardavidson/.cursor/projects/Users-saardavidson-Dev-beerolog/agent-transcripts/4d428da5-a8cb-4b22-8532-5ec2fdfe94a1/4d428da5-a8cb-4b22-8532-5ec2fdfe94a1.jsonl": 1781740540,
-    "/Users/saardavidson/.cursor/projects/Users-saardavidson-Dev-beerolog/agent-transcripts/4d4ab3c3-228d-45c4-a579-d7fda2286570/4d4ab3c3-228d-45c4-a579-d7fda2286570.jsonl": 1784397635,
-    "/Users/saardavidson/.cursor/projects/Users-saardavidson-Dev-beerolog/agent-transcripts/4d4ab3c3-228d-45c4-a579-d7fda2286570/subagents/af2f5af9-7aaf-487c-9024-fd234665ec32.jsonl": 1784397665,
+    "/Users/saardavidson/.cursor/projects/Users-saardavidson-Dev-beerolog/agent-transcripts/4d4ab3c3-228d-45c4-a579-d7fda2286570/4d4ab3c3-228d-45c4-a579-d7fda2286570.jsonl": 1784397778,
+    "/Users/saardavidson/.cursor/projects/Users-saardavidson-Dev-beerolog/agent-transcripts/4d4ab3c3-228d-45c4-a579-d7fda2286570/subagents/af2f5af9-7aaf-487c-9024-fd234665ec32.jsonl": 1784397773,
     "/Users/saardavidson/.cursor/projects/Users-saardavidson-Dev-beerolog/agent-transcripts/519243c2-0220-4fee-9747-d3aea781a0b8/519243c2-0220-4fee-9747-d3aea781a0b8.jsonl": 1781735245,
     "/Users/saardavidson/.cursor/projects/Users-saardavidson-Dev-beerolog/agent-transcripts/519243c2-0220-4fee-9747-d3aea781a0b8/subagents/60dc0ec9-bce2-4fca-83f2-757eb71b5f9d.jsonl": 1781714523,
     "/Users/saardavidson/.cursor/projects/Users-saardavidson-Dev-beerolog/agent-transcripts/519243c2-0220-4fee-9747-d3aea781a0b8/subagents/d61e4460-00a6-4083-9460-e927174a1c7a.jsonl": 1781714671,
@@ -98,8 +99,10 @@
     "/Users/saardavidson/.cursor/projects/Users-saardavidson-Dev-beerolog/agent-transcripts/b86963df-89f5-46c3-b933-9f4a703b71b8/b86963df-89f5-46c3-b933-9f4a703b71b8.jsonl": 1781740562,
     "/Users/saardavidson/.cursor/projects/Users-saardavidson-Dev-beerolog/agent-transcripts/b86963df-89f5-46c3-b933-9f4a703b71b8/subagents/17067c8e-00f4-4406-835e-e6b87c796b97.jsonl": 1781740078,
     "/Users/saardavidson/.cursor/projects/Users-saardavidson-Dev-beerolog/agent-transcripts/b86963df-89f5-46c3-b933-9f4a703b71b8/subagents/64af0367-7750-4bbf-bb8f-f42d022dc22e.jsonl": 1781740077,
+    "/Users/saardavidson/.cursor/projects/Users-saardavidson-Dev-beerolog/agent-transcripts/bbca2cac-964f-4813-bdd4-8f353699d538/bbca2cac-964f-4813-bdd4-8f353699d538.jsonl": 1784578353,
     "/Users/saardavidson/.cursor/projects/Users-saardavidson-Dev-beerolog/agent-transcripts/bdff09c0-2a45-47c4-b65a-0da98ddf117a/bdff09c0-2a45-47c4-b65a-0da98ddf117a.jsonl": 1780011265,
     "/Users/saardavidson/.cursor/projects/Users-saardavidson-Dev-beerolog/agent-transcripts/c093068f-8055-4137-a4ef-72f16b1a3ef3/c093068f-8055-4137-a4ef-72f16b1a3ef3.jsonl": 1784321747,
+    "/Users/saardavidson/.cursor/projects/Users-saardavidson-Dev-beerolog/agent-transcripts/c7e1fff3-97a7-4056-bfba-dafae1f8308a/c7e1fff3-97a7-4056-bfba-dafae1f8308a.jsonl": 1784577609,
     "/Users/saardavidson/.cursor/projects/Users-saardavidson-Dev-beerolog/agent-transcripts/caf5cc87-c9d3-47ab-afd7-9f679925752e/caf5cc87-c9d3-47ab-afd7-9f679925752e.jsonl": 1781736039,
     "/Users/saardavidson/.cursor/projects/Users-saardavidson-Dev-beerolog/agent-transcripts/caf5cc87-c9d3-47ab-afd7-9f679925752e/subagents/f9638029-a7a5-4ddb-b7ab-e271e4ea4c6d.jsonl": 1781735599,
     "/Users/saardavidson/.cursor/projects/Users-saardavidson-Dev-beerolog/agent-transcripts/d59f98a3-66eb-4898-a997-5abb76d01e9b/d59f98a3-66eb-4898-a997-5abb76d01e9b.jsonl": 1784337673,
@@ -111,6 +114,8 @@
     "/Users/saardavidson/.cursor/projects/Users-saardavidson-Dev-beerolog/agent-transcripts/d7b073ce-1199-4e4f-819d-2d0bd5d9d5ba/subagents/f1cadc74-9f59-45dd-8389-700a44448b46.jsonl": 1779836879,
     "/Users/saardavidson/.cursor/projects/Users-saardavidson-Dev-beerolog/agent-transcripts/e01ad240-723a-4499-8c85-a960fc1f08eb/e01ad240-723a-4499-8c85-a960fc1f08eb.jsonl": 1781738668,
     "/Users/saardavidson/.cursor/projects/Users-saardavidson-Dev-beerolog/agent-transcripts/e0e56bfe-0c65-4e06-ab6a-28b467d58583/e0e56bfe-0c65-4e06-ab6a-28b467d58583.jsonl": 1781741382,
-    "/Users/saardavidson/.cursor/projects/Users-saardavidson-Dev-beerolog/agent-transcripts/ebaacc8b-9d1f-4f10-bf95-b2433266a845/ebaacc8b-9d1f-4f10-bf95-b2433266a845.jsonl": 1783175013
+    "/Users/saardavidson/.cursor/projects/Users-saardavidson-Dev-beerolog/agent-transcripts/ebaacc8b-9d1f-4f10-bf95-b2433266a845/ebaacc8b-9d1f-4f10-bf95-b2433266a845.jsonl": 1783175013,
+    "/Users/saardavidson/.cursor/projects/Users-saardavidson-Dev-beerolog/agent-transcripts/edf111eb-0b2f-444d-a342-2927718b9039/edf111eb-0b2f-444d-a342-2927718b9039.jsonl": 1784579828,
+    "/Users/saardavidson/.cursor/projects/Users-saardavidson-Dev-beerolog/agent-transcripts/edf111eb-0b2f-444d-a342-2927718b9039/subagents/af38670a-0963-4d86-b43c-39b34b698576.jsonl": 1784579864
   }
 }

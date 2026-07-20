@@ -32,7 +32,11 @@ const BEER: RecommendedBeer = {
   market_tier: 'mainstream',
   color: null,
   image_url: null,
-  why: { code: 'baseline' },
+  why: {
+    code: 'baseline',
+    text: 'A crisp lager that matches how you usually drink.',
+    facts: [{ code: 'taste_close' }, { code: 'flavor_overlap', params: { flavor: 'malty' } }],
+  },
   breakdown: {
     baseline_cos: 0.5,
     session_cos: 0,
@@ -48,13 +52,7 @@ const BEER: RecommendedBeer = {
 
 function renderCard() {
   return renderWithI18n(
-    <RecommendationBeerCard
-      beer={BEER}
-      rank={1}
-      matchPercent={80}
-      alpha={0.6}
-      hasSession={false}
-    />,
+    <RecommendationBeerCard beer={BEER} rank={1} matchPercent={80} />,
     'en',
   )
 }
@@ -64,6 +62,29 @@ beforeEach(() => {
   getMock.mockReset()
   postMock.mockResolvedValue({ data: { id: 'r1', rating: 'loved' }, error: undefined })
   getMock.mockResolvedValue({ data: { ratings: {} }, error: undefined })
+})
+
+describe('RecommendationBeerCard why copy', () => {
+  it('shows the LLM why sentence when present', () => {
+    renderCard()
+    expect(
+      screen.getByText('A crisp lager that matches how you usually drink.'),
+    ).toBeInTheDocument()
+  })
+
+  it('falls back to a beer-named template when LLM text is absent', () => {
+    renderWithI18n(
+      <RecommendationBeerCard
+        beer={{ ...BEER, why: { code: 'baseline' } }}
+        rank={1}
+        matchPercent={80}
+      />,
+      'en',
+    )
+    expect(
+      screen.getByText('Goldstar (Tempo) — Matches your usual style.'),
+    ).toBeInTheDocument()
+  })
 })
 
 describe('RecommendationBeerCard rating', () => {

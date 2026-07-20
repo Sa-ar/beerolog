@@ -266,16 +266,26 @@ class ScoreBreakdown(BaseModel):
     dominant_component: DominantComponent
 
 
-class WhyLine(BaseModel):
-    """Language-neutral recommendation explanation.
+class WhyFact(BaseModel):
+    """Language-neutral match fact for the details accordion / LLM grounding."""
 
-    The API picks the code + params; the frontend renders the localized
-    sentence (key why.<code>). Keeps copy in one place and the embedding
-    templates English-only.
+    code: str
+    params: dict[str, str] = Field(default_factory=dict)
+
+
+class WhyLine(BaseModel):
+    """Recommendation explanation.
+
+    `code` + `params` are always set (template fallback / analytics). The
+    frontend renders `t('why.' + code)` when `text` is absent. When the LLM
+    path succeeds, `text` is a short sentence already in the request locale.
+    `facts` power the "how we matched" details panel.
     """
 
     code: str
     params: dict[str, str] = Field(default_factory=dict)
+    text: str | None = None
+    facts: list[WhyFact] = Field(default_factory=list)
 
 
 class RecommendedBeer(BaseModel):
@@ -304,6 +314,8 @@ class RecommendationsRequest(BaseModel):
     alpha: float | None = None
     beta: float | None = None
     top_k: int = 5
+    # UI language for LLM why-lines (`en` | `he`). Defaults to English.
+    locale: Literal["en", "he"] = "en"
 
 
 class MatchCalibration(BaseModel):

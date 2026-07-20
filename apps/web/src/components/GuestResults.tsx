@@ -12,7 +12,7 @@
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { Badge, Button, Card } from '@beerolog/ui'
-import { BeerColorGlass } from './BeerColorGlass'
+import { BeerCardMedia } from './BeerCardMedia'
 import { deriveBeerColor } from '../lib/beer-color'
 import type { GuestRecommendedBeer } from '../lib/guest-answers'
 
@@ -90,8 +90,8 @@ function GuestBeerCard({ beer, rank }: GuestBeerCardProps) {
       data-testid="guest-beer-card"
       className="overflow-hidden border-neutral-200 bg-white shadow-sm"
     >
-      <div className="flex flex-col items-center gap-4 p-4 sm:flex-row sm:items-start sm:gap-4 sm:p-6">
-        <div className="flex shrink-0 flex-col items-center gap-2 self-center sm:self-start">
+      <div className="flex flex-col sm:flex-row sm:items-stretch">
+        <div className="order-1 flex shrink-0 flex-col items-center gap-2 self-center px-4 pt-4 sm:self-start sm:p-6 sm:pe-0">
           <span
             className="flex h-10 w-10 items-center justify-center rounded-full bg-neutral-100 text-sm font-bold text-neutral-600"
             aria-hidden
@@ -107,26 +107,14 @@ function GuestBeerCard({ beer, rank }: GuestBeerCardProps) {
           </Badge>
         </div>
 
-        <div className="flex w-full min-w-0 flex-1 flex-col items-center gap-3 text-center sm:items-start sm:text-left">
-          <div className="flex w-full flex-col items-center gap-3 sm:flex-row sm:items-start sm:gap-4">
-            <div className="order-2 min-w-0 space-y-1 sm:order-1 sm:flex-1">
-              <h2 className="text-base font-bold leading-snug tracking-tight text-neutral-900 break-words sm:text-lg sm:leading-tight">
-                {displayName}
-              </h2>
-              <p className="text-sm text-neutral-600">{beer.brewery}</p>
-            </div>
+        <BeerCardMedia imageUrl={beer.image_url ?? null} color={beerColor} />
 
-            <div className="order-1 shrink-0 sm:order-2">
-              {beer.image_url ? (
-                <img
-                  src={beer.image_url}
-                  alt=""
-                  className="h-20 w-20 rounded-xl object-cover shadow-sm ring-1 ring-neutral-200/80 sm:h-16 sm:w-16 sm:rounded-2xl"
-                />
-              ) : (
-                <BeerColorGlass color={beerColor} className="h-16 w-16 sm:h-14 sm:w-14" />
-              )}
-            </div>
+        <div className="order-3 flex w-full min-w-0 flex-1 flex-col items-center gap-3 p-4 text-center sm:order-2 sm:items-start sm:p-6 sm:ps-4 sm:text-left">
+          <div className="min-w-0 space-y-1">
+            <h2 className="text-base font-bold leading-snug tracking-tight text-neutral-900 break-words sm:text-lg sm:leading-tight">
+              {displayName}
+            </h2>
+            <p className="text-sm text-neutral-600">{beer.brewery}</p>
           </div>
 
           <div className="flex flex-wrap justify-center gap-1.5 sm:justify-start sm:gap-2">

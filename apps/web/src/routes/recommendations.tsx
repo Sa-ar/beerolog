@@ -14,6 +14,7 @@ import { RecommendationsLoadingState } from '../components/RecommendationsLoadin
 import { StatusCard } from '../components/StatusCard'
 import { apiFetch } from '../lib/api-fetch'
 import { fetchAvailability } from '../lib/beer-availability'
+import { features } from '../lib/features'
 import { filterByAvailability } from '../lib/near-me-filter'
 import { clearGuestAnswers, readGuestAnswers } from '../lib/guest-answers'
 import { DEFAULT_MATCH_CALIBRATION, tonightMatchPercent } from '../lib/match-score'
@@ -29,6 +30,7 @@ import {
   readStoredRecommendations,
   type RecommendationsPayload,
   RECS_PAGE_SIZE,
+  recommendationsLocale,
   type SessionBaseline,
   startSession,
   type StoredSessionRequest,
@@ -79,7 +81,9 @@ function baselineFromRecord(record: BaselineTasteRecord): SessionBaseline {
  * when freshly hydrated, or null when nothing to hydrate (caller falls back to
  * its normal flow). Always discards stored guest answers once auth is known.
  */
-async function hydrateGuestAnswers(): Promise<RecommendationsPayload | null> {
+async function hydrateGuestAnswers(
+  locale: 'en' | 'he',
+): Promise<RecommendationsPayload | null> {
   const profileRes = await apiFetch('/me/baseline-taste')
 
   // Existing profile (returning user): discard any stale guest answers, no POST.
@@ -104,7 +108,10 @@ async function hydrateGuestAnswers(): Promise<RecommendationsPayload | null> {
   if (!onboardingRes.ok) throw new Error(`HTTP ${onboardingRes.status}`)
   const record = (await onboardingRes.json()) as BaselineTasteRecord
 
-  const payload = await fetchBaselineRecommendations(baselineFromRecord(record))
+  const payload = await fetchBaselineRecommendations(
+    baselineFromRecord(record),
+    locale,
+  )
   clearGuestAnswers()
   return payload
 }
@@ -112,11 +119,13 @@ async function hydrateGuestAnswers(): Promise<RecommendationsPayload | null> {
 // Baseline picks from the signed-in user's persisted taste profile. This is the
 // returning-user path: no session, no guest answers, empty sessionStorage still
 // yields picks. 404 (no profile yet) is the one genuine empty state -> null.
-async function baselineRecommendationsFromProfile(): Promise<RecommendationsPayload | null> {
+async function baselineRecommendationsFromProfile(
+  locale: 'en' | 'he',
+): Promise<RecommendationsPayload | null> {
   const res = await apiFetch('/me/baseline-taste')
   if (!res.ok) return null
   const record = (await res.json()) as BaselineTasteRecord
-  return fetchBaselineRecommendations(baselineFromRecord(record))
+  return fetchBaselineRecommendations(baselineFromRecord(record), locale)
 }
 
 // Resolve the initial recommendations: a pending session-start (from the
@@ -128,6 +137,7 @@ async function baselineRecommendationsFromProfile(): Promise<RecommendationsPayl
 // missing profile (404) yields the empty state; a genuine outage propagates.
 async function resolveInitialRecommendations(
   pendingRequest: StoredSessionRequest | null,
+  locale: 'en' | 'he',
 ): Promise<RecsData> {
   const withHasMore = (payload: RecommendationsPayload): RecsData => ({
     ...payload,
@@ -137,7 +147,11 @@ async function resolveInitialRecommendations(
   if (pendingRequest?.session) {
     try {
       return withHasMore(
-        await startSession(pendingRequest.baseline, pendingRequest.session),
+        await startSession(
+          pendingRequest.baseline,
+          pendingRequest.session,
+          locale,
+        ),
       )
     } catch {
       // Session start failed — fall through to baseline picks below.
@@ -146,7 +160,7 @@ async function resolveInitialRecommendations(
 
   if (readGuestAnswers()) {
     try {
-      const payload = await hydrateGuestAnswers()
+      const payload = await hydrateGuestAnswers(locale)
       if (payload) return withHasMore(payload)
     } catch {
       // Fall back to stored/baseline/missing below.
@@ -160,12 +174,12 @@ async function resolveInitialRecommendations(
     return withHasMore(stored)
   }
 
-  const baseline = await baselineRecommendationsFromProfile()
+  const baseline = await baselineRecommendationsFromProfile(locale)
   return baseline ? withHasMore(baseline) : null
 }
 
 function RecommendationsContent() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const queryClient = useQueryClient()
 
   // Consume a pending session-start once; the captured value drives both the
@@ -176,9 +190,10 @@ function RecommendationsContent() {
     if (p) clearPendingSession()
     return p
   })
+  const locale = recommendationsLocale(i18n.language)
   const recs = useQuery<RecsData, Error>({
     queryKey: ['recommendations'],
-    queryFn: () => resolveInitialRecommendations(pendingRequest),
+    queryFn: () => resolveInitialRecommendations(pendingRequest, locale),
     // Paint stored recs instantly unless we have a session to start or guest
     // answers to hydrate — those show the loading state while their query runs.
     initialData: (): RecsData | undefined => {
@@ -200,7 +215,7 @@ function RecommendationsContent() {
     Error,
     RecommendedBeer[]
   >({
-    mutationFn: (current) => loadMoreRecommendations(current),
+    mutationFn: (current) => loadMoreRecommendations(current, locale),
     onSuccess: ({ results, hasMore }) => {
       queryClient.setQueryData<RecsData>(['recommendations'], (prev) =>
         prev ? { ...prev, results, hasMore } : prev,
@@ -209,6 +224,7 @@ function RecommendationsContent() {
   })
 
   const [searchArea, setSearchArea] = useState(() => {
+    if (!features.findNearbySearch) return ''
     try {
       return localStorage.getItem('beerolog.searchArea') ?? ''
     } catch {
@@ -216,14 +232,16 @@ function RecommendationsContent() {
     }
   })
   const [nearMeOnly, setNearMeOnly] = useState(false)
+  const areaFilter = features.findNearbySearch ? searchArea : ''
+  const nearMeFilter = features.findNearbySearch && nearMeOnly
 
   // Debounce the area filter so typing doesn't refetch on every keystroke. This
   // effect only derives a value — the fetch itself is a react-query query below.
-  const [debouncedArea, setDebouncedArea] = useState(searchArea)
+  const [debouncedArea, setDebouncedArea] = useState(areaFilter)
   useEffect(() => {
-    const handle = setTimeout(() => setDebouncedArea(searchArea), 300)
+    const handle = setTimeout(() => setDebouncedArea(areaFilter), 300)
     return () => clearTimeout(handle)
-  }, [searchArea])
+  }, [areaFilter])
 
   const shownIds = recs.data?.results.map((b) => b.id) ?? []
   // "Available at" venues for the shown beers. fetchAvailability resolves to {}
@@ -320,14 +338,12 @@ function RecommendationsContent() {
   const { beers: shownResults, empty: nearMeEmpty } = filterByAvailability(
     results,
     availability,
-    nearMeOnly && availabilityLoaded,
+    nearMeFilter && availabilityLoaded,
   )
   const stored = readStoredRecommendations()
-  const alpha = stored?.alpha ?? 0.4
   const calibration = stored?.calibration ?? DEFAULT_MATCH_CALIBRATION
   const beta = stored?.beta ?? 0.3
   const hasSession = Boolean(stored?.request?.session)
-  const abvIntent = stored?.request?.session?.abv_intent
 
   return (
     <main className={`${PAGE_SHELL_X} flex flex-1 flex-col gap-6 py-8 sm:gap-8 sm:py-10 md:py-12`}>
@@ -339,7 +355,7 @@ function RecommendationsContent() {
           {t('recommendations.heading', { count: shownResults.length })}
         </Heading>
         <p className="max-w-xl text-sm text-neutral-600 sm:text-base">
-          {t('recommendations.subhead')}
+          {t(hasSession ? 'recommendations.subhead' : 'recommendations.subheadBaseline')}
         </p>
         <Link
           to="/"
@@ -349,37 +365,39 @@ function RecommendationsContent() {
         </Link>
       </section>
 
-      <section className="flex flex-col gap-1.5 rounded-xl border border-neutral-200 bg-neutral-50/60 p-3 sm:p-4">
-        <label htmlFor="search-area" className="text-sm font-medium text-neutral-700">
-          {t('recommendations.findNearby.areaLabel')}
-        </label>
-        <input
-          id="search-area"
-          type="text"
-          value={searchArea}
-          onChange={(e) => {
-            setSearchArea(e.target.value)
-            try {
-              localStorage.setItem('beerolog.searchArea', e.target.value)
-            } catch {
-              /* ignore storage failures */
-            }
-          }}
-          placeholder={t('recommendations.findNearby.areaPlaceholder')}
-          className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-brand-400 focus:outline-none focus:ring-1 focus:ring-brand-400"
-        />
-        <p className="text-xs text-neutral-500">{t('recommendations.findNearby.areaHint')}</p>
-        <label className="mt-1 flex items-center gap-2 text-sm text-neutral-700">
+      {features.findNearbySearch ? (
+        <section className="flex flex-col gap-1.5 rounded-xl border border-neutral-200 bg-neutral-50/60 p-3 sm:p-4">
+          <label htmlFor="search-area" className="text-sm font-medium text-neutral-700">
+            {t('recommendations.findNearby.areaLabel')}
+          </label>
           <input
-            type="checkbox"
-            checked={nearMeOnly}
-            onChange={(e) => setNearMeOnly(e.target.checked)}
+            id="search-area"
+            type="text"
+            value={searchArea}
+            onChange={(e) => {
+              setSearchArea(e.target.value)
+              try {
+                localStorage.setItem('beerolog.searchArea', e.target.value)
+              } catch {
+                /* ignore storage failures */
+              }
+            }}
+            placeholder={t('recommendations.findNearby.areaPlaceholder')}
+            className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-brand-400 focus:outline-none focus:ring-1 focus:ring-brand-400"
           />
-          {t('recommendations.findNearby.nearMeToggle')}
-        </label>
-      </section>
+          <p className="text-xs text-neutral-500">{t('recommendations.findNearby.areaHint')}</p>
+          <label className="mt-1 flex items-center gap-2 text-sm text-neutral-700">
+            <input
+              type="checkbox"
+              checked={nearMeOnly}
+              onChange={(e) => setNearMeOnly(e.target.checked)}
+            />
+            {t('recommendations.findNearby.nearMeToggle')}
+          </label>
+        </section>
+      ) : null}
 
-      {nearMeEmpty ? (
+      {features.findNearbySearch && nearMeEmpty ? (
         <p className="rounded-xl border border-neutral-200 bg-neutral-50/60 p-4 text-sm text-neutral-600">
           {t('recommendations.findNearby.nearMeEmpty')}
         </p>
@@ -392,10 +410,6 @@ function RecommendationsContent() {
             beer={beer}
             rank={index + 1}
             matchPercent={tonightMatchPercent(beer.breakdown, hasSession, calibration, beta)}
-            alpha={alpha}
-            hasSession={hasSession}
-            abvIntent={abvIntent}
-            calibration={calibration}
             venues={availability[beer.id]}
           />
         ))}

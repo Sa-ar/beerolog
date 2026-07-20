@@ -15,8 +15,9 @@ from fastapi.testclient import TestClient  # type: ignore[import-not-found]
 from app.auth import get_optional_user
 from app.main import app
 from app.routes.onboarding import get_baseline_taste_repo
-from app.routes.recommendations import _embedding_client_dep
+from app.routes.recommendations import _embedding_client_dep, _why_explainer_dep
 from app.services.baseline_taste_repo import BaselineTasteSnapshot
+from app.services.why_explainer import NullWhyExplainer, WhyBeerInput
 
 
 class _StubEmbeddingClient:
@@ -50,15 +51,39 @@ class _MemoryBaselineRepo:
         raise NotImplementedError
 
 
+class _StubWhyExplainer:
+    """Returns a distinct why sentence per beer id."""
+
+    async def explain_batch(
+        self,
+        beers: list[WhyBeerInput],
+        *,
+        locale: str,
+    ) -> dict[str, str | None]:
+        return {b.id: f"[{locale}] why for {b.name}" for b in beers}
+
+
+class _FailingWhyExplainer:
+    async def explain_batch(
+        self,
+        beers: list[WhyBeerInput],
+        *,
+        locale: str,
+    ) -> dict[str, str | None]:
+        raise RuntimeError("openai down")
+
+
 @pytest.fixture
 def client() -> TestClient:
     app.dependency_overrides[_embedding_client_dep] = lambda: _StubEmbeddingClient()
     app.dependency_overrides[get_baseline_taste_repo] = lambda: _NullBaselineRepo()
+    app.dependency_overrides[_why_explainer_dep] = lambda: NullWhyExplainer()
     try:
         yield TestClient(app)
     finally:
         app.dependency_overrides.pop(_embedding_client_dep, None)
         app.dependency_overrides.pop(get_baseline_taste_repo, None)
+        app.dependency_overrides.pop(_why_explainer_dep, None)
         app.dependency_overrides.pop(get_optional_user, None)
 
 
@@ -91,6 +116,8 @@ def test_returns_top_5_with_full_breakdown(client: TestClient) -> None:
     assert len(body["results"]) == 5
     for beer in body["results"]:
         assert beer["why"]["code"]
+        assert isinstance(beer["why"].get("facts"), list)
+        assert beer["why"]["facts"], "expected at least one match fact"
         assert beer["color"] in ("pale", "gold", "amber", "brown", "dark")
         breakdown = beer["breakdown"]
         for k in (
@@ -225,3 +252,23 @@ def test_503_when_openai_key_missing(monkeypatch) -> None:
     r = raw_client.post("/recommendations", json=_PAYLOAD)
     assert r.status_code == 503
     assert "OPENAI_API_KEY" in r.text
+
+
+def test_llm_why_text_differs_across_beers_and_respects_locale(client: TestClient) -> None:
+    app.dependency_overrides[_why_explainer_dep] = lambda: _StubWhyExplainer()
+    r = client.post("/recommendations", json={**_PAYLOAD, "locale": "he"})
+    assert r.status_code == 200, r.text
+    results = r.json()["results"]
+    texts = [b["why"]["text"] for b in results]
+    assert all(t and t.startswith("[he] why for ") for t in texts)
+    assert len(set(texts)) == len(texts)
+
+
+def test_why_explainer_failure_falls_back_to_template_codes(client: TestClient) -> None:
+    app.dependency_overrides[_why_explainer_dep] = lambda: _FailingWhyExplainer()
+    r = client.post("/recommendations", json=_PAYLOAD)
+    assert r.status_code == 200, r.text
+    for beer in r.json()["results"]:
+        assert beer["why"]["code"]
+        assert beer["why"].get("text") is None
+        assert beer["why"]["facts"]

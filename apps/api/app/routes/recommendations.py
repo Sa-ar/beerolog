@@ -7,6 +7,8 @@ embedding instead of re-embedding dial summary text.
 
 from __future__ import annotations
 
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.api_contracts import (
@@ -27,9 +29,11 @@ from app.services.baseline_dials_text import dials_to_text
 from app.services.baseline_taste_repo import BaselineTasteRepo
 from app.services.catalog_repo import fetch_catalog
 from app.services.embedding_service import EmbeddingClient, get_embedding_client
-from app.services.match_engine import rank
+from app.services.match_engine import MatchResult, rank
+from app.services.why_explainer import WhyBeerInput, WhyExplainer, get_why_explainer
 
 router = APIRouter(prefix="/recommendations", tags=["recommendations"])
+_log = logging.getLogger(__name__)
 
 
 def _embedding_client_dep() -> EmbeddingClient:
@@ -39,6 +43,10 @@ def _embedding_client_dep() -> EmbeddingClient:
             detail="OPENAI_API_KEY is not configured",
         )
     return get_embedding_client()
+
+
+def _why_explainer_dep() -> WhyExplainer:
+    return get_why_explainer()
 
 
 def _resolve_alpha(body: RecommendationsRequest) -> float:
@@ -62,6 +70,31 @@ async def _resolve_baseline_embedding(
     return await client.embed(dials_to_text(body.baseline))
 
 
+async def _why_texts(
+    results: list[MatchResult],
+    *,
+    session,
+    user_flavor: dict[str, float] | None,
+    locale: str,
+    explainer: WhyExplainer,
+) -> dict[str, str | None]:
+    inputs: list[WhyBeerInput] = []
+    for r in results:
+        facts = why_line.build_match_facts(r, session=session, user_flavor=user_flavor)
+        inputs.append(
+            WhyBeerInput(
+                id=r.beer.id,
+                name=r.beer.name,
+                brewery=r.beer.brewery,
+                style=r.beer.style,
+                abv=r.beer.abv,
+                market_tier=r.beer.market_tier,
+                facts=facts,
+            )
+        )
+    return await explainer.explain_batch(inputs, locale=locale)  # type: ignore[arg-type]
+
+
 @router.post(
     "",
     response_model=RecommendationsResponse,
@@ -72,6 +105,7 @@ async def post_recommendations(
     client: EmbeddingClient = Depends(_embedding_client_dep),
     user: dict | None = Depends(get_optional_user),
     repo: BaselineTasteRepo = Depends(get_baseline_taste_repo),
+    explainer: WhyExplainer = Depends(_why_explainer_dep),
 ) -> RecommendationsResponse:
     baseline_vec = await _resolve_baseline_embedding(body, client, user, repo)
 
@@ -125,6 +159,18 @@ async def post_recommendations(
         avoid_neutral=settings.match_avoid_neutral,
     )
 
+    try:
+        llm_why = await _why_texts(
+            results,
+            session=body.session,
+            user_flavor=user_flavor,
+            locale=body.locale,
+            explainer=explainer,
+        )
+    except Exception as exc:
+        _log.warning("why_explainer batch failed (%s); using template fallback", exc)
+        llm_why = {r.beer.id: None for r in results}
+
     return RecommendationsResponse(
         calibration=MatchCalibration(
             cos_floor=settings.match_cos_floor,
@@ -141,7 +187,12 @@ async def post_recommendations(
                 market_tier=r.beer.market_tier,  # type: ignore[arg-type]
                 color=r.beer.color,  # type: ignore[arg-type]
                 image_url=r.beer.image_url,
-                why=why_line.explain(r.dominant_component, session=body.session),
+                why=why_line.compose_why(
+                    r,
+                    session=body.session,
+                    user_flavor=user_flavor,
+                    text=llm_why.get(r.beer.id),
+                ),
                 breakdown=ScoreBreakdown(
                     baseline_cos=r.baseline_cos,
                     session_cos=r.session_cos,

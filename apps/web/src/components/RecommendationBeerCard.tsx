@@ -5,12 +5,10 @@ import { useTranslation } from 'react-i18next'
 import type { Rating } from '@beerolog/types'
 import { Badge, Card, RatingTapper } from '@beerolog/ui'
 import { apiClient } from '../lib/api-client/client'
-import { BeerColorGlass } from './BeerColorGlass'
+import { BeerCardMedia } from './BeerCardMedia'
 import { deriveBeerColor, type BeerColor } from '../lib/beer-color'
-import { matchAlignmentPercents, type MatchCalibration } from '../lib/match-score'
 import { useMyRatings } from '../lib/my-ratings'
 import { SAVE_STATUS, type SaveStatus } from '../lib/save-status'
-import type { AbvIntent } from '../lib/session-intent'
 import { venueMapsUrl } from '../lib/beer-store-search'
 import { flagAvailability, reportAvailability, type Venue } from '../lib/beer-availability'
 import { AvailabilityAddPlace } from './AvailabilityAddPlace'
@@ -41,19 +39,23 @@ export type RecommendedBeer = {
   breakdown: Breakdown
 }
 
+export type WhyFact = {
+  code: string
+  params?: Record<string, string>
+}
+
 export type WhyLine = {
   code: string
   params?: Record<string, string>
+  /** LLM sentence already in the request locale; prefer over template code. */
+  text?: string | null
+  facts?: WhyFact[]
 }
 
 type RecommendationBeerCardProps = {
   beer: RecommendedBeer
   rank: number
   matchPercent: number
-  alpha: number
-  hasSession: boolean
-  abvIntent?: AbvIntent | undefined
-  calibration?: MatchCalibration
   venues?: Venue[] | undefined
 }
 
@@ -61,10 +63,6 @@ export function RecommendationBeerCard({
   beer,
   rank,
   matchPercent,
-  alpha,
-  hasSession,
-  abvIntent,
-  calibration,
   venues,
 }: RecommendationBeerCardProps) {
   const { t, i18n } = useTranslation()
@@ -91,13 +89,6 @@ export function RecommendationBeerCard({
   const displayName =
     i18n.language.startsWith('he') && beer.name_hebrew ? beer.name_hebrew : beer.name
   const beerColor = deriveBeerColor(beer.style, beer.color)
-  const contributors = matchAlignmentPercents(
-    beer.breakdown,
-    alpha,
-    hasSession,
-    abvIntent,
-    calibration,
-  )
   // Immediate (card) rating path. Optimistic: show 'saving' at once, then the
   // saved confirmation; on error keep the tapper so the user can retry.
   const [rateStatus, setRateStatus] = useState<SaveStatus>(SAVE_STATUS.idle)
@@ -120,8 +111,8 @@ export function RecommendationBeerCard({
           : 'border-neutral-200 bg-white shadow-sm',
       ].join(' ')}
     >
-      <div className="flex flex-col items-center gap-4 p-4 sm:flex-row sm:items-start sm:gap-4 sm:p-6">
-        <div className="flex shrink-0 flex-col items-center gap-2 self-center sm:self-start">
+      <div className="flex flex-col sm:flex-row sm:items-stretch">
+        <div className="order-1 flex shrink-0 flex-col items-center gap-2 self-center px-4 pt-4 sm:self-start sm:p-6 sm:pe-0">
           <span
             className={[
               'flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold',
@@ -142,31 +133,19 @@ export function RecommendationBeerCard({
           </Badge>
         </div>
 
-        <div className="flex w-full min-w-0 flex-1 flex-col items-center gap-3 text-center sm:items-start sm:text-start">
-          <div className="flex w-full flex-col items-center gap-3 sm:flex-row sm:items-start sm:gap-4">
-            <div className="order-2 min-w-0 space-y-1 sm:order-1 sm:flex-1">
-              {isTopPick ? (
-                <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">
-                  {t('recommendations.topPick')}
-                </p>
-              ) : null}
-              <h2 className="text-base font-bold leading-snug tracking-tight text-neutral-900 break-words sm:text-lg sm:leading-tight sm:text-xl">
-                {displayName}
-              </h2>
-              <p className="text-sm text-neutral-600">{beer.brewery}</p>
-            </div>
+        <BeerCardMedia imageUrl={beer.image_url} color={beerColor} />
 
-            <div className="order-1 shrink-0 sm:order-2">
-              {beer.image_url ? (
-                <img
-                  src={beer.image_url}
-                  alt=""
-                  className="h-20 w-20 rounded-xl object-cover shadow-sm ring-1 ring-neutral-200/80 sm:h-16 sm:w-16 sm:rounded-2xl"
-                />
-              ) : (
-                <BeerColorGlass color={beerColor} className="h-16 w-16 sm:h-14 sm:w-14" />
-              )}
-            </div>
+        <div className="order-3 flex w-full min-w-0 flex-1 flex-col items-center gap-3 p-4 text-center sm:order-2 sm:items-start sm:p-6 sm:ps-4 sm:text-start">
+          <div className="min-w-0 space-y-1">
+            {isTopPick ? (
+              <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">
+                {t('recommendations.topPick')}
+              </p>
+            ) : null}
+            <h2 className="text-base font-bold leading-snug tracking-tight text-neutral-900 break-words sm:text-lg sm:leading-tight sm:text-xl">
+              {displayName}
+            </h2>
+            <p className="text-sm text-neutral-600">{beer.brewery}</p>
           </div>
 
           <div className="flex flex-wrap justify-center gap-1.5 sm:justify-start sm:gap-2">
@@ -181,28 +160,8 @@ export function RecommendationBeerCard({
             </Badge>
           </div>
 
-          <div className="w-full space-y-2">
-            {beer.why?.code ? (
-              <blockquote className="border-t-4 border-brand-400 bg-brand-50/60 px-3 py-2 text-sm italic leading-relaxed text-neutral-700 sm:border-s-4 sm:border-t-0">
-                {whyText(t, beer.why)}
-              </blockquote>
-            ) : null}
-
-            <details className="w-full rounded-lg border border-neutral-200 bg-neutral-50/80 px-3 py-2 text-start text-xs text-neutral-600">
-              <summary className="cursor-pointer font-medium text-neutral-700">
-                {t('recommendations.howMatched')}
-              </summary>
-              <ul className="mt-2 space-y-1 ps-4">
-                {contributors.map((item) => (
-                  <li key={item.key}>
-                    {t(`recommendations.contributors.${item.key}`)}:{' '}
-                    <span className="font-semibold tabular-nums text-neutral-800">
-                      {item.percent}%
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </details>
+          <div className="w-full">
+            <WhyExplanation t={t} why={beer.why} beerName={displayName} brewery={beer.brewery} />
           </div>
 
           {venues && venues.length > 0 ? (
@@ -331,13 +290,43 @@ function formatAbv(abv: number): string {
   return `${Number(abv.toFixed(1))}%`
 }
 
-// Renders the API's language-neutral why-line. Vibe/ABV params are themselves
-// translated (why.vibe.*, why.abv.*) so the sentence reads naturally per language.
-function whyText(t: TFunction, why: WhyLine): string {
+// Prefer the LLM one-liner (unique per beer). If the model fails, still make the
+// fallback unique by naming this beer — shared template codes alone look identical.
+function WhyExplanation({
+  t,
+  why,
+  beerName,
+  brewery,
+}: {
+  t: TFunction
+  why: WhyLine
+  beerName: string
+  brewery: string
+}) {
+  const line = whyText(t, why, beerName, brewery)
+  if (!line) return null
+  return (
+    <blockquote className="border-t-4 border-brand-400 bg-brand-50/60 px-3 py-2 text-sm italic leading-relaxed text-neutral-700 sm:border-s-4 sm:border-t-0">
+      {line}
+    </blockquote>
+  )
+}
+
+function whyText(
+  t: TFunction,
+  why: WhyLine,
+  beerName: string,
+  brewery: string,
+): string {
+  if (why.text?.trim()) return why.text.trim()
+  if (!why.code) return ''
   const params: Record<string, string> = {}
   if (why.params?.vibe) params.vibe = t(`why.vibeWord.${why.params.vibe}`)
   if (why.params?.abv) params.abv = t(`why.abvWord.${why.params.abv}`)
-  return t(`why.${why.code}`, params)
+  if (why.params?.flavor) params.flavor = t(`why.flavorWord.${why.params.flavor}`)
+  if (why.params?.style) params.style = why.params.style
+  const reason = t(`why.${why.code}`, params)
+  return t('why.namedFallback', { name: beerName, brewery, reason })
 }
 
 function tierBadgeVariant(tier: RecommendedBeer['market_tier']): 'default' | 'outline' | 'success' {

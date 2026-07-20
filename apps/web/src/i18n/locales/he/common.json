@@ -524,13 +524,32 @@
     "abv_any": "מתאימה להעדפת האלכוהול שלכם.",
     "novelty_positive": "בחירה נועזת מהרגיל — אמרתם שאתם רוצים לחקור.",
     "novelty_negative": "בחירה בטוחה ומוכרת — קרובה למה שאתם בדרך כלל אוהבים.",
+    "namedFallback": "{{name}} ({{brewery}}) — {{reason}}",
     "vibeWord": {
       "refreshing": "מרעננת",
       "cozy": "נעימה",
       "adventurous": "הרפתקנית",
       "familiar": "מוכרת"
     },
-    "abvWord": { "low": "נמוכה", "medium": "בינונית", "high": "גבוהה" }
+    "abvWord": { "low": "נמוכה", "medium": "בינונית", "high": "גבוהה" },
+    "flavorWord": {
+      "hoppy": "כשותית",
+      "malty": "לתתית",
+      "roasty": "קלויה",
+      "fruity": "פירותית",
+      "sour": "חמוצה",
+      "smoky": "מעושנת"
+    },
+    "fact": {
+      "style": "סגנון: {{style}}",
+      "taste_close": "קרובה לפרופיל הטעם השמור שלכם",
+      "flavor_overlap": "מתאימה לצד ה{{flavor}} בפרופיל שלכם",
+      "session_vibe": "מתאימה לאווירת הערב ה{{vibe}}",
+      "abv_fit": "רמת האלכוהול מתאימה לבחירה ה{{abv}} שלכם להערב",
+      "abv_fit_profile": "רמת האלכוהול מתאימה להעדפה הרגילה שלכם",
+      "novelty_boost": "קצת יותר נועזת מהבחירות הרגילות שלכם",
+      "novelty_safe": "בחירה בטוחה ומוכרת יותר עבורכם"
+    }
   },
   "recommendations": {
     "eyebrow": "המלצות",
@@ -581,6 +600,7 @@
     "heading_many": "{{count}} ההמלצות המובילות שלכם",
     "heading_other": "{{count}} ההמלצות המובילות שלכם",
     "subhead": "מדורגות לפי פרופיל הטעם שלכם ולפי אווירת הערב שבחרתם.",
+    "subheadBaseline": "מדורגות לפי פרופיל הטעם השמור שלכם.",
     "loadingMore": "טוען עוד המלצות…",
     "showMore": "הציגו עוד {{count}} בירות",
     "topPick": "ההמלצה המובילה",

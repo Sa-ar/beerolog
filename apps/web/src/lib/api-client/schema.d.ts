@@ -1093,6 +1093,12 @@ export interface components {
             baseline: components["schemas"]["BaselineTasteDials"];
             /** Beta */
             beta?: number | null;
+            /**
+             * Locale
+             * @default en
+             * @enum {string}
+             */
+            locale: "en" | "he";
             session?: components["schemas"]["SessionIntent"] | null;
             /**
              * Top K
@@ -1261,20 +1267,37 @@ export interface components {
          */
         Vibe: "refreshing" | "cozy" | "adventurous" | "familiar";
         /**
-         * WhyLine
-         * @description Language-neutral recommendation explanation.
-         *
-         *     The API picks the code + params; the frontend renders the localized
-         *     sentence (key why.<code>). Keeps copy in one place and the embedding
-         *     templates English-only.
+         * WhyFact
+         * @description Language-neutral match fact for the details accordion / LLM grounding.
          */
-        WhyLine: {
+        WhyFact: {
             /** Code */
             code: string;
             /** Params */
             params?: {
                 [key: string]: string;
             };
+        };
+        /**
+         * WhyLine
+         * @description Recommendation explanation.
+         *
+         *     `code` + `params` are always set (template fallback / analytics). The
+         *     frontend renders `t('why.' + code)` when `text` is absent. When the LLM
+         *     path succeeds, `text` is a short sentence already in the request locale.
+         *     `facts` power the "how we matched" details panel.
+         */
+        WhyLine: {
+            /** Code */
+            code: string;
+            /** Facts */
+            facts?: components["schemas"]["WhyFact"][];
+            /** Params */
+            params?: {
+                [key: string]: string;
+            };
+            /** Text */
+            text?: string | null;
         };
     };
     responses: never;
