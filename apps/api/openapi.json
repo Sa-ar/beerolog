@@ -602,6 +602,17 @@
             "title": "Color",
             "type": "string"
           },
+          "ibu": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ibu"
+          },
           "id": {
             "title": "Id",
             "type": "string"

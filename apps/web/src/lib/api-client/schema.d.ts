@@ -679,6 +679,8 @@ export interface components {
             brewery: string;
             /** Color */
             color: string;
+            /** Ibu */
+            ibu?: number | null;
             /** Id */
             id: string;
             /** Image Url */

@@ -18,6 +18,12 @@
     "sweetness": { "dry": "Dry finish", "balanced": "Balanced finish", "sweet": "Sweet finish" },
     "colorLabel": "Color",
     "openCta": "View sensory profile",
+    "route": {
+      "loading": "Loading beer…",
+      "notFoundTitle": "We couldn't find that beer",
+      "cta": "Find your beer match",
+      "ctaHint": "Take the 30-second quiz to see how this matches your taste."
+    },
     "legend": { "beer": "This beer", "you": "Your taste" }
   },
   "header": { "home": "Beerolog home" },

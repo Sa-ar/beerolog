@@ -354,6 +354,7 @@ class CatalogBeer(BaseModel):
     color: str
     image_url: str | None = None
     adventurousness: float
+    ibu: int | None = None
 
 
 class CatalogListResponse(BaseModel):

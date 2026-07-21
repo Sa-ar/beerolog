@@ -371,7 +371,7 @@ function RecommendationsContent() {
     if (!topBeer) return
     const beerName =
       i18n.language.startsWith('he') && topBeer.name_hebrew ? topBeer.name_hebrew : topBeer.name
-    const url = `${window.location.origin}/`
+    const url = `${window.location.origin}/beer/${topBeer.id}`
     const text = t('recommendations.shareText', { beer: beerName })
     if (typeof navigator !== 'undefined' && navigator.share) {
       try {

@@ -20,6 +20,7 @@ import { Route as AccountIndexRouteImport } from './routes/account.index'
 import { Route as SignupSplatRouteImport } from './routes/signup.$'
 import { Route as SigninSplatRouteImport } from './routes/signin.$'
 import { Route as LegalSlugRouteImport } from './routes/legal.$slug'
+import { Route as BeerIdRouteImport } from './routes/beer.$id'
 import { Route as AccountSettingsRouteImport } from './routes/account.settings'
 import { Route as AccountSecurityRouteImport } from './routes/account.security'
 import { Route as AccountProfileRouteImport } from './routes/account.profile'
@@ -79,6 +80,11 @@ const LegalSlugRoute = LegalSlugRouteImport.update({
   path: '/legal/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BeerIdRoute = BeerIdRouteImport.update({
+  id: '/beer/$id',
+  path: '/beer/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AccountSettingsRoute = AccountSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -106,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/account/profile': typeof AccountProfileRoute
   '/account/security': typeof AccountSecurityRoute
   '/account/settings': typeof AccountSettingsRoute
+  '/beer/$id': typeof BeerIdRoute
   '/legal/$slug': typeof LegalSlugRoute
   '/signin/$': typeof SigninSplatRoute
   '/signup/$': typeof SignupSplatRoute
@@ -121,6 +128,7 @@ export interface FileRoutesByTo {
   '/account/profile': typeof AccountProfileRoute
   '/account/security': typeof AccountSecurityRoute
   '/account/settings': typeof AccountSettingsRoute
+  '/beer/$id': typeof BeerIdRoute
   '/legal/$slug': typeof LegalSlugRoute
   '/signin/$': typeof SigninSplatRoute
   '/signup/$': typeof SignupSplatRoute
@@ -138,6 +146,7 @@ export interface FileRoutesById {
   '/account/profile': typeof AccountProfileRoute
   '/account/security': typeof AccountSecurityRoute
   '/account/settings': typeof AccountSettingsRoute
+  '/beer/$id': typeof BeerIdRoute
   '/legal/$slug': typeof LegalSlugRoute
   '/signin/$': typeof SigninSplatRoute
   '/signup/$': typeof SignupSplatRoute
@@ -156,6 +165,7 @@ export interface FileRouteTypes {
     | '/account/profile'
     | '/account/security'
     | '/account/settings'
+    | '/beer/$id'
     | '/legal/$slug'
     | '/signin/$'
     | '/signup/$'
@@ -171,6 +181,7 @@ export interface FileRouteTypes {
     | '/account/profile'
     | '/account/security'
     | '/account/settings'
+    | '/beer/$id'
     | '/legal/$slug'
     | '/signin/$'
     | '/signup/$'
@@ -187,6 +198,7 @@ export interface FileRouteTypes {
     | '/account/profile'
     | '/account/security'
     | '/account/settings'
+    | '/beer/$id'
     | '/legal/$slug'
     | '/signin/$'
     | '/signup/$'
@@ -201,6 +213,7 @@ export interface RootRouteChildren {
   RateRoute: typeof RateRoute
   RecommendationsRoute: typeof RecommendationsRoute
   TryRoute: typeof TryRoute
+  BeerIdRoute: typeof BeerIdRoute
   LegalSlugRoute: typeof LegalSlugRoute
   SigninSplatRoute: typeof SigninSplatRoute
   SignupSplatRoute: typeof SignupSplatRoute
@@ -285,6 +298,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LegalSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/beer/$id': {
+      id: '/beer/$id'
+      path: '/beer/$id'
+      fullPath: '/beer/$id'
+      preLoaderRoute: typeof BeerIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/account/settings': {
       id: '/account/settings'
       path: '/settings'
@@ -334,6 +354,7 @@ const rootRouteChildren: RootRouteChildren = {
   RateRoute: RateRoute,
   RecommendationsRoute: RecommendationsRoute,
   TryRoute: TryRoute,
+  BeerIdRoute: BeerIdRoute,
   LegalSlugRoute: LegalSlugRoute,
   SigninSplatRoute: SigninSplatRoute,
   SignupSplatRoute: SignupSplatRoute,

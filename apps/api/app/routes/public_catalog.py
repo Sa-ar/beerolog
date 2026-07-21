@@ -43,6 +43,7 @@ def _to_beer(b: BeerCandidate) -> CatalogBeer:
         color=b.color,
         image_url=b.image_url,
         adventurousness=b.adventurousness,
+        ibu=b.ibu,
     )
 
 

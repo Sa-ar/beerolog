@@ -11,7 +11,9 @@ from app.routes.public_catalog import _embedding_client_dep
 from app.services.match_engine import BeerCandidate
 
 
-def _beer(i: int, *, style: str, abv: float, vec: list[float]) -> BeerCandidate:
+def _beer(
+    i: int, *, style: str, abv: float, vec: list[float], ibu: int | None = None
+) -> BeerCandidate:
     return BeerCandidate(
         id=f"b{i}",
         name=f"Beer {i}",
@@ -24,11 +26,12 @@ def _beer(i: int, *, style: str, abv: float, vec: list[float]) -> BeerCandidate:
         image_url=None,
         adventurousness=0.5,
         embedding=vec,
+        ibu=ibu,
     )
 
 
 CATALOG = [
-    _beer(0, style="IPA", abv=6.5, vec=[1.0, 0.0]),
+    _beer(0, style="IPA", abv=6.5, vec=[1.0, 0.0], ibu=65),
     _beer(1, style="Lager", abv=4.2, vec=[0.0, 1.0]),
 ]
 
@@ -62,6 +65,15 @@ def test_list_catalog_strips_embedding():
 
 def test_get_beer_404():
     assert _client().get("/catalog/nope").status_code == 404
+
+
+def test_get_beer_includes_ibu():
+    """The detail view's bitterness axis needs ibu on the public catalog surface."""
+    r = _client().get("/catalog/b0")
+    assert r.status_code == 200, r.text
+    assert r.json()["ibu"] == 65
+    # nullable: a beer without ibu still serializes cleanly
+    assert _client().get("/catalog/b1").json()["ibu"] is None
 
 
 def test_search_by_abv():
