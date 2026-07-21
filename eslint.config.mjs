@@ -32,4 +32,25 @@ export default tseslint.config(
       },
     },
   },
+  {
+    // Enforce shared @beerolog/ui primitives over inline markup on the
+    // feature surface (docs/agents/frontend-conventions.md). Primitives
+    // themselves live in packages/ui and are exempt.
+    files: ['apps/web/src/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'JSXOpeningElement[name.name=/^h[1-6]$/]',
+          message:
+            'Use <Heading level={n}> from @beerolog/ui, not a raw <h1>–<h6>. See docs/agents/frontend-conventions.md.',
+        },
+        {
+          selector: "JSXOpeningElement[name.name='dialog']",
+          message:
+            'Use the <Dialog> primitive from @beerolog/ui, not a raw <dialog>. See docs/agents/frontend-conventions.md.',
+        },
+      ],
+    },
+  },
 )

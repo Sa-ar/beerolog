@@ -27,7 +27,7 @@ export function LegalPage({ slug }: { slug: LegalSlug }) {
         <p className="mt-2 text-neutral-700">{t(`legal.${slug}.intro`)}</p>
         {list.map((section, i) => (
           <section key={i} className="mt-6">
-            <h2 className="text-lg font-semibold text-neutral-900">{section.heading}</h2>
+            <Heading level={2} className="text-lg font-semibold text-neutral-900">{section.heading}</Heading>
             <p className="mt-1 text-neutral-700">{section.body}</p>
           </section>
         ))}

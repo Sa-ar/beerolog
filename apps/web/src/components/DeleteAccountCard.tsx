@@ -1,4 +1,4 @@
-import { Card, CardContent } from '@beerolog/ui'
+import { Card, CardContent, Heading } from '@beerolog/ui'
 import { useClerk } from '@clerk/tanstack-react-start'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -32,7 +32,7 @@ export function DeleteAccountCard() {
   return (
     <Card>
       <CardContent className="pt-6">
-        <h2 className="mb-2 text-sm font-semibold text-neutral-700">{t('privacy.delete.title')}</h2>
+        <Heading level={2} className="mb-2 text-sm font-semibold text-neutral-700">{t('privacy.delete.title')}</Heading>
         <p className="mb-4 text-sm text-neutral-600">{t('privacy.delete.description')}</p>
         {!confirming ? (
           <button

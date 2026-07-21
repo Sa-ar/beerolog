@@ -17,7 +17,7 @@
  */
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button, Card, CardContent } from '@beerolog/ui'
+import { Button, Card, CardContent, Heading } from '@beerolog/ui'
 import { ChalkTick, QuizChips, optionCardClass, optionGrid } from './QuizChips'
 import { QuizIcon } from './quiz-icons'
 import {
@@ -468,9 +468,9 @@ function Summary({
   return (
     <div className="space-y-5">
       <div className="space-y-1">
-        <h2 className="font-display text-xl font-semibold uppercase tracking-wide text-neutral-900">
+        <Heading level={2} className="font-display text-xl font-semibold uppercase tracking-wide text-neutral-900">
           {t('onboarding.reviewHeadline')}
-        </h2>
+        </Heading>
         <p className="text-sm text-neutral-500">{t('onboarding.readyHeadline')}</p>
       </div>
       <ul className="divide-y divide-neutral-200 overflow-hidden rounded-lg border border-neutral-200">

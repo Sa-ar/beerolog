@@ -1,5 +1,5 @@
 import { useReverification, useSession, useUser } from '@clerk/tanstack-react-start'
-import { Button, Card, CardContent } from '@beerolog/ui'
+import { Button, Card, CardContent, Heading } from '@beerolog/ui'
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
@@ -92,9 +92,9 @@ function SecurityPage() {
     <div className="flex flex-col gap-6">
       <Card>
         <CardContent className="pt-6">
-          <h2 className="mb-4 text-sm font-semibold text-neutral-700">
+          <Heading level={2} className="mb-4 text-sm font-semibold text-neutral-700">
             {t('account.security.passwordTitle')}
-          </h2>
+          </Heading>
           <form onSubmit={onChangePassword} className="flex flex-col gap-4">
             <label className="flex flex-col gap-1 text-sm font-medium text-neutral-700">
               {t('account.security.currentPassword')}
@@ -139,9 +139,9 @@ function SecurityPage() {
 
       <Card>
         <CardContent className="pt-6">
-          <h2 className="mb-4 text-sm font-semibold text-neutral-700">
+          <Heading level={2} className="mb-4 text-sm font-semibold text-neutral-700">
             {t('account.security.sessionsTitle')}
-          </h2>
+          </Heading>
           <ul className="flex flex-col divide-y divide-neutral-100">
             {sessions.map((s) => {
               const isCurrent = s.id === currentSession?.id

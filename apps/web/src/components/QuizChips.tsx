@@ -1,3 +1,4 @@
+import { Heading } from '@beerolog/ui'
 import { useTranslation } from 'react-i18next'
 import { QuizIcon } from './quiz-icons'
 
@@ -65,9 +66,9 @@ export function QuizChips<T extends string>({
   const { t } = useTranslation()
   return (
     <div role="radiogroup" aria-label={title} data-testid="quiz-question" className="mt-6">
-      <h2 className={`${subtitle ? 'mb-1' : 'mb-3'} font-display text-xl font-semibold uppercase tracking-wide text-neutral-900`}>
+      <Heading level={2} className={`${subtitle ? 'mb-1' : 'mb-3'} font-display text-xl font-semibold uppercase tracking-wide text-neutral-900`}>
         {title}
-      </h2>
+      </Heading>
       {subtitle ? (
         <p className="mb-3 text-sm font-normal normal-case tracking-normal text-neutral-500">
           {subtitle}

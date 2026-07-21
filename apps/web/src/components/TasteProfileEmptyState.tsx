@@ -43,9 +43,9 @@ export function TasteProfileEmptyState({ greeting }: TasteProfileEmptyStateProps
       />
 
       <section className="space-y-4">
-        <h2 className="text-center text-sm font-semibold uppercase tracking-wide text-neutral-500">
+        <Heading level={2} className="text-center text-sm font-semibold uppercase tracking-wide text-neutral-500">
           {t('emptyProfile.whatNext')}
-        </h2>
+        </Heading>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {JOURNEY_STEPS.map((step, index) => (
             <Card

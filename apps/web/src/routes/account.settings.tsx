@@ -1,4 +1,4 @@
-import { Card, CardContent } from '@beerolog/ui'
+import { Card, CardContent, Heading } from '@beerolog/ui'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { DeleteAccountCard } from '../components/DeleteAccountCard'
@@ -16,13 +16,13 @@ function AccountSettings() {
     <div className="flex flex-col gap-6">
       <Card>
         <CardContent className="pt-6">
-          <h2 className="mb-2 text-sm font-semibold text-neutral-700">{t('settings.language')}</h2>
+          <Heading level={2} className="mb-2 text-sm font-semibold text-neutral-700">{t('settings.language')}</Heading>
           <LanguageSwitcher />
         </CardContent>
       </Card>
       <Card>
         <CardContent className="pt-6">
-          <h2 className="mb-4 text-sm font-semibold text-neutral-700">{t('footer.legal')}</h2>
+          <Heading level={2} className="mb-4 text-sm font-semibold text-neutral-700">{t('footer.legal')}</Heading>
           <div className="flex flex-col gap-3">
             {LEGAL_SLUGS.map((slug) => (
               <Link

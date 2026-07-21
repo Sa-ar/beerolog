@@ -1,4 +1,4 @@
-import { Card, cn } from '@beerolog/ui'
+import { Card, cn, Heading } from '@beerolog/ui'
 import type { ReactNode } from 'react'
 import { StatusIllustration, type StatusVariant } from './status-illustrations'
 
@@ -28,7 +28,7 @@ export function StatusCard({
     >
       <StatusIllustration variant={variant} illustration={illustration} />
       <div className="space-y-2">
-        <h2 className="text-xl font-semibold text-neutral-900">{title}</h2>
+        <Heading level={2} className="text-xl font-semibold text-neutral-900">{title}</Heading>
         <p className="mx-auto max-w-sm text-sm text-neutral-600">{description}</p>
       </div>
       {action}

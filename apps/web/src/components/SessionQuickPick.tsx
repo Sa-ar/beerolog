@@ -3,7 +3,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CatalogIcon } from '@beerolog/icons'
-import { Button } from '@beerolog/ui'
+import { Button, Heading } from '@beerolog/ui'
 import type { BaselineTaste } from '../lib/baseline-taste'
 import {
   ABV_OPTIONS,
@@ -50,7 +50,7 @@ export function SessionQuickPick({ baseline }: SessionQuickPickProps) {
   return (
     <div className="space-y-5">
       <div className="space-y-1">
-        <h2 className="text-lg font-semibold text-neutral-900">{t('session.start')}</h2>
+        <Heading level={2} className="text-lg font-semibold text-neutral-900">{t('session.start')}</Heading>
         <p className="text-sm text-neutral-600">{t('session.intro')}</p>
       </div>
 

@@ -47,6 +47,10 @@ heading, fetch wrapper, or enum locally.
 Reference implementations: `AgeVerificationGate` (Dialog + Button),
 `BeerCardMedia` (Dialog lightbox), recommendations route (`Heading` + `Button`).
 
+**Lint-enforced:** raw `<h1>`–`<h6>` and `<dialog>` in `apps/web/src` are a CI
+error (`no-restricted-syntax` in `eslint.config.mjs`) — the Headings and Modals
+rows above are machine-checked, not just guidance.
+
 ### Connection / data quick map
 
 | Need | Use | Avoid |

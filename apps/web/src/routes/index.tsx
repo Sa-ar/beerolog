@@ -168,9 +168,9 @@ function VisitorHome() {
         {/* Today's menu: the steps as numbered pours with dotted leader lines. */}
         <div className="relative mt-12">
           <div className="flex items-baseline justify-between gap-3 border-b border-brand-700/30 pb-2">
-            <h2 className="font-display text-sm font-semibold uppercase tracking-[0.3em] text-brand-300">
+            <Heading level={2} className="font-display text-sm font-semibold uppercase tracking-[0.3em] text-brand-300">
               {t('home.howItWorks')}
-            </h2>
+            </Heading>
             <p className="font-script text-lg text-neutral-500">{t('home.howItWorksHint')}</p>
           </div>
 

@@ -1,4 +1,4 @@
-import { Card, CardContent } from '@beerolog/ui'
+import { Card, CardContent, Heading } from '@beerolog/ui'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { apiClient } from '../lib/api-client/client'
@@ -26,7 +26,7 @@ export function ExportDataCard() {
   return (
     <Card>
       <CardContent className="pt-6">
-        <h2 className="mb-2 text-sm font-semibold text-neutral-700">{t('privacy.export.title')}</h2>
+        <Heading level={2} className="mb-2 text-sm font-semibold text-neutral-700">{t('privacy.export.title')}</Heading>
         <p className="mb-4 text-sm text-neutral-600">{t('privacy.export.description')}</p>
         <button
           type="button"
