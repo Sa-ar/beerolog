@@ -141,9 +141,13 @@ describe('/recommendations post-signup hydration', () => {
 
     // Availability is an orthogonal query fired once results render; assert the
     // hydration sequence without it.
-    const paths = apiFetchMock.mock.calls
-      .map((c) => c[0] as string)
-      .filter((p) => p !== '/availability')
+    // Dedupe endpoints: the radar-overlay fires a second /me/baseline-taste,
+    // orthogonal to the hydration sequence asserted here (like /availability).
+    const paths = [
+      ...new Set(
+        apiFetchMock.mock.calls.map((c) => c[0] as string).filter((p) => p !== '/availability'),
+      ),
+    ]
     expect(paths).toEqual(['/me/baseline-taste', '/onboarding', '/recommendations'])
 
     // POST /onboarding carried the stored guest answers.
@@ -218,9 +222,13 @@ describe('/recommendations post-signup hydration', () => {
     renderPage()
 
     await waitFor(() => expect(screen.getByText('Authed Lager')).toBeInTheDocument())
-    const paths = apiFetchMock.mock.calls
-      .map((c) => c[0] as string)
-      .filter((p) => p !== '/availability')
+    // Dedupe endpoints: the radar-overlay fires a second /me/baseline-taste,
+    // orthogonal to the baseline-picks sequence asserted here.
+    const paths = [
+      ...new Set(
+        apiFetchMock.mock.calls.map((c) => c[0] as string).filter((p) => p !== '/availability'),
+      ),
+    ]
     expect(paths).toEqual(['/me/baseline-taste', '/recommendations'])
   })
 

@@ -257,6 +257,28 @@ function RecommendationsContent() {
   const availability = availabilityQuery.data ?? {}
   const availabilityLoaded = availabilityQuery.isSuccess
 
+  // Baseline dials for the per-beer radar overlay ("your taste" in the modal).
+  // A signed-in user on this page always has a profile; degrade to null on miss.
+  const tasteQuery = useQuery({
+    queryKey: ['baseline-dials'],
+    queryFn: async () => {
+      const res = await apiFetch('/me/baseline-taste')
+      if (!res.ok) return null
+      const rec = (await res.json()) as {
+        bitterness: number
+        abv_affinity?: number | null
+        novelty_affinity: number
+      }
+      return {
+        bitterness: rec.bitterness,
+        abv_affinity: rec.abv_affinity ?? null,
+        novelty_affinity: rec.novelty_affinity,
+      }
+    },
+    staleTime: Infinity,
+  })
+  const taste = tasteQuery.data ?? null
+
   const loadError = loadMore.isError ? loadMoreErrorMessage(t, loadMore.error) : null
 
   if (recs.isPending) {
@@ -455,6 +477,7 @@ function RecommendationsContent() {
             rank={index + 1}
             matchPercent={tonightMatchPercent(beer.breakdown, hasSession, calibration, beta)}
             venues={availability[beer.id]}
+            taste={taste}
           />
         ))}
       </div>

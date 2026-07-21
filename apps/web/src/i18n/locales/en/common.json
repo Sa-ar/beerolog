@@ -17,7 +17,8 @@
     "body": { "light": "Light body", "medium": "Medium body", "full": "Full body" },
     "sweetness": { "dry": "Dry finish", "balanced": "Balanced finish", "sweet": "Sweet finish" },
     "colorLabel": "Color",
-    "openCta": "View sensory profile"
+    "openCta": "View sensory profile",
+    "legend": { "beer": "This beer", "you": "Your taste" }
   },
   "header": { "home": "Beerolog home" },
   "nav": {

@@ -36,3 +36,24 @@ export function beerSensoryAxes(beer: BeerRadarInput): RadarAxis[] {
   axes.push({ key: 'adventurousness', value: clamp01(beer.adventurousness) })
   return axes
 }
+
+export type TasteOverlayInput = {
+  bitterness: number
+  abv_affinity?: number | null
+  novelty_affinity: number
+}
+
+/**
+ * The user's BaselineTaste dials mapped onto the same axis keys/order as
+ * `beerSensoryAxes`, so the two polygons overlay cleanly. `abv_affinity`
+ * (the strength counterpart) defaults to neutral 0.5 when absent on older
+ * profiles. Callers align this to the beer's present axes (e.g. drop the
+ * bitterness overlay when the beer has no ibu).
+ */
+export function tasteOverlayAxes(taste: TasteOverlayInput): RadarAxis[] {
+  return [
+    { key: 'bitterness', value: clamp01(taste.bitterness) },
+    { key: 'strength', value: clamp01(taste.abv_affinity ?? 0.5) },
+    { key: 'adventurousness', value: clamp01(taste.novelty_affinity) },
+  ]
+}

@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { Badge, Heading } from '@beerolog/ui'
 import { TasteRadar } from './TasteRadar'
 import { BeerColorGlass } from './BeerColorGlass'
-import { beerSensoryAxes } from '../lib/beer-radar'
+import { beerSensoryAxes, tasteOverlayAxes } from '../lib/beer-radar'
 import { deriveBeerColor, type BeerColor } from '../lib/beer-color'
 
 export type BeerDetailData = {
@@ -19,6 +19,8 @@ export type BeerDetailData = {
   sweetness?: 'dry' | 'balanced' | 'sweet' | null
   /** Already-resolved why-this-beer sentence in the request locale. */
   why?: string | null
+  /** The viewer's BaselineTaste dials, overlaid on the radar. null = objective-only. */
+  taste?: { bitterness: number; abv_affinity?: number | null; novelty_affinity: number } | null
 }
 
 /**
@@ -42,6 +44,11 @@ export function BeerDetail({ beer }: { beer: BeerDetailData }) {
     strength: t('beerDetail.axis.strength'),
     adventurousness: t('beerDetail.axis.adventurousness'),
   }
+  // Align the overlay to the beer's present axes (e.g. drop bitterness when the
+  // beer has no ibu) so the two polygons share the same spokes.
+  const overlayAxes = beer.taste
+    ? tasteOverlayAxes(beer.taste).filter((o) => axes.some((a) => a.key === o.key))
+    : undefined
 
   return (
     <div data-testid="beer-detail" className="flex flex-col gap-4">
@@ -67,6 +74,12 @@ export function BeerDetail({ beer }: { beer: BeerDetailData }) {
         axes={axes}
         labels={axisLabels}
         ariaLabel={t('beerDetail.radarAria', { name: displayName })}
+        overlay={overlayAxes}
+        seriesLabels={
+          overlayAxes
+            ? { primary: t('beerDetail.legend.beer'), overlay: t('beerDetail.legend.you') }
+            : undefined
+        }
       />
 
       <div className="flex flex-wrap items-center justify-center gap-2">

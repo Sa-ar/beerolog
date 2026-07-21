@@ -35,4 +35,22 @@ describe('BeerDetail', () => {
     expect(screen.queryByText('Full body')).toBeNull()
     expect(screen.queryByText(/finish/)).toBeNull()
   })
+
+  it('overlays the viewer taste as a second series + legend when provided', () => {
+    renderWithI18n(
+      <BeerDetail
+        beer={{ ...base, taste: { bitterness: 0.8, abv_affinity: 0.3, novelty_affinity: 0.6 } }}
+      />,
+      'en',
+    )
+    expect(screen.getByTestId('taste-radar-overlay')).toBeInTheDocument()
+    expect(screen.getByText('This beer')).toBeInTheDocument()
+    expect(screen.getByText('Your taste')).toBeInTheDocument()
+  })
+
+  it('renders objective-only (no overlay) when taste is absent', () => {
+    renderWithI18n(<BeerDetail beer={base} />, 'en')
+    expect(screen.queryByTestId('taste-radar-overlay')).toBeNull()
+    expect(screen.queryByText('Your taste')).toBeNull()
+  })
 })

@@ -60,6 +60,8 @@ type RecommendationBeerCardProps = {
   rank: number
   matchPercent: number
   venues?: Venue[] | undefined
+  /** The viewer's BaselineTaste dials, overlaid on the detail radar. */
+  taste?: { bitterness: number; abv_affinity?: number | null; novelty_affinity: number } | null
 }
 
 export function RecommendationBeerCard({
@@ -67,6 +69,7 @@ export function RecommendationBeerCard({
   rank,
   matchPercent,
   venues,
+  taste,
 }: RecommendationBeerCardProps) {
   const { t, i18n } = useTranslation()
   const isTopPick = rank === 1
@@ -326,6 +329,7 @@ export function RecommendationBeerCard({
               ibu: beer.ibu ?? null,
               adventurousness: beer.adventurousness,
               why: whyText(t, beer.why, displayName, beer.brewery) || null,
+              taste: taste ?? null,
             }}
           />
         </DialogContent>
