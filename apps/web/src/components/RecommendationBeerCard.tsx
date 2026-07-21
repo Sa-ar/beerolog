@@ -3,7 +3,7 @@ import { Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Rating } from '@beerolog/types'
-import { Badge, Card, RatingTapper } from '@beerolog/ui'
+import { Badge, Button, Card, Heading, RatingTapper } from '@beerolog/ui'
 import { apiClient } from '../lib/api-client/client'
 import { BeerCardMedia } from './BeerCardMedia'
 import { deriveBeerColor, type BeerColor } from '../lib/beer-color'
@@ -142,9 +142,9 @@ export function RecommendationBeerCard({
                 {t('recommendations.topPick')}
               </p>
             ) : null}
-            <h2 className="text-base font-bold leading-snug tracking-tight text-neutral-900 break-words sm:text-lg sm:leading-tight sm:text-xl">
+            <Heading level={2} className="text-base leading-snug break-words sm:text-lg sm:leading-tight sm:text-xl">
               {displayName}
-            </h2>
+            </Heading>
             <p className="text-sm text-neutral-600">{beer.brewery}</p>
           </div>
 
@@ -208,32 +208,35 @@ export function RecommendationBeerCard({
                           )
                         return (
                           <span className="mt-0.5 flex gap-3">
-                            <button
+                            <Button
                               type="button"
+                              variant="ghost"
                               onClick={() => report(v.id, 'user_confirm')}
-                              className="text-[11px] text-neutral-500 hover:text-brand-600"
+                              className="h-auto p-0 text-[11px] font-normal text-neutral-500 hover:bg-transparent hover:text-brand-600"
                             >
                               👍 {t('recommendations.findNearby.stillHere')}
-                            </button>
-                            <button
+                            </Button>
+                            <Button
                               type="button"
+                              variant="ghost"
                               onClick={() => report(v.id, 'user_deny')}
-                              className="text-[11px] text-neutral-500 hover:text-brand-600"
+                              className="h-auto p-0 text-[11px] font-normal text-neutral-500 hover:bg-transparent hover:text-brand-600"
                             >
                               🚫 {t('recommendations.findNearby.gone')}
-                            </button>
+                            </Button>
                             {flagged.has(v.id) ? (
                               <span className="text-[11px] text-neutral-400">
                                 {t('recommendations.findNearby.flagged')}
                               </span>
                             ) : (
-                              <button
+                              <Button
                                 type="button"
+                                variant="ghost"
                                 onClick={() => flag(v.id)}
-                                className="text-[11px] text-neutral-400 hover:text-red-600"
+                                className="h-auto p-0 text-[11px] font-normal text-neutral-400 hover:bg-transparent hover:text-red-600"
                               >
                                 🚩 {t('recommendations.findNearby.flagWrong')}
-                              </button>
+                              </Button>
                             )}
                           </span>
                         )

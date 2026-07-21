@@ -232,6 +232,7 @@ function RecommendationsContent() {
     }
   })
   const [nearMeOnly, setNearMeOnly] = useState(false)
+  const [shareCopied, setShareCopied] = useState(false)
   const areaFilter = features.findNearbySearch ? searchArea : ''
   const nearMeFilter = features.findNearbySearch && nearMeOnly
 
@@ -340,6 +341,33 @@ function RecommendationsContent() {
     availability,
     nearMeFilter && availabilityLoaded,
   )
+  // Share the top pick + a link home. Native share sheet on mobile; clipboard
+  // fallback elsewhere. Shares the site root, not this authed page, so the
+  // recipient lands somewhere they can act. ponytail: no share lib.
+  const topBeer = shownResults[0]
+  async function shareResults() {
+    if (!topBeer) return
+    const beerName =
+      i18n.language.startsWith('he') && topBeer.name_hebrew ? topBeer.name_hebrew : topBeer.name
+    const url = `${window.location.origin}/`
+    const text = t('recommendations.shareText', { beer: beerName })
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({ text, url })
+      } catch {
+        /* user dismissed the share sheet */
+      }
+      return
+    }
+    try {
+      await navigator.clipboard.writeText(`${text} ${url}`)
+      setShareCopied(true)
+      setTimeout(() => setShareCopied(false), 2000)
+    } catch {
+      /* clipboard unavailable */
+    }
+  }
+
   const stored = readStoredRecommendations()
   const calibration = stored?.calibration ?? DEFAULT_MATCH_CALIBRATION
   const beta = stored?.beta ?? 0.3
@@ -357,12 +385,28 @@ function RecommendationsContent() {
         <p className="max-w-xl text-sm text-neutral-600 sm:text-base">
           {t(hasSession ? 'recommendations.subhead' : 'recommendations.subheadBaseline')}
         </p>
-        <Link
-          to="/"
-          className="inline-flex text-sm font-semibold text-brand-300 underline-offset-2 hover:underline"
-        >
-          {t('recommendations.adjustTonight')}
-        </Link>
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 pt-1 text-sm font-semibold">
+          <Link
+            to="/"
+            className="inline-flex text-brand-300 underline-offset-2 hover:underline"
+          >
+            {t('recommendations.adjustTonight')}
+          </Link>
+          <Link
+            to="/onboarding"
+            className="inline-flex text-brand-300 underline-offset-2 hover:underline"
+          >
+            {t('recommendations.retakeQuiz')}
+          </Link>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => void shareResults()}
+            className="h-auto gap-1 p-0 text-sm font-semibold text-brand-300 underline-offset-2 hover:bg-transparent hover:underline"
+          >
+            {shareCopied ? t('recommendations.shareCopied') : t('recommendations.shareCta')}
+          </Button>
+        </div>
       </section>
 
       {features.findNearbySearch ? (

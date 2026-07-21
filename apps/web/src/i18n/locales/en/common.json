@@ -3,7 +3,9 @@
   "language": { "label": "Language", "he": "עברית", "en": "English" },
   "common": {
     "tryAgain": "Try again",
-    "backToHome": "Back to home"
+    "backToHome": "Back to home",
+    "enlargeImage": "Enlarge photo",
+    "close": "Close"
   },
   "header": { "home": "Beerolog home" },
   "nav": {
@@ -568,6 +570,10 @@
     "backToDashboard": "Start tonight's picks",
     "startTonightsPicks": "Start tonight's picks",
     "adjustTonight": "Adjust tonight",
+    "retakeQuiz": "Retake the quiz",
+    "shareCta": "Share my picks",
+    "shareCopied": "Link copied",
+    "shareText": "My top beer match: {{beer}}. Find yours at Beerolog:",
     "missingTitle": "No picks yet",
     "missingDescription": "Pick tonight's vibe and we'll match five beers to how you feel right now.",
     "startSession": "Start tonight's picks",

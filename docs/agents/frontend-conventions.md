@@ -1,25 +1,12 @@
 # Frontend Conventions
 
 Web conventions distilled from PR review feedback. Follow these when writing or
-changing code under `apps/web` and `packages/ui` so reviews don't re-litigate the
-same points.
+changing code under `apps/web` and `packages/ui`.
 
-## Headings: use the shared `Heading` primitive
-
-Don't hand-roll headings with inline `<h1>`/`<h2>` + Tailwind. Use `Heading` from
-`@beerolog/ui`, which bakes in the shared visual base (`font-bold tracking-tight
-text-neutral-900`) and takes a semantic `level` prop.
-
-```tsx
-// no
-<h2 className="text-xl font-bold text-neutral-900">{name}</h2>
-// yes
-<Heading level={2} className="text-xl">{name}</Heading>
-```
-
-Keep exactly one `Heading level={1}` per page; size/tracking overrides go in
-`className` (twMerge lets them win). This extends the "shared UI primitives over
-inline markup" rule.
+**Shared building blocks** (UI, icons, types, API/connection helpers, hooks,
+utils — what they are, how to use them, when/how to create new ones) live in
+[`primitives.md`](./primitives.md). This file covers coding style that is not
+"which export to import."
 
 ## Enum-like values: `const` object, derived type
 
@@ -61,3 +48,6 @@ state stays in react-query (see the react-query-over-`useEffect`-fetch rule).
 const debounced = useDebouncedValue(query.trim(), 250)
 const results = useBeerSearch(debounced) // enabled at >= 2 chars
 ```
+
+See [`primitives.md`](./primitives.md) for the broader connection-helper and
+hook catalog this pattern belongs to.

@@ -3,7 +3,9 @@
   "language": { "label": "שפה", "he": "עברית", "en": "English" },
   "common": {
     "tryAgain": "נסו שוב",
-    "backToHome": "חזרה לדף הבית"
+    "backToHome": "חזרה לדף הבית",
+    "enlargeImage": "הגדלת התמונה",
+    "close": "סגירה"
   },
   "header": { "home": "בירולוג — דף הבית" },
   "nav": {
@@ -557,6 +559,10 @@
     "backToDashboard": "התחילו את בחירות הערב",
     "startTonightsPicks": "התחילו את בחירות הערב",
     "adjustTonight": "עדכנו להערב",
+    "retakeQuiz": "מלאו את השאלון מחדש",
+    "shareCta": "שתפו את ההמלצות",
+    "shareCopied": "הקישור הועתק",
+    "shareText": "ההתאמה המובילה שלי בבירולוג: {{beer}}. מצאו את שלכם:",
     "missingTitle": "עדיין אין המלצות",
     "missingDescription": "בחרו את אווירת הערב ונתאים חמש בירות לאיך שאתם מרגישים עכשיו.",
     "startSession": "התחילו את בחירות הערב",

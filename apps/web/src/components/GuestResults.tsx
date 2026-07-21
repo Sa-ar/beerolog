@@ -11,7 +11,7 @@
 
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import { Badge, Button, Card } from '@beerolog/ui'
+import { Badge, Button, Card, Heading } from '@beerolog/ui'
 import { BeerCardMedia } from './BeerCardMedia'
 import { deriveBeerColor } from '../lib/beer-color'
 import type { GuestRecommendedBeer } from '../lib/guest-answers'
@@ -37,9 +37,9 @@ export function GuestResults({ results, unlockedCount }: GuestResultsProps) {
       {locked.length > 0 ? (
         <section className="space-y-4">
           <Card className="border-brand-200 bg-gradient-to-br from-brand-50 to-amber-50/80 p-5 text-center shadow-sm sm:p-6">
-            <h2 className="text-lg font-bold tracking-tight text-neutral-900">
+            <Heading level={2} className="text-lg">
               {t('try.lockedTitle', { count: locked.length })}
-            </h2>
+            </Heading>
             <p className="mt-1 text-sm text-neutral-600">{t('try.lockedSubtitle')}</p>
             <div className="mt-4 flex justify-center">
               <Link
@@ -111,9 +111,9 @@ function GuestBeerCard({ beer, rank }: GuestBeerCardProps) {
 
         <div className="order-3 flex w-full min-w-0 flex-1 flex-col items-center gap-3 p-4 text-center sm:order-2 sm:items-start sm:p-6 sm:ps-4 sm:text-left">
           <div className="min-w-0 space-y-1">
-            <h2 className="text-base font-bold leading-snug tracking-tight text-neutral-900 break-words sm:text-lg sm:leading-tight">
+            <Heading level={2} className="text-base leading-snug break-words sm:text-lg sm:leading-tight">
               {displayName}
-            </h2>
+            </Heading>
             <p className="text-sm text-neutral-600">{beer.brewery}</p>
           </div>
 

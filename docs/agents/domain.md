@@ -4,7 +4,9 @@ How Beerolog's engineering skills should consume repo context before planning or
 
 ## Read these first
 
+- Root [`AGENTS.md`](../../AGENTS.md) for pipeline, docs map, and learned memory
 - `CONTEXT.md` for shared product language, MVP scope, and repo shape
+- [`primitives.md`](./primitives.md) before inventing UI, fetch, or util one-offs
 - `docs/adr/` for durable product and architectural decisions
 - `docs/prds/README.md` and `docs/issues/README.md` when working on planning artifacts
 
