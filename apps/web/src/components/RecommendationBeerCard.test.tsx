@@ -32,6 +32,8 @@ const BEER: RecommendedBeer = {
   market_tier: 'mainstream',
   color: null,
   image_url: null,
+  ibu: 18,
+  adventurousness: 0.05,
   why: {
     code: 'baseline',
     text: 'A crisp lager that matches how you usually drink.',

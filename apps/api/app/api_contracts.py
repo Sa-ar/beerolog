@@ -298,6 +298,10 @@ class RecommendedBeer(BaseModel):
     market_tier: Literal["mainstream", "craft", "import"]
     color: Literal["pale", "gold", "amber", "brown", "dark"]
     image_url: str | None = None
+    # Detail-view sensory-radar inputs. adventurousness is always present (0..1);
+    # ibu is nullable (the bitterness axis drops when absent).
+    adventurousness: float
+    ibu: int | None = None
     why: WhyLine
     breakdown: ScoreBreakdown
 

@@ -52,7 +52,7 @@ class AsyncpgBeerDescriptorRepo:
 async def fetch_catalog(pool) -> list[BeerCandidate]:
     sql = """
         SELECT id, name, name_hebrew, brewery, style, abv, market_tier, color,
-               image_url, adventurousness, embedding
+               image_url, adventurousness, ibu, embedding
         FROM beers
     """
     async with pool.acquire() as conn:
@@ -69,6 +69,7 @@ async def fetch_catalog(pool) -> list[BeerCandidate]:
             color=row["color"],
             image_url=row["image_url"],
             adventurousness=row["adventurousness"],
+            ibu=row["ibu"],
             embedding=_parse_pgvector(row["embedding"]),
         )
         for row in rows

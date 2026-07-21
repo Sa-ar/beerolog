@@ -187,6 +187,8 @@ async def post_recommendations(
                 market_tier=r.beer.market_tier,  # type: ignore[arg-type]
                 color=r.beer.color,  # type: ignore[arg-type]
                 image_url=r.beer.image_url,
+                adventurousness=r.beer.adventurousness,
+                ibu=r.beer.ibu,
                 why=why_line.compose_why(
                     r,
                     session=body.session,

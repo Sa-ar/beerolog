@@ -1120,6 +1120,8 @@ export interface components {
         RecommendedBeer: {
             /** Abv */
             abv: number;
+            /** Adventurousness */
+            adventurousness: number;
             breakdown: components["schemas"]["ScoreBreakdown"];
             /** Brewery */
             brewery: string;
@@ -1128,6 +1130,8 @@ export interface components {
              * @enum {string}
              */
             color: "pale" | "gold" | "amber" | "brown" | "dark";
+            /** Ibu */
+            ibu?: number | null;
             /** Id */
             id: string;
             /** Image Url */

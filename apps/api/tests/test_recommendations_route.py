@@ -134,6 +134,18 @@ def test_returns_top_5_with_full_breakdown(client: TestClient) -> None:
             assert k in breakdown
 
 
+def test_results_include_ibu_and_adventurousness(client: TestClient) -> None:
+    """The detail-view radar needs bitterness (from ibu) and adventurousness on
+    the wire. ibu is nullable; adventurousness is always a 0..1 float."""
+    r = client.post("/recommendations", json=_PAYLOAD)
+    assert r.status_code == 200, r.text
+    for beer in r.json()["results"]:
+        assert "ibu" in beer, "ibu key must be present (may be null)"
+        assert beer["ibu"] is None or isinstance(beer["ibu"], (int, float))
+        assert isinstance(beer["adventurousness"], (int, float))
+        assert 0.0 <= beer["adventurousness"] <= 1.0
+
+
 def test_session_uses_lower_default_alpha(client: TestClient) -> None:
     r = client.post("/recommendations", json=_PAYLOAD)
     body = r.json()

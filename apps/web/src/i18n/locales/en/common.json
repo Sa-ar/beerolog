@@ -7,6 +7,18 @@
     "enlargeImage": "Enlarge photo",
     "close": "Close"
   },
+  "beerDetail": {
+    "radarAria": "Sensory profile of {{name}}",
+    "axis": {
+      "bitterness": "Bitterness",
+      "strength": "Strength",
+      "adventurousness": "Adventurousness"
+    },
+    "body": { "light": "Light body", "medium": "Medium body", "full": "Full body" },
+    "sweetness": { "dry": "Dry finish", "balanced": "Balanced finish", "sweet": "Sweet finish" },
+    "colorLabel": "Color",
+    "openCta": "View sensory profile"
+  },
   "header": { "home": "Beerolog home" },
   "nav": {
     "primary": "Primary",

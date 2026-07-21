@@ -55,6 +55,7 @@ PLACEHOLDER_CATALOG: list[BeerCandidate] = [
         color="amber",
         image_url=None,
         adventurousness=0.05,
+        ibu=18,
         embedding=[0.7, 0.3, 0.5, 0.2, 0.1, 0.0, 0.0, 0.05],
     ),
     BeerCandidate(
@@ -67,6 +68,7 @@ PLACEHOLDER_CATALOG: list[BeerCandidate] = [
         color="gold",
         image_url=None,
         adventurousness=0.05,
+        ibu=12,
         embedding=[0.8, 0.2, 0.4, 0.05, 0.05, 0.0, 0.0, 0.05],
     ),
     BeerCandidate(
@@ -79,6 +81,7 @@ PLACEHOLDER_CATALOG: list[BeerCandidate] = [
         color="amber",
         image_url=None,
         adventurousness=0.55,
+        ibu=60,
         embedding=[0.4, 0.85, 0.3, 0.05, 0.7, 0.0, 0.0, 0.5],
     ),
     BeerCandidate(
@@ -91,6 +94,7 @@ PLACEHOLDER_CATALOG: list[BeerCandidate] = [
         color="pale",
         image_url=None,
         adventurousness=0.35,
+        ibu=35,
         embedding=[0.5, 0.6, 0.4, 0.1, 0.6, 0.05, 0.0, 0.35],
     ),
     BeerCandidate(
@@ -103,6 +107,7 @@ PLACEHOLDER_CATALOG: list[BeerCandidate] = [
         color="dark",
         image_url=None,
         adventurousness=0.55,
+        ibu=45,
         embedding=[0.2, 0.55, 0.6, 0.85, 0.1, 0.0, 0.2, 0.5],
     ),
     BeerCandidate(
@@ -115,6 +120,7 @@ PLACEHOLDER_CATALOG: list[BeerCandidate] = [
         color="pale",
         image_url=None,
         adventurousness=0.7,
+        ibu=28,
         embedding=[0.55, 0.5, 0.3, 0.05, 0.65, 0.4, 0.0, 0.7],
     ),
     BeerCandidate(
@@ -127,6 +133,7 @@ PLACEHOLDER_CATALOG: list[BeerCandidate] = [
         color="pale",
         image_url=None,
         adventurousness=0.8,
+        ibu=10,
         embedding=[0.7, 0.3, 0.2, 0.05, 0.5, 0.85, 0.0, 0.75],
     ),
     BeerCandidate(
@@ -139,6 +146,7 @@ PLACEHOLDER_CATALOG: list[BeerCandidate] = [
         color="pale",
         image_url=None,
         adventurousness=0.5,
+        ibu=38,
         embedding=[0.5, 0.65, 0.35, 0.1, 0.6, 0.05, 0.0, 0.55],
     ),
     BeerCandidate(
@@ -151,6 +159,7 @@ PLACEHOLDER_CATALOG: list[BeerCandidate] = [
         color="pale",
         image_url=None,
         adventurousness=0.25,
+        ibu=None,
         embedding=[0.75, 0.25, 0.45, 0.05, 0.6, 0.15, 0.0, 0.25],
     ),
     BeerCandidate(
@@ -163,6 +172,7 @@ PLACEHOLDER_CATALOG: list[BeerCandidate] = [
         color="dark",
         image_url=None,
         adventurousness=0.3,
+        ibu=40,
         embedding=[0.3, 0.5, 0.55, 0.85, 0.1, 0.0, 0.15, 0.3],
     ),
 ]

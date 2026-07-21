@@ -3,9 +3,10 @@ import { Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Rating } from '@beerolog/types'
-import { Badge, Button, Card, Heading, RatingTapper } from '@beerolog/ui'
+import { Badge, Button, Card, Dialog, DialogContent, DialogTitle, Heading, RatingTapper } from '@beerolog/ui'
 import { apiClient } from '../lib/api-client/client'
 import { BeerCardMedia } from './BeerCardMedia'
+import { BeerDetail } from './BeerDetail'
 import { deriveBeerColor, type BeerColor } from '../lib/beer-color'
 import { useMyRatings } from '../lib/my-ratings'
 import { SAVE_STATUS, type SaveStatus } from '../lib/save-status'
@@ -35,6 +36,8 @@ export type RecommendedBeer = {
   market_tier: 'mainstream' | 'craft' | 'import'
   color?: BeerColor | null
   image_url: string | null
+  ibu?: number | null
+  adventurousness: number
   why: WhyLine
   breakdown: Breakdown
 }
@@ -93,6 +96,7 @@ export function RecommendationBeerCard({
   // saved confirmation; on error keep the tapper so the user can retry.
   const [rateStatus, setRateStatus] = useState<SaveStatus>(SAVE_STATUS.idle)
   const myRatings = useMyRatings()
+  const [detailOpen, setDetailOpen] = useState(false)
 
   async function handleRate(rating: Rating) {
     setRateStatus(SAVE_STATUS.saving)
@@ -163,6 +167,15 @@ export function RecommendationBeerCard({
           <div className="w-full">
             <WhyExplanation t={t} why={beer.why} beerName={displayName} brewery={beer.brewery} />
           </div>
+
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => setDetailOpen(true)}
+            className="h-auto gap-1 p-0 text-sm font-semibold text-brand-600 underline-offset-2 hover:bg-transparent hover:underline"
+          >
+            {t('beerDetail.openCta')}
+          </Button>
 
           {venues && venues.length > 0 ? (
             <div className="flex w-full flex-col gap-1.5">
@@ -285,6 +298,38 @@ export function RecommendationBeerCard({
           </p>
         )}
       </div>
+
+      <Dialog open={detailOpen} onOpenChange={setDetailOpen} dismissible>
+        <DialogContent>
+          <DialogTitle className="sr-only">{displayName}</DialogTitle>
+          <div className="mb-2 flex justify-end">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => setDetailOpen(false)}
+              aria-label={t('common.close')}
+              className="h-8 w-8 rounded-full text-neutral-500 hover:bg-neutral-100 hover:text-neutral-800"
+            >
+              ✕
+            </Button>
+          </div>
+          <BeerDetail
+            beer={{
+              name: beer.name,
+              name_hebrew: beer.name_hebrew ?? null,
+              brewery: beer.brewery,
+              style: beer.style,
+              abv: beer.abv,
+              market_tier: beer.market_tier,
+              color: beer.color ?? null,
+              ibu: beer.ibu ?? null,
+              adventurousness: beer.adventurousness,
+              why: whyText(t, beer.why, displayName, beer.brewery) || null,
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </Card>
   )
 }

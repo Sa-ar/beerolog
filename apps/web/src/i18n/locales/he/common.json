@@ -7,6 +7,18 @@
     "enlargeImage": "הגדלת התמונה",
     "close": "סגירה"
   },
+  "beerDetail": {
+    "radarAria": "פרופיל טעם של {{name}}",
+    "axis": {
+      "bitterness": "מרירות",
+      "strength": "עוצמה",
+      "adventurousness": "הרפתקנות"
+    },
+    "body": { "light": "גוף קל", "medium": "גוף בינוני", "full": "גוף מלא" },
+    "sweetness": { "dry": "סיומת יבשה", "balanced": "סיומת מאוזנת", "sweet": "סיומת מתוקה" },
+    "colorLabel": "צבע",
+    "openCta": "צפייה בפרופיל הטעם"
+  },
   "header": { "home": "בירולוג — דף הבית" },
   "nav": {
     "primary": "ניווט ראשי",

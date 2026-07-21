@@ -28,6 +28,7 @@ class BeerCandidate:
     adventurousness: float
     embedding: list[float]
     name_hebrew: str | None = None
+    ibu: int | None = None
 
 
 @dataclass(frozen=True)
