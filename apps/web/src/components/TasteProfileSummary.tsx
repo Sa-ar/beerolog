@@ -10,7 +10,9 @@ import {
   type BaselineTaste,
 } from '../lib/baseline-taste'
 import { useRatingCount } from '../lib/rating-count'
+import { isArchetypeKey } from '../lib/archetypes'
 import { SessionQuickPick } from './SessionQuickPick'
+import { ShareArchetypeButton } from './ShareArchetypeButton'
 import { TasteRadar } from './TasteRadar'
 
 type TasteProfileSummaryProps = {
@@ -120,6 +122,10 @@ export function TasteProfileSummary({ greeting, baseline }: TasteProfileSummaryP
           </p>
         </div>
       </Card>
+
+      {baseline.archetype && isArchetypeKey(baseline.archetype.key) ? (
+        <ShareArchetypeButton archetypeKey={baseline.archetype.key} className="w-full" />
+      ) : null}
 
       <section className="flex flex-col gap-6" data-testid="taste-details">
         <Card className="space-y-4 p-6">

@@ -51,3 +51,42 @@ const results = useBeerSearch(debounced) // enabled at >= 2 chars
 
 See [`primitives.md`](./primitives.md) for the broader connection-helper and
 hook catalog this pattern belongs to.
+
+## User-facing copy lives in i18n, never in code
+
+Any string a user reads (names, taglines, labels, CTAs) belongs in
+`apps/web/src/i18n/locales/{en,he}/common.json`, not hardcoded in a component or
+a `const`/metadata object — even a "data" map. Keep only non-localized data
+(icons, numeric config, keys) in code, and expose i18n **key builders** next to it
+so callers never hand-build dotted paths:
+
+```ts
+export const archetypeNameKey = (key: ArchetypeKey) => `archetypes.${key}.name`
+```
+
+In React, resolve with `useTranslation`'s `t`. **Server-side** (route `head()`,
+`@vercel/og` image endpoints — no React context) resolve with a standalone
+instance: `createI18n(lang).getFixedT(lang)`. Arrays use
+`t(key, { returnObjects: true })`. A test that walks both locales for full key
+coverage keeps translations from silently drifting.
+
+## Language handling goes through the shared `Lang` util
+
+Type any language value as `Lang` from `i18n/locale-cookie.ts` (the single source
+for the languages we support) — never re-declare `'en' | 'he'` inline. Normalize
+unknown input with `normalizeLang(value)` and derive direction/casing with
+`dirFor(lang)`. Do **not** sniff the language with `lang.startsWith('he')`; that's
+a string check standing in for a typed enum.
+
+## Model variants as const objects; drive per-variant values by lookup
+
+A component's fixed variant set is a `const` object with a derived type (same
+rule as enum-like values above), and per-variant styling/config is an **object
+keyed by the variant**, not a chain of `isX ? a : b` ternaries:
+
+```tsx
+export const CARD_VARIANTS = { reveal: 'reveal', share: 'share' } as const
+export type CardVariant = (typeof CARD_VARIANTS)[keyof typeof CARD_VARIANTS]
+const LAYOUT: Record<CardVariant, string> = { reveal: '…', share: '…' }
+// …className={LAYOUT[variant]}  — not  isShare ? '…' : '…'
+```

@@ -30,6 +30,7 @@ export type GuestRecommendedBeer = {
 export type GuestRecommendationsResponse = {
   results: GuestRecommendedBeer[]
   unlocked_count: number
+  archetype?: { key: string }
 }
 
 function hasStorage(): boolean {

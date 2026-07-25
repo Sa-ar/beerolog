@@ -13,6 +13,7 @@ export type BaselineTaste = {
   persona?: TastePersona | null
   updated_at: string
   icons?: TasteProfileIcons | null
+  archetype?: { key: string } | null
 }
 
 export type TastePersona = {

@@ -12,7 +12,9 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert, Button, Card, CardContent, Heading } from '@beerolog/ui'
 import { GuestResults } from '../components/GuestResults'
+import { ShareArchetypeButton } from '../components/ShareArchetypeButton'
 import { BeerJsonLd } from '../components/BeerJsonLd'
+import { isArchetypeKey } from '../lib/archetypes'
 import { QuizStepper } from '../components/QuizStepper'
 import { PAGE_MAIN } from '../lib/page-shell'
 import { type Answers, prunedAnswers } from '../lib/onboarding-quiz'
@@ -122,6 +124,9 @@ function TryPage() {
           <p className="text-sm text-neutral-600" data-testid="try-unlocked-count">
             {t('try.unlocked', { count: view.data.unlocked_count })}
           </p>
+          {view.data.archetype && isArchetypeKey(view.data.archetype.key) ? (
+            <ShareArchetypeButton archetypeKey={view.data.archetype.key} className="w-full" />
+          ) : null}
           <BeerJsonLd beers={view.data.results} />
           <GuestResults
             results={view.data.results}

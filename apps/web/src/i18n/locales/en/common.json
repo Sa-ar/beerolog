@@ -34,6 +34,13 @@
   "archetypeOg": {
     "cta": "What's your type? beerolog.com/try"
   },
+  "share": {
+    "taste": {
+      "cta": "Share your type",
+      "text": "I found my beer taste type on Beerolog. What's yours?",
+      "copied": "Link copied!"
+    }
+  },
   "tasteShare": {
     "cta": "What's YOUR type? Take the 30-second quiz",
     "ctaHint": "Free — no sign-up needed to start."

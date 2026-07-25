@@ -51,4 +51,20 @@ describe('TasteProfileSummary', () => {
     expect(screen.getByText(/7 beers rated/i)).toBeInTheDocument()
     expect(screen.queryByText(/see taste details/i)).not.toBeInTheDocument()
   })
+
+  it('offers a share-your-type action when the profile has an archetype', () => {
+    renderWithI18n(
+      <TasteProfileSummary
+        greeting="Hi"
+        baseline={{ ...baseline, archetype: { key: 'hop-chaser' } }}
+      />,
+      'en',
+    )
+    expect(screen.getByTestId('share-archetype')).toBeInTheDocument()
+  })
+
+  it('hides the share action when no archetype is present', () => {
+    renderWithI18n(<TasteProfileSummary greeting="Hi" baseline={baseline} />, 'en')
+    expect(screen.queryByTestId('share-archetype')).toBeNull()
+  })
 })
