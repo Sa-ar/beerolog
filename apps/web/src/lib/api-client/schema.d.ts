@@ -513,6 +513,23 @@ export interface components {
          * @enum {string}
          */
         AdventureLevel: "low" | "medium" | "high";
+        /**
+         * Archetype
+         * @description The shareable named taste type. Key-only: the card is rendered from the
+         *     frontend archetype metadata map, not from the user's exact dials.
+         */
+        Archetype: {
+            key: components["schemas"]["ArchetypeKey"];
+        };
+        /**
+         * ArchetypeKey
+         * @description Closed set of shareable taste archetypes (slice #285).
+         *
+         *     Derived deterministically from dials by `services.archetype.derive_archetype`.
+         *     The frontend metadata map (slice #286) must cover every member.
+         * @enum {string}
+         */
+        ArchetypeKey: "adventurer" | "hop-chaser" | "bitter-zealot" | "malt-romantic" | "roast-devotee" | "fruit-forward" | "sour-seeker" | "smoke-wanderer" | "heavyweight" | "easy-drinker" | "crisp-classicist" | "balanced-explorer";
         /** AvailabilityFlagRequest */
         AvailabilityFlagRequest: {
             /** Beer Id */
@@ -634,6 +651,7 @@ export interface components {
         BaselineTasteRecord: {
             /** Abv Affinity */
             abv_affinity: number;
+            archetype: components["schemas"]["Archetype"];
             /** Bitterness */
             bitterness: number;
             /** Body */
@@ -854,6 +872,7 @@ export interface components {
         FlavorCue: "grapefruit" | "caramel" | "pine" | "tropical" | "banana_bread" | "citrus_zest" | "coffee" | "bread_crust";
         /** GuestRecommendationsResponse */
         GuestRecommendationsResponse: {
+            archetype: components["schemas"]["Archetype"];
             /** Results */
             results: components["schemas"]["GuestRecommendedBeer"][];
             /** Unlocked Count */

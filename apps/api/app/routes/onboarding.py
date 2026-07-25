@@ -20,6 +20,8 @@ from beerolog_icon_service.service import resolve_taste_profile_icons
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.api_contracts import (
+    Archetype,
+    BaselineTasteDials,
     BaselineTasteRecord,
     OnboardingAnswers,
     TasteProfileIcon,
@@ -29,6 +31,7 @@ from app.api_contracts import (
 from app.auth import get_current_user
 from app.config import settings
 from app.services import baseline_taste
+from app.services.archetype import derive_archetype
 from app.services.baseline_taste_repo import BaselineTasteRepo, BaselineTasteSnapshot
 from app.services.embedding_service import EmbeddingClient, get_embedding_client
 from app.services.persona import GPTPersonaGenerator, PersonaGenerator
@@ -156,6 +159,20 @@ async def _record_from_snapshot(
         embedding_fresh_at=snap.embedding_fresh_at,
         updated_at=snap.updated_at,
         icons=icons,
+        archetype=Archetype(key=derive_archetype(_dials_from_snapshot(snap))),
+    )
+
+
+def _dials_from_snapshot(snap: BaselineTasteSnapshot) -> BaselineTasteDials:
+    """Project the persisted snapshot onto the dial model archetype derivation wants."""
+    return BaselineTasteDials(
+        bubbles=snap.bubbles,
+        bitterness=snap.bitterness,
+        sweetness=snap.sweetness,
+        body=snap.body,
+        abv_affinity=snap.abv_affinity,
+        flavor_family=snap.flavor_family,
+        novelty_affinity=snap.novelty_affinity,
     )
 
 

@@ -141,8 +141,8 @@ def test_results_include_ibu_and_adventurousness(client: TestClient) -> None:
     assert r.status_code == 200, r.text
     for beer in r.json()["results"]:
         assert "ibu" in beer, "ibu key must be present (may be null)"
-        assert beer["ibu"] is None or isinstance(beer["ibu"], (int, float))
-        assert isinstance(beer["adventurousness"], (int, float))
+        assert beer["ibu"] is None or isinstance(beer["ibu"], int | float)
+        assert isinstance(beer["adventurousness"], int | float)
         assert 0.0 <= beer["adventurousness"] <= 1.0
 
 

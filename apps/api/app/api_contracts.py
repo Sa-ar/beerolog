@@ -164,6 +164,34 @@ class BaselineTasteDials(BaseModel):
     novelty_affinity: Annotated[float, Field(ge=0.0, le=1.0)]
 
 
+class ArchetypeKey(StrEnum):
+    """Closed set of shareable taste archetypes (slice #285).
+
+    Derived deterministically from dials by `services.archetype.derive_archetype`.
+    The frontend metadata map (slice #286) must cover every member.
+    """
+
+    adventurer = "adventurer"
+    hop_chaser = "hop-chaser"
+    bitter_zealot = "bitter-zealot"
+    malt_romantic = "malt-romantic"
+    roast_devotee = "roast-devotee"
+    fruit_forward = "fruit-forward"
+    sour_seeker = "sour-seeker"
+    smoke_wanderer = "smoke-wanderer"
+    heavyweight = "heavyweight"
+    easy_drinker = "easy-drinker"
+    crisp_classicist = "crisp-classicist"
+    balanced_explorer = "balanced-explorer"
+
+
+class Archetype(BaseModel):
+    """The shareable named taste type. Key-only: the card is rendered from the
+    frontend archetype metadata map, not from the user's exact dials."""
+
+    key: ArchetypeKey
+
+
 class TasteProfileIcon(BaseModel):
     purpose: str
     flavor_key: str | None = None
@@ -200,6 +228,7 @@ class BaselineTasteRecord(BaseModel):
     embedding_fresh_at: str  # ISO-8601
     updated_at: str  # ISO-8601
     icons: TasteProfileIcons | None = None
+    archetype: Archetype
 
 
 class CatalogIconItem(BaseModel):
@@ -480,6 +509,7 @@ class GuestRecommendedBeer(BaseModel):
 class GuestRecommendationsResponse(BaseModel):
     results: list[GuestRecommendedBeer]
     unlocked_count: int
+    archetype: Archetype
 
 
 # ---------------------------------------------------------------------------

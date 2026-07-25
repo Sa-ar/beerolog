@@ -251,6 +251,18 @@ def test_onboarding_includes_new_taste_dials(client: TestClient) -> None:
         assert 0.0 <= body[dial] <= 1.0, f"{dial} missing or out of range"
 
 
+def test_baseline_taste_includes_archetype_key(client: TestClient) -> None:
+    from app.api_contracts import ArchetypeKey
+
+    client.post("/onboarding", json=_HOP_HEAD_ANSWERS)
+    r = client.get("/me/baseline-taste")
+    assert r.status_code == 200, r.text
+    key = r.json()["archetype"]["key"]
+    assert key in {k.value for k in ArchetypeKey}
+    # A hop-head profile should derive a hop-leaning archetype.
+    assert key in {ArchetypeKey.hop_chaser, ArchetypeKey.bitter_zealot, ArchetypeKey.adventurer}
+
+
 def test_onboarding_persists_bilingual_persona(client: TestClient) -> None:
     client.post("/onboarding", json=_HOP_HEAD_ANSWERS)
     r = client.get("/me/baseline-taste")

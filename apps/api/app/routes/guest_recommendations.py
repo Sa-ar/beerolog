@@ -23,6 +23,7 @@ import time
 from fastapi import APIRouter, BackgroundTasks, Depends
 
 from app.api_contracts import (
+    Archetype,
     GuestRecommendationsResponse,
     GuestRecommendedBeer,
     OnboardingAnswers,
@@ -32,6 +33,7 @@ from app.db import get_pool
 from app.placeholder_catalog import PLACEHOLDER_CATALOG
 from app.services import baseline_taste, guest_submission_repo
 from app.services import guest_embedding_cache_repo as embed_cache_repo
+from app.services.archetype import derive_archetype
 from app.services.catalog_repo import fetch_catalog
 from app.services.dial_match import rank_by_dials
 from app.services.embedding_service import (
@@ -282,4 +284,5 @@ async def post_guest_recommendations(
     return GuestRecommendationsResponse(
         results=results,
         unlocked_count=settings.guest_unlocked_count,
+        archetype=Archetype(key=derive_archetype(dials)),
     )

@@ -171,6 +171,38 @@
         "title": "AdventureLevel",
         "type": "string"
       },
+      "Archetype": {
+        "description": "The shareable named taste type. Key-only: the card is rendered from the\nfrontend archetype metadata map, not from the user's exact dials.",
+        "properties": {
+          "key": {
+            "$ref": "#/components/schemas/ArchetypeKey"
+          }
+        },
+        "required": [
+          "key"
+        ],
+        "title": "Archetype",
+        "type": "object"
+      },
+      "ArchetypeKey": {
+        "description": "Closed set of shareable taste archetypes (slice #285).\n\nDerived deterministically from dials by `services.archetype.derive_archetype`.\nThe frontend metadata map (slice #286) must cover every member.",
+        "enum": [
+          "adventurer",
+          "hop-chaser",
+          "bitter-zealot",
+          "malt-romantic",
+          "roast-devotee",
+          "fruit-forward",
+          "sour-seeker",
+          "smoke-wanderer",
+          "heavyweight",
+          "easy-drinker",
+          "crisp-classicist",
+          "balanced-explorer"
+        ],
+        "title": "ArchetypeKey",
+        "type": "string"
+      },
       "AvailabilityFlagRequest": {
         "properties": {
           "beer_id": {
@@ -486,6 +518,9 @@
             "title": "Abv Affinity",
             "type": "number"
           },
+          "archetype": {
+            "$ref": "#/components/schemas/Archetype"
+          },
           "bitterness": {
             "title": "Bitterness",
             "type": "number"
@@ -561,7 +596,8 @@
           "novelty_affinity",
           "model_version",
           "embedding_fresh_at",
-          "updated_at"
+          "updated_at",
+          "archetype"
         ],
         "title": "BaselineTasteRecord",
         "type": "object"
@@ -1124,6 +1160,9 @@
       },
       "GuestRecommendationsResponse": {
         "properties": {
+          "archetype": {
+            "$ref": "#/components/schemas/Archetype"
+          },
           "results": {
             "items": {
               "$ref": "#/components/schemas/GuestRecommendedBeer"
@@ -1138,7 +1177,8 @@
         },
         "required": [
           "results",
-          "unlocked_count"
+          "unlocked_count",
+          "archetype"
         ],
         "title": "GuestRecommendationsResponse",
         "type": "object"

@@ -42,6 +42,16 @@ def test_returns_results_and_unlocked_count() -> None:
         assert beer["name"]
 
 
+def test_response_includes_archetype_key() -> None:
+    raw = TestClient(app)
+    r = raw.post("/guest-recommendations", json=_PAYLOAD)
+    assert r.status_code == 200, r.text
+    from app.api_contracts import ArchetypeKey
+
+    key = r.json()["archetype"]["key"]
+    assert key in {k.value for k in ArchetypeKey}
+
+
 def test_no_openai_still_succeeds(monkeypatch) -> None:
     """Guest path must NOT depend on OpenAI; succeeds with empty key."""
     monkeypatch.setattr(settings, "openai_api_key", "")
