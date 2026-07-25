@@ -34,6 +34,10 @@
   "archetypeOg": {
     "cta": "מה הטעם שלכם? beerolog.com/try"
   },
+  "tasteShare": {
+    "cta": "מה הטעם שלכם? קחו את החידון של 30 השניות",
+    "ctaHint": "בחינם — בלי הרשמה כדי להתחיל."
+  },
   "beerDetail": {
     "radarAria": "פרופיל טעם של {{name}}",
     "axis": {

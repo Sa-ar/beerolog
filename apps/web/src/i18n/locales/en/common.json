@@ -34,6 +34,10 @@
   "archetypeOg": {
     "cta": "What's your type? beerolog.com/try"
   },
+  "tasteShare": {
+    "cta": "What's YOUR type? Take the 30-second quiz",
+    "ctaHint": "Free — no sign-up needed to start."
+  },
   "beerDetail": {
     "radarAria": "Sensory profile of {{name}}",
     "axis": {
