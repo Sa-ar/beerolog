@@ -31,6 +31,9 @@
     "sour": "חמצמץ",
     "novelty": "הרפתקניות"
   },
+  "archetypeOg": {
+    "cta": "מה הטעם שלכם? beerolog.com/try"
+  },
   "beerDetail": {
     "radarAria": "פרופיל טעם של {{name}}",
     "axis": {

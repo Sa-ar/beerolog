@@ -31,6 +31,9 @@
     "sour": "Sour",
     "novelty": "Novelty"
   },
+  "archetypeOg": {
+    "cta": "What's your type? beerolog.com/try"
+  },
   "beerDetail": {
     "radarAria": "Sensory profile of {{name}}",
     "axis": {

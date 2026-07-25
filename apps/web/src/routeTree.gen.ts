@@ -24,6 +24,7 @@ import { Route as BeerIdRouteImport } from './routes/beer.$id'
 import { Route as AccountSettingsRouteImport } from './routes/account.settings'
 import { Route as AccountSecurityRouteImport } from './routes/account.security'
 import { Route as AccountProfileRouteImport } from './routes/account.profile'
+import { Route as ApiOgTasteKeyRouteImport } from './routes/api.og.taste.$key'
 
 const TryRoute = TryRouteImport.update({
   id: '/try',
@@ -100,6 +101,11 @@ const AccountProfileRoute = AccountProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => AccountRoute,
 } as any)
+const ApiOgTasteKeyRoute = ApiOgTasteKeyRouteImport.update({
+  id: '/api/og/taste/$key',
+  path: '/api/og/taste/$key',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -117,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/signin/$': typeof SigninSplatRoute
   '/signup/$': typeof SignupSplatRoute
   '/account/': typeof AccountIndexRoute
+  '/api/og/taste/$key': typeof ApiOgTasteKeyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -133,6 +140,7 @@ export interface FileRoutesByTo {
   '/signin/$': typeof SigninSplatRoute
   '/signup/$': typeof SignupSplatRoute
   '/account': typeof AccountIndexRoute
+  '/api/og/taste/$key': typeof ApiOgTasteKeyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -151,6 +159,7 @@ export interface FileRoutesById {
   '/signin/$': typeof SigninSplatRoute
   '/signup/$': typeof SignupSplatRoute
   '/account/': typeof AccountIndexRoute
+  '/api/og/taste/$key': typeof ApiOgTasteKeyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -170,6 +179,7 @@ export interface FileRouteTypes {
     | '/signin/$'
     | '/signup/$'
     | '/account/'
+    | '/api/og/taste/$key'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -186,6 +196,7 @@ export interface FileRouteTypes {
     | '/signin/$'
     | '/signup/$'
     | '/account'
+    | '/api/og/taste/$key'
   id:
     | '__root__'
     | '/'
@@ -203,6 +214,7 @@ export interface FileRouteTypes {
     | '/signin/$'
     | '/signup/$'
     | '/account/'
+    | '/api/og/taste/$key'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -217,6 +229,7 @@ export interface RootRouteChildren {
   LegalSlugRoute: typeof LegalSlugRoute
   SigninSplatRoute: typeof SigninSplatRoute
   SignupSplatRoute: typeof SignupSplatRoute
+  ApiOgTasteKeyRoute: typeof ApiOgTasteKeyRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -326,6 +339,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountProfileRouteImport
       parentRoute: typeof AccountRoute
     }
+    '/api/og/taste/$key': {
+      id: '/api/og/taste/$key'
+      path: '/api/og/taste/$key'
+      fullPath: '/api/og/taste/$key'
+      preLoaderRoute: typeof ApiOgTasteKeyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -358,6 +378,7 @@ const rootRouteChildren: RootRouteChildren = {
   LegalSlugRoute: LegalSlugRoute,
   SigninSplatRoute: SigninSplatRoute,
   SignupSplatRoute: SignupSplatRoute,
+  ApiOgTasteKeyRoute: ApiOgTasteKeyRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
