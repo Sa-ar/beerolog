@@ -8,7 +8,13 @@ export type {
   TasteProfileIcons,
 } from './types'
 export { ICON_STYLE } from './style'
-export { buildCatalogSvg, buildFlavorSvg, buildHeroSvg, buildIconByPurpose } from './icon-factory'
+export {
+  buildArchetypeSvg,
+  buildCatalogSvg,
+  buildFlavorSvg,
+  buildHeroSvg,
+  buildIconByPurpose,
+} from './icon-factory'
 export { resolveTasteProfileIconRequests } from './taste-profile'
 export { resolveProfileHeroSvg } from './resolve-profile-hero'
 export { sanitizeSvg } from './sanitize'

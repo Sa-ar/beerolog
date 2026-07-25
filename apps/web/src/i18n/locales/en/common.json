@@ -7,6 +7,30 @@
     "enlargeImage": "Enlarge photo",
     "close": "Close"
   },
+  "archetypes": {
+    "adventurer": { "name": "The Adventurer", "tagline": "Always chasing the next new pour.", "traits": ["Curious", "Bold", "Open"] },
+    "hop-chaser": { "name": "The Hop Chaser", "tagline": "Give it all the hops — the greener the better.", "traits": ["Hoppy", "Aromatic", "Vibrant"] },
+    "bitter-zealot": { "name": "The Bitter Zealot", "tagline": "The more bitter, the better. No apologies.", "traits": ["Bitter", "Intense", "Bold"] },
+    "malt-romantic": { "name": "The Malt Romantic", "tagline": "Warm, bready and comforting to the last sip.", "traits": ["Malty", "Warm", "Smooth"] },
+    "roast-devotee": { "name": "The Roast Devotee", "tagline": "Coffee, cocoa and dark-roast depth in every glass.", "traits": ["Roasty", "Deep", "Rich"] },
+    "fruit-forward": { "name": "The Fruit Forward", "tagline": "Juicy, ripe and bursting with fruit.", "traits": ["Fruity", "Juicy", "Bright"] },
+    "sour-seeker": { "name": "The Sour Seeker", "tagline": "Tart, funky and gloriously puckering.", "traits": ["Sour", "Tart", "Funky"] },
+    "smoke-wanderer": { "name": "The Smoke Wanderer", "tagline": "Campfire smoke and savory depth, off the beaten path.", "traits": ["Smoky", "Savory", "Bold"] },
+    "heavyweight": { "name": "The Heavyweight", "tagline": "Big body, big ABV, big flavor.", "traits": ["Strong", "Full", "Rich"] },
+    "easy-drinker": { "name": "The Easy Drinker", "tagline": "Light, crushable and always refreshing.", "traits": ["Light", "Crisp", "Sessionable"] },
+    "crisp-classicist": { "name": "The Crisp Classicist", "tagline": "Clean, balanced lagers done right.", "traits": ["Clean", "Balanced", "Classic"] },
+    "balanced-explorer": { "name": "The Balanced Explorer", "tagline": "A little of everything, always in balance.", "traits": ["Balanced", "Versatile", "Open"] }
+  },
+  "archetypeAxis": {
+    "bitterness": "Bitter",
+    "sweetness": "Sweet",
+    "body": "Body",
+    "hoppy": "Hoppy",
+    "malty": "Malty",
+    "roasty": "Roasty",
+    "sour": "Sour",
+    "novelty": "Novelty"
+  },
   "beerDetail": {
     "radarAria": "Sensory profile of {{name}}",
     "axis": {

@@ -59,6 +59,25 @@ const MARKETING_BODIES: Record<string, string> = {
   'taste-quiz-hero': `<ellipse cx="100" cy="148" rx="56" ry="8" fill="${M}"/><rect x="62" y="48" width="76" height="88" rx="10" fill="${L}" stroke="${S}" stroke-width="2" stroke-dasharray="6 4"/><path d="M62 68 Q100 58 138 68" fill="none" stroke="${S}" stroke-width="2" opacity="0.5"/><circle cx="84" cy="92" r="6" fill="${S}" opacity="0.2"/><circle cx="116" cy="102" r="5" fill="${S}" opacity="0.15"/><text x="100" y="98" text-anchor="middle" font-size="28" fill="hsl(25 50% 15%)" opacity="0.35">?</text><circle cx="148" cy="28" r="18" fill="${M}" stroke="${S}" stroke-width="2"/><path d="M144 24c2-4 6-6 8-4" fill="none" stroke="${S}" stroke-width="1.5" stroke-linecap="round"/><circle cx="36" cy="36" r="16" fill="${M}" stroke="${S}" stroke-width="2"/><rect x="31" y="32" width="10" height="8" rx="2" fill="${S}" opacity="0.25"/><circle cx="100" cy="16" r="14" fill="${S}"/><path d="M96 16l3 3 5-6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`,
 }
 
+// Archetype icons (slice #286): one per shareable taste archetype. The six
+// flavor-led archetypes reuse the flavor artwork (maximally representative); the
+// scalar-led ones get their own brand-style bodies. All are 32x32 @beerolog/icons
+// SVGs — never emoji.
+const ARCHETYPE_BODIES: Record<string, string> = {
+  'hop-chaser': FLAVOR_BODIES.hoppy!,
+  'bitter-zealot': `<path d="M16 3v4" stroke="${S}" stroke-width="${W}" stroke-linecap="round"/><path d="M9 10q7-4 14 0-7 5-14 0z" fill="${A.hoppy}" stroke="${S}" stroke-width="${W}" stroke-linejoin="round"/><path d="M7 17q9-5 18 0-9 5-18 0z" fill="${A.hoppy}" stroke="${S}" stroke-width="${W}" stroke-linejoin="round"/><path d="M9 24q7-4 14 0-7 4-14 0z" fill="${A.hoppy}" stroke="${S}" stroke-width="${W}" stroke-linejoin="round"/><path d="M13 29l3-3 3 3" stroke="${S}" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`,
+  'malt-romantic': FLAVOR_BODIES.malty!,
+  'roast-devotee': FLAVOR_BODIES.roasty!,
+  'fruit-forward': FLAVOR_BODIES.fruity!,
+  'sour-seeker': FLAVOR_BODIES.sour!,
+  'smoke-wanderer': FLAVOR_BODIES.smoky!,
+  adventurer: VIBE_BODIES.adventurous!,
+  heavyweight: `<path d="M10 6h12l-1 20c0 2-2 3.5-5 3.5s-5-1.5-5-3.5L10 6z" fill="${A.roasty}" stroke="${S}" stroke-width="${W}" stroke-linejoin="round"/><ellipse cx="16" cy="8.5" rx="6" ry="1.8" fill="${L}" stroke="${S}" stroke-width="1"/><path d="M11.5 13h9" stroke="${L}" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>`,
+  'easy-drinker': VIBE_BODIES.refreshing!,
+  'crisp-classicist': `<path d="M12 5h8l-1.5 22c0 1.5-1.2 2.5-2.5 2.5s-2.5-1-2.5-2.5L12 5z" fill="hsl(48 90% 88%)" stroke="${S}" stroke-width="${W}" stroke-linejoin="round"/><circle cx="15" cy="12" r="1.2" fill="white" stroke="${S}" stroke-width="0.6"/><circle cx="17.5" cy="16" r="1" fill="white" stroke="${S}" stroke-width="0.6"/><circle cx="15.5" cy="20" r="0.9" fill="white" stroke="${S}" stroke-width="0.6"/>`,
+  'balanced-explorer': `<circle cx="16" cy="16" r="11" fill="${L}" stroke="${S}" stroke-width="${W}"/><path d="M16 5a11 11 0 0 1 0 22z" fill="${A.malty}"/><path d="M16 5v22" stroke="${S}" stroke-width="1.5"/>`,
+}
+
 const PURPOSE_MAP: Record<string, { viewBox: string; body: string }> = {}
 
 function registerPurpose(purpose: string, viewBox: string, body: string) {
@@ -79,6 +98,9 @@ for (const [key, body] of Object.entries(JOURNEY_BODIES)) {
 }
 for (const [key, body] of Object.entries(MARKETING_BODIES)) {
   registerPurpose(`marketing:${key}`, '0 0 200 160', body)
+}
+for (const [key, body] of Object.entries(ARCHETYPE_BODIES)) {
+  registerPurpose(`archetype:${key}`, '0 0 32 32', body)
 }
 
 function flavorBody(key: string): string {
@@ -135,4 +157,8 @@ export function buildCatalogSvg(group: CatalogIconGroup, iconKey: string): strin
 
 export function buildFlavorSvg(flavor: string): string | null {
   return buildCatalogSvg('flavor', flavor)
+}
+
+export function buildArchetypeSvg(key: string): string | null {
+  return buildIconByPurpose(`archetype:${key}`)
 }
