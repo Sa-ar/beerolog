@@ -26,10 +26,10 @@ describe('CookieNotice', () => {
     expect(screen.queryByRole('dialog')).toBeNull()
   })
 
-  it('stays dismissed after acknowledgement', async () => {
+  it('stays hidden after a consent choice', async () => {
     const user = userEvent.setup()
     const { unmount } = renderWithI18n(<CookieNotice />, 'en')
-    await user.click(screen.getByRole('button', { name: /got it/i }))
+    await user.click(screen.getByRole('button', { name: /accept/i }))
     expect(screen.queryByRole('region', { name: /cookie/i })).toBeNull()
     unmount()
 

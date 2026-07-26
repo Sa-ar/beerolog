@@ -2,11 +2,12 @@ import { useAuth } from '@clerk/tanstack-react-start'
 import { Link } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { updateAnalyticsConsent } from '../lib/analytics'
+import { getAnalyticsConsent, type AnalyticsConsent } from '../lib/analytics-consent'
 
-const ACK_KEY = 'cookie_notice_ack'
-
-// Non-blocking first-visit disclosure. A region (not a modal) so it never
-// blocks essential site function; dismissal is remembered in localStorage.
+// Opt-in consent banner for analytics + session replay. A region (not a modal)
+// so it never blocks the site; PostHog stays dormant until the user accepts.
+// Shows only until a decision is recorded (analytics-consent.ts).
 export function CookieNotice() {
   const { t } = useTranslation()
   const { isSignedIn } = useAuth()
@@ -17,7 +18,7 @@ export function CookieNotice() {
   const [reserve, setReserve] = useState(0)
 
   useEffect(() => {
-    if (localStorage.getItem(ACK_KEY) !== '1') setShow(true)
+    if (getAnalyticsConsent() === null) setShow(true)
   }, [])
 
   useEffect(() => {
@@ -33,8 +34,8 @@ export function CookieNotice() {
 
   if (!show) return null
 
-  function dismiss() {
-    localStorage.setItem(ACK_KEY, '1')
+  function decide(consent: AnalyticsConsent) {
+    updateAnalyticsConsent(consent)
     setShow(false)
   }
 
@@ -59,13 +60,22 @@ export function CookieNotice() {
               {t('cookies.notice.learnMore')}
             </Link>
           </p>
-          <button
-            type="button"
-            onClick={dismiss}
-            className="rounded-lg bg-brand-500 px-3 py-1.5 font-medium text-[hsl(26_30%_10%)] hover:bg-brand-600"
-          >
-            {t('cookies.notice.dismiss')}
-          </button>
+          <div className="flex shrink-0 gap-2">
+            <button
+              type="button"
+              onClick={() => decide('denied')}
+              className="rounded-lg px-3 py-1.5 font-medium text-neutral-500 hover:text-neutral-700"
+            >
+              {t('cookies.notice.decline')}
+            </button>
+            <button
+              type="button"
+              onClick={() => decide('granted')}
+              className="rounded-lg bg-brand-500 px-3 py-1.5 font-medium text-[hsl(26_30%_10%)] hover:bg-brand-600"
+            >
+              {t('cookies.notice.accept')}
+            </button>
+          </div>
         </div>
       </div>
     </>

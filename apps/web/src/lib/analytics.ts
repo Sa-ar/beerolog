@@ -1,16 +1,20 @@
 import posthog from 'posthog-js'
+import {
+  hasAnalyticsConsent,
+  writeAnalyticsConsent,
+  type AnalyticsConsent,
+} from './analytics-consent'
 
-// PostHog product analytics for Beerolog. FULL suite (owner decision 2026-07-26):
-// autocapture, $pageview, session replay (input-masked), feature flags, exception
-// tracking, and persistent cross-session identity via cookies.
-//
-// ⚠ COMPLIANCE DEBT: this sets analytics cookies + records sessions with NO opt-in
-// consent, which the privacy policy requires. Tracked in
-// docs/legal/legal-launch-followups.md — resolve before public launch.
+// PostHog product analytics for Beerolog. FULL suite (autocapture, $pageview,
+// session replay [input-masked], feature flags, exception tracking, cookie
+// identity) — GATED on explicit opt-in consent (analytics-consent.ts). Nothing
+// initialises and no cookie/recording starts until the user accepts in the
+// consent banner (CookieNotice); declining keeps PostHog dormant.
 let ready = false
 
 export function initAnalytics(): void {
   if (ready || typeof window === 'undefined') return
+  if (!hasAnalyticsConsent()) return // opt-in gate: no PostHog until consent
   const key = import.meta.env.VITE_POSTHOG_PROJECT_TOKEN
   if (!key) return // unset in dev/preview — capture() stays a no-op
   posthog.init(key, {
@@ -25,6 +29,14 @@ export function initAnalytics(): void {
     // (on) — the "everything on" posture.
   })
   ready = true
+}
+
+// Called by the consent banner. Grant → initialise now; deny → opt out if PostHog
+// is already running (e.g. the user changes their mind mid-session).
+export function updateAnalyticsConsent(consent: AnalyticsConsent): void {
+  writeAnalyticsConsent(consent)
+  if (consent === 'granted') initAnalytics()
+  else if (ready) posthog.opt_out_capturing()
 }
 
 // Closed set of growth-loop events + their properties. PostHog has no per-event

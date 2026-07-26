@@ -108,10 +108,11 @@
   "a11y": { "skipToContent": "Skip to content" },
   "cookies": {
     "notice": {
-      "label": "Cookie notice",
-      "body": "Beerolog uses only essential and functional cookies — no advertising or analytics.",
+      "label": "Cookie consent",
+      "body": "Beerolog uses analytics and session replay (PostHog) to understand usage and improve the app. Enable these? Essential cookies stay on either way.",
       "learnMore": "Learn more",
-      "dismiss": "Got it"
+      "accept": "Accept",
+      "decline": "Decline"
     }
   },
   "privacy": {
@@ -182,7 +183,7 @@
         },
         {
           "heading": "Sub-processors & International transfers",
-          "body": "We share data with Clerk Inc. (authentication), Vercel Inc. (web hosting), Neon AD (database), OpenAI LLC (recommendation inference), and PostHog Inc. (product-usage analytics). By using the service, you consent to your data being transferred to and stored in the US and the EU."
+          "body": "We share data with Clerk Inc. (authentication), Vercel Inc. (web hosting), Neon AD (database), OpenAI LLC (recommendation inference), and PostHog Inc. (product analytics + opt-in session replay). By using the service, you consent to your data being transferred to and stored in the US and the EU."
         },
         {
           "heading": "Data retention & Deletion",
@@ -242,11 +243,15 @@
     },
     "cookies": {
       "title": "Cookie Policy",
-      "intro": "Beerolog uses a minimal number of cookies and browser storage to provide a functional and secure experience. We do not use cookies for advertising or tracking.",
+      "intro": "Beerolog uses a minimal number of cookies and browser storage to provide a functional and secure experience. We do not use cookies for advertising. Analytics and session-replay cookies are set only if you opt in via the consent banner.",
       "sections": [
         {
           "heading": "Strictly necessary cookies",
           "body": "• 'age_verified' (First-party): Records that you verified you are 18 or older to prevent the age gate from appearing on every visit. Lifespan: 1 year.\n• Authentication Cookies (Third-party/Clerk): Managed by Clerk Inc. to identify active sign-in sessions and maintain security. Lifespan: Per session / Clerk retention policy."
+        },
+        {
+          "heading": "Analytics cookies (opt-in)",
+          "body": "If you accept in the consent banner, PostHog sets first-party 'ph_*' cookies to measure product usage and record (input-masked) session replays so we can improve the app. Lifespan: up to 1 year. Decline and none are set; you can withdraw anytime by clearing them."
         },
         {
           "heading": "Functional cookies & storage",

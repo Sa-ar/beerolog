@@ -60,15 +60,13 @@ K-factor loop in the PostHog funnel UI: `share_taste` → `cta_click` →
 `quiz_start (referred=true)` → `quiz_complete` → `archetype_revealed` → back to
 `share_taste`.
 
-## ⚠ Before public launch (compliance debt)
+## Consent (opt-in gated)
 
-The sub-processor disclosure is landed (`legal.privacy`, both locales). BUT the full
-suite now **sets analytics cookies + records real user sessions with no opt-in
-consent**, which the privacy policy requires. Outstanding (see
-`docs/legal/legal-launch-followups.md`):
+PostHog is **off until the user opts in.** `initAnalytics()` no-ops unless
+`analytics-consent.ts` records `granted`; the `CookieNotice` banner is the Accept /
+Decline gate. Declining opts out — nothing initialises, no cookie, no replay. The
+sub-processor disclosure, `ph_*` cookie registry + cookie-policy copy, and the opt-in
+session-replay privacy disclosure are all landed (both locales).
 
-1. Add PostHog cookies (`ph_*`) to `apps/web/src/lib/legal/cookies.ts` + notice copy.
-2. Wire explicit opt-in consent gating `initAnalytics()` before any cookie/replay fires.
-3. Privacy policy: disclose session replay + cookie identity; confirm masking is enough.
-
-Accepted as known debt by the owner 2026-07-26.
+Residual: consent is stored in localStorage (client-only). Move to a server-readable
+consent cookie if SSR ever needs to know the choice.
