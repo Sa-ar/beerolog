@@ -90,9 +90,9 @@ class GPTMenuChat:
     """Real LLM chat. Dependency-injected; stubbed in tests (like persona.py)."""
 
     def __init__(self, *, api_key: str, model: str) -> None:
-        from openai import AsyncOpenAI  # type: ignore[import-not-found]
+        from app.services.observability import observed_async_openai
 
-        self._client = AsyncOpenAI(api_key=api_key)
+        self._client = observed_async_openai(api_key)
         self._model = model
 
     async def converse(self, *, pool: list[PoolBeer], messages: list[ChatTurn]) -> ChatReply:

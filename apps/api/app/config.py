@@ -88,6 +88,10 @@ class Settings(BaseSettings):
     # Batched why-line explanations on POST /recommendations.
     why_model: str = "gpt-4o-mini"
     why_timeout_seconds: float = 4.0
+    # PostHog LLM observability ($ai_generation events on OpenAI calls). Unset =
+    # off (falls back to the plain OpenAI client). Reuses the web project token.
+    posthog_project_token: str = ""
+    posthog_host: str = "https://us.i.posthog.com"
 
     @field_validator("availability_scrape_sources", "cors_allowed_origins", mode="before")
     @classmethod

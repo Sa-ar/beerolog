@@ -9,7 +9,6 @@ import asyncio
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from openai import AsyncOpenAI
 from pydantic import BaseModel, Field
 
 from app.api_contracts import AbvIntent, SessionIntent
@@ -31,6 +30,7 @@ from app.services.menu_chat import (
     chat_over_pool,
 )
 from app.services.menu_scanner import scan_menu
+from app.services.observability import observed_async_openai
 from app.services.vision_service import OpenAILLMClient
 
 router = APIRouter(prefix="/menu", tags=["menu"])
@@ -119,7 +119,7 @@ def _vision_client_dep() -> OpenAILLMClient:
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Menu scan requires an OpenAI API key",
         )
-    return OpenAILLMClient(AsyncOpenAI(api_key=settings.openai_api_key))
+    return OpenAILLMClient(observed_async_openai(settings.openai_api_key))
 
 
 def _menu_chat_dep() -> MenuChatLLM:

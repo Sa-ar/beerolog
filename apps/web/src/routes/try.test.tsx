@@ -24,8 +24,12 @@ vi.mock('../lib/api-fetch', () => ({
 // TanStack's createFileRoute pulls in router internals; stub it so we can render
 // the page component directly.
 vi.mock('@tanstack/react-router', () => ({
-  createFileRoute: () => (opts: { component: unknown }) => opts,
+  createFileRoute: () => (opts: { component: unknown }) => ({ ...opts, useSearch: () => ({}) }),
 }))
+
+// Analytics is a browser-only PostHog wrapper; stub it so the unit test doesn't
+// pull in posthog-js. Event firing is covered by analytics.test.ts.
+vi.mock('../lib/analytics', () => ({ capture: vi.fn() }))
 
 import { Route } from './try'
 import { GUEST_ANSWERS_KEY } from '../lib/guest-answers'

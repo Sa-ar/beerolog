@@ -14,6 +14,7 @@ overrides:
 allowBuilds:
   '@clerk/shared': true
   '@parcel/watcher': true
+  core-js: false
   esbuild: true
   # @vercel/og renders via resvg-wasm, so sharp's native build is not needed.
   sharp: false

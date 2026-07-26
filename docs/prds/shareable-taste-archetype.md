@@ -130,10 +130,16 @@ Key shape decisions (locked with the product owner in the plan session):
 ### Fast-follow (near-free once infra exists — not a launch slice)
 
 - Backfill `og:image` (`size=og`) on `/beer/{id}` and `/try` via their `head()`
-  so every pasted Beerolog link gets a rich preview.
+  so every pasted Beerolog link gets a rich preview. — **Pending, tracked in [#309](https://github.com/Sa-ar/beerolog/issues/309).**
 - Attribution: append `?from=share` to the `/taste` CTA and fire a Vercel
-  Analytics custom event (already mounted — no new dependency) to measure the
-  share → quiz-start K-factor.
+  Analytics custom event to measure the share → quiz-start K-factor. — **Done
+  (via PostHog, not Vercel):** the `/taste` CTA carries `?from=share`, and
+  PostHog captures the full loop — `archetype_revealed`, `share_taste`,
+  `quiz_start` (with `referred`), `quiz_complete`, `cta_click`. Vercel's 2-key
+  custom-event cap + lack of funnels drove the switch; see
+  `docs/services/posthog.md`. Sub-processor disclosure is landed, but PostHog was
+  since expanded to its full suite (replay, cookies, autocapture), which reopened
+  the consent/cookie compliance gate before prod (`docs/legal/legal-launch-followups.md`).
 
 ## Explicitly Out of Scope
 
@@ -142,6 +148,10 @@ Key shape decisions (locked with the product owner in the plan session):
   their existing PRDs).
 - No per-user LLM persona in the *shared* card (it remains the in-app blurb).
 - No new analytics platform (reuse the mounted Vercel Analytics for the fast-follow).
+  — **Superseded (owner decision, 2026-07-26):** PostHog was added for the funnel /
+  K-factor analysis the counts-only Vercel Analytics can't provide. Later expanded to
+  the full PostHog suite (replay, flags, autocapture); the cookieless posture was
+  dropped 2026-07-26 (owner decision), reopening the consent/cookie compliance work.
 
 ## Acceptance Criteria (feature-level)
 

@@ -1,9 +1,10 @@
 import { ClerkProvider } from '@clerk/tanstack-react-start'
 import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
 import { QueryClientProvider } from '@tanstack/react-query'
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { I18nextProvider } from 'react-i18next'
 import { Analytics } from '@vercel/analytics/react'
+import { initAnalytics } from '../lib/analytics'
 import { IconCatalogProvider } from '@beerolog/icons'
 import { AppBottomNav } from '../components/AppBottomNav'
 import { AppFooter } from '../components/AppFooter'
@@ -35,6 +36,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   const { lang, ageVerified } = Route.useLoaderData()
   const i18n = useMemo(() => createI18n(lang), [lang])
   const queryClient = getQueryClient()
+  // Cookieless PostHog for growth-loop events; no-op until VITE_POSTHOG_PROJECT_TOKEN is set.
+  useEffect(() => initAnalytics(), [])
   // signInUrl points Clerk's RedirectToSignIn (and friends) at our own /signin
   // page instead of Clerk's hosted Account Portal.
   const clerkProps = publishableKey ? { publishableKey, signInUrl: '/signin' } : {}

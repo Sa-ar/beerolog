@@ -15,10 +15,11 @@ export interface CookieDefinition {
   purposeKey: string
 }
 
-// Canonical list of every cookie present in the Beerolog experience, including
-// essential cookies set by our sign-in provider (Clerk). Analytics/marketing
-// cookies are intentionally absent — they must not be set without explicit
-// opt-in (see the cookie notice copy).
+// First-party essential/functional cookies. ⚠ PostHog analytics is now enabled and
+// sets analytics cookies (ph_*) + records sessions, which are NOT yet listed here
+// and were NOT gated behind opt-in consent. The cookie-notice "no analytics cookies
+// without opt-in" claim is inaccurate until that lands — outstanding compliance
+// work, see docs/legal/legal-launch-followups.md.
 export const COOKIE_REGISTRY: CookieDefinition[] = [
   { name: 'age_verified', classification: 'essential', durationDays: 365, purposeKey: 'ageVerified' },
   { name: 'lang', classification: 'functional', durationDays: 365, purposeKey: 'lang' },

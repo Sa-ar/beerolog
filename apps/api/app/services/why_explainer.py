@@ -63,9 +63,11 @@ class GPTWhyExplainer:
     """Real OpenAI batch explainer."""
 
     def __init__(self, *, api_key: str, model: str, timeout_seconds: float) -> None:
-        from openai import AsyncOpenAI  # type: ignore[import-not-found]
+        # PostHog-observed client ($ai_generation events) when configured, else
+        # the plain OpenAI client. See app/services/observability.py.
+        from app.services.observability import observed_async_openai
 
-        self._client = AsyncOpenAI(api_key=api_key)
+        self._client = observed_async_openai(api_key)
         self._model = model
         self._timeout = timeout_seconds
 

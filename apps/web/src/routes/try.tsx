@@ -8,8 +8,9 @@
  */
 
 import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { capture } from '../lib/analytics'
 import { Alert, Button, Card, CardContent, Heading } from '@beerolog/ui'
 import { GuestResults } from '../components/GuestResults'
 import { ShareArchetypeButton } from '../components/ShareArchetypeButton'
@@ -27,6 +28,10 @@ import {
 } from '../lib/guest-answers'
 
 export const Route = createFileRoute('/try')({
+  // `from=share` marks a visitor arriving from a shared /taste card, so a
+  // quiz-start can be attributed to the growth loop (see quiz_start_from_share).
+  validateSearch: (search: Record<string, unknown>): { from?: 'share' } =>
+    search.from === 'share' ? { from: 'share' } : {},
   component: TryPage,
 })
 
@@ -39,10 +44,18 @@ type View =
 
 function TryPage() {
   const { t } = useTranslation()
+  const { from } = Route.useSearch()
+
   // Seed once from storage so a returning guest can skip straight to results.
   const [view, setView] = useState<View>(() =>
     readGuestAnswers() ? { status: 'resume' } : { status: 'quiz' },
   )
+
+  // A quiz-start attributed to the share loop when the visitor arrived via a
+  // shared /taste card (`referred`). Fires on each entry into the quiz view.
+  useEffect(() => {
+    if (view.status === 'quiz') capture('quiz_start', { surface: 'try', referred: from === 'share' })
+  }, [view.status, from])
   const [lastAnswers, setLastAnswers] = useState<Answers | null>(null)
 
   async function run(answers: Answers) {
@@ -51,12 +64,16 @@ function TryPage() {
       const data = await fetchGuestRecommendations(answers)
       localStorage.removeItem('beerolog_try_quiz')
       setView({ status: 'results', data })
+      if (data.archetype && isArchetypeKey(data.archetype.key)) {
+        capture('archetype_revealed', { key: data.archetype.key, surface: 'try' })
+      }
     } catch {
       setView({ status: 'error' })
     }
   }
 
   function onComplete(answers: Answers) {
+    capture('quiz_complete', { surface: 'try' })
     const pruned = prunedAnswers(answers)
     writeGuestAnswers(pruned)
     setLastAnswers(pruned)
@@ -125,7 +142,11 @@ function TryPage() {
             {t('try.unlocked', { count: view.data.unlocked_count })}
           </p>
           {view.data.archetype && isArchetypeKey(view.data.archetype.key) ? (
-            <ShareArchetypeButton archetypeKey={view.data.archetype.key} className="w-full" />
+            <ShareArchetypeButton
+              archetypeKey={view.data.archetype.key}
+              surface="try"
+              className="w-full"
+            />
           ) : null}
           <BeerJsonLd beers={view.data.results} />
           <GuestResults

@@ -26,11 +26,33 @@ Requirements:
 """
 
 
+def _observed_openai(api_key: str):
+    """AsyncOpenAI wrapped for PostHog $ai_generation capture when
+    POSTHOG_PROJECT_TOKEN is set, else the plain client. Self-contained so this
+    shared package needn't depend on the API's app config."""
+    import os
+
+    token = os.environ.get("POSTHOG_PROJECT_TOKEN", "")
+    if token:
+        try:
+            from posthog import Posthog
+            from posthog.ai.openai import AsyncOpenAI as ObservedAsyncOpenAI
+
+            ph = Posthog(
+                project_api_key=token,
+                host=os.environ.get("POSTHOG_HOST", "https://us.i.posthog.com"),
+            )
+            return ObservedAsyncOpenAI(api_key=api_key, posthog_client=ph)
+        except ImportError:
+            pass
+    from openai import AsyncOpenAI  # type: ignore[import-not-found]
+
+    return AsyncOpenAI(api_key=api_key)
+
+
 class GPTIconGenerator:
     def __init__(self, *, api_key: str, model: str) -> None:
-        from openai import AsyncOpenAI  # type: ignore[import-not-found]
-
-        self._client = AsyncOpenAI(api_key=api_key)
+        self._client = _observed_openai(api_key)
         self._model = model
 
     async def generate_svg(self, description: str) -> str:

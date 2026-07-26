@@ -20,10 +20,11 @@ class EmbeddingClient(Protocol):
 
 class OpenAIEmbeddingClient:
     def __init__(self, api_key: str, model: str) -> None:
-        # Lazy-import openai so tests can run without the package installed
-        from openai import AsyncOpenAI  # type: ignore[import-not-found]
+        # PostHog-observed client ($ai_embedding events) when configured, else
+        # the plain client. See app/services/observability.py.
+        from app.services.observability import observed_async_openai
 
-        self._client = AsyncOpenAI(api_key=api_key)
+        self._client = observed_async_openai(api_key)
         self._model = model
 
     async def embed(self, text: str) -> list[float]:

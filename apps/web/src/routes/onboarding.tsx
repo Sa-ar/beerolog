@@ -7,8 +7,9 @@
 
 import { RedirectToSignIn, Show } from '@clerk/tanstack-react-start'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { capture } from '../lib/analytics'
 import { Alert, Heading } from '@beerolog/ui'
 import { apiFetch } from '../lib/api-fetch'
 import { QuizStepper } from '../components/QuizStepper'
@@ -39,8 +40,12 @@ function OnboardingForm() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // The signed-in taste quiz has no share referral; surface tells the two flows apart.
+  useEffect(() => capture('quiz_start', { surface: 'onboarding', referred: false }), [])
+
   async function submit(answers: Answers) {
     if (submitting) return
+    capture('quiz_complete', { surface: 'onboarding' })
     setSubmitting(true)
     setError(null)
     try {

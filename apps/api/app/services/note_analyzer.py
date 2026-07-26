@@ -69,9 +69,9 @@ class GPTNoteExtractor:
     """Real LLM extractor. Dependency-injected; mocked in tests (like persona.py)."""
 
     def __init__(self, *, api_key: str, model: str) -> None:
-        from openai import AsyncOpenAI  # type: ignore[import-not-found]
+        from app.services.observability import observed_async_openai
 
-        self._client = AsyncOpenAI(api_key=api_key)
+        self._client = observed_async_openai(api_key)
         self._model = model
 
     async def extract(self, *, note: str, rating: str, beer: str | None) -> NoteSignal:

@@ -9,6 +9,7 @@ import { Link, createFileRoute, notFound } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@beerolog/ui'
 import { ArchetypeCard } from '../components/ArchetypeCard'
+import { capture } from '../lib/analytics'
 import {
   archetypeNameKey,
   archetypeTaglineKey,
@@ -71,7 +72,11 @@ export function TasteShareView({ archetypeKey }: { archetypeKey: ArchetypeKey })
       <div className="mx-auto flex max-w-md flex-col items-center gap-6">
         <ArchetypeCard archetypeKey={archetypeKey} variant="reveal" />
         <div className="flex flex-col items-center gap-2 text-center">
-          <Link to="/try">
+          <Link
+            to="/try"
+            search={{ from: 'share' }}
+            onClick={() => capture('cta_click', { key: archetypeKey, target: 'try' })}
+          >
             <Button size="lg">{t('tasteShare.cta')}</Button>
           </Link>
           <p className="text-sm text-neutral-600">{t('tasteShare.ctaHint')}</p>

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@beerolog/ui'
+import { capture } from '../lib/analytics'
 import type { ArchetypeKey } from '../lib/archetypes'
 import { normalizeLang } from '../i18n/locale-cookie'
 import { shareArchetype } from '../lib/share-archetype'
@@ -9,9 +10,11 @@ import { shareArchetype } from '../lib/share-archetype'
 // Native share sheet (with the story image) on mobile; copy-link fallback else.
 export function ShareArchetypeButton({
   archetypeKey,
+  surface,
   className,
 }: {
   archetypeKey: ArchetypeKey
+  surface: 'try' | 'home'
   className?: string
 }) {
   const { t, i18n } = useTranslation()
@@ -24,6 +27,10 @@ export function ShareArchetypeButton({
       lang,
       text: t('share.taste.text'),
     })
+    // Numerator of the share → quiz-start K-factor: only count an actual share.
+    if (outcome === 'shared' || outcome === 'copied') {
+      capture('share_taste', { key: archetypeKey, method: outcome, surface })
+    }
     if (outcome === 'copied') {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)

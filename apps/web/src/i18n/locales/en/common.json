@@ -182,7 +182,7 @@
         },
         {
           "heading": "Sub-processors & International transfers",
-          "body": "We share data with Clerk Inc. (authentication), Vercel Inc. (web hosting), Neon AD (database), and OpenAI LLC (recommendation inference). By using the service, you consent to your data being transferred to and stored in the US and the EU."
+          "body": "We share data with Clerk Inc. (authentication), Vercel Inc. (web hosting), Neon AD (database), OpenAI LLC (recommendation inference), and PostHog Inc. (product-usage analytics). By using the service, you consent to your data being transferred to and stored in the US and the EU."
         },
         {
           "heading": "Data retention & Deletion",

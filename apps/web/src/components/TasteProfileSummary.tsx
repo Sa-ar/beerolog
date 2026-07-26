@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router'
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CatalogIcon, GeneratedTasteIcon, resolveProfileHeroSvg } from '@beerolog/icons'
 import { Badge, Button, Card, Heading } from '@beerolog/ui'
@@ -11,6 +12,7 @@ import {
 } from '../lib/baseline-taste'
 import { useRatingCount } from '../lib/rating-count'
 import { isArchetypeKey } from '../lib/archetypes'
+import { capture } from '../lib/analytics'
 import { SessionQuickPick } from './SessionQuickPick'
 import { ShareArchetypeButton } from './ShareArchetypeButton'
 import { TasteRadar } from './TasteRadar'
@@ -23,6 +25,13 @@ type TasteProfileSummaryProps = {
 export function TasteProfileSummary({ greeting, baseline }: TasteProfileSummaryProps) {
   const { t, i18n } = useTranslation()
   const { data: ratingCount } = useRatingCount()
+
+  // The signed-in home is the second archetype-reveal surface (alongside /try).
+  const archetypeKey =
+    baseline.archetype && isArchetypeKey(baseline.archetype.key) ? baseline.archetype.key : null
+  useEffect(() => {
+    if (archetypeKey) capture('archetype_revealed', { key: archetypeKey, surface: 'home' })
+  }, [archetypeKey])
 
   const flavors = topFlavorFamilies(t, baseline)
   const title = flavorTitle(t, baseline)
@@ -124,7 +133,11 @@ export function TasteProfileSummary({ greeting, baseline }: TasteProfileSummaryP
       </Card>
 
       {baseline.archetype && isArchetypeKey(baseline.archetype.key) ? (
-        <ShareArchetypeButton archetypeKey={baseline.archetype.key} className="w-full" />
+        <ShareArchetypeButton
+          archetypeKey={baseline.archetype.key}
+          surface="home"
+          className="w-full"
+        />
       ) : null}
 
       <section className="flex flex-col gap-6" data-testid="taste-details">
