@@ -30,6 +30,13 @@ jobs:
       - name: Web unit + accessibility (axe) tests
         run: pnpm --dir apps/web test
 
+      # A real production build catches failures tsc does NOT (e.g. duplicate
+      # `export function`, which esbuild rejects but tsc allows). Without this,
+      # build-only breakage reaches main and fails the Vercel deploy.
+      # See docs/ops/incidents/2026-07-28-ci-missing-build.md.
+      - name: Web production build
+        run: pnpm --dir apps/web build
+
   db-schema:
     name: Drizzle migration check
     runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}

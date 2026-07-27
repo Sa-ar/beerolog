@@ -9,6 +9,10 @@ export default defineConfig({
   server: {
     port: Number(process.env.WEB_PORT) || 3000,
   },
+  // 'hidden' emits sourcemaps but drops the //# sourceMappingURL comment, so they
+  // are not served/referenced publicly — posthog-cli uploads them for de-minified
+  // error tracking, then the postbuild step deletes them.
+  build: { sourcemap: 'hidden' },
   plugins: [
     tsConfigPaths({ projects: ['./tsconfig.json'] }),
     tanstackStart(),

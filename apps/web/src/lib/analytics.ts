@@ -45,14 +45,6 @@ export function updateAnalyticsConsent(consent: AnalyticsConsent): void {
   else if (ready) posthog.opt_out_capturing()
 }
 
-// Called by the consent banner. Grant → initialise now; deny → opt out if PostHog
-// is already running (e.g. the user changes their mind mid-session).
-export function updateAnalyticsConsent(consent: AnalyticsConsent): void {
-  writeAnalyticsConsent(consent)
-  if (consent === 'granted') initAnalytics()
-  else if (ready) posthog.opt_out_capturing()
-}
-
 // Closed set of growth-loop events + their properties. PostHog has no per-event
 // key cap (unlike Vercel custom events), so properties are rich and typed here.
 type EventProps = {
