@@ -5,7 +5,6 @@
  * cache. Reuses the slice-2 archetype metadata.
  */
 import { createFileRoute } from '@tanstack/react-router'
-import { ImageResponse } from '@vercel/og'
 import {
   ARCHETYPES,
   archetypeNameKey,
@@ -142,10 +141,17 @@ export const Route = createFileRoute('/api/og/taste/$key')({
         const traits = t(archetypeTraitsKey(key), { returnObjects: true }) as string[]
 
         const font = await loadOgFont()
+        // Lazy-load @vercel/og ONLY inside the handler. Importing it at module
+        // top level pulls its bundled default font (Geist) into the SSR entry,
+        // which readFileSync's a .ttf that the vite/Nitro build never emits —
+        // ENOENT at load crashed EVERY route (prod outage, 2026-07-28). Deferring
+        // + failing soft keeps the app up; only this endpoint degrades.
+        const og = await import('@vercel/og').catch(() => null)
+        if (!og) return new Response('OG image temporarily unavailable', { status: 503 })
         // Pure function of (key, lang, size) → cache hard at the edge forever.
         const headers = { 'Cache-Control': 'public, no-transform, immutable, max-age=31536000' }
         const base = { width, height, headers }
-        return new ImageResponse(
+        return new og.ImageResponse(
           <OgCard
             icon={ARCHETYPES[key].icon}
             size={size}
