@@ -13,6 +13,7 @@ import {
   type SessionBaseline,
   type SessionVibe,
 } from '../lib/session-intent'
+import { capture } from '../lib/analytics'
 
 type SessionQuickPickProps = {
   baseline: BaselineTaste
@@ -39,6 +40,7 @@ export function SessionQuickPick({ baseline }: SessionQuickPickProps) {
 
   function handleSubmit() {
     if (!canSubmit || vibe === null || abv === null) return
+    capture('session_started', { vibe, abv, has_free_text: freeText.trim().length > 0 })
     setNavigating(true)
     markSessionPending({
       baseline: toSessionBaseline(baseline),

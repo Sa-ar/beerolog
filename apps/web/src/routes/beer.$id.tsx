@@ -6,12 +6,14 @@
  */
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button, Heading } from '@beerolog/ui'
 import { apiClient } from '../lib/api-client/client'
 import { BeerDetail, type BeerDetailData } from '../components/BeerDetail'
 import { PAGE_MAIN } from '../lib/page-shell'
 import type { BeerColor } from '../lib/beer-color'
+import { capture } from '../lib/analytics'
 
 export const Route = createFileRoute('/beer/$id')({
   component: BeerDetailPage,
@@ -36,6 +38,13 @@ export function BeerDetailView({ id }: { id: string }) {
       return data
     },
   })
+
+  // Must be before any early returns to satisfy Rules of Hooks.
+  // Fire once when beer data is available — this is the share-loop landing page.
+  useEffect(() => {
+    if (!query.data) return
+    capture('beer_detail_viewed', { beer_id: query.data.id, market_tier: query.data.market_tier })
+  }, [query.data?.id, query.data?.market_tier])
 
   if (query.isPending) {
     return (
@@ -64,6 +73,7 @@ export function BeerDetailView({ id }: { id: string }) {
   }
 
   const b = query.data
+
   const detail: BeerDetailData = {
     name: b.name,
     name_hebrew: b.name_hebrew ?? null,

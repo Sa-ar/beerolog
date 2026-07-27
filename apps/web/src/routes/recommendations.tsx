@@ -7,8 +7,9 @@ import { CatalogIcon } from '@beerolog/icons'
 import { Alert, Button, Heading } from '@beerolog/ui'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { capture } from '../lib/analytics'
 import { RecommendationBeerCard, type RecommendedBeer } from '../components/RecommendationBeerCard'
 import { RecommendationsLoadingState } from '../components/RecommendationsLoadingState'
 import { StatusCard } from '../components/StatusCard'
@@ -233,6 +234,7 @@ function RecommendationsContent() {
   })
   const [nearMeOnly, setNearMeOnly] = useState(false)
   const [shareCopied, setShareCopied] = useState(false)
+  const loadedTracked = useRef(false)
   const areaFilter = features.findNearbySearch ? searchArea : ''
   const nearMeFilter = features.findNearbySearch && nearMeOnly
 
@@ -280,6 +282,16 @@ function RecommendationsContent() {
   const taste = tasteQuery.data ?? null
 
   const loadError = loadMore.isError ? loadMoreErrorMessage(t, loadMore.error) : null
+
+  // Fire once when recommendations first render successfully.
+  useEffect(() => {
+    if (!recs.isSuccess || !recs.data || loadedTracked.current) return
+    loadedTracked.current = true
+    capture('recommendations_loaded', {
+      count: recs.data.results.length,
+      has_session: Boolean(recs.data.results.length > 0 && pendingRequest),
+    })
+  }, [recs.isSuccess, recs.data, pendingRequest])
 
   if (recs.isPending) {
     return <RecommendationsLoadingState />
@@ -376,6 +388,7 @@ function RecommendationsContent() {
     if (typeof navigator !== 'undefined' && navigator.share) {
       try {
         await navigator.share({ text, url })
+        capture('recommendations_shared', { method: 'native' })
       } catch {
         /* user dismissed the share sheet */
       }
@@ -383,6 +396,7 @@ function RecommendationsContent() {
     }
     try {
       await navigator.clipboard.writeText(`${text} ${url}`)
+      capture('recommendations_shared', { method: 'clipboard' })
       setShareCopied(true)
       setTimeout(() => setShareCopied(false), 2000)
     } catch {
@@ -494,7 +508,10 @@ function RecommendationsContent() {
               <Button
                 size="lg"
                 disabled={loadMore.isPending}
-                onClick={() => loadMore.mutate(results)}
+                onClick={() => {
+                  capture('recommendations_loaded_more', {})
+                  loadMore.mutate(results)
+                }}
                 className="w-full max-w-md rounded-xl px-8 shadow-sm"
               >
                 {loadMore.isPending

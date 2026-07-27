@@ -9,6 +9,7 @@ import type { Rating } from '@beerolog/types'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useState } from 'react'
 import { apiClient } from './api-client/client'
+import { capture } from './analytics'
 
 export type DeckBeer = {
   id: string
@@ -84,10 +85,12 @@ export function useRateDeck() {
     if (!beers || finished) return
     const beer = beers[index]
     if (!beer) return
+    capture('beer_rated', { rating })
     save.mutate({ beer_id: beer.id, rating, ...(note ? { note } : {}) })
     const nextIndex = index + 1
     setIndex(nextIndex)
     if (nextIndex >= beers.length) {
+      capture('rating_session_complete', { count: nextIndex })
       setFinished(true)
       // Run complete: drop the stale deck so a later visit excludes what was
       // just rated. Safe now because we no longer render cards from it.

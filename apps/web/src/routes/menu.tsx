@@ -10,6 +10,7 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { PAGE_MAIN } from '../lib/page-shell'
+import { capture } from '../lib/analytics'
 import {
   useMenuChat,
   useMenuRank,
@@ -124,6 +125,7 @@ function MenuScanFlow() {
     setAddedIds([])
     const session = sessionFor(vibe, freeText)
     setAppliedSession(session)
+    capture('menu_scanned', { has_vibe: vibe !== null, has_free_text: freeText.trim().length > 0 })
     scan.mutate(scanArgs(file, session))
   }
 

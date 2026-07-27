@@ -16,6 +16,7 @@ import { SkipLink } from '../components/SkipLink'
 import { AuthTokenBridge } from '../components/AuthTokenBridge'
 import { GlobalErrorPage } from '../components/GlobalErrorPage'
 import { NotFoundPage } from '../components/NotFoundPage'
+import { PostHogIdentitySync } from '../components/PostHogIdentitySync'
 import { createI18n } from '../i18n'
 import { getQueryClient } from '../lib/query-client'
 import { dirFor, getLang } from '../i18n/locale-cookie'
@@ -63,6 +64,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             <ClerkProvider {...clerkProps}>
               <IconCatalogProvider apiUrl={apiUrl}>
                 <AuthTokenBridge />
+                <PostHogIdentitySync />
                 <AgeVerificationGate initialVerified={ageVerified} />
                 <div className="flex min-h-0 flex-1 flex-col">
                   <AppHeader />
