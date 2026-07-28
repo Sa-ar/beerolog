@@ -11,6 +11,7 @@ import { Button, Heading, buttonVariants } from '@beerolog/ui'
 import { Link } from '@tanstack/react-router'
 import { useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { capture } from '../lib/analytics'
 import { PAGE_SHELL_X } from '../lib/page-shell'
 import { useRateDeck } from '../lib/rate-deck'
 import { useSwipeCard } from '../lib/use-swipe-card'
@@ -54,7 +55,11 @@ export function RateDeckFlow() {
     (dx: number, dy: number, threshold: number) => resolveKnowSwipe(dx, dy, threshold, rtl),
     [rtl],
   )
-  const { state: swipe, handlers } = useSwipeCard<Rating>((r) => rate(r), resolve)
+  const track = (r: Rating) => {
+    capture('beer_swiped', { direction: r, deck: 'know' })
+    rate(r)
+  }
+  const { state: swipe, handlers } = useSwipeCard<Rating>(track, resolve)
 
   if (state.status === 'loading') {
     return <Shell subtitle>{t('rate.loading', 'Loading beers…')}</Shell>
@@ -149,13 +154,13 @@ export function RateDeckFlow() {
         role="group"
         aria-label={t('rate.swipeHint')}
       >
-        <Button variant="outline" className="flex-1" onClick={() => rate(RATINGS.disliked)}>
+        <Button variant="outline" className="flex-1" onClick={() => track(RATINGS.disliked)}>
           {t('rate.tapper.disliked', 'Not for me')}
         </Button>
-        <Button variant="outline" className="flex-1" onClick={() => rate(RATINGS.fine)}>
+        <Button variant="outline" className="flex-1" onClick={() => track(RATINGS.fine)}>
           {t('rate.tapper.fine', 'It was fine')}
         </Button>
-        <Button variant="default" className="flex-1" onClick={() => rate(RATINGS.loved)}>
+        <Button variant="default" className="flex-1" onClick={() => track(RATINGS.loved)}>
           {t('rate.tapper.loved', 'Loved it')}
         </Button>
       </div>

@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@beerolog/ui'
+import { capture } from '../lib/analytics'
 import { WANT_DECK_PRELOAD_AT } from '../lib/session-intent'
 import { useSwipeCard } from '../lib/use-swipe-card'
 import { resolveWantSwipe, wantActionForDirection, type WantAction } from '../lib/swipe-want'
@@ -86,8 +87,7 @@ export function WantDeck({
     (action: WantAction) => {
       const card = beers[index]
       if (!card) return
-      // ponytail: swipe signal only; the typed `beer_swiped` analytics event
-      // lands in Slice 8 (#329). Persistence is wired via onSignal (#325).
+      capture('beer_swiped', { direction: action, deck: 'want' })
       onSignal?.(card.id, action)
       setIndex((i) => i + 1)
     },

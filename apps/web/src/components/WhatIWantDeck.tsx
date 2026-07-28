@@ -12,6 +12,7 @@ import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { Button, Heading } from '@beerolog/ui'
 import { apiFetch } from '../lib/api-fetch'
+import { capture } from '../lib/analytics'
 import type { BaselineTaste } from '../lib/baseline-taste'
 import { excludeRated } from '../lib/exclude-rated'
 import { DEFAULT_MATCH_CALIBRATION, tonightMatchPercent } from '../lib/match-score'
@@ -194,6 +195,7 @@ export function WhatIWantDeck() {
             .filter((r) => r.matched_id)
             .map(scanItemToCard)
             .sort((a, b) => (b.matchPercent ?? -1) - (a.matchPercent ?? -1))
+          capture('menu_scan_scoped', { matched: scopedCards.length })
           setScoped({ label: t('whatIWant.scanMenuLabel'), cards: scopedCards })
         },
       },
@@ -203,8 +205,13 @@ export function WhatIWantDeck() {
   const onSignal = (beerId: string, action: 'want' | 'pass' | 'must_try') => {
     // Right-swipe persists `want`; super-like persists `must_try`. Pass (left)
     // is not saved. The API also feeds the taste signal (#325).
-    if (action === 'want') addWant.mutate({ beerId, state: 'want' })
-    else if (action === 'must_try') addWant.mutate({ beerId, state: 'must_try' })
+    if (action === 'want') {
+      addWant.mutate({ beerId, state: 'want' })
+      capture('want_to_try_added', { state: 'want' })
+    } else if (action === 'must_try') {
+      addWant.mutate({ beerId, state: 'must_try' })
+      capture('want_to_try_added', { state: 'must_try' })
+    }
   }
 
   const endCard = (

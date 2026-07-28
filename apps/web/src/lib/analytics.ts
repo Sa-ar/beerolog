@@ -62,6 +62,11 @@ type EventProps = {
   beer_rated: { rating: string }
   rating_session_complete: { count: number }
   beer_detail_viewed: { beer_id: string; market_tier: string }
+  // Page-reduction swipe decks (#329). direction is the vocab value (want/pass/
+  // must_try for `What I want`; loved/fine/disliked/unknown for `What I know`).
+  beer_swiped: { direction: string; deck: 'want' | 'know' }
+  want_to_try_added: { state: 'want' | 'must_try' }
+  menu_scan_scoped: { matched: number }
 }
 
 export function capture<K extends keyof EventProps>(name: K, props: EventProps[K]): void {

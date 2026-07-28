@@ -8,4 +8,10 @@ describe('analytics.capture', () => {
     expect(() => capture('cta_click', { key: 'hop-chaser', target: 'try' })).not.toThrow()
     expect(() => capture('quiz_start', { surface: 'try', referred: true })).not.toThrow()
   })
+
+  it('accepts the page-reduction swipe-deck events as no-ops before init', () => {
+    expect(() => capture('beer_swiped', { direction: 'want', deck: 'want' })).not.toThrow()
+    expect(() => capture('want_to_try_added', { state: 'must_try' })).not.toThrow()
+    expect(() => capture('menu_scan_scoped', { matched: 4 })).not.toThrow()
+  })
 })

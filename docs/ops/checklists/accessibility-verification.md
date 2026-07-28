@@ -45,6 +45,20 @@ Using only Tab / Shift+Tab / Enter / Space / arrow keys:
 - [ ] The accessibility statement contact (coordinator email) is correct
 - [ ] The cookie notice appears on first visit and does **not** block use
 
+## 5. Swipe decks (page reduction, #329)
+
+Run against `What I want` and `What I know` (ADR 0004 / WCAG 2.5.1, Level A).
+
+- [ ] **Every swipe has an operable on-screen button equivalent** — `What I want`: Pass / Want / Must try; `What I know`: Not for me / It was fine / Loved it. Verified with keyboard only.
+- [ ] **Undo** is present and operable on both decks (button, not gesture-only).
+- [ ] Swipe controls form a `role="group"` with an accessible name; every control is focusable and Enter/Space-operable.
+- [ ] Match % badge and super-like / remove controls expose `aria-label`s; card image is decorative (`alt=""`).
+- [ ] **RTL (Hebrew):** swipe direction mirrors on the horizontal axis and the card layout mirrors under `dir="rtl"`.
+- [ ] Swipe/persist/scan analytics (`beer_swiped`, `want_to_try_added`, `menu_scan_scoped`) stay dormant until consent is granted.
+
+Automated coverage: `WantDeck.test`, `rate.test`, `decks-a11y.test`,
+`swipe-want.test`, `swipe-know.test`, `deferral-guard.test`.
+
 ## Known exceptions
 
 - Clerk's hosted sign-in UI is a third-party embed; note any barriers in the
