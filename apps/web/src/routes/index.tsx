@@ -3,6 +3,7 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { Button, Heading } from '@beerolog/ui'
 import { PAGE_MAIN } from '../lib/page-shell'
+import { WhatIWantDeck } from '../components/WhatIWantDeck'
 
 export const Route = createFileRoute('/')({
   component: HomePage,
@@ -20,35 +21,13 @@ function HomePage() {
   }
 
   if (signedIn) {
-    return (
-      <main className={`${PAGE_MAIN} py-10 sm:py-12`}>
-        <SignedInHome />
-      </main>
-    )
+    return <WhatIWantDeck />
   }
 
   return (
     <main className={`${PAGE_MAIN} py-8 sm:py-14`}>
       <VisitorHome />
     </main>
-  )
-}
-
-// `What I want` is the signed-in home/default deck. The image-forward swipe deck
-// lands in a later slice; this IA skeleton links into the existing picks surface.
-// Taste profile now lives behind the avatar on the Account > Profile tab.
-function SignedInHome() {
-  const { t } = useTranslation()
-  return (
-    <section className="mx-auto flex w-full max-w-md flex-col gap-6 py-6 text-center">
-      <Heading className="text-3xl sm:text-4xl">{t('whatIWant.title')}</Heading>
-      <p className="text-base text-neutral-500">{t('whatIWant.subtitle')}</p>
-      <Link to="/recommendations" className="block">
-        <Button className="w-full" size="lg">
-          {t('whatIWant.cta')}
-        </Button>
-      </Link>
-    </section>
   )
 }
 

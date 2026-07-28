@@ -20,7 +20,17 @@ export type SwipeState = {
 
 const IDLE: SwipeState = { dx: 0, dy: 0, dragging: false, direction: null, progress: 0 }
 
-export function useSwipeCard(onCommit: (rating: Rating) => void) {
+// Generic over the committed value so both decks reuse the pointer glue:
+// `What I know` commits a Rating (default resolver), `What I want` commits a
+// WantAction via a resolver passed in by the deck.
+export function useSwipeCard<T = Rating>(
+  onCommit: (value: T) => void,
+  resolve: (dx: number, dy: number, threshold: number) => T | null = resolveSwipe as (
+    dx: number,
+    dy: number,
+    threshold: number,
+  ) => T | null,
+) {
   const [state, setState] = useState<SwipeState>(IDLE)
   const startRef = useRef<{ x: number; y: number } | null>(null)
   const liveRef = useRef({ dx: 0, dy: 0 })
@@ -53,8 +63,8 @@ export function useSwipeCard(onCommit: (rating: Rating) => void) {
     const { dx, dy } = liveRef.current
     startRef.current = null
     setState(IDLE)
-    const rating = resolveSwipe(dx, dy, SWIPE_THRESHOLD)
-    if (rating) onCommit(rating)
+    const value = resolve(dx, dy, SWIPE_THRESHOLD)
+    if (value != null) onCommit(value)
   }
 
   return {

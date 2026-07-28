@@ -73,7 +73,18 @@
   "whatIWant": {
     "title": "What I want",
     "subtitle": "Your highest-match beers, ready to swipe.",
-    "cta": "See your picks"
+    "cta": "See your picks",
+    "loading": "Finding your picks…",
+    "error": "Couldn't load your picks. Try again.",
+    "empty": "That's everything for now — rate a few beers to sharpen your picks.",
+    "emptyCta": "Take the taste quiz",
+    "pass": "Pass",
+    "want": "Want",
+    "superLike": "Must try",
+    "undo": "Undo",
+    "details": "Details",
+    "swipeHint": "Swipe right to want, left to pass, up for must-try",
+    "progress": "{{current}} of {{total}}"
   },
   "menu": {
     "account": "Account menu",
