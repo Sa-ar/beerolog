@@ -2,12 +2,8 @@ import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { renderWithI18n } from '../test/render'
-import type { RecommendedBeer } from './RecommendationBeerCard'
+import type { DeckCard } from './WantDeck'
 
-vi.mock('../lib/match-score', () => ({
-  DEFAULT_MATCH_CALIBRATION: {},
-  tonightMatchPercent: () => 88,
-}))
 vi.mock('./SwipeBeerCard', () => ({
   SwipeBeerCard: ({ beer }: { beer: { id: string } }) => (
     <div data-testid="card">{beer.id}</div>
@@ -16,26 +12,18 @@ vi.mock('./SwipeBeerCard', () => ({
 
 const { WantDeck } = await import('./WantDeck')
 
-function beer(id: string): RecommendedBeer {
+function beer(id: string): DeckCard {
   return {
     id,
     name: id,
     brewery: 'B',
     style: 'IPA',
     abv: 5,
-    market_tier: 'craft',
     image_url: null,
-    adventurousness: 0.5,
-    why: { code: 'x', text: `why-${id}` },
-    breakdown: {
-      baseline_score: 1,
-      session_score: 1,
-      abv_score: 1,
-      novelty_score: 1,
-      total_score: 1,
-      dominant_component: 'baseline',
-    },
-  } as RecommendedBeer
+    color: 'gold',
+    matchPercent: 88,
+    why: `why-${id}`,
+  }
 }
 
 describe('WantDeck', () => {
@@ -100,5 +88,13 @@ describe('WantDeck', () => {
     renderWithI18n(<WantDeck beers={[beer('a')]} onOpenRefiner={onOpenRefiner} />, 'en')
     await user.click(screen.getByRole('button', { name: 'Refine' }))
     expect(onOpenRefiner).toHaveBeenCalled()
+  })
+
+  it('exposes the menu-scan action in the header when a handler is given', async () => {
+    const onScan = vi.fn()
+    const user = userEvent.setup()
+    renderWithI18n(<WantDeck beers={[beer('a')]} onScan={onScan} />, 'en')
+    await user.click(screen.getByRole('button', { name: 'Scan' }))
+    expect(onScan).toHaveBeenCalled()
   })
 })

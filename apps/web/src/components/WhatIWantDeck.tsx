@@ -6,7 +6,7 @@
  * Cold-start (no profile) shows a quiz CTA for now; Slice 7 (#328) turns this
  * into a default-profile deck.
  */
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
@@ -14,8 +14,11 @@ import { Button, Heading } from '@beerolog/ui'
 import { apiFetch } from '../lib/api-fetch'
 import type { BaselineTaste } from '../lib/baseline-taste'
 import { excludeRated } from '../lib/exclude-rated'
+import { DEFAULT_MATCH_CALIBRATION, tonightMatchPercent } from '../lib/match-score'
 import { useMyRatings } from '../lib/my-ratings'
+import { useScanMenu, type MenuScanResultItem } from '../lib/menu-scan'
 import { useAddWantToTry } from '../lib/use-want-to-try'
+import type { RecommendedBeer } from './RecommendationBeerCard'
 import {
   fetchRecommendationsPage,
   recommendationsLocale,
@@ -24,7 +27,43 @@ import {
   type SessionRequest,
 } from '../lib/session-intent'
 import { RefinerSheet } from './RefinerSheet'
-import { WantDeck } from './WantDeck'
+import { WantDeck, type DeckCard } from './WantDeck'
+
+// The deck's match % is fixed (not result-set normalized); baseline path uses
+// no tonight session. Missing breakdown (e.g. test fixtures) degrades to null.
+function recommendedToCard(beer: RecommendedBeer): DeckCard {
+  return {
+    id: beer.id,
+    name: beer.name,
+    name_hebrew: beer.name_hebrew ?? null,
+    brewery: beer.brewery,
+    style: beer.style,
+    abv: beer.abv,
+    image_url: beer.image_url,
+    color: beer.color ?? null,
+    matchPercent: beer.breakdown
+      ? tonightMatchPercent(beer.breakdown, false, DEFAULT_MATCH_CALIBRATION, 0.3)
+      : null,
+    why: beer.why?.text ?? null,
+  }
+}
+
+// Menu-scan results are already menu-scoped and taste-ranked; taste_fit (0..1)
+// becomes the card's match %. Only catalog-matched rows form the scoped deck.
+function scanItemToCard(item: MenuScanResultItem): DeckCard {
+  return {
+    id: item.matched_id as string,
+    name: item.name ?? item.raw_text,
+    name_hebrew: null,
+    brewery: item.brewery ?? '',
+    style: item.style ?? '',
+    abv: item.abv ?? 0,
+    image_url: null,
+    color: null,
+    matchPercent: item.taste_fit != null ? Math.round(item.taste_fit * 100) : null,
+    why: null,
+  }
+}
 
 function Frame({ children }: { children: React.ReactNode }) {
   return <main className="mx-auto flex w-full flex-1 flex-col overflow-hidden">{children}</main>
@@ -49,8 +88,11 @@ export function WhatIWantDeck() {
   const [session, setSession] = useState<SessionRequest | null>(null)
   const [notTried, setNotTried] = useState(false)
   const [refinerOpen, setRefinerOpen] = useState(false)
+  const [scoped, setScoped] = useState<{ label: string; cards: DeckCard[] } | null>(null)
   const myRatings = useMyRatings()
   const addWant = useAddWantToTry()
+  const scan = useScanMenu()
+  const fileRef = useRef<HTMLInputElement>(null)
 
   const baselineQuery = useQuery<{ baseline: BaselineTaste } | { noProfile: true }, Error>({
     queryKey: ['deck-baseline'],
@@ -142,7 +184,37 @@ export function WhatIWantDeck() {
   }
 
   const allBeers = recs.data.pages.at(-1) ?? []
-  const beers = notTried ? excludeRated(allBeers, myRatings) : allBeers
+  const filtered = notTried ? excludeRated(allBeers, myRatings) : allBeers
+  const cards = scoped ? scoped.cards : filtered.map(recommendedToCard)
+
+  // Menu scan is its own first-class action — never merged into the refiner or
+  // free text. On success the deck reloads scoped to the extracted catalog
+  // beers, ranked match-first. The menu-scan AI chat stays on /menu (deferred
+  // within this slice), not merged here.
+  function onScanFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = '' // allow re-selecting the same file
+    if (!file) return
+    scan.mutate(
+      { file },
+      {
+        onSuccess: (results) => {
+          const scopedCards = results
+            .filter((r) => r.matched_id)
+            .map(scanItemToCard)
+            .sort((a, b) => (b.matchPercent ?? -1) - (a.matchPercent ?? -1))
+          setScoped({ label: t('whatIWant.scanMenuLabel'), cards: scopedCards })
+        },
+      },
+    )
+  }
+
+  const onSignal = (beerId: string, action: 'want' | 'pass' | 'must_try') => {
+    // Right-swipe persists `want`; super-like persists `must_try`. Pass (left)
+    // is not saved. The API also feeds the taste signal (#325).
+    if (action === 'want') addWant.mutate({ beerId, state: 'want' })
+    else if (action === 'must_try') addWant.mutate({ beerId, state: 'must_try' })
+  }
 
   const endCard = (
     <div className="flex flex-col items-center gap-3">
@@ -151,11 +223,9 @@ export function WhatIWantDeck() {
       </Heading>
       <div className="flex w-full max-w-xs flex-col gap-2">
         <Button onClick={() => setRefinerOpen(true)}>{t('whatIWant.endAdjust')}</Button>
-        <Link to="/menu" className="block">
-          <Button variant="outline" className="w-full">
-            {t('whatIWant.endScan')}
-          </Button>
-        </Link>
+        <Button variant="outline" onClick={() => fileRef.current?.click()}>
+          {t('whatIWant.endScan')}
+        </Button>
         <Link to="/account/profile" className="block">
           <Button variant="outline" className="w-full">
             {t('whatIWant.endList')}
@@ -165,23 +235,59 @@ export function WhatIWantDeck() {
     </div>
   )
 
+  const scopedEndCard = (
+    <div className="flex flex-col items-center gap-3">
+      <p className="text-lg font-semibold">{t('whatIWant.scanEnd')}</p>
+      <Button onClick={() => setScoped(null)}>{t('whatIWant.scanClear')}</Button>
+    </div>
+  )
+
   return (
     <Frame>
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        data-testid="menu-scan-input"
+        className="hidden"
+        onChange={onScanFile}
+      />
+      {scan.isPending ? (
+        <p className="py-2 text-center text-sm text-neutral-400 animate-pulse">
+          {t('whatIWant.scanPending')}
+        </p>
+      ) : null}
+      {scan.isError ? (
+        <p role="alert" className="py-2 text-center text-sm text-red-600">
+          {t('whatIWant.scanError')}
+        </p>
+      ) : null}
+      {scoped ? (
+        <div className="mx-auto flex w-full max-w-md items-center justify-between gap-2 px-4 pt-2">
+          <span className="truncate rounded-full bg-brand-500/20 px-3 py-1 text-sm text-brand-200">
+            {t('whatIWant.scanScopedChip', { label: scoped.label })}
+          </span>
+          <Button variant="ghost" size="sm" onClick={() => setScoped(null)}>
+            {t('whatIWant.scanClear')}
+          </Button>
+        </div>
+      ) : null}
       <WantDeck
-        beers={beers}
-        onSignal={(beerId, action) => {
-          // Right-swipe persists `want`; super-like persists `must_try`. Pass
-          // (left) is not saved. The API also feeds the taste signal (#325).
-          if (action === 'want') addWant.mutate({ beerId, state: 'want' })
-          else if (action === 'must_try') addWant.mutate({ beerId, state: 'must_try' })
-        }}
-        hasMore={recs.hasNextPage}
-        onNearEnd={() => {
-          if (recs.hasNextPage && !recs.isFetchingNextPage) void recs.fetchNextPage()
-        }}
-        endCard={endCard}
-        onOpenRefiner={() => setRefinerOpen(true)}
-        resetKey={`${JSON.stringify(session)}|${notTried}`}
+        beers={cards}
+        onSignal={onSignal}
+        hasMore={scoped ? false : recs.hasNextPage}
+        {...(scoped
+          ? {}
+          : {
+              onNearEnd: () => {
+                if (recs.hasNextPage && !recs.isFetchingNextPage) void recs.fetchNextPage()
+              },
+              onOpenRefiner: () => setRefinerOpen(true),
+            })}
+        endCard={scoped ? scopedEndCard : endCard}
+        onScan={() => fileRef.current?.click()}
+        resetKey={scoped ? `scoped:${scoped.label}` : `${JSON.stringify(session)}|${notTried}`}
       />
       <RefinerSheet
         open={refinerOpen}

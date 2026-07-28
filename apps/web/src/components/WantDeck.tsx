@@ -1,19 +1,32 @@
 /**
- * `What I want` swipe deck (issue #323). One image-forward card per viewport;
- * swipe right = want, left = pass, up = must-try, each with an on-screen button
- * equivalent + undo (WCAG 2.5.1). Swipes post a signal immediately; the
- * persisted Want-to-try list is stubbed here and landed in Slice 4 (#325).
- * Batch paging + refiners land in Slice 3 (#324).
+ * `What I want` swipe deck (issues #323, #324, #327). One image-forward card per
+ * viewport; swipe right = want, left = pass, up = must-try, each with an
+ * on-screen button equivalent + undo (WCAG 2.5.1). Renders a generic DeckCard so
+ * both the recommendations feed and menu-scan results (scoped deck) reuse it.
+ * Batch preload via onNearEnd; a menu-scan action (onScan) scopes the deck.
  */
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@beerolog/ui'
-import { DEFAULT_MATCH_CALIBRATION, tonightMatchPercent } from '../lib/match-score'
 import { WANT_DECK_PRELOAD_AT } from '../lib/session-intent'
 import { useSwipeCard } from '../lib/use-swipe-card'
 import { resolveWantSwipe, wantActionForDirection, type WantAction } from '../lib/swipe-want'
-import type { RecommendedBeer } from './RecommendationBeerCard'
+import type { BeerColor } from '../lib/beer-color'
 import { SwipeBeerCard } from './SwipeBeerCard'
+
+/** A ready-to-render deck card: card fields + a precomputed match % and why. */
+export type DeckCard = {
+  id: string
+  name: string
+  name_hebrew?: string | null
+  brewery: string
+  style: string
+  abv: number
+  image_url?: string | null
+  color?: BeerColor | null
+  matchPercent?: number | null
+  why?: string | null
+}
 
 const STAMP_POSITION: Record<WantAction, string> = {
   want: 'end-4 top-1/2 -translate-y-1/2 border-green-400 text-green-200',
@@ -34,9 +47,10 @@ export function WantDeck({
   onNearEnd,
   endCard,
   onOpenRefiner,
+  onScan,
   resetKey,
 }: {
-  beers: RecommendedBeer[]
+  beers: DeckCard[]
   onSignal?: (beerId: string, action: WantAction) => void
   /** More batches are available; suppresses the terminal card while preloading. */
   hasMore?: boolean
@@ -46,16 +60,16 @@ export function WantDeck({
   endCard?: ReactNode
   /** Opens the refiner bottom sheet (header filter button). */
   onOpenRefiner?: () => void
-  /** Changes when the deck is re-queried (refiner change) so the index resets;
-   * stable across preloaded batches so the position is kept. */
+  /** Opens the menu-scan action (header camera button). */
+  onScan?: () => void
+  /** Changes when the deck is re-queried (refiner change / scope change) so the
+   * index resets; stable across preloaded batches so the position is kept. */
   resetKey?: string
 }) {
   const { t, i18n } = useTranslation()
   const rtl = i18n.dir() === 'rtl'
   const [index, setIndex] = useState(0)
 
-  // Least-scroll: swipe replaces scroll, so keep the page from scrolling under
-  // an up/down drag while the deck is mounted.
   useEffect(() => {
     const previous = document.body.style.overflow
     document.body.style.overflow = 'hidden'
@@ -64,19 +78,17 @@ export function WantDeck({
     }
   }, [])
 
-  // Reset to the top only on a re-query (refiner change), not when a preloaded
-  // batch grows the same deck.
   useEffect(() => {
     setIndex(0)
   }, [resetKey])
 
   const commit = useCallback(
     (action: WantAction) => {
-      const beer = beers[index]
-      if (!beer) return
-      // ponytail: swipe signal only for now; the typed `beer_swiped` analytics
-      // event and the persisted Want-to-try write land in Slices 9 (#329) and 4 (#325).
-      onSignal?.(beer.id, action)
+      const card = beers[index]
+      if (!card) return
+      // ponytail: swipe signal only; the typed `beer_swiped` analytics event
+      // lands in Slice 8 (#329). Persistence is wired via onSignal (#325).
+      onSignal?.(card.id, action)
       setIndex((i) => i + 1)
     },
     [beers, index, onSignal],
@@ -88,14 +100,13 @@ export function WantDeck({
   )
   const { state, handlers } = useSwipeCard<WantAction>(commit, resolve)
 
-  // Preload the next batch a few cards before the end so the deck feels endless.
   const remaining = beers.length - index
   useEffect(() => {
     if (hasMore && onNearEnd && remaining <= WANT_DECK_PRELOAD_AT) onNearEnd()
   }, [hasMore, onNearEnd, remaining])
 
-  const beer = beers[index]
-  if (!beer) {
+  const card = beers[index]
+  if (!card) {
     if (hasMore) {
       return (
         <div className="flex min-h-0 flex-1 flex-col items-center justify-center p-6 text-center">
@@ -114,7 +125,6 @@ export function WantDeck({
     )
   }
 
-  const matchPercent = tonightMatchPercent(beer.breakdown, false, DEFAULT_MATCH_CALIBRATION, 0.3)
   const liveAction = wantActionForDirection(state.direction, rtl)
   const transform = `translate(${state.dx}px, ${state.dy}px) rotate(${state.dx / 24}deg)`
 
@@ -132,13 +142,18 @@ export function WantDeck({
         <span className="text-xs font-medium text-neutral-400" aria-live="polite">
           {t('whatIWant.progress', { current: index + 1, total: beers.length })}
         </span>
-        {onOpenRefiner ? (
-          <Button variant="ghost" size="sm" onClick={onOpenRefiner}>
-            {t('whatIWant.refine')}
-          </Button>
-        ) : (
-          <span className="w-12" aria-hidden />
-        )}
+        <div className="flex items-center gap-1">
+          {onScan ? (
+            <Button variant="ghost" size="sm" onClick={onScan}>
+              {t('whatIWant.scan')}
+            </Button>
+          ) : null}
+          {onOpenRefiner ? (
+            <Button variant="ghost" size="sm" onClick={onOpenRefiner}>
+              {t('whatIWant.refine')}
+            </Button>
+          ) : null}
+        </div>
       </div>
 
       <div className="relative min-h-0 flex-1">
@@ -159,7 +174,11 @@ export function WantDeck({
             state.dragging ? '' : 'transition-transform duration-200 motion-reduce:transition-none'
           }`}
         >
-          <SwipeBeerCard beer={beer} matchPercent={matchPercent} why={beer.why?.text ?? null} />
+          <SwipeBeerCard
+            beer={card}
+            matchPercent={card.matchPercent ?? null}
+            why={card.why ?? null}
+          />
         </div>
       </div>
 

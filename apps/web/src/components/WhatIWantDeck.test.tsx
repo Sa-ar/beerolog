@@ -1,8 +1,19 @@
-import { screen, waitFor } from '@testing-library/react'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { renderWithI18n } from '../test/render'
 import { fetchRecommendationsPage } from '../lib/session-intent'
+
+const { scanState } = vi.hoisted(() => ({ scanState: { results: [] as unknown[] } }))
+
+vi.mock('../lib/menu-scan', () => ({
+  useScanMenu: () => ({
+    mutate: (_args: unknown, opts?: { onSuccess?: (r: unknown) => void }) =>
+      opts?.onSuccess?.(scanState.results),
+    isPending: false,
+    isError: false,
+  }),
+}))
 
 vi.mock('../lib/api-fetch', () => ({
   apiFetch: vi.fn(async () => ({
@@ -34,6 +45,10 @@ vi.mock('./WantDeck', () => ({
     </div>
   ),
 }))
+
+beforeEach(() => {
+  scanState.results = []
+})
 
 vi.mock('./RefinerSheet', () => ({
   RefinerSheet: ({
@@ -82,5 +97,27 @@ describe('WhatIWantDeck', () => {
       ),
     )
     expect(await screen.findByTestId('deck-count')).toHaveTextContent('1')
+  })
+
+  it('scans a menu, scopes the deck to the extracted beers, and clears back', async () => {
+    scanState.results = [
+      { matched_id: 'm1', name: 'M1', taste_fit: 0.9, raw_text: 'M1', confidence: 1, needs_review: false },
+      { matched_id: 'm2', name: 'M2', taste_fit: 0.7, raw_text: 'M2', confidence: 1, needs_review: false },
+      { matched_id: null, raw_text: 'unmatched', confidence: 0.2, needs_review: true },
+    ]
+    const user = userEvent.setup()
+    renderWithI18n(<WhatIWantDeck />, 'en')
+
+    expect(await screen.findByTestId('deck-count')).toHaveTextContent('3') // baseline
+    fireEvent.change(screen.getByTestId('menu-scan-input'), {
+      target: { files: [new File(['x'], 'menu.jpg', { type: 'image/jpeg' })] },
+    })
+
+    // Scoped to the 2 catalog-matched beers; unmatched row is dropped.
+    expect(await screen.findByText(/showing/i)).toBeInTheDocument()
+    expect(screen.getByTestId('deck-count')).toHaveTextContent('2')
+
+    await user.click(screen.getByRole('button', { name: /clear/i }))
+    expect(screen.getByTestId('deck-count')).toHaveTextContent('3')
   })
 })

@@ -90,7 +90,14 @@
     "endScan": "סרקו תפריט",
     "endList": "לרשימת הבירות שבא לכם",
     "swipeHint": "החליקו ימינה כדי לרצות, שמאלה כדי לדלג, למעלה לחובה לטעום",
-    "progress": "{{current}} מתוך {{total}}"
+    "progress": "{{current}} מתוך {{total}}",
+    "scan": "סריקה",
+    "scanMenuLabel": "תפריט",
+    "scanScopedChip": "מציג: {{label}}",
+    "scanClear": "נקוי",
+    "scanPending": "סורקים תפריט…",
+    "scanError": "לא הצלחנו לקרוא את התפריט. נסו שוב.",
+    "scanEnd": "זה התפריט — נקו כדי לראות את כל ההמלצות."
   },
   "refiner": {
     "title": "חדדו את ההמלצות",

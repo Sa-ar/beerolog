@@ -90,7 +90,14 @@
     "endScan": "Scan a menu",
     "endList": "See your Want-to-try list",
     "swipeHint": "Swipe right to want, left to pass, up for must-try",
-    "progress": "{{current}} of {{total}}"
+    "progress": "{{current}} of {{total}}",
+    "scan": "Scan",
+    "scanMenuLabel": "menu",
+    "scanScopedChip": "Showing: {{label}}",
+    "scanClear": "Clear",
+    "scanPending": "Scanning menu…",
+    "scanError": "Couldn't read that menu. Try again.",
+    "scanEnd": "That's the menu — clear to see all your picks."
   },
   "refiner": {
     "title": "Refine your picks",
