@@ -1,6 +1,6 @@
 # ADR 0009: International scaling architecture and white-label multi-tenancy
 
-- Status: Accepted (seams in now; full multi-market operations deferred)
+- Status: Accepted (seams in now; full multi-market operations deferred) — amended, see Addendum 2026-07-28
 - Date: 2026-07-24
 
 ## Decision
@@ -10,6 +10,11 @@ from the start, even though Beerolog launches in a single market (Israel). The g
 expanding to a new country is a **data and config problem**, not an engineering rewrite.
 
 ### What is built in now (v1 seams)
+
+> Superseded by the Addendum (2026-07-28): these seams were never implemented.
+> `markets` + organization tenancy land in staff-portal Phase A (#297);
+> `white_label_tenants` is replaced by `organizations`;
+> `beer_market_availability` is re-scheduled to white-label Phase D.
 
 - `markets` table: `{ id, country_code, name, default_locale, age_gate_min_age, supported_locales[] }`
 - `beer_market_availability` join: `{ beer_id, market_id, market_tier }` — replaces the
@@ -136,3 +141,39 @@ exists with enough coverage to produce useful matches.
 - **Single global market assumption**: Locks in Israeli-specific logic (`market_tier` as a
   global field, age gate hardcoded to 18-IL, Hebrew as default). Already partially true — this
   ADR exists to formally reverse those assumptions before they calcify further.
+
+## Addendum (2026-07-28): unified tenant model, seams rescheduled
+
+Written while planning the white-label platform
+(`docs/prds/white-label-platform.md`). Two corrections to the original
+decision:
+
+1. **The "built in now" seams were never implemented.** As of this date
+   `packages/db/src/schema.ts` contains none of `markets`,
+   `beer_market_availability`, or `white_label_tenants`. Rather than pretend,
+   the schedule is made explicit:
+   - `markets` (minimal, one `IL` row) and organization tenancy land in
+     staff-portal Phase A (issue #297).
+   - `beer_market_availability` is deferred to white-label **Phase D**
+     (multi-market activation). Until then `market_tier` stays global on
+     `beers` — acceptable with exactly one market.
+
+2. **`organizations` ARE the tenants** — the separate `white_label_tenants`
+   table is dropped from the design. The staff-portal PRD introduced
+   `organizations` (bar groups as first-class customers); a second
+   tenant table would duplicate identity. `organizations` carries the tenant
+   fields (`slug`, `market_id`, `branding_config jsonb`,
+   `status pending|active|suspended`). Wherever this ADR or ADR 0010 says
+   "tenant", read `org_id`.
+
+   Correspondingly, the **existing `venues` table is reused** (nullable
+   `org_id`, `slug`, `is_active`) instead of the staff-portal PRD's originally
+   proposed new venues table — availability signals (ADR 0006), demand data,
+   and venue-verified catches keep one venue identity, and unmanaged venues
+   (`org_id IS NULL`) keep working.
+
+3. **Payments correction**: the Context section's "Stripe handles most
+   international markets" does not hold for the home market — Stripe does not
+   onboard Israeli businesses. Per-market payment providers are an explicit
+   open decision (OD-006); in-venue ordering payments are governed by ADR
+   0012 (bar's own merchant account, Beerolog never merchant of record).

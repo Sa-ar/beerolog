@@ -1,6 +1,6 @@
 # ADR 0010: Tenant data governance and operator data access model
 
-- Status: Accepted
+- Status: Accepted — amended, see Amendment 2026-07-28
 - Date: 2026-07-25
 
 ## Decision
@@ -92,3 +92,50 @@ This decision aligns with:
 - **No analytics at all**: maximally safe but removes the B2B value proposition. Rejected.
 - **Per-user opt-in at venue check-in**: architecturally sound but requires the consent surface
   to exist before the staff portal ships. Deferred with profile portability.
+
+## Amendment (2026-07-28): new operator-visible aggregates and the k-anonymity floor
+
+This amendment is the review this ADR's own audit clause requires ("material
+changes to tenant data access rules require a new ADR and a privacy impact
+review before shipping") for the white-label platform's Phase B/C analytics
+(`docs/prds/white-label-platform.md`).
+
+### Additional operator-visible data (all aggregate, all tenant-scoped)
+
+1. **Demand signals** — counts of users who want-to-try beers on/off the
+   venue's menu (e.g. "12 people want beers you don't stock"). Counts only,
+   never the users.
+2. **Order and return-rate rollups** — per-beer order counts and outcome
+   distribution (`as_expected | not_what_expected | better_than_expected`)
+   from ratings attributed to served orders. Extends the already-permitted
+   "recommendation outcomes" view with the ordering module (ADR 0012).
+3. **Area taste aggregates** — distribution of taste dials, flavor families,
+   and archetypes for a city/area, computed by job from consenting users'
+   baseline taste × visit/rating attribution. Cross-tenant by nature but
+   **area-scoped, not venue-scoped**, and Beerolog computes it — operators
+   only ever see the aggregate output.
+4. **Supply recommendations** — LLM-generated stocking suggestions grounded
+   exclusively in the aggregates above plus the venue's own menu and the
+   market catalog.
+
+Gate: area aggregates and any B2C-derived insight (items 3–4) additionally
+require **OD-008** resolved (processing-purpose line in the privacy policy)
+before shipping.
+
+### Anonymisation mechanism: the k-anonymity floor
+
+Every operator-facing panel or endpoint that aggregates over users enforces a
+minimum distinct-user count **K** (OD-007, proposed K=20, one shared constant
+across API and jobs). Below the floor the response is an explicit
+"not enough data" state — never small-n numbers, which are re-identifiable in
+a small venue. This applies to the original taste-distribution views as well
+as the new aggregates above; `area_taste_aggregates` rows with `n_users < K`
+are never served.
+
+### Unchanged
+
+Everything in "What bar operators cannot see" stands. Individual profiles,
+cross-session user history, PII, and cross-tenant venue data remain off the
+table. Tenant scoping is enforced at the API layer via the staff context
+dependency; under the unified tenant model (ADR 0009 addendum), `tenant_id`
+reads as `org_id`.

@@ -58,6 +58,66 @@ and write the corresponding ADR or PRD update.
 
 ---
 
+## OD-006: In-venue payment provider + IL alcohol-sale legal review
+
+**Blocks**: White-label slice B3 (payments) — see `white-label-platform.md` and ADR 0012.
+
+**Open** (raised 2026-07-28). Two questions that must resolve together:
+
+1. **Provider**: which IL payment provider ships first for the payment adapter?
+   Candidates: PayPlus, Meshulam/Grow, Tranzila, Cardcom. Stripe is not an
+   option — it does not onboard Israeli businesses. Selection criteria: API
+   quality (tokenized checkout + webhooks), per-bar merchant onboarding
+   friction, refund API, fees. The bar's own merchant account is used;
+   Beerolog is never merchant of record (ADR 0012).
+2. **Legal**: how do Israeli alcohol-sale rules apply to in-app purchase at a
+   licensed venue — is transaction-time age verification required beyond the
+   existing 18+ age gate, and do hours-of-sale restrictions (23:00–06:00 sales
+   limits) apply to an in-app order served on premises? Needs counsel review
+   before any paid order ships.
+
+---
+
+## OD-006b: First external POS/ordering integration target
+
+**Blocks**: White-label slice B3b (`ordering_mode='integrated'`) — see ADR 0012.
+
+**Open** (raised 2026-07-28). Which POS/ordering service does the order-dispatch
+adapter integrate first? IL candidates: Tabit, Presto, Cash-It. Needs market
+research: which systems the target bars actually run, API availability
+(order injection + status webhook/poll), and partnership terms. Independent of
+OD-006 — a bar picks native, integrated, or off.
+
+---
+
+## OD-007: Privacy floor K for operator-facing aggregates
+
+**Blocks**: White-label analytics panels (#301, #305, B5, C1, C2) — see ADR 0010 amendment.
+
+**Open** (raised 2026-07-28). The minimum distinct-user count below which no
+operator-facing aggregate is served. **Proposed default: K=20**, defined once
+as a shared constant used by both API endpoints and aggregate jobs. Trade-off:
+too high → empty dashboards at small venues; too low → re-identification risk
+in small crowds. Owner may tune the default before Phase C ships; panels ship
+with the constant either way.
+
+---
+
+## OD-008: B2C data feeding B2B area insights
+
+**Blocks**: White-label slices C2 (area taste aggregates) and C3 (supply recommendations) — see ADR 0010 amendment.
+
+**Open** (raised 2026-07-28). Area taste aggregates derive from consumer
+(B2C) baseline-taste profiles and visit/rating attribution, then feed
+bar-facing (B2B) intelligence. That is a processing purpose the privacy policy
+does not currently state. Required before C2/C3 ship: (1) a purpose line in
+the privacy policy covering aggregate, k-floored area insights, (2)
+confirmation with counsel that k-anonymised aggregates keep this outside
+GDPR/Israeli-law individual-consent territory (ADR 0010's reasoning suggests
+yes, but the cross-context B2C→B2B use is new), (3) owner sign-off.
+
+---
+
 ## How to close an open decision
 
 1. Owner makes the decision (product conversation, doc comment, or async note)
