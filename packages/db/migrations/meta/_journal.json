@@ -71,6 +71,13 @@
       "when": 1784000000000,
       "tag": "0009_rating_enum_backfill",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1785256995777,
+      "tag": "0010_want_to_try",
+      "breakpoints": true
     }
   ]
 }

@@ -96,6 +96,11 @@
     "title": "Refine your picks",
     "notTried": "Only beers I haven't tried yet"
   },
+  "wantToTry": {
+    "title": "Want to try",
+    "remove": "Remove {{beer}} from your list",
+    "mustTry": "Must try"
+  },
   "menu": {
     "account": "Account menu",
     "accountLink": "Account",

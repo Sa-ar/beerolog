@@ -3,6 +3,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { TasteProfileSummary } from '../components/TasteProfileSummary'
+import { WantToTryList } from '../components/WantToTryList'
 import { TasteProfileEmptyState } from '../components/TasteProfileEmptyState'
 import { TasteProfileErrorState } from '../components/TasteProfileErrorState'
 import { TasteProfileLoadingState } from '../components/TasteProfileLoadingState'
@@ -77,5 +78,10 @@ function ProfileTastePage() {
     return <TasteProfileLoadingState greeting={greeting} />
   }
 
-  return <TasteProfileSummary greeting={greeting} baseline={profile.data.ready} />
+  return (
+    <div className="flex flex-col gap-8">
+      <WantToTryList />
+      <TasteProfileSummary greeting={greeting} baseline={profile.data.ready} />
+    </div>
+  )
 }

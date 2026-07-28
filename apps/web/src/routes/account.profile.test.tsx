@@ -37,6 +37,8 @@ vi.mock('../components/TasteProfileSummary', () => ({
   TasteProfileSummary: () => <div data-testid="taste-summary" />,
 }))
 
+vi.mock('../components/WantToTryList', () => ({ WantToTryList: () => null }))
+
 const { Route } = await import('./account.profile')
 const ProfileTastePage = (Route as unknown as { component: () => ReactNode }).component
 

@@ -317,6 +317,32 @@ export const beerRatings = pgTable(
   ],
 )
 
+// ---------------------------------------------------------------------------
+// Want-to-try list (slice #325) — right-swipe / super-like on `What I want`.
+// `want` = right-swipe, `must_try` = super-like (pinned to the top of the list).
+// ---------------------------------------------------------------------------
+
+export const wantToTryStateEnum = pgEnum('want_to_try_state', ['want', 'must_try'])
+
+export const wantToTry = pgTable(
+  'want_to_try',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    beerId: text('beer_id')
+      .notNull()
+      .references(() => beers.id, { onDelete: 'cascade' }),
+    state: wantToTryStateEnum('state').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('want_to_try_user_idx').on(t.userId),
+    uniqueIndex('want_to_try_user_beer_uniq').on(t.userId, t.beerId),
+  ],
+)
+
 // Persistent cache of onboarding-questionnaire embeddings for the public guest
 // flow. The initial questionnaire has a finite answer space, so once each combo
 // has been embedded once it is read from here forever — OpenAI is never called

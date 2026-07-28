@@ -578,3 +578,31 @@ class RateSessionRequest(BaseModel):
 
 class RateSessionResponse(BaseModel):
     recorded: int
+
+
+# ---------------------------------------------------------------------------
+# Want-to-try list (slice #325)
+# ---------------------------------------------------------------------------
+
+# right-swipe on `What I want` = "want"; super-like (swipe up) = "must_try"
+# (pinned to the top of the Profile list).
+WantToTryState = Literal["want", "must_try"]
+
+
+class CreateWantToTryRequest(BaseModel):
+    beer_id: str
+    state: WantToTryState = "want"
+
+
+class WantToTryRecord(BaseModel):
+    beer_id: str
+    beer_name: str
+    beer_brewery: str
+    beer_image_url: str | None = None
+    state: WantToTryState
+    created_at: str  # ISO-8601
+
+
+class WantToTryListResponse(BaseModel):
+    # must_try items first, then most-recent want items.
+    items: list[WantToTryRecord]

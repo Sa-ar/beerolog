@@ -15,6 +15,7 @@ import { apiFetch } from '../lib/api-fetch'
 import type { BaselineTaste } from '../lib/baseline-taste'
 import { excludeRated } from '../lib/exclude-rated'
 import { useMyRatings } from '../lib/my-ratings'
+import { useAddWantToTry } from '../lib/use-want-to-try'
 import {
   fetchRecommendationsPage,
   recommendationsLocale,
@@ -49,6 +50,7 @@ export function WhatIWantDeck() {
   const [notTried, setNotTried] = useState(false)
   const [refinerOpen, setRefinerOpen] = useState(false)
   const myRatings = useMyRatings()
+  const addWant = useAddWantToTry()
 
   const baselineQuery = useQuery<{ baseline: BaselineTaste } | { noProfile: true }, Error>({
     queryKey: ['deck-baseline'],
@@ -167,6 +169,12 @@ export function WhatIWantDeck() {
     <Frame>
       <WantDeck
         beers={beers}
+        onSignal={(beerId, action) => {
+          // Right-swipe persists `want`; super-like persists `must_try`. Pass
+          // (left) is not saved. The API also feeds the taste signal (#325).
+          if (action === 'want') addWant.mutate({ beerId, state: 'want' })
+          else if (action === 'must_try') addWant.mutate({ beerId, state: 'must_try' })
+        }}
         hasMore={recs.hasNextPage}
         onNearEnd={() => {
           if (recs.hasNextPage && !recs.isFetchingNextPage) void recs.fetchNextPage()
