@@ -9,6 +9,12 @@ vi.mock('@tanstack/react-router', () => ({
   createFileRoute: () => () => ({}),
   Link: ({ to, children }: { to: string; children: React.ReactNode }) => <a href={to}>{children}</a>,
 }))
+// This route is the public share target; exercise the signed-out branch (quiz
+// CTA). The signed-in catch flow (#330) is verified manually per its PRD.
+vi.mock('@clerk/tanstack-react-start', () => ({
+  Show: ({ when, children }: { when: string; children: React.ReactNode }) =>
+    when === 'signed-out' ? children : null,
+}))
 
 import { renderWithI18n } from '../test/render'
 import { BeerDetailView } from './beer.$id'

@@ -60,6 +60,7 @@ type EventProps = {
   recommendations_shared: { method: 'native' | 'clipboard' }
   recommendations_loaded_more: Record<string, never>
   beer_rated: { rating: string }
+  beer_caught: { beer_id: string; rating: string }
   rating_session_complete: { count: number }
   beer_detail_viewed: { beer_id: string; market_tier: string }
   // Page-reduction swipe decks (#329). direction is the vocab value (want/pass/

@@ -31,7 +31,9 @@ class _MemoryRatingsRepo:
     async def beer_exists(self, beer_id: str) -> bool:
         return beer_id == BEER
 
-    async def upsert_rating(self, *, user_id, beer_id, rating, note) -> RatingRow:
+    async def upsert_rating(
+        self, *, user_id, beer_id, rating, note, proof_photo_url=None, proof_source=None
+    ) -> RatingRow:
         row = RatingRow(
             id="r1",
             user_id=user_id,

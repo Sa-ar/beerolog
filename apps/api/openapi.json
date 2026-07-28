@@ -809,6 +809,110 @@
         "title": "CatalogRecommendation",
         "type": "object"
       },
+      "CatchCollectionResponse": {
+        "properties": {
+          "catches": {
+            "items": {
+              "$ref": "#/components/schemas/CatchItem"
+            },
+            "title": "Catches",
+            "type": "array"
+          },
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "catches",
+          "count"
+        ],
+        "title": "CatchCollectionResponse",
+        "type": "object"
+      },
+      "CatchItem": {
+        "description": "One caught beer in a user's CatchCollection (a Rating with proof).",
+        "properties": {
+          "beer_id": {
+            "title": "Beer Id",
+            "type": "string"
+          },
+          "brewery": {
+            "title": "Brewery",
+            "type": "string"
+          },
+          "color": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Color"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "name_hebrew": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name Hebrew"
+          },
+          "proof_photo_url": {
+            "title": "Proof Photo Url",
+            "type": "string"
+          },
+          "rating": {
+            "enum": [
+              "loved",
+              "fine",
+              "disliked",
+              "unknown"
+            ],
+            "title": "Rating",
+            "type": "string"
+          },
+          "style": {
+            "title": "Style",
+            "type": "string"
+          }
+        },
+        "required": [
+          "beer_id",
+          "name",
+          "brewery",
+          "style",
+          "proof_photo_url",
+          "rating",
+          "created_at"
+        ],
+        "title": "CatchItem",
+        "type": "object"
+      },
       "ChatMessage": {
         "properties": {
           "content": {
@@ -971,6 +1075,29 @@
             ],
             "title": "Note"
           },
+          "proof_photo_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Proof Photo Url"
+          },
+          "proof_source": {
+            "anyOf": [
+              {
+                "const": "self_photo",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Proof Source"
+          },
           "rating": {
             "enum": [
               "loved",
@@ -987,6 +1114,28 @@
           "rating"
         ],
         "title": "CreateRatingRequest",
+        "type": "object"
+      },
+      "CreateWantToTryRequest": {
+        "properties": {
+          "beer_id": {
+            "title": "Beer Id",
+            "type": "string"
+          },
+          "state": {
+            "default": "want",
+            "enum": [
+              "want",
+              "must_try"
+            ],
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "beer_id"
+        ],
+        "title": "CreateWantToTryRequest",
         "type": "object"
       },
       "DeckBeer": {
@@ -1693,6 +1842,12 @@
             "title": "Beer Name",
             "type": "string"
           },
+          "caught": {
+            "description": "A Rating with proof is a Catch (ADR 0011). Single source of truth.",
+            "readOnly": true,
+            "title": "Caught",
+            "type": "boolean"
+          },
           "created_at": {
             "title": "Created At",
             "type": "string"
@@ -1712,6 +1867,28 @@
             ],
             "title": "Note"
           },
+          "proof_photo_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Proof Photo Url"
+          },
+          "proof_source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Proof Source"
+          },
           "rating": {
             "enum": [
               "loved",
@@ -1730,7 +1907,8 @@
           "beer_brewery",
           "rating",
           "note",
-          "created_at"
+          "created_at",
+          "caught"
         ],
         "title": "RatingRecord",
         "type": "object"
@@ -2337,6 +2515,70 @@
         ],
         "title": "Vibe",
         "type": "string"
+      },
+      "WantToTryListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/WantToTryRecord"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "WantToTryListResponse",
+        "type": "object"
+      },
+      "WantToTryRecord": {
+        "properties": {
+          "beer_brewery": {
+            "title": "Beer Brewery",
+            "type": "string"
+          },
+          "beer_id": {
+            "title": "Beer Id",
+            "type": "string"
+          },
+          "beer_image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Beer Image Url"
+          },
+          "beer_name": {
+            "title": "Beer Name",
+            "type": "string"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "want",
+              "must_try"
+            ],
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "beer_id",
+          "beer_name",
+          "beer_brewery",
+          "state",
+          "created_at"
+        ],
+        "title": "WantToTryRecord",
+        "type": "object"
       },
       "WhyFact": {
         "description": "Language-neutral match fact for the details accordion / LLM grounding.",
@@ -3032,6 +3274,32 @@
         ]
       }
     },
+    "/me/catches": {
+      "get": {
+        "operationId": "listMyCatches",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatchCollectionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List My Catches",
+        "tags": [
+          "ratings"
+        ]
+      }
+    },
     "/me/export": {
       "get": {
         "operationId": "exportMyAccount",
@@ -3142,6 +3410,116 @@
         "summary": "Get My Ratings Map",
         "tags": [
           "ratings"
+        ]
+      }
+    },
+    "/me/want-to-try": {
+      "get": {
+        "operationId": "listWantToTry",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WantToTryListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Want To Try",
+        "tags": [
+          "want-to-try"
+        ]
+      },
+      "post": {
+        "operationId": "addWantToTry",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateWantToTryRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WantToTryRecord"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Add Want To Try",
+        "tags": [
+          "want-to-try"
+        ]
+      }
+    },
+    "/me/want-to-try/{beer_id}": {
+      "delete": {
+        "operationId": "removeWantToTry",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "beer_id",
+            "required": true,
+            "schema": {
+              "title": "Beer Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Remove Want To Try",
+        "tags": [
+          "want-to-try"
         ]
       }
     },

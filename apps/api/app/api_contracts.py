@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import StrEnum
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, computed_field
 
 from app.ratings_vocab import RatingValue
 
@@ -525,6 +525,11 @@ class CreateRatingRequest(BaseModel):
     beer_id: str
     rating: RatingValue
     note: str | None = None
+    # Proof photo (ADR 0011): presence upgrades the rating to a Catch; content
+    # is not verified. Clients may only self-attest — `venue_verified` is a
+    # future white-label tier and is never client-writable.
+    proof_photo_url: str | None = None
+    proof_source: Literal["self_photo"] | None = None
 
 
 class RatingRecord(BaseModel):
@@ -535,6 +540,14 @@ class RatingRecord(BaseModel):
     rating: RatingValue
     note: str | None
     created_at: str  # ISO-8601
+    proof_photo_url: str | None = None
+    proof_source: str | None = None
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def caught(self) -> bool:
+        """A Rating with proof is a Catch (ADR 0011). Single source of truth."""
+        return self.proof_photo_url is not None
 
 
 class RatingsHistoryResponse(BaseModel):
@@ -548,6 +561,27 @@ class RatingsMapResponse(BaseModel):
     # beer_id -> the current user's rating. The re-rate surfaces (search,
     # recommendations) read this to show the existing rating from server truth.
     ratings: dict[str, RatingValue]
+
+
+class CatchItem(BaseModel):
+    """One caught beer in a user's CatchCollection (a Rating with proof)."""
+
+    beer_id: str
+    name: str
+    name_hebrew: str | None = None
+    brewery: str
+    style: str
+    color: str | None = None
+    image_url: str | None = None
+    proof_photo_url: str
+    rating: RatingValue
+    created_at: str  # ISO-8601
+
+
+class CatchCollectionResponse(BaseModel):
+    # The user's personal, unbounded CatchCollection, newest catch first.
+    catches: list[CatchItem]
+    count: int
 
 
 class DeckBeer(BaseModel):

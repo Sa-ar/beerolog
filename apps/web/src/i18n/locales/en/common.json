@@ -34,16 +34,42 @@
   "archetypeOg": {
     "cta": "What's your type? beerolog.com/try"
   },
+  "catchOg": {
+    "caught": "Caught on Beerolog",
+    "cta": "What's your beer? beerolog.com/try"
+  },
+  "collectionOg": {
+    "title": "Caught 'em all",
+    "cta": "What's your beer? beerolog.com/try"
+  },
+  "sets": { "israeliCraftStarter": "Israeli Craft Starter" },
   "share": {
     "taste": {
       "cta": "Share your type",
       "text": "I found my beer taste type on Beerolog. What's yours?",
       "copied": "Link copied!"
-    }
+    },
+    "catch": { "text": "I just caught this beer on Beerolog." },
+    "collection": { "text": "I caught every beer in a Beerolog set!" }
   },
   "tasteShare": {
     "cta": "What's YOUR type? Take the 30-second quiz",
     "ctaHint": "Free — no sign-up needed to start."
+  },
+  "collection": {
+    "loading": "Loading your catches…",
+    "error": "Couldn't load your collection.",
+    "title": "Your catches",
+    "count": "{{count}} caught",
+    "empty": "No catches yet",
+    "emptyHint": "Catch a beer by adding a photo when you rate it.",
+    "emptyCta": "Rate beers",
+    "set": {
+      "progress": "{{caught}}/{{total}} caught",
+      "remaining": "{{count}} to go",
+      "complete": "You caught 'em all!",
+      "share": "Share"
+    }
   },
   "beerDetail": {
     "radarAria": "Sensory profile of {{name}}",
@@ -61,6 +87,20 @@
       "notFoundTitle": "We couldn't find that beer",
       "cta": "Find your beer match",
       "ctaHint": "Take the 30-second quiz to see how this matches your taste."
+    },
+    "catch": {
+      "cta": "Catch this beer",
+      "hint": "Snap a photo to add it to your collection.",
+      "uploading": "Uploading photo…",
+      "ratePrompt": "Nice catch! How was it?",
+      "loved": "Loved it",
+      "fine": "It was fine",
+      "disliked": "Not for me",
+      "saving": "Saving…",
+      "caught": "Caught!",
+      "caughtDetail": "Added to your collection.",
+      "error": "Something went wrong — try again.",
+      "share": "Share your catch"
     },
     "legend": { "beer": "This beer", "you": "Your taste" }
   },
@@ -337,7 +377,7 @@
   "settings": { "title": "Settings", "language": "Language" },
   "account": {
     "title": "Account",
-    "tabs": { "profile": "Profile", "details": "Details", "security": "Security", "settings": "Settings" },
+    "tabs": { "profile": "Profile", "collection": "Collection", "details": "Details", "security": "Security", "settings": "Settings" },
     "details": {
       "firstName": "First name",
       "lastName": "Last name",

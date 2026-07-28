@@ -28,6 +28,22 @@ class RatingRow:
     rating: RatingValue
     note: str | None
     created_at: str
+    proof_photo_url: str | None = None
+    proof_source: str | None = None
+
+
+@dataclass(frozen=True)
+class CatchRow:
+    beer_id: str
+    name: str
+    name_hebrew: str | None
+    brewery: str
+    style: str
+    color: str | None
+    image_url: str | None
+    proof_photo_url: str
+    rating: RatingValue
+    created_at: str
 
 
 class RatingsRepo(Protocol):
@@ -38,6 +54,8 @@ class RatingsRepo(Protocol):
         beer_id: str,
         rating: RatingValue,
         note: str | None,
+        proof_photo_url: str | None = None,
+        proof_source: str | None = None,
     ) -> RatingRow: ...
 
     async def beer_exists(self, beer_id: str) -> bool: ...
@@ -56,6 +74,8 @@ class RatingsRepo(Protocol):
 
     async def list_ratings_map(self, user_id: str) -> dict[str, RatingValue]: ...
 
+    async def list_catches(self, user_id: str) -> list[CatchRow]: ...
+
 
 class AsyncpgRatingsRepo:
     """Default DB-backed implementation. Exercised only by integration tests."""
@@ -70,21 +90,31 @@ class AsyncpgRatingsRepo:
         beer_id: str,
         rating: RatingValue,
         note: str | None,
+        proof_photo_url: str | None = None,
+        proof_source: str | None = None,
     ) -> RatingRow:
         sql = """
-            INSERT INTO beer_ratings (user_id, beer_id, rating, note)
-            VALUES ($1, $2, $3, $4)
+            INSERT INTO beer_ratings (user_id, beer_id, rating, note,
+                                      proof_photo_url, proof_source)
+            VALUES ($1, $2, $3, $4, $5, $6)
             ON CONFLICT (user_id, beer_id)
             DO UPDATE SET rating = EXCLUDED.rating, note = EXCLUDED.note,
+                          -- Preserve an existing Catch: a proof-less re-rate
+                          -- (recommendation card / deck / search) must not wipe
+                          -- the proof photo. Only overwrite when new proof is given.
+                          proof_photo_url = COALESCE(EXCLUDED.proof_photo_url, beer_ratings.proof_photo_url),
+                          proof_source = COALESCE(EXCLUDED.proof_source, beer_ratings.proof_source),
                           created_at = NOW()
-            RETURNING id, created_at
+            RETURNING id, created_at, proof_photo_url, proof_source
         """
         async with self._pool.acquire() as conn:
             await conn.execute(
                 "INSERT INTO users (id) VALUES ($1) ON CONFLICT (id) DO NOTHING",
                 user_id,
             )
-            row = await conn.fetchrow(sql, user_id, beer_id, rating, note)
+            row = await conn.fetchrow(
+                sql, user_id, beer_id, rating, note, proof_photo_url, proof_source
+            )
             beer = await conn.fetchrow("SELECT name, brewery FROM beers WHERE id = $1", beer_id)
             assert beer is not None  # caller validates first via beer_exists
             return RatingRow(
@@ -96,6 +126,8 @@ class AsyncpgRatingsRepo:
                 rating=rating,
                 note=note,
                 created_at=row["created_at"].isoformat(),
+                proof_photo_url=row["proof_photo_url"],
+                proof_source=row["proof_source"],
             )
 
     async def beer_exists(self, beer_id: str) -> bool:
@@ -154,3 +186,32 @@ class AsyncpgRatingsRepo:
                 "SELECT beer_id, rating FROM beer_ratings WHERE user_id = $1", user_id
             )
         return {r["beer_id"]: r["rating"] for r in rows}
+
+    async def list_catches(self, user_id: str) -> list[CatchRow]:
+        # A Catch is a rating with a proof photo (ADR 0011). Newest first;
+        # dedup is inherent (one rating per user+beer).
+        sql = """
+            SELECT r.beer_id, r.rating, r.created_at, r.proof_photo_url,
+                   b.name, b.name_hebrew, b.brewery, b.style, b.color, b.image_url
+            FROM beer_ratings r
+            JOIN beers b ON b.id = r.beer_id
+            WHERE r.user_id = $1 AND r.proof_photo_url IS NOT NULL
+            ORDER BY r.created_at DESC
+        """
+        async with self._pool.acquire() as conn:
+            rows = await conn.fetch(sql, user_id)
+        return [
+            CatchRow(
+                beer_id=r["beer_id"],
+                name=r["name"],
+                name_hebrew=r["name_hebrew"],
+                brewery=r["brewery"],
+                style=r["style"],
+                color=r["color"],
+                image_url=r["image_url"],
+                proof_photo_url=r["proof_photo_url"],
+                rating=r["rating"],
+                created_at=r["created_at"].isoformat(),
+            )
+            for r in rows
+        ]

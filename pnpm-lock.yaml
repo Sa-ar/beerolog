@@ -77,6 +77,9 @@ importers:
       '@vercel/analytics':
         specifier: ^2.0.1
         version: 2.0.1(react@19.2.6)
+      '@vercel/blob':
+        specifier: ^0.27.3
+        version: 0.27.3
       '@vercel/og':
         specifier: ^0.11.1
         version: 0.11.1

@@ -28,6 +28,7 @@ describe('Account tabs', () => {
     ])
     expect(tabs).toEqual([
       ['/account/profile', 'Profile'],
+      ['/account/collection', 'Collection'],
       ['/account/details', 'Details'],
       ['/account/security', 'Security'],
       ['/account/settings', 'Settings'],

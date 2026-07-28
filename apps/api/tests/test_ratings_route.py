@@ -15,7 +15,7 @@ from app.auth import get_current_user
 from app.dependencies import get_taste_feedback_service
 from app.main import app
 from app.routes.ratings import get_ratings_repo
-from app.services.ratings_repo import RatingRow
+from app.services.ratings_repo import CatchRow, RatingRow
 
 
 class _NoopFeedback:
@@ -29,14 +29,34 @@ class _MemoryRepo:
     def __init__(self, existing_beers: set[str]) -> None:
         self._beers = existing_beers
         self._rows: dict[tuple[str, str], RatingRow] = {}
+        self._seq = 0  # monotonic created_at so newest-first ordering is testable
 
     async def beer_exists(self, beer_id: str) -> bool:
         return beer_id in self._beers
 
     async def upsert_rating(
-        self, *, user_id: str, beer_id: str, rating: str, note: str | None
+        self,
+        *,
+        user_id: str,
+        beer_id: str,
+        rating: str,
+        note: str | None,
+        proof_photo_url: str | None = None,
+        proof_source: str | None = None,
     ) -> RatingRow:
         existing = self._rows.get((user_id, beer_id))
+        # Mirror the SQL COALESCE: a proof-less re-rate keeps the existing proof.
+        proof_photo_url = (
+            proof_photo_url
+            if proof_photo_url is not None
+            else (existing.proof_photo_url if existing else None)
+        )
+        proof_source = (
+            proof_source
+            if proof_source is not None
+            else (existing.proof_source if existing else None)
+        )
+        self._seq += 1
         row = RatingRow(
             id=existing.id if existing else str(uuid4()),
             user_id=user_id,
@@ -45,7 +65,9 @@ class _MemoryRepo:
             beer_brewery="Test Brewery",
             rating=rating,
             note=note,
-            created_at="2026-06-15T00:00:00+00:00",
+            created_at=f"2026-06-15T00:00:{self._seq:02d}+00:00",
+            proof_photo_url=proof_photo_url,
+            proof_source=proof_source,
         )
         self._rows[(user_id, beer_id)] = row
         return row
@@ -64,6 +86,27 @@ class _MemoryRepo:
 
     async def list_ratings_map(self, user_id: str) -> dict[str, str]:
         return {r.beer_id: r.rating for r in self._rows.values() if r.user_id == user_id}
+
+    async def list_catches(self, user_id: str) -> list[CatchRow]:
+        rows = [
+            r for r in self._rows.values() if r.user_id == user_id and r.proof_photo_url is not None
+        ]
+        rows.sort(key=lambda r: r.created_at, reverse=True)
+        return [
+            CatchRow(
+                beer_id=r.beer_id,
+                name=r.beer_name,
+                name_hebrew=None,
+                brewery=r.beer_brewery,
+                style="IPA",
+                color="gold",
+                image_url=None,
+                proof_photo_url=r.proof_photo_url,
+                rating=r.rating,
+                created_at=r.created_at,
+            )
+            for r in rows
+        ]
 
 
 FAKE_USER = {"sub": "user_test_123"}
@@ -99,6 +142,64 @@ def test_create_rating_returns_201_and_record(client: TestClient) -> None:
     assert body["note"] == "crisp and easy"
 
 
+def test_create_rating_with_proof_is_caught(client: TestClient) -> None:
+    # Attaching a proof photo finalizes the rating into a Catch (ADR 0011).
+    r = client.post(
+        "/ratings",
+        json={
+            "beer_id": "goldstar",
+            "rating": "loved",
+            "proof_photo_url": "https://blob.example/proof/abc.jpg",
+            "proof_source": "self_photo",
+        },
+    )
+    assert r.status_code == 201, r.text
+    body = r.json()
+    assert body["proof_photo_url"] == "https://blob.example/proof/abc.jpg"
+    assert body["proof_source"] == "self_photo"
+    assert body["caught"] is True
+
+
+def test_re_rating_without_proof_keeps_the_catch(client: TestClient) -> None:
+    # A Catch must survive a later proof-less re-rate from a normal surface
+    # (recommendation card / deck / search all POST /ratings with no proof).
+    client.post(
+        "/ratings",
+        json={"beer_id": "goldstar", "rating": "loved", "proof_photo_url": "https://b/x.jpg"},
+    )
+    r = client.post("/ratings", json={"beer_id": "goldstar", "rating": "fine"})
+    assert r.status_code == 201, r.text
+    body = r.json()
+    assert body["caught"] is True
+    assert body["proof_photo_url"] == "https://b/x.jpg"
+    assert [c["beer_id"] for c in client.get("/me/catches").json()["catches"]] == ["goldstar"]
+
+
+def test_create_rating_without_proof_is_not_caught(client: TestClient) -> None:
+    r = client.post("/ratings", json={"beer_id": "goldstar", "rating": "fine"})
+    assert r.status_code == 201, r.text
+    body = r.json()
+    assert body["proof_photo_url"] is None
+    assert body["proof_source"] is None
+    assert body["caught"] is False
+
+
+def test_create_rating_rejects_unknown_proof_source(client: TestClient) -> None:
+    # Only self-attestation is client-writable; `venue_verified` is a future
+    # server-side tier, and any other value is rejected at the boundary.
+    for bad in ("venue_verified", "forged", ""):
+        r = client.post(
+            "/ratings",
+            json={
+                "beer_id": "goldstar",
+                "rating": "loved",
+                "proof_photo_url": "https://blob.example/x.jpg",
+                "proof_source": bad,
+            },
+        )
+        assert r.status_code == 422, bad
+
+
 def test_create_rating_rejects_unknown_beer(client: TestClient) -> None:
     r = client.post(
         "/ratings",
@@ -132,6 +233,39 @@ def test_create_rating_upserts_not_duplicates(client: TestClient, repo: _MemoryR
     assert r2.json()["note"] == "worse today"
     # Repo should contain exactly one row for this (user, beer)
     assert len(repo._rows) == 1
+
+
+def test_list_catches_returns_only_caught_newest_first(client: TestClient) -> None:
+    # A plain rating (no proof) is not a Catch; only proof-backed ones show up,
+    # newest first.
+    client.post("/ratings", json={"beer_id": "goldstar", "rating": "loved"})
+    client.post(
+        "/ratings",
+        json={"beer_id": "malka-stout", "rating": "loved", "proof_photo_url": "https://b/1.jpg"},
+    )
+    client.post(
+        "/ratings",
+        json={
+            "beer_id": "alexander-blazer",
+            "rating": "fine",
+            "proof_photo_url": "https://b/2.jpg",
+        },
+    )
+    r = client.get("/me/catches")
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["count"] == 2
+    assert [c["beer_id"] for c in body["catches"]] == ["alexander-blazer", "malka-stout"]
+    assert all(c["proof_photo_url"] for c in body["catches"])
+
+
+def test_catches_require_auth() -> None:
+    app.dependency_overrides[get_ratings_repo] = lambda: _MemoryRepo(set())
+    try:
+        r = TestClient(app).get("/me/catches")
+        assert r.status_code == 401
+    finally:
+        app.dependency_overrides.pop(get_ratings_repo, None)
 
 
 def test_ratings_map_returns_beer_id_to_rating(client: TestClient) -> None:

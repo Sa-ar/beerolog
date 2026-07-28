@@ -34,16 +34,42 @@
   "archetypeOg": {
     "cta": "מה הטעם שלכם? beerolog.com/try"
   },
+  "catchOg": {
+    "caught": "נתפסה בבירולוג",
+    "cta": "מה הבירה שלכם? beerolog.com/try"
+  },
+  "collectionOg": {
+    "title": "תפסתם את כולן",
+    "cta": "מה הבירה שלכם? beerolog.com/try"
+  },
+  "sets": { "israeliCraftStarter": "מבחר קראפט ישראלי" },
   "share": {
     "taste": {
       "cta": "שתפו את הטעם שלכם",
       "text": "גיליתי את סוג הטעם שלי בבירולוג. מה שלכם?",
       "copied": "הקישור הועתק!"
-    }
+    },
+    "catch": { "text": "הרגע תפסתי את הבירה הזו בבירולוג." },
+    "collection": { "text": "תפסתי את כל הבירות בסט של בירולוג!" }
   },
   "tasteShare": {
     "cta": "מה הטעם שלכם? קחו את החידון של 30 השניות",
     "ctaHint": "בחינם — בלי הרשמה כדי להתחיל."
+  },
+  "collection": {
+    "loading": "טוען את התפיסות שלכם…",
+    "error": "לא הצלחנו לטעון את האוסף שלכם.",
+    "title": "התפיסות שלכם",
+    "count": "{{count}} נתפסו",
+    "empty": "עדיין לא תפסתם בירות",
+    "emptyHint": "תפסו בירה על ידי הוספת תמונה כשאתם מדרגים אותה.",
+    "emptyCta": "דרגו בירות",
+    "set": {
+      "progress": "{{caught}}/{{total}} נתפסו",
+      "remaining": "עוד {{count}}",
+      "complete": "תפסתם את כולן!",
+      "share": "שיתוף"
+    }
   },
   "beerDetail": {
     "radarAria": "פרופיל טעם של {{name}}",
@@ -61,6 +87,20 @@
       "notFoundTitle": "לא מצאנו את הבירה הזו",
       "cta": "מצאו את הבירה שלכם",
       "ctaHint": "מלאו את השאלון בן 30 השניות כדי לראות עד כמה זה מתאים לטעם שלכם."
+    },
+    "catch": {
+      "cta": "לתפוס את הבירה",
+      "hint": "צלמו את הבירה כדי להוסיף אותה לאוסף שלכם.",
+      "uploading": "מעלה תמונה…",
+      "ratePrompt": "תפיסה יפה! איך היא הייתה?",
+      "loved": "אהבתי",
+      "fine": "הייתה בסדר",
+      "disliked": "לא בשבילי",
+      "saving": "שומר…",
+      "caught": "נתפסה!",
+      "caughtDetail": "נוספה לאוסף שלכם.",
+      "error": "משהו השתבש — נסו שוב.",
+      "share": "שתפו את התפיסה"
     },
     "legend": { "beer": "הבירה הזו", "you": "הטעם שלך" }
   },
@@ -337,7 +377,7 @@
   "settings": { "title": "הגדרות", "language": "שפה" },
   "account": {
     "title": "החשבון שלי",
-    "tabs": { "profile": "פרופיל", "details": "פרטים", "security": "אבטחה", "settings": "הגדרות" },
+    "tabs": { "profile": "פרופיל", "collection": "האוסף", "details": "פרטים", "security": "אבטחה", "settings": "הגדרות" },
     "details": {
       "firstName": "שם פרטי",
       "lastName": "שם משפחה",

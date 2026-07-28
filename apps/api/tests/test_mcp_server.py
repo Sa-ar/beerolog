@@ -107,13 +107,17 @@ class _Row:
     rating = "loved"
     note = None
     created_at = "2026-07-04T00:00:00+00:00"
+    proof_photo_url = None
+    proof_source = None
 
 
 class _RatingsRepo:
     async def beer_exists(self, beer_id: str) -> bool:
         return beer_id == "b0"
 
-    async def upsert_rating(self, *, user_id, beer_id, rating, note):
+    async def upsert_rating(
+        self, *, user_id, beer_id, rating, note, proof_photo_url=None, proof_source=None
+    ):
         return _Row()
 
 

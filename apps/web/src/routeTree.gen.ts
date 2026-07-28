@@ -22,10 +22,14 @@ import { Route as SignupSplatRouteImport } from './routes/signup.$'
 import { Route as SigninSplatRouteImport } from './routes/signin.$'
 import { Route as LegalSlugRouteImport } from './routes/legal.$slug'
 import { Route as BeerIdRouteImport } from './routes/beer.$id'
+import { Route as ApiProofUploadRouteImport } from './routes/api.proof-upload'
 import { Route as AccountSettingsRouteImport } from './routes/account.settings'
 import { Route as AccountSecurityRouteImport } from './routes/account.security'
 import { Route as AccountProfileRouteImport } from './routes/account.profile'
 import { Route as AccountDetailsRouteImport } from './routes/account.details'
+import { Route as AccountCollectionRouteImport } from './routes/account.collection'
+import { Route as ApiOgCollectionRouteImport } from './routes/api.og.collection'
+import { Route as ApiOgCatchRouteImport } from './routes/api.og.catch'
 import { Route as ApiOgTasteKeyRouteImport } from './routes/api.og.taste.$key'
 
 const TryRoute = TryRouteImport.update({
@@ -93,6 +97,11 @@ const BeerIdRoute = BeerIdRouteImport.update({
   path: '/beer/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiProofUploadRoute = ApiProofUploadRouteImport.update({
+  id: '/api/proof-upload',
+  path: '/api/proof-upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AccountSettingsRoute = AccountSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -113,6 +122,21 @@ const AccountDetailsRoute = AccountDetailsRouteImport.update({
   path: '/details',
   getParentRoute: () => AccountRoute,
 } as any)
+const AccountCollectionRoute = AccountCollectionRouteImport.update({
+  id: '/collection',
+  path: '/collection',
+  getParentRoute: () => AccountRoute,
+} as any)
+const ApiOgCollectionRoute = ApiOgCollectionRouteImport.update({
+  id: '/api/og/collection',
+  path: '/api/og/collection',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiOgCatchRoute = ApiOgCatchRouteImport.update({
+  id: '/api/og/catch',
+  path: '/api/og/catch',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiOgTasteKeyRoute = ApiOgTasteKeyRouteImport.update({
   id: '/api/og/taste/$key',
   path: '/api/og/taste/$key',
@@ -127,16 +151,20 @@ export interface FileRoutesByFullPath {
   '/rate': typeof RateRoute
   '/recommendations': typeof RecommendationsRoute
   '/try': typeof TryRoute
+  '/account/collection': typeof AccountCollectionRoute
   '/account/details': typeof AccountDetailsRoute
   '/account/profile': typeof AccountProfileRoute
   '/account/security': typeof AccountSecurityRoute
   '/account/settings': typeof AccountSettingsRoute
+  '/api/proof-upload': typeof ApiProofUploadRoute
   '/beer/$id': typeof BeerIdRoute
   '/legal/$slug': typeof LegalSlugRoute
   '/signin/$': typeof SigninSplatRoute
   '/signup/$': typeof SignupSplatRoute
   '/taste/$key': typeof TasteKeyRoute
   '/account/': typeof AccountIndexRoute
+  '/api/og/catch': typeof ApiOgCatchRoute
+  '/api/og/collection': typeof ApiOgCollectionRoute
   '/api/og/taste/$key': typeof ApiOgTasteKeyRoute
 }
 export interface FileRoutesByTo {
@@ -146,16 +174,20 @@ export interface FileRoutesByTo {
   '/rate': typeof RateRoute
   '/recommendations': typeof RecommendationsRoute
   '/try': typeof TryRoute
+  '/account/collection': typeof AccountCollectionRoute
   '/account/details': typeof AccountDetailsRoute
   '/account/profile': typeof AccountProfileRoute
   '/account/security': typeof AccountSecurityRoute
   '/account/settings': typeof AccountSettingsRoute
+  '/api/proof-upload': typeof ApiProofUploadRoute
   '/beer/$id': typeof BeerIdRoute
   '/legal/$slug': typeof LegalSlugRoute
   '/signin/$': typeof SigninSplatRoute
   '/signup/$': typeof SignupSplatRoute
   '/taste/$key': typeof TasteKeyRoute
   '/account': typeof AccountIndexRoute
+  '/api/og/catch': typeof ApiOgCatchRoute
+  '/api/og/collection': typeof ApiOgCollectionRoute
   '/api/og/taste/$key': typeof ApiOgTasteKeyRoute
 }
 export interface FileRoutesById {
@@ -167,16 +199,20 @@ export interface FileRoutesById {
   '/rate': typeof RateRoute
   '/recommendations': typeof RecommendationsRoute
   '/try': typeof TryRoute
+  '/account/collection': typeof AccountCollectionRoute
   '/account/details': typeof AccountDetailsRoute
   '/account/profile': typeof AccountProfileRoute
   '/account/security': typeof AccountSecurityRoute
   '/account/settings': typeof AccountSettingsRoute
+  '/api/proof-upload': typeof ApiProofUploadRoute
   '/beer/$id': typeof BeerIdRoute
   '/legal/$slug': typeof LegalSlugRoute
   '/signin/$': typeof SigninSplatRoute
   '/signup/$': typeof SignupSplatRoute
   '/taste/$key': typeof TasteKeyRoute
   '/account/': typeof AccountIndexRoute
+  '/api/og/catch': typeof ApiOgCatchRoute
+  '/api/og/collection': typeof ApiOgCollectionRoute
   '/api/og/taste/$key': typeof ApiOgTasteKeyRoute
 }
 export interface FileRouteTypes {
@@ -189,16 +225,20 @@ export interface FileRouteTypes {
     | '/rate'
     | '/recommendations'
     | '/try'
+    | '/account/collection'
     | '/account/details'
     | '/account/profile'
     | '/account/security'
     | '/account/settings'
+    | '/api/proof-upload'
     | '/beer/$id'
     | '/legal/$slug'
     | '/signin/$'
     | '/signup/$'
     | '/taste/$key'
     | '/account/'
+    | '/api/og/catch'
+    | '/api/og/collection'
     | '/api/og/taste/$key'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -208,16 +248,20 @@ export interface FileRouteTypes {
     | '/rate'
     | '/recommendations'
     | '/try'
+    | '/account/collection'
     | '/account/details'
     | '/account/profile'
     | '/account/security'
     | '/account/settings'
+    | '/api/proof-upload'
     | '/beer/$id'
     | '/legal/$slug'
     | '/signin/$'
     | '/signup/$'
     | '/taste/$key'
     | '/account'
+    | '/api/og/catch'
+    | '/api/og/collection'
     | '/api/og/taste/$key'
   id:
     | '__root__'
@@ -228,16 +272,20 @@ export interface FileRouteTypes {
     | '/rate'
     | '/recommendations'
     | '/try'
+    | '/account/collection'
     | '/account/details'
     | '/account/profile'
     | '/account/security'
     | '/account/settings'
+    | '/api/proof-upload'
     | '/beer/$id'
     | '/legal/$slug'
     | '/signin/$'
     | '/signup/$'
     | '/taste/$key'
     | '/account/'
+    | '/api/og/catch'
+    | '/api/og/collection'
     | '/api/og/taste/$key'
   fileRoutesById: FileRoutesById
 }
@@ -249,11 +297,14 @@ export interface RootRouteChildren {
   RateRoute: typeof RateRoute
   RecommendationsRoute: typeof RecommendationsRoute
   TryRoute: typeof TryRoute
+  ApiProofUploadRoute: typeof ApiProofUploadRoute
   BeerIdRoute: typeof BeerIdRoute
   LegalSlugRoute: typeof LegalSlugRoute
   SigninSplatRoute: typeof SigninSplatRoute
   SignupSplatRoute: typeof SignupSplatRoute
   TasteKeyRoute: typeof TasteKeyRoute
+  ApiOgCatchRoute: typeof ApiOgCatchRoute
+  ApiOgCollectionRoute: typeof ApiOgCollectionRoute
   ApiOgTasteKeyRoute: typeof ApiOgTasteKeyRoute
 }
 
@@ -350,6 +401,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BeerIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/proof-upload': {
+      id: '/api/proof-upload'
+      path: '/api/proof-upload'
+      fullPath: '/api/proof-upload'
+      preLoaderRoute: typeof ApiProofUploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/account/settings': {
       id: '/account/settings'
       path: '/settings'
@@ -378,6 +436,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountDetailsRouteImport
       parentRoute: typeof AccountRoute
     }
+    '/account/collection': {
+      id: '/account/collection'
+      path: '/collection'
+      fullPath: '/account/collection'
+      preLoaderRoute: typeof AccountCollectionRouteImport
+      parentRoute: typeof AccountRoute
+    }
+    '/api/og/collection': {
+      id: '/api/og/collection'
+      path: '/api/og/collection'
+      fullPath: '/api/og/collection'
+      preLoaderRoute: typeof ApiOgCollectionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/og/catch': {
+      id: '/api/og/catch'
+      path: '/api/og/catch'
+      fullPath: '/api/og/catch'
+      preLoaderRoute: typeof ApiOgCatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/og/taste/$key': {
       id: '/api/og/taste/$key'
       path: '/api/og/taste/$key'
@@ -389,6 +468,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AccountRouteChildren {
+  AccountCollectionRoute: typeof AccountCollectionRoute
   AccountDetailsRoute: typeof AccountDetailsRoute
   AccountProfileRoute: typeof AccountProfileRoute
   AccountSecurityRoute: typeof AccountSecurityRoute
@@ -397,6 +477,7 @@ interface AccountRouteChildren {
 }
 
 const AccountRouteChildren: AccountRouteChildren = {
+  AccountCollectionRoute: AccountCollectionRoute,
   AccountDetailsRoute: AccountDetailsRoute,
   AccountProfileRoute: AccountProfileRoute,
   AccountSecurityRoute: AccountSecurityRoute,
@@ -415,11 +496,14 @@ const rootRouteChildren: RootRouteChildren = {
   RateRoute: RateRoute,
   RecommendationsRoute: RecommendationsRoute,
   TryRoute: TryRoute,
+  ApiProofUploadRoute: ApiProofUploadRoute,
   BeerIdRoute: BeerIdRoute,
   LegalSlugRoute: LegalSlugRoute,
   SigninSplatRoute: SigninSplatRoute,
   SignupSplatRoute: SignupSplatRoute,
   TasteKeyRoute: TasteKeyRoute,
+  ApiOgCatchRoute: ApiOgCatchRoute,
+  ApiOgCollectionRoute: ApiOgCollectionRoute,
   ApiOgTasteKeyRoute: ApiOgTasteKeyRoute,
 }
 export const routeTree = rootRouteImport

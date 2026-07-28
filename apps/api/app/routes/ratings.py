@@ -9,6 +9,8 @@ from __future__ import annotations
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
 
 from app.api_contracts import (
+    CatchCollectionResponse,
+    CatchItem,
     CreateRatingRequest,
     RatingRecord,
     RatingsHistoryResponse,
@@ -47,11 +49,16 @@ async def create_rating(
 ) -> RatingRecord:
     if not await repo.beer_exists(body.beer_id):
         raise HTTPException(status_code=404, detail=f"Beer not found: {body.beer_id}")
+    # Proof only means anything with a photo; default the source to self-attest
+    # (ADR 0011). No photo -> plain rating, not a Catch.
+    proof_source = (body.proof_source or "self_photo") if body.proof_photo_url else None
     row = await repo.upsert_rating(
         user_id=user["sub"],
         beer_id=body.beer_id,
         rating=body.rating,
         note=body.note,
+        proof_photo_url=body.proof_photo_url,
+        proof_source=proof_source,
     )
     # Immediate path (card rating): nudge the baseline now. `fine` is a no-op.
     await feedback.apply(user_id=user["sub"], beer_id=body.beer_id, rating=body.rating)
@@ -72,6 +79,8 @@ async def create_rating(
         rating=row.rating,
         note=row.note,
         created_at=row.created_at,
+        proof_photo_url=row.proof_photo_url,
+        proof_source=row.proof_source,
     )
 
 
@@ -87,6 +96,34 @@ async def get_my_ratings_map(
     # Whole map in one call so the frontend joins it into any beer list without
     # paging the history endpoint.
     return RatingsMapResponse(ratings=await repo.list_ratings_map(user["sub"]))
+
+
+@router.get(
+    "/me/catches",
+    response_model=CatchCollectionResponse,
+    operation_id="listMyCatches",
+)
+async def list_my_catches(
+    user: dict = Depends(get_current_user),
+    repo: RatingsRepo = Depends(get_ratings_repo),
+) -> CatchCollectionResponse:
+    rows = await repo.list_catches(user["sub"])
+    catches = [
+        CatchItem(
+            beer_id=r.beer_id,
+            name=r.name,
+            name_hebrew=r.name_hebrew,
+            brewery=r.brewery,
+            style=r.style,
+            color=r.color,
+            image_url=r.image_url,
+            proof_photo_url=r.proof_photo_url,
+            rating=r.rating,
+            created_at=r.created_at,
+        )
+        for r in rows
+    ]
+    return CatchCollectionResponse(catches=catches, count=len(catches))
 
 
 @router.get(
@@ -112,6 +149,8 @@ async def list_my_ratings(
                 rating=r.rating,
                 note=r.note,
                 created_at=r.created_at,
+                proof_photo_url=r.proof_photo_url,
+                proof_source=r.proof_source,
             )
             for r in rows
         ],

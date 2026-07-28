@@ -57,6 +57,10 @@ export const notesSourceEnum = pgEnum('notes_source', ['brewery', 'aggregator', 
 
 export const ratingEnum = pgEnum('rating', ['loved', 'fine', 'disliked', 'unknown'])
 
+// Proof strength for a Catch (ADR 0011). Only `self_photo` is written in v1;
+// `venue_verified` is the reserved white-label seam, defined now, unused.
+export const proofSourceEnum = pgEnum('proof_source', ['self_photo', 'venue_verified'])
+
 export const venueTypeEnum = pgEnum('venue_type', ['shop', 'pub'])
 
 // 'curated' rows come from our seed; 'user' rows come from crowdsourced reports.
@@ -308,6 +312,10 @@ export const beerRatings = pgTable(
       .references(() => beers.id, { onDelete: 'cascade' }),
     rating: ratingEnum('rating').notNull(),
     note: text('note'),
+    // A Rating with a proof photo is a Catch (issue #330, ADR 0011). Nullable:
+    // photo-less ratings stay plain ratings.
+    proofPhotoUrl: text('proof_photo_url'),
+    proofSource: proofSourceEnum('proof_source'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [

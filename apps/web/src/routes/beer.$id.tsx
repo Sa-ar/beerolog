@@ -4,6 +4,7 @@
  * public GET /catalog/{id}. This is the Share target; a logged-out recipient
  * gets a quiz CTA. Owner-overlay on this route is deferred (#275).
  */
+import { Show } from '@clerk/tanstack-react-start'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { useEffect } from 'react'
@@ -11,6 +12,7 @@ import { useTranslation } from 'react-i18next'
 import { Button, Heading } from '@beerolog/ui'
 import { apiClient } from '../lib/api-client/client'
 import { BeerDetail, type BeerDetailData } from '../components/BeerDetail'
+import { CatchBeerControl } from '../components/CatchBeerControl'
 import { PAGE_MAIN } from '../lib/page-shell'
 import type { BeerColor } from '../lib/beer-color'
 import { capture } from '../lib/analytics'
@@ -90,12 +92,19 @@ export function BeerDetailView({ id }: { id: string }) {
     <main className={`${PAGE_MAIN} py-8 sm:py-10`}>
       <div className="mx-auto max-w-md">
         <BeerDetail beer={detail} />
-        <div className="mt-6 flex flex-col items-center gap-2 text-center">
-          <p className="text-sm text-neutral-600">{t('beerDetail.route.ctaHint')}</p>
-          <Link to="/try">
-            <Button size="lg">{t('beerDetail.route.cta')}</Button>
-          </Link>
-        </div>
+        {/* Signed-in: catch this beer with a proof photo (#330). Signed-out
+            recipients of a shared link keep the objective view + quiz CTA. */}
+        <Show when="signed-in">
+          <CatchBeerControl beerId={b.id} beerName={b.name} />
+        </Show>
+        <Show when="signed-out">
+          <div className="mt-6 flex flex-col items-center gap-2 text-center">
+            <p className="text-sm text-neutral-600">{t('beerDetail.route.ctaHint')}</p>
+            <Link to="/try">
+              <Button size="lg">{t('beerDetail.route.cta')}</Button>
+            </Link>
+          </div>
+        </Show>
       </div>
     </main>
   )
