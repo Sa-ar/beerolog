@@ -83,8 +83,18 @@
     "superLike": "Must try",
     "undo": "Undo",
     "details": "Details",
+    "refine": "Refine",
+    "loadingMore": "Loading more picks…",
+    "endTitle": "That's the batch",
+    "endAdjust": "Adjust your filters",
+    "endScan": "Scan a menu",
+    "endList": "See your Want-to-try list",
     "swipeHint": "Swipe right to want, left to pass, up for must-try",
     "progress": "{{current}} of {{total}}"
+  },
+  "refiner": {
+    "title": "Refine your picks",
+    "notTried": "Only beers I haven't tried yet"
   },
   "menu": {
     "account": "Account menu",

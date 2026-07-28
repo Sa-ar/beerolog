@@ -34,6 +34,10 @@ export type RecommendationsPayload = {
 }
 
 export const RECS_PAGE_SIZE = 5
+// `What I want` deck paging (issue #324): a larger batch than the list route's
+// page, and how many cards remain before we preload the next batch.
+export const WANT_DECK_BATCH = 15
+export const WANT_DECK_PRELOAD_AT = 4
 export const RECS_STORAGE_KEY = 'beerolog_last_recs'
 export const RECS_PENDING_KEY = 'beerolog_pending_session'
 const RECS_REQUEST_KEY = 'beerolog_last_recs_request'
@@ -153,6 +157,34 @@ export async function fetchBaselineRecommendations(
   const request: StoredSessionRequest = { baseline }
   persistSessionResults(request, { ...data, results })
   return { ...data, results, request }
+}
+
+/**
+ * Side-effect-free recommendations fetch for the `What I want` deck. Unlike
+ * fetchBaselineRecommendations/startSession it does NOT touch sessionStorage, so
+ * the home deck never clobbers the /recommendations list route's saved page.
+ * The API returns the top_k highest-match-first, so requesting a larger top_k
+ * yields the same prefix plus the next batch — order-preserving pagination.
+ */
+export async function fetchRecommendationsPage(params: {
+  baseline: SessionBaseline
+  session?: SessionRequest
+  topK: number
+  locale?: 'en' | 'he'
+}): Promise<RecommendedBeer[]> {
+  const { baseline, session, topK, locale = 'en' } = params
+  const res = await apiFetch('/recommendations', {
+    method: 'POST',
+    body: JSON.stringify({
+      baseline,
+      ...(session ? { session: { ...session, free_text: session.free_text ?? '' } } : {}),
+      top_k: topK,
+      locale,
+    }),
+  })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  const data = (await res.json()) as { results: RecommendedBeer[] }
+  return data.results.map(normalizeRecommendedBeer)
 }
 
 export async function startSession(

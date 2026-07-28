@@ -5,10 +5,11 @@
  * persisted Want-to-try list is stubbed here and landed in Slice 4 (#325).
  * Batch paging + refiners land in Slice 3 (#324).
  */
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@beerolog/ui'
 import { DEFAULT_MATCH_CALIBRATION, tonightMatchPercent } from '../lib/match-score'
+import { WANT_DECK_PRELOAD_AT } from '../lib/session-intent'
 import { useSwipeCard } from '../lib/use-swipe-card'
 import { resolveWantSwipe, wantActionForDirection, type WantAction } from '../lib/swipe-want'
 import type { RecommendedBeer } from './RecommendationBeerCard'
@@ -29,9 +30,25 @@ const STAMP_LABEL: Record<WantAction, string> = {
 export function WantDeck({
   beers,
   onSignal,
+  hasMore = false,
+  onNearEnd,
+  endCard,
+  onOpenRefiner,
+  resetKey,
 }: {
   beers: RecommendedBeer[]
   onSignal?: (beerId: string, action: WantAction) => void
+  /** More batches are available; suppresses the terminal card while preloading. */
+  hasMore?: boolean
+  /** Fired when the remaining cards hit the preload threshold. */
+  onNearEnd?: () => void
+  /** Terminal card shown when the deck is exhausted and nothing more is loading. */
+  endCard?: ReactNode
+  /** Opens the refiner bottom sheet (header filter button). */
+  onOpenRefiner?: () => void
+  /** Changes when the deck is re-queried (refiner change) so the index resets;
+   * stable across preloaded batches so the position is kept. */
+  resetKey?: string
 }) {
   const { t, i18n } = useTranslation()
   const rtl = i18n.dir() === 'rtl'
@@ -46,6 +63,12 @@ export function WantDeck({
       document.body.style.overflow = previous
     }
   }, [])
+
+  // Reset to the top only on a re-query (refiner change), not when a preloaded
+  // batch grows the same deck.
+  useEffect(() => {
+    setIndex(0)
+  }, [resetKey])
 
   const commit = useCallback(
     (action: WantAction) => {
@@ -65,13 +88,28 @@ export function WantDeck({
   )
   const { state, handlers } = useSwipeCard<WantAction>(commit, resolve)
 
+  // Preload the next batch a few cards before the end so the deck feels endless.
+  const remaining = beers.length - index
+  useEffect(() => {
+    if (hasMore && onNearEnd && remaining <= WANT_DECK_PRELOAD_AT) onNearEnd()
+  }, [hasMore, onNearEnd, remaining])
+
   const beer = beers[index]
   if (!beer) {
+    if (hasMore) {
+      return (
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center p-6 text-center">
+          <p className="text-sm text-neutral-400 animate-pulse">{t('whatIWant.loadingMore')}</p>
+        </div>
+      )
+    }
     return (
       <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
-        <p role="status" className="text-lg font-semibold">
-          {t('whatIWant.empty')}
-        </p>
+        {endCard ?? (
+          <p role="status" className="text-lg font-semibold">
+            {t('whatIWant.empty')}
+          </p>
+        )}
       </div>
     )
   }
@@ -94,6 +132,13 @@ export function WantDeck({
         <span className="text-xs font-medium text-neutral-400" aria-live="polite">
           {t('whatIWant.progress', { current: index + 1, total: beers.length })}
         </span>
+        {onOpenRefiner ? (
+          <Button variant="ghost" size="sm" onClick={onOpenRefiner}>
+            {t('whatIWant.refine')}
+          </Button>
+        ) : (
+          <span className="w-12" aria-hidden />
+        )}
       </div>
 
       <div className="relative min-h-0 flex-1">

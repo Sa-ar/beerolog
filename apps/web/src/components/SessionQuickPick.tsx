@@ -11,12 +11,19 @@ import {
   VIBE_OPTIONS,
   type AbvIntent,
   type SessionBaseline,
+  type SessionRequest,
   type SessionVibe,
 } from '../lib/session-intent'
 import { capture } from '../lib/analytics'
 
 type SessionQuickPickProps = {
   baseline: BaselineTaste
+  /**
+   * When provided (e.g. the `What I want` refiner sheet), apply the chosen
+   * session in place instead of navigating to /recommendations. The dashboard
+   * usage omits it and keeps the navigate-to-picks behavior.
+   */
+  onApply?: (session: SessionRequest) => void
 }
 
 function toSessionBaseline(baseline: BaselineTaste): SessionBaseline {
@@ -28,7 +35,7 @@ function toSessionBaseline(baseline: BaselineTaste): SessionBaseline {
   }
 }
 
-export function SessionQuickPick({ baseline }: SessionQuickPickProps) {
+export function SessionQuickPick({ baseline, onApply }: SessionQuickPickProps) {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const [vibe, setVibe] = useState<SessionVibe | null>(null)
@@ -41,11 +48,13 @@ export function SessionQuickPick({ baseline }: SessionQuickPickProps) {
   function handleSubmit() {
     if (!canSubmit || vibe === null || abv === null) return
     capture('session_started', { vibe, abv, has_free_text: freeText.trim().length > 0 })
+    const session: SessionRequest = { vibe, abv_intent: abv, free_text: freeText.trim() }
+    if (onApply) {
+      onApply(session)
+      return
+    }
     setNavigating(true)
-    markSessionPending({
-      baseline: toSessionBaseline(baseline),
-      session: { vibe, abv_intent: abv, free_text: freeText.trim() },
-    })
+    markSessionPending({ baseline: toSessionBaseline(baseline), session })
     navigate({ to: '/recommendations' })
   }
 

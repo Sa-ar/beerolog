@@ -68,4 +68,37 @@ describe('WantDeck', () => {
     expect(screen.getByRole('status')).toBeInTheDocument()
     expect(screen.queryByTestId('card')).toBeNull()
   })
+
+  it('preloads the next batch when few cards remain and more exist', () => {
+    const onNearEnd = vi.fn()
+    // Four cards left = the preload threshold, so it fires on mount.
+    renderWithI18n(
+      <WantDeck beers={[beer('a'), beer('b'), beer('c'), beer('d')]} hasMore onNearEnd={onNearEnd} />,
+      'en',
+    )
+    expect(onNearEnd).toHaveBeenCalled()
+  })
+
+  it('does not preload while a full batch remains', () => {
+    const onNearEnd = vi.fn()
+    const many = Array.from({ length: 15 }, (_, i) => beer(`b${i}`))
+    renderWithI18n(<WantDeck beers={many} hasMore onNearEnd={onNearEnd} />, 'en')
+    expect(onNearEnd).not.toHaveBeenCalled()
+  })
+
+  it('shows the provided end card (not the default) when exhausted with no more', () => {
+    renderWithI18n(
+      <WantDeck beers={[]} hasMore={false} endCard={<div>terminal-card</div>} />,
+      'en',
+    )
+    expect(screen.getByText('terminal-card')).toBeInTheDocument()
+  })
+
+  it('opens the refiner from the header when a handler is given', async () => {
+    const onOpenRefiner = vi.fn()
+    const user = userEvent.setup()
+    renderWithI18n(<WantDeck beers={[beer('a')]} onOpenRefiner={onOpenRefiner} />, 'en')
+    await user.click(screen.getByRole('button', { name: 'Refine' }))
+    expect(onOpenRefiner).toHaveBeenCalled()
+  })
 })
