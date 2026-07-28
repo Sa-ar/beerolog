@@ -52,6 +52,16 @@ export const VIBE_OPTIONS: SessionVibe[] = ['refreshing', 'cozy', 'adventurous',
 
 export const ABV_OPTIONS: AbvIntent[] = ['low', 'medium', 'high', 'any']
 
+// Neutral starting profile for a brand-new (no-profile) user so `What I want`
+// shows a usable default deck immediately instead of a quiz wall (issue #328).
+// Swipes personalize from card one; the visible quiz CTA sharpens it faster.
+export const DEFAULT_SESSION_BASELINE: SessionBaseline = {
+  bubbles: 0.5,
+  bitterness: 0.5,
+  flavor_family: { malty: 0.5, hoppy: 0.5, roasty: 0.5, fruity: 0.5, sour: 0.5, smoky: 0.5 },
+  novelty_affinity: 0.5,
+}
+
 function persistSessionResults(
   request: StoredSessionRequest,
   data: Omit<RecommendationsPayload, 'request'>,

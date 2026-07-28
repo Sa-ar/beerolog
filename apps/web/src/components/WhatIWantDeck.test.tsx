@@ -4,7 +4,16 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { renderWithI18n } from '../test/render'
 import { fetchRecommendationsPage } from '../lib/session-intent'
 
-const { scanState } = vi.hoisted(() => ({ scanState: { results: [] as unknown[] } }))
+const { scanState, apiState } = vi.hoisted(() => ({
+  scanState: { results: [] as unknown[] },
+  apiState: { status: 200 },
+}))
+
+vi.mock('@tanstack/react-router', () => ({
+  Link: ({ to, children }: { to: string; children: React.ReactNode }) => (
+    <a href={to}>{children}</a>
+  ),
+}))
 
 vi.mock('../lib/menu-scan', () => ({
   useScanMenu: () => ({
@@ -16,16 +25,19 @@ vi.mock('../lib/menu-scan', () => ({
 }))
 
 vi.mock('../lib/api-fetch', () => ({
-  apiFetch: vi.fn(async () => ({
-    ok: true,
-    status: 200,
-    json: async () => ({
-      bubbles: 0.5,
-      bitterness: 0.5,
-      flavor_family: {},
-      novelty_affinity: 0.5,
-    }),
-  })),
+  apiFetch: vi.fn(async () => {
+    if (apiState.status === 404) return { ok: false, status: 404, json: async () => ({}) }
+    return {
+      ok: true,
+      status: 200,
+      json: async () => ({
+        bubbles: 0.5,
+        bitterness: 0.5,
+        flavor_family: {},
+        novelty_affinity: 0.5,
+      }),
+    }
+  }),
 }))
 
 vi.mock('../lib/my-ratings', () => ({ useMyRatings: () => ({}) }))
@@ -48,6 +60,7 @@ vi.mock('./WantDeck', () => ({
 
 beforeEach(() => {
   scanState.results = []
+  apiState.status = 200
 })
 
 vi.mock('./RefinerSheet', () => ({
@@ -119,5 +132,28 @@ describe('WhatIWantDeck', () => {
 
     await user.click(screen.getByRole('button', { name: /clear/i }))
     expect(screen.getByTestId('deck-count')).toHaveTextContent('3')
+  })
+
+  it('gives a no-profile user a default deck plus a visible quiz CTA (first card + header)', async () => {
+    apiState.status = 404 // no baseline profile yet
+    const user = userEvent.setup()
+    renderWithI18n(<WhatIWantDeck />, 'en')
+
+    // First card is the quiz CTA + a persistent header quiz entry (two links).
+    expect(await screen.findByRole('link', { name: /take the taste quiz/i })).toBeInTheDocument()
+    expect(screen.getByText(/sharpen your picks/i)).toBeInTheDocument()
+    expect(screen.queryByTestId('deck-count')).toBeNull() // not a wall, but lead shown first
+
+    // Skipping reveals the default-profile deck; swipes still record signals.
+    await user.click(screen.getByRole('button', { name: /start swiping/i }))
+    expect(await screen.findByTestId('deck-count')).toHaveTextContent('3')
+    // Header quiz entry persists until a profile exists.
+    expect(screen.getByText(/sharpen your picks/i)).toBeInTheDocument()
+  })
+
+  it('hides the quiz CTA once a profile exists', async () => {
+    renderWithI18n(<WhatIWantDeck />, 'en')
+    expect(await screen.findByTestId('deck-count')).toHaveTextContent('3')
+    expect(screen.queryByText(/sharpen your picks/i)).toBeNull()
   })
 })

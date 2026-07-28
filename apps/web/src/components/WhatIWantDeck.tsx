@@ -20,6 +20,7 @@ import { useScanMenu, type MenuScanResultItem } from '../lib/menu-scan'
 import { useAddWantToTry } from '../lib/use-want-to-try'
 import type { RecommendedBeer } from './RecommendationBeerCard'
 import {
+  DEFAULT_SESSION_BASELINE,
   fetchRecommendationsPage,
   recommendationsLocale,
   WANT_DECK_BATCH,
@@ -88,6 +89,7 @@ export function WhatIWantDeck() {
   const [session, setSession] = useState<SessionRequest | null>(null)
   const [notTried, setNotTried] = useState(false)
   const [refinerOpen, setRefinerOpen] = useState(false)
+  const [showQuizLead, setShowQuizLead] = useState(true)
   const [scoped, setScoped] = useState<{ label: string; cards: DeckCard[] } | null>(null)
   const myRatings = useMyRatings()
   const addWant = useAddWantToTry()
@@ -108,17 +110,19 @@ export function WhatIWantDeck() {
 
   const baseline =
     baselineQuery.data && 'baseline' in baselineQuery.data ? baselineQuery.data.baseline : null
-  const sessionBaseline = baseline ? toSessionBaseline(baseline) : null
+  const hasProfile = baseline != null
+  // No-profile users get a usable default deck immediately (no quiz wall, #328).
+  const effectiveBaseline = baseline ? toSessionBaseline(baseline) : DEFAULT_SESSION_BASELINE
 
   const recs = useInfiniteQuery({
-    queryKey: ['want-deck', locale, session],
-    enabled: !!sessionBaseline,
+    queryKey: ['want-deck', locale, session, hasProfile],
+    enabled: baselineQuery.isSuccess,
     staleTime: 5 * 60 * 1000,
     retry: false,
     initialPageParam: WANT_DECK_BATCH,
     queryFn: ({ pageParam }) =>
       fetchRecommendationsPage({
-        baseline: sessionBaseline!,
+        baseline: effectiveBaseline,
         ...(session ? { session } : {}),
         topK: pageParam,
         locale,
@@ -150,19 +154,6 @@ export function WhatIWantDeck() {
       </Frame>
     )
   }
-  if (baseline == null) {
-    return (
-      <Frame>
-        <Centered>
-          <p className="text-lg font-semibold">{t('whatIWant.empty')}</p>
-          <Link to="/onboarding">
-            <Button size="lg">{t('whatIWant.emptyCta')}</Button>
-          </Link>
-        </Centered>
-      </Frame>
-    )
-  }
-
   if (recs.isPending) {
     return (
       <Frame>
@@ -242,8 +233,45 @@ export function WhatIWantDeck() {
     </div>
   )
 
+  // Persistent header quiz entry — stays until a profile exists (#328).
+  const quizBanner = !hasProfile ? (
+    <Link to="/onboarding" className="mx-auto block w-full max-w-md px-4 pt-2">
+      <div className="rounded-xl bg-brand-500/15 px-3 py-2 text-center text-sm font-semibold text-brand-200">
+        {t('whatIWant.quizBanner')}
+      </div>
+    </Link>
+  ) : null
+
+  // Cold start: the quiz CTA is the first card (skippable, not a wall).
+  if (!hasProfile && showQuizLead) {
+    return (
+      <Frame>
+        {quizBanner}
+        <div className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
+          <Heading level={2} className="text-2xl">
+            {t('whatIWant.leadTitle')}
+          </Heading>
+          <p className="text-neutral-500">{t('whatIWant.leadBody')}</p>
+          <Link to="/onboarding" className="w-full max-w-xs">
+            <Button size="lg" className="w-full">
+              {t('whatIWant.emptyCta')}
+            </Button>
+          </Link>
+          <Button
+            variant="outline"
+            className="w-full max-w-xs"
+            onClick={() => setShowQuizLead(false)}
+          >
+            {t('whatIWant.leadSkip')}
+          </Button>
+        </div>
+      </Frame>
+    )
+  }
+
   return (
     <Frame>
+      {quizBanner}
       <input
         ref={fileRef}
         type="file"
@@ -283,23 +311,25 @@ export function WhatIWantDeck() {
               onNearEnd: () => {
                 if (recs.hasNextPage && !recs.isFetchingNextPage) void recs.fetchNextPage()
               },
-              onOpenRefiner: () => setRefinerOpen(true),
+              ...(hasProfile ? { onOpenRefiner: () => setRefinerOpen(true) } : {}),
             })}
         endCard={scoped ? scopedEndCard : endCard}
         onScan={() => fileRef.current?.click()}
         resetKey={scoped ? `scoped:${scoped.label}` : `${JSON.stringify(session)}|${notTried}`}
       />
-      <RefinerSheet
-        open={refinerOpen}
-        onClose={() => setRefinerOpen(false)}
-        baseline={baseline}
-        notTried={notTried}
-        onToggleNotTried={setNotTried}
-        onApply={(s) => {
-          setSession(s)
-          setRefinerOpen(false)
-        }}
-      />
+      {baseline ? (
+        <RefinerSheet
+          open={refinerOpen}
+          onClose={() => setRefinerOpen(false)}
+          baseline={baseline}
+          notTried={notTried}
+          onToggleNotTried={setNotTried}
+          onApply={(s) => {
+            setSession(s)
+            setRefinerOpen(false)
+          }}
+        />
+      ) : null}
     </Frame>
   )
 }
