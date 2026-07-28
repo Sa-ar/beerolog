@@ -11,7 +11,7 @@ import {
   type BaselineTaste,
 } from '../lib/baseline-taste'
 import { useRatingCount } from '../lib/rating-count'
-import { isArchetypeKey } from '../lib/archetypes'
+import { archetypeNameKey, isArchetypeKey } from '../lib/archetypes'
 import { capture } from '../lib/analytics'
 import { SessionQuickPick } from './SessionQuickPick'
 import { ShareArchetypeButton } from './ShareArchetypeButton'
@@ -37,9 +37,10 @@ export function TasteProfileSummary({ greeting, baseline }: TasteProfileSummaryP
   const title = flavorTitle(t, baseline)
   const heroSvg = resolveProfileHeroSvg(baseline, baseline.icons)
   const persona = personaForLang(baseline, i18n.language)
-  // One canonical identity: prefer the generated persona name, fall back to the
-  // deterministic flavor title. #226
-  const displayName = persona?.title ?? title
+  // One canonical identity: the shareable archetype name wins so the name shown
+  // here matches the /taste/{key} link the share button emits. Fall back to the
+  // persona title / flavor title only for legacy profiles with no archetype. #226 #319
+  const displayName = archetypeKey ? t(archetypeNameKey(archetypeKey)) : (persona?.title ?? title)
   const radarAxes = [
     { key: 'bitterness', value: baseline.bitterness },
     { key: 'sweetness', value: baseline.sweetness ?? 0.5 },

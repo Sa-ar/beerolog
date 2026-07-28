@@ -52,6 +52,20 @@ describe('TasteProfileSummary', () => {
     expect(screen.queryByText(/see taste details/i)).not.toBeInTheDocument()
   })
 
+  it('shows the shareable archetype name as the identity, matching the share link', () => {
+    // Regression: the heading must equal the /taste/{key} archetype name, not the
+    // divergent LLM persona title, so "the type I see" == "the type I share". #319
+    renderWithI18n(
+      <TasteProfileSummary
+        greeting="Hi"
+        baseline={{ ...baseline, archetype: { key: 'smoke-wanderer' } }}
+      />,
+      'en',
+    )
+    expect(screen.getByTestId('persona-title')).toHaveTextContent('The Smoke Wanderer')
+    expect(screen.getByTestId('persona-title')).not.toHaveTextContent('Malty comfort')
+  })
+
   it('offers a share-your-type action when the profile has an archetype', () => {
     renderWithI18n(
       <TasteProfileSummary
