@@ -1,15 +1,21 @@
 /**
- * The /rate deck experience: fetch a deck, rate beers one at a time, batch-
- * submit on completion. Data + progression live in useRateDeck; this component
- * is presentation only.
+ * The `What I know` deck (issue #326): swipe to rate beers you recognize —
+ * up = loved, right = fine, left = not-for-me — on the shared image-forward
+ * card, with on-screen button equivalents + undo (WCAG 2.5.1). Data +
+ * progression live in useRateDeck; each swipe posts to /ratings immediately.
+ * The deck is ranked by recognition likelihood (mainstream first). A search
+ * mode is retained as a secondary affordance on the /rate route.
  */
-import { Button, Heading, ProgressRing, buttonVariants } from '@beerolog/ui'
+import { RATINGS, type Rating } from '@beerolog/types'
+import { Button, Heading, buttonVariants } from '@beerolog/ui'
 import { Link } from '@tanstack/react-router'
-import { useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { PAGE_SHELL_X } from '../lib/page-shell'
 import { useRateDeck } from '../lib/rate-deck'
-import { RateBeerCard } from './RateBeerCard'
+import { useSwipeCard } from '../lib/use-swipe-card'
+import { knowRatingForDirection, resolveKnowSwipe } from '../lib/swipe-know'
+import { SwipeBeerCard } from './SwipeBeerCard'
 
 function Shell({ children, subtitle }: { children: React.ReactNode; subtitle?: boolean }) {
   const { t } = useTranslation()
@@ -22,12 +28,19 @@ function Shell({ children, subtitle }: { children: React.ReactNode; subtitle?: b
   )
 }
 
+const STAMPS: { rating: Rating; position: string; labelKey: string }[] = [
+  { rating: RATINGS.loved, position: 'left-1/2 top-6 -translate-x-1/2 border-green-400 text-green-200', labelKey: 'rate.tapper.loved' },
+  { rating: RATINGS.fine, position: 'end-4 top-1/2 -translate-y-1/2 border-brand-400 text-brand-200', labelKey: 'rate.tapper.fine' },
+  { rating: RATINGS.disliked, position: 'start-4 top-1/2 -translate-y-1/2 border-red-400 text-red-200', labelKey: 'rate.tapper.disliked' },
+]
+
 export function RateDeckFlow() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const rtl = i18n.dir() === 'rtl'
   const { state, rate, undo, restart, saveError } = useRateDeck()
 
-  // Lock body scroll while actively rating so up/down swipes rate the card
-  // instead of scrolling the page (#4).
+  // Lock body scroll while rating so up/down swipes rate the card instead of
+  // scrolling the page.
   useEffect(() => {
     if (state.status !== 'rating') return
     const previous = document.body.style.overflow
@@ -36,6 +49,12 @@ export function RateDeckFlow() {
       document.body.style.overflow = previous
     }
   }, [state.status])
+
+  const resolve = useCallback(
+    (dx: number, dy: number, threshold: number) => resolveKnowSwipe(dx, dy, threshold, rtl),
+    [rtl],
+  )
+  const { state: swipe, handlers } = useSwipeCard<Rating>((r) => rate(r), resolve)
 
   if (state.status === 'loading') {
     return <Shell subtitle>{t('rate.loading', 'Loading beers…')}</Shell>
@@ -88,22 +107,58 @@ export function RateDeckFlow() {
 
   const beer = state.deck[state.index]!
   const total = state.deck.length
+  const liveRating = knowRatingForDirection(swipe.direction, rtl)
+  const transform = `translate(${swipe.dx}px, ${swipe.dy}px) rotate(${swipe.dx / 24}deg)`
+
   return (
-    <Shell subtitle>
-      <div className="relative mb-4 flex justify-center">
-        {state.index > 0 ? (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={undo}
-            className="absolute left-0 top-1/2 -translate-y-1/2"
-          >
-            {t('rate.undo', 'Undo last')}
-          </Button>
-        ) : null}
-        <ProgressRing value={state.index} max={total} label={`${state.index + 1}/${total}`} />
+    <div className={`mx-auto flex h-full w-full max-w-md flex-col gap-3 px-4 pb-4 ${PAGE_SHELL_X}`}>
+      <div className="flex items-center justify-between pt-2">
+        <Button variant="ghost" size="sm" onClick={undo} disabled={state.index === 0}>
+          {t('rate.undo', 'Undo last')}
+        </Button>
+        <span className="text-xs font-medium text-neutral-400" aria-live="polite">
+          {state.index + 1}/{total}
+        </span>
+        <span className="w-12" aria-hidden />
       </div>
-      <RateBeerCard key={beer.id} beer={beer} onRate={rate} />
-    </Shell>
+
+      <div className="relative min-h-[24rem] flex-1">
+        {STAMPS.map((s) => (
+          <span
+            key={s.rating}
+            aria-hidden
+            className={`pointer-events-none absolute z-10 rounded-xl border-2 bg-black/50 px-3 py-1 text-sm font-bold uppercase tracking-wide ${s.position}`}
+            style={{ opacity: liveRating === s.rating ? swipe.progress : 0 }}
+          >
+            {t(s.labelKey)}
+          </span>
+        ))}
+        <div
+          {...handlers}
+          style={{ transform, touchAction: 'none' }}
+          className={`h-full ${
+            swipe.dragging ? '' : 'transition-transform duration-200 motion-reduce:transition-none'
+          }`}
+        >
+          <SwipeBeerCard key={beer.id} beer={beer} />
+        </div>
+      </div>
+
+      <div
+        className="flex items-center justify-center gap-3"
+        role="group"
+        aria-label={t('rate.swipeHint')}
+      >
+        <Button variant="outline" className="flex-1" onClick={() => rate(RATINGS.disliked)}>
+          {t('rate.tapper.disliked', 'Not for me')}
+        </Button>
+        <Button variant="outline" className="flex-1" onClick={() => rate(RATINGS.fine)}>
+          {t('rate.tapper.fine', 'It was fine')}
+        </Button>
+        <Button variant="default" className="flex-1" onClick={() => rate(RATINGS.loved)}>
+          {t('rate.tapper.loved', 'Loved it')}
+        </Button>
+      </div>
+    </div>
   )
 }

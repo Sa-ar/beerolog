@@ -33,8 +33,8 @@ const { RateDeckFlow } = await import('../components/RateDeckFlow')
 
 const DECK = {
   beers: [
-    { id: 'a', name: 'Beer A', name_hebrew: null, brewery: 'Brew', style: 'lager', abv: 5 },
-    { id: 'b', name: 'Beer B', name_hebrew: null, brewery: 'Brew', style: 'ipa', abv: 6 },
+    { id: 'a', name: 'Beer A', name_hebrew: null, brewery: 'Brew', style: 'lager', abv: 5, market_tier: 'mainstream', image_url: null, color: 'gold' },
+    { id: 'b', name: 'Beer B', name_hebrew: null, brewery: 'Brew', style: 'ipa', abv: 6, market_tier: 'mainstream', image_url: null, color: 'gold' },
   ],
 }
 
@@ -51,14 +51,14 @@ describe('RateDeckFlow', () => {
     renderWithI18n(<RateDeckFlow />, 'en')
 
     expect(await screen.findByText('Beer A')).toBeInTheDocument()
-    await user.type(screen.getByRole('textbox'), 'tasty')
     await user.click(screen.getByRole('button', { name: /loved it/i }))
 
     // Saved right away via /ratings — not held in a batch until the deck ends,
-    // so leaving mid-deck still persists what was rated.
+    // so leaving mid-deck still persists what was rated. The image-forward card
+    // has no in-card note field.
     await waitFor(() =>
       expect(postMock).toHaveBeenCalledWith('/ratings', {
-        body: { beer_id: 'a', rating: 'loved', note: 'tasty' },
+        body: { beer_id: 'a', rating: 'loved' },
       }),
     )
 

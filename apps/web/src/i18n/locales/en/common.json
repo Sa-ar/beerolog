@@ -733,6 +733,7 @@
   "rate": {
     "title": "Rate beers",
     "subtitle": "Each rating sharpens your recommendations.",
+    "swipeHint": "Swipe up for loved, right for fine, left for not-for-me",
     "loading": "Loading beers…",
     "error": "Couldn't load the deck. Try again.",
     "empty": "No beers to rate right now — you've rated them all!",

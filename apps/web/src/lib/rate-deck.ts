@@ -10,6 +10,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useState } from 'react'
 import { apiClient } from './api-client/client'
 import { capture } from './analytics'
+import type { BeerColor } from './beer-color'
 
 export type DeckBeer = {
   id: string
@@ -18,6 +19,23 @@ export type DeckBeer = {
   brewery: string
   style: string
   abv: number
+  market_tier: 'mainstream' | 'craft' | 'import'
+  image_url?: string | null
+  color?: BeerColor | null
+}
+
+// Recognition-likelihood proxy: mainstream beers are the most widely recognized,
+// so the `What I know` deck surfaces them first (issue #326).
+const TIER_RANK: Record<DeckBeer['market_tier'], number> = {
+  mainstream: 0,
+  craft: 1,
+  import: 2,
+}
+
+function sortByRecognition(beers: DeckBeer[]): DeckBeer[] {
+  return [...beers].sort(
+    (a, b) => (TIER_RANK[a.market_tier] ?? 99) - (TIER_RANK[b.market_tier] ?? 99),
+  )
 }
 
 export type Swipe = { beer_id: string; rating: Rating; note?: string }
@@ -34,7 +52,18 @@ const DECK_KEY = ['rate', 'deck'] as const
 async function fetchDeck(): Promise<DeckBeer[]> {
   const { data, error } = await apiClient.GET('/rate/deck')
   if (error || !data) throw new Error('Failed to load deck')
-  return data.beers
+  const beers: DeckBeer[] = data.beers.map((b) => ({
+    id: b.id,
+    name: b.name,
+    name_hebrew: b.name_hebrew ?? null,
+    brewery: b.brewery,
+    style: b.style,
+    abv: b.abv,
+    market_tier: b.market_tier,
+    image_url: b.image_url ?? null,
+    color: (b.color ?? null) as BeerColor | null,
+  }))
+  return sortByRecognition(beers)
 }
 
 export function useRateDeck() {
