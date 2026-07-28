@@ -4,6 +4,12 @@
 
 Beerolog helps a person learn their taste, get strong beer recommendations, and refine their profile over time.
 
+## Business model
+
+The B2C app (beerolog.com) is a thin shell kept alive at minimal cost — same codebase, no dedicated investment. It has limited traction and is not the primary growth vector.
+
+The primary business is a **paid white-label B2B product**: bars and venues license Beerolog's recommendation engine under their own brand. The white-label subscription is a single paid tier — all analytics (descriptive now, predictive at network scale) are included. There is no free tier for venues.
+
 ## Supported MVP
 
 - The supported runtime surface is the signed-in solo flow.
@@ -19,6 +25,10 @@ Beerolog helps a person learn their taste, get strong beer recommendations, and 
 - Leaderboards and social proof
 - Badges and milestone systems
 - Broader bar tooling and operator workflows
+- Cross-category drink upsells (beer → cocktail / wine) — deferred until non-beer flavor catalog exists
+- B2B bar intelligence predictive analytics (cross-venue benchmarks, stocking recommendations) — included in white-label subscription but deferred until network scale exists (10+ active partner bars); descriptive analytics ship with the staff portal
+- White-label multi-tenancy, international markets, and per-market configuration — seams designed in now (see ADR 0009); full multi-market operations deferred
+- User taste profile portability / white-label sharing — resolved: cold start at every venue, no cross-tenant profile portability in v1 (see OD-001 in `docs/prds/open-decisions.md`)
 
 ## Core terms
 
@@ -42,6 +52,11 @@ Beerolog helps a person learn their taste, get strong beer recommendations, and 
 | `Venue` | A physical place a `Beer` can be obtained: a bottle shop (off-premise) or a pub/bar (on-premise). Located by free-text city/area, not coordinates. Distinct from a scanned bar menu: a `Venue` is a durable, shareable place record; a menu scan is one user's transient capture. |
 | `Availability` | A claim that a `Venue` *generally carries* a `Beer` as part of its regular range — never a live in-stock count. Carries a confidence that decays over months and is refreshed by re-scrapes and user reports. |
 | `AvailabilityReport` | A user's Waze-style assertion about an `Availability`: confirm ("still here"), deny ("gone"), or add (a `Venue`/`Beer` pairing we didn't have). Adjusts confidence and freshness; weighted by reporter trust. |
+| `Market` | A country-level partition of the shared catalog. Every `Beer` and `Venue` belongs to one or more markets via a `beer_market_availability` join. Recommendations are filtered to the user's active market. Designed as a seam from the start so multi-market operations require data and config changes, not schema rewrites. See ADR 0009. |
+| `CatalogItem` | The generalised form of `Beer` in a shared product DB — includes non-beer items (cocktails, spirits, food) submitted by bar staff. Each item carries a `category` (`beer` | `cocktail` | `spirit` | `food`), structured attributes appropriate to its category, and a `BeerEmbedding`-style vector for similarity matching. Enables food pairing and cross-category upsells without a separate catalog. Deferred for non-beer categories until the staff portal exists. |
+| `FoodPairing` | A declared or LLM-derived relationship between a `CatalogItem` (beer) and a `CatalogItem` (food), capturing complementary flavor relationships. v1 scope: beer + food only. Beer → cocktail / wine pairings are deferred. |
+| `CatalogEnrichment` | The automated pipeline that fills structured attributes (ABV, IBU, style, flavor profile) when bar staff submit a new menu item by name. Waterfall: (1) fuzzy match against existing catalog; (2) LLM lookup using training knowledge; (3) BJCP style-level priors as fallback; (4) staff confirmation. No scraping of ToS-protected sources. See ADR 0008. |
+| `WhiteLabelTenant` | A bar or venue running Beerolog under their own brand, on a paid subscription. Scoped to a `Market`. Has its own staff portal, menu, and branding config. Shares the global catalog and recommendation engine. Users start with a cold-start re-quiz at each venue — no cross-tenant profile portability in v1 (see OD-001). Bar operators see aggregate anonymised taste distribution and recommendation outcomes for their venue; individual user profiles are never exposed to operators (see OD-002). |
 
 ## Repo shape
 
