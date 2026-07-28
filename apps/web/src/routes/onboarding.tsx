@@ -55,7 +55,9 @@ function OnboardingForm() {
       })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       localStorage.removeItem('beerolog_onboarding_quiz')
-      navigate({ to: '/recommendations' })
+      // After the taste quiz, land on the main dashboard (home) so the user sees
+      // their taste profile (radar + persona), not straight into recommendations.
+      navigate({ to: '/' })
     } catch (e) {
       setError(onboardingSaveErrorMessage(t, e))
     } finally {

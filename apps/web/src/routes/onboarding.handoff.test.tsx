@@ -50,12 +50,12 @@ describe('onboarding handoff', () => {
     apiFetch.mockResolvedValue({ ok: true })
   })
 
-  it('navigates to recommendations after a successful save', async () => {
+  it('navigates to the home dashboard after a successful save', async () => {
     const user = userEvent.setup()
     renderWithI18n(<OnboardingPage />, 'en')
     await user.click(screen.getByRole('button', { name: /finish quiz/i }))
     await waitFor(() => {
-      expect(navigate).toHaveBeenCalledWith({ to: '/recommendations' })
+      expect(navigate).toHaveBeenCalledWith({ to: '/' })
     })
   })
 })
