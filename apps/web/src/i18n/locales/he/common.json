@@ -67,10 +67,13 @@
   "header": { "home": "בירולוג — דף הבית" },
   "nav": {
     "primary": "ניווט ראשי",
-    "home": "הערב",
-    "scan": "סרקו תפריט",
-    "picks": "המלצות",
-    "rate": "דירוג בירות"
+    "whatIKnow": "מה אני מכיר",
+    "whatIWant": "מה בא לי"
+  },
+  "whatIWant": {
+    "title": "מה בא לי",
+    "subtitle": "הבירות שהכי מתאימות לכם, מוכנות להחלקה.",
+    "cta": "לצפייה בהמלצות"
   },
   "menu": {
     "account": "תפריט חשבון",
@@ -297,8 +300,8 @@
   "settings": { "title": "הגדרות", "language": "שפה" },
   "account": {
     "title": "החשבון שלי",
-    "tabs": { "profile": "פרופיל", "security": "אבטחה", "settings": "הגדרות" },
-    "profile": {
+    "tabs": { "profile": "פרופיל", "details": "פרטים", "security": "אבטחה", "settings": "הגדרות" },
+    "details": {
       "firstName": "שם פרטי",
       "lastName": "שם משפחה",
       "username": "שם משתמש",

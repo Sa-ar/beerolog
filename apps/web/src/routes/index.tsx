@@ -1,18 +1,8 @@
-import { useAuth, useUser } from '@clerk/tanstack-react-start'
+import { useUser } from '@clerk/tanstack-react-start'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Button, Heading } from '@beerolog/ui'
 import { PAGE_MAIN } from '../lib/page-shell'
-import { TasteProfileEmptyState } from '../components/TasteProfileEmptyState'
-import { TasteProfileErrorState } from '../components/TasteProfileErrorState'
-import { TasteProfileLoadingState } from '../components/TasteProfileLoadingState'
-import { TasteProfileSummary } from '../components/TasteProfileSummary'
-import type { BaselineLoadErrorReason } from '../lib/load-baseline-taste'
-import { loadBaselineTaste } from '../lib/load-baseline-taste'
-import { clearBaselineCache, readBaselineCache, writeBaselineCache } from '../lib/baseline-cache'
-import type { BaselineTaste } from '../lib/baseline-taste'
-import { timeAwareGreeting, isStaleProfile } from '../lib/baseline-taste'
 
 export const Route = createFileRoute('/')({
   component: HomePage,
@@ -21,18 +11,8 @@ export const Route = createFileRoute('/')({
 // Labels come from home.steps.<step>.{title,detail}; icon keyed by step.
 const STEPS = ['quiz', 'vibe', 'picks'] as const
 
-// Carries the typed failure reason through react-query's error channel so the
-// error screen can show a specific message.
-class BaselineError extends Error {
-  constructor(readonly reason: BaselineLoadErrorReason) {
-    super(reason)
-  }
-}
-
-type BaselineResult = { ready: BaselineTaste } | { empty: true }
-
 function HomePage() {
-  const { isLoaded, isSignedIn, user } = useUser()
+  const { isLoaded, isSignedIn } = useUser()
   const signedIn = isLoaded && isSignedIn
 
   if (!isLoaded) {
@@ -42,7 +22,7 @@ function HomePage() {
   if (signedIn) {
     return (
       <main className={`${PAGE_MAIN} py-10 sm:py-12`}>
-        <SignedInHome firstName={user?.firstName} />
+        <SignedInHome />
       </main>
     )
   }
@@ -51,6 +31,24 @@ function HomePage() {
     <main className={`${PAGE_MAIN} py-8 sm:py-14`}>
       <VisitorHome />
     </main>
+  )
+}
+
+// `What I want` is the signed-in home/default deck. The image-forward swipe deck
+// lands in a later slice; this IA skeleton links into the existing picks surface.
+// Taste profile now lives behind the avatar on the Account > Profile tab.
+function SignedInHome() {
+  const { t } = useTranslation()
+  return (
+    <section className="mx-auto flex w-full max-w-md flex-col gap-6 py-6 text-center">
+      <Heading className="text-3xl sm:text-4xl">{t('whatIWant.title')}</Heading>
+      <p className="text-base text-neutral-500">{t('whatIWant.subtitle')}</p>
+      <Link to="/recommendations" className="block">
+        <Button className="w-full" size="lg">
+          {t('whatIWant.cta')}
+        </Button>
+      </Link>
+    </section>
   )
 }
 
@@ -69,65 +67,6 @@ function ChalkRule() {
       <path d="M4 8 C 60 2, 100 2, 130 6 S 200 11, 236 4" />
     </svg>
   )
-}
-
-function SignedInHome({ firstName }: { firstName: string | null | undefined }) {
-  const { getToken, isLoaded: authLoaded, userId } = useAuth()
-  const { t } = useTranslation()
-  const greeting = timeAwareGreeting(t, firstName)
-
-  const profile = useQuery<BaselineResult, BaselineError>({
-    queryKey: ['baseline', userId],
-    enabled: authLoaded,
-    staleTime: 0,
-    retry: false,
-    // Seed from cache so the profile shows instantly; a stale-model cache is
-    // ignored so we force the improved quiz. initialDataUpdatedAt: 0 keeps it
-    // stale so we always revalidate in the background.
-    initialData: () => {
-      const cached = readBaselineCache(userId)
-      return cached && !isStaleProfile(cached) ? { ready: cached } : undefined
-    },
-    initialDataUpdatedAt: 0,
-    queryFn: async () => {
-      const result = await loadBaselineTaste(() => getToken())
-      if (result.status === 'error') throw new BaselineError(result.reason)
-      if (result.status === 'empty' || isStaleProfile(result.baseline)) {
-        clearBaselineCache(userId)
-        return { empty: true }
-      }
-      writeBaselineCache(userId, result.baseline)
-      return { ready: result.baseline }
-    },
-  })
-
-  // Cold start (nothing cached, still fetching) shows the loading screen.
-  if (!authLoaded || profile.isPending) {
-    return <TasteProfileLoadingState greeting={greeting} />
-  }
-
-  // Revalidation failed with no cached profile to fall back on. When a cached
-  // profile exists react-query keeps it in `data`, so we fall through and keep
-  // showing it rather than flashing an error.
-  if (profile.isError && !profile.data) {
-    return (
-      <TasteProfileErrorState
-        greeting={greeting}
-        reason={profile.error.reason}
-        onRetry={() => void profile.refetch()}
-      />
-    )
-  }
-
-  if (profile.data && 'empty' in profile.data) {
-    return <TasteProfileEmptyState greeting={greeting} />
-  }
-
-  if (!profile.data || !('ready' in profile.data)) {
-    return <TasteProfileLoadingState greeting={greeting} />
-  }
-
-  return <TasteProfileSummary greeting={greeting} baseline={profile.data.ready} />
 }
 
 function SessionLoading() {

@@ -10,6 +10,7 @@ export const Route = createFileRoute('/account')({
 
 const TABS = [
   { to: '/account/profile', key: 'profile' },
+  { to: '/account/details', key: 'details' },
   { to: '/account/security', key: 'security' },
   { to: '/account/settings', key: 'settings' },
 ] as const

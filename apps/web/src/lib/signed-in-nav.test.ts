@@ -2,14 +2,9 @@ import { describe, expect, it } from 'vitest'
 import { SIGNED_IN_NAV, activeSignedInNavId } from './signed-in-nav'
 
 describe('signed-in-nav', () => {
-  it('exposes four primary destinations in order', () => {
-    expect(SIGNED_IN_NAV.map((item) => item.id)).toEqual(['home', 'scan', 'picks', 'rate'])
-    expect(SIGNED_IN_NAV.map((item) => item.to)).toEqual([
-      '/',
-      '/menu',
-      '/recommendations',
-      '/rate',
-    ])
+  it('exposes exactly the two deck destinations, What I want as home', () => {
+    expect(SIGNED_IN_NAV.map((item) => item.id)).toEqual(['whatIKnow', 'whatIWant'])
+    expect(SIGNED_IN_NAV.map((item) => item.to)).toEqual(['/rate', '/'])
   })
 
   it('does not treat account routes as a primary-nav match', () => {
@@ -18,8 +13,9 @@ describe('signed-in-nav', () => {
     expect(activeSignedInNavId('/account/profile')).toBeNull()
   })
 
-  it('matches home only at exact /', () => {
-    expect(activeSignedInNavId('/')).toBe('home')
+  it('matches What I want only at exact /, What I know on /rate', () => {
+    expect(activeSignedInNavId('/')).toBe('whatIWant')
+    expect(activeSignedInNavId('/rate')).toBe('whatIKnow')
     expect(activeSignedInNavId('/onboarding')).toBeNull()
   })
 })

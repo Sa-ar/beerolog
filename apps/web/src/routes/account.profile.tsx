@@ -1,147 +1,81 @@
-import { useUser } from '@clerk/tanstack-react-start'
-import { Button, Card, CardContent } from '@beerolog/ui'
+import { useAuth, useUser } from '@clerk/tanstack-react-start'
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useRef, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { clerkErrorMessage } from '../lib/clerkError'
+import { TasteProfileSummary } from '../components/TasteProfileSummary'
+import { TasteProfileEmptyState } from '../components/TasteProfileEmptyState'
+import { TasteProfileErrorState } from '../components/TasteProfileErrorState'
+import { TasteProfileLoadingState } from '../components/TasteProfileLoadingState'
+import type { BaselineLoadErrorReason } from '../lib/load-baseline-taste'
+import { loadBaselineTaste } from '../lib/load-baseline-taste'
+import { clearBaselineCache, readBaselineCache, writeBaselineCache } from '../lib/baseline-cache'
+import type { BaselineTaste } from '../lib/baseline-taste'
+import { timeAwareGreeting, isStaleProfile } from '../lib/baseline-taste'
 
+// The Profile (taste) tab is the default Account tab and the single home for the
+// taste profile — moved here from the signed-in Home during the page reduction.
 export const Route = createFileRoute('/account/profile')({
-  component: ProfilePage,
+  component: ProfileTastePage,
 })
 
-const inputClass =
-  'w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-brand-500'
+// Carries the typed failure reason through react-query's error channel.
+class BaselineError extends Error {
+  constructor(readonly reason: BaselineLoadErrorReason) {
+    super(reason)
+  }
+}
 
-function ProfilePage() {
+type BaselineResult = { ready: BaselineTaste } | { empty: true }
+
+function ProfileTastePage() {
+  const { getToken, isLoaded: authLoaded, userId } = useAuth()
+  const { user } = useUser()
   const { t } = useTranslation()
-  const { isLoaded, user } = useUser()
-  const fileRef = useRef<HTMLInputElement>(null)
-  const [form, setForm] = useState({ firstName: '', lastName: '', username: '' })
-  const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const greeting = timeAwareGreeting(t, user?.firstName)
 
-  useEffect(() => {
-    if (!user) return
-    setForm({
-      firstName: user.firstName ?? '',
-      lastName: user.lastName ?? '',
-      username: user.username ?? '',
-    })
-  }, [user?.id])
-
-  if (!isLoaded || !user) return null
-
-  async function onSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (!user) return
-    setSaving(true)
-    setSaved(false)
-    setError(null)
-    try {
-      const payload: { firstName: string; lastName: string; username?: string } = {
-        firstName: form.firstName,
-        lastName: form.lastName,
+  const profile = useQuery<BaselineResult, BaselineError>({
+    queryKey: ['baseline', userId],
+    enabled: authLoaded,
+    staleTime: 0,
+    retry: false,
+    initialData: () => {
+      const cached = readBaselineCache(userId)
+      return cached && !isStaleProfile(cached) ? { ready: cached } : undefined
+    },
+    initialDataUpdatedAt: 0,
+    queryFn: async () => {
+      const result = await loadBaselineTaste(() => getToken())
+      if (result.status === 'error') throw new BaselineError(result.reason)
+      if (result.status === 'empty' || isStaleProfile(result.baseline)) {
+        clearBaselineCache(userId)
+        return { empty: true }
       }
-      if (form.username !== (user.username ?? '')) payload.username = form.username
-      await user.update(payload)
-      setSaved(true)
-    } catch (err) {
-      setError(clerkErrorMessage(err, t('account.profile.error')))
-    } finally {
-      setSaving(false)
-    }
+      writeBaselineCache(userId, result.baseline)
+      return { ready: result.baseline }
+    },
+  })
+
+  if (!authLoaded || profile.isPending) {
+    return <TasteProfileLoadingState greeting={greeting} />
   }
 
-  async function onAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file || !user) return
-    setError(null)
-    try {
-      await user.setProfileImage({ file })
-    } catch (err) {
-      setError(clerkErrorMessage(err, t('account.profile.error')))
-    }
+  if (profile.isError && !profile.data) {
+    return (
+      <TasteProfileErrorState
+        greeting={greeting}
+        reason={profile.error.reason}
+        onRetry={() => void profile.refetch()}
+      />
+    )
   }
 
-  async function removeAvatar() {
-    if (!user) return
-    setError(null)
-    try {
-      await user.setProfileImage({ file: null })
-    } catch (err) {
-      setError(clerkErrorMessage(err, t('account.profile.error')))
-    }
+  if (profile.data && 'empty' in profile.data) {
+    return <TasteProfileEmptyState greeting={greeting} />
   }
 
-  const initials = (user.firstName?.[0] ?? user.fullName?.[0] ?? '?').toUpperCase()
+  if (!profile.data || !('ready' in profile.data)) {
+    return <TasteProfileLoadingState greeting={greeting} />
+  }
 
-  return (
-    <Card>
-      <CardContent className="pt-6">
-        <div className="mb-6 flex items-center gap-4">
-          <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-amber-700 text-xl font-semibold text-[#fff]">
-            {user.hasImage ? (
-              <img src={user.imageUrl} alt="" className="h-full w-full object-cover" />
-            ) : (
-              initials
-            )}
-          </div>
-          <div className="flex gap-2">
-            <input
-              ref={fileRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={onAvatarChange}
-            />
-            <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()}>
-              {t('account.profile.upload')}
-            </Button>
-            {user.hasImage && (
-              <Button type="button" variant="ghost" size="sm" onClick={removeAvatar}>
-                {t('account.profile.remove')}
-              </Button>
-            )}
-          </div>
-        </div>
-
-        <form onSubmit={onSubmit} className="flex flex-col gap-4">
-          <label className="flex flex-col gap-1 text-sm font-medium text-neutral-700">
-            {t('account.profile.firstName')}
-            <input
-              className={inputClass}
-              value={form.firstName}
-              onChange={(e) => setForm((f) => ({ ...f, firstName: e.target.value }))}
-            />
-          </label>
-          <label className="flex flex-col gap-1 text-sm font-medium text-neutral-700">
-            {t('account.profile.lastName')}
-            <input
-              className={inputClass}
-              value={form.lastName}
-              onChange={(e) => setForm((f) => ({ ...f, lastName: e.target.value }))}
-            />
-          </label>
-          <label className="flex flex-col gap-1 text-sm font-medium text-neutral-700">
-            {t('account.profile.username')}
-            <input
-              className={inputClass}
-              value={form.username}
-              onChange={(e) => setForm((f) => ({ ...f, username: e.target.value }))}
-            />
-          </label>
-
-          {error && <p className="text-sm text-red-600">{error}</p>}
-          {saved && <p className="text-sm text-green-700">{t('account.profile.saved')}</p>}
-
-          <div>
-            <Button type="submit" size="sm" disabled={saving}>
-              {saving ? t('account.profile.saving') : t('account.profile.save')}
-            </Button>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
-  )
+  return <TasteProfileSummary greeting={greeting} baseline={profile.data.ready} />
 }

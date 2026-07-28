@@ -1,41 +1,26 @@
 /**
  * Single source of truth for signed-in primary destinations.
+ * Two decks: `What I know` (rate) and `What I want` (home/default).
  */
 
 import type { CatalogIconGroup } from '@beerolog/icons'
 
 export const SIGNED_IN_NAV = [
   {
-    id: 'home',
-    to: '/',
-    labelKey: 'nav.home',
-    iconGroup: 'session.vibe' as const satisfies CatalogIconGroup,
-    iconKey: 'refreshing',
-    match: (pathname: string) => pathname === '/',
-  },
-  {
-    id: 'scan',
-    to: '/menu',
-    labelKey: 'nav.scan',
-    iconGroup: 'journey' as const satisfies CatalogIconGroup,
-    iconKey: 'quiz',
-    match: (pathname: string) => pathname.startsWith('/menu'),
-  },
-  {
-    id: 'picks',
-    to: '/recommendations',
-    labelKey: 'nav.picks',
-    iconGroup: 'journey' as const satisfies CatalogIconGroup,
-    iconKey: 'picks',
-    match: (pathname: string) => pathname.startsWith('/recommendations'),
-  },
-  {
-    id: 'rate',
+    id: 'whatIKnow',
     to: '/rate',
-    labelKey: 'nav.rate',
+    labelKey: 'nav.whatIKnow',
     iconGroup: 'journey' as const satisfies CatalogIconGroup,
     iconKey: 'quiz',
     match: (pathname: string) => pathname.startsWith('/rate'),
+  },
+  {
+    id: 'whatIWant',
+    to: '/',
+    labelKey: 'nav.whatIWant',
+    iconGroup: 'journey' as const satisfies CatalogIconGroup,
+    iconKey: 'picks',
+    match: (pathname: string) => pathname === '/',
   },
 ] as const
 

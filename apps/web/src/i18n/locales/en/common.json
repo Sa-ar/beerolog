@@ -67,10 +67,13 @@
   "header": { "home": "Beerolog home" },
   "nav": {
     "primary": "Primary",
-    "home": "Tonight",
-    "scan": "Scan menu",
-    "picks": "Picks",
-    "rate": "Rate beers"
+    "whatIKnow": "What I know",
+    "whatIWant": "What I want"
+  },
+  "whatIWant": {
+    "title": "What I want",
+    "subtitle": "Your highest-match beers, ready to swipe.",
+    "cta": "See your picks"
   },
   "menu": {
     "account": "Account menu",
@@ -297,8 +300,8 @@
   "settings": { "title": "Settings", "language": "Language" },
   "account": {
     "title": "Account",
-    "tabs": { "profile": "Profile", "security": "Security", "settings": "Settings" },
-    "profile": {
+    "tabs": { "profile": "Profile", "details": "Details", "security": "Security", "settings": "Settings" },
+    "details": {
       "firstName": "First name",
       "lastName": "Last name",
       "username": "Username",

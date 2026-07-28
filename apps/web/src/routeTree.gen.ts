@@ -25,6 +25,7 @@ import { Route as BeerIdRouteImport } from './routes/beer.$id'
 import { Route as AccountSettingsRouteImport } from './routes/account.settings'
 import { Route as AccountSecurityRouteImport } from './routes/account.security'
 import { Route as AccountProfileRouteImport } from './routes/account.profile'
+import { Route as AccountDetailsRouteImport } from './routes/account.details'
 import { Route as ApiOgTasteKeyRouteImport } from './routes/api.og.taste.$key'
 
 const TryRoute = TryRouteImport.update({
@@ -107,6 +108,11 @@ const AccountProfileRoute = AccountProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => AccountRoute,
 } as any)
+const AccountDetailsRoute = AccountDetailsRouteImport.update({
+  id: '/details',
+  path: '/details',
+  getParentRoute: () => AccountRoute,
+} as any)
 const ApiOgTasteKeyRoute = ApiOgTasteKeyRouteImport.update({
   id: '/api/og/taste/$key',
   path: '/api/og/taste/$key',
@@ -121,6 +127,7 @@ export interface FileRoutesByFullPath {
   '/rate': typeof RateRoute
   '/recommendations': typeof RecommendationsRoute
   '/try': typeof TryRoute
+  '/account/details': typeof AccountDetailsRoute
   '/account/profile': typeof AccountProfileRoute
   '/account/security': typeof AccountSecurityRoute
   '/account/settings': typeof AccountSettingsRoute
@@ -139,6 +146,7 @@ export interface FileRoutesByTo {
   '/rate': typeof RateRoute
   '/recommendations': typeof RecommendationsRoute
   '/try': typeof TryRoute
+  '/account/details': typeof AccountDetailsRoute
   '/account/profile': typeof AccountProfileRoute
   '/account/security': typeof AccountSecurityRoute
   '/account/settings': typeof AccountSettingsRoute
@@ -159,6 +167,7 @@ export interface FileRoutesById {
   '/rate': typeof RateRoute
   '/recommendations': typeof RecommendationsRoute
   '/try': typeof TryRoute
+  '/account/details': typeof AccountDetailsRoute
   '/account/profile': typeof AccountProfileRoute
   '/account/security': typeof AccountSecurityRoute
   '/account/settings': typeof AccountSettingsRoute
@@ -180,6 +189,7 @@ export interface FileRouteTypes {
     | '/rate'
     | '/recommendations'
     | '/try'
+    | '/account/details'
     | '/account/profile'
     | '/account/security'
     | '/account/settings'
@@ -198,6 +208,7 @@ export interface FileRouteTypes {
     | '/rate'
     | '/recommendations'
     | '/try'
+    | '/account/details'
     | '/account/profile'
     | '/account/security'
     | '/account/settings'
@@ -217,6 +228,7 @@ export interface FileRouteTypes {
     | '/rate'
     | '/recommendations'
     | '/try'
+    | '/account/details'
     | '/account/profile'
     | '/account/security'
     | '/account/settings'
@@ -359,6 +371,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountProfileRouteImport
       parentRoute: typeof AccountRoute
     }
+    '/account/details': {
+      id: '/account/details'
+      path: '/details'
+      fullPath: '/account/details'
+      preLoaderRoute: typeof AccountDetailsRouteImport
+      parentRoute: typeof AccountRoute
+    }
     '/api/og/taste/$key': {
       id: '/api/og/taste/$key'
       path: '/api/og/taste/$key'
@@ -370,6 +389,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AccountRouteChildren {
+  AccountDetailsRoute: typeof AccountDetailsRoute
   AccountProfileRoute: typeof AccountProfileRoute
   AccountSecurityRoute: typeof AccountSecurityRoute
   AccountSettingsRoute: typeof AccountSettingsRoute
@@ -377,6 +397,7 @@ interface AccountRouteChildren {
 }
 
 const AccountRouteChildren: AccountRouteChildren = {
+  AccountDetailsRoute: AccountDetailsRoute,
   AccountProfileRoute: AccountProfileRoute,
   AccountSecurityRoute: AccountSecurityRoute,
   AccountSettingsRoute: AccountSettingsRoute,
