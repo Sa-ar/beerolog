@@ -1,4 +1,4 @@
-import { apiFetch } from './api-fetch'
+import { apiFetch } from '@beerolog/shared'
 import { DEFAULT_MATCH_CALIBRATION, normalizeRecommendedBeer, type MatchCalibration } from './match-score'
 import type { RecommendedBeer } from '../components/RecommendationBeerCard'
 

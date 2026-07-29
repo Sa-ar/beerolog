@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { Button, Heading } from '@beerolog/ui'
-import type { BaselineLoadErrorReason } from '../lib/user-facing-errors'
-import { describeBaselineLoadError } from '../lib/user-facing-errors'
+import type { BaselineLoadErrorReason } from '@beerolog/shared'
+import { describeBaselineLoadError } from '@beerolog/shared'
 import { StatusCard } from './StatusCard'
 
 type TasteProfileErrorStateProps = {

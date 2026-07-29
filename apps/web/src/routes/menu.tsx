@@ -9,7 +9,7 @@ import { RedirectToSignIn, Show } from '@clerk/tanstack-react-start'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { PAGE_MAIN } from '../lib/page-shell'
+import { PAGE_MAIN } from '@beerolog/shared'
 import { capture } from '../lib/analytics'
 import {
   useMenuChat,

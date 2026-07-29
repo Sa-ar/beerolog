@@ -2,7 +2,7 @@ import { useAuth } from '@clerk/tanstack-react-start'
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { LEGAL_SLUGS } from '../lib/legal/registry'
-import { PAGE_FOOTER_SHELL } from '../lib/page-shell'
+import { PAGE_FOOTER_SHELL } from '@beerolog/shared'
 import { LanguageSwitcher } from './LanguageSwitcher'
 
 // Footer present on every page: responsible-drinking note, legal links, and the

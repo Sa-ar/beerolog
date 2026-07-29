@@ -11,11 +11,11 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { capture } from '../lib/analytics'
 import { Alert, Heading } from '@beerolog/ui'
-import { apiFetch } from '../lib/api-fetch'
+import { apiFetch } from '@beerolog/shared'
 import { QuizStepper } from '../components/QuizStepper'
-import { PAGE_MAIN } from '../lib/page-shell'
+import { PAGE_MAIN } from '@beerolog/shared'
 import { type Answers, prunedAnswers } from '../lib/onboarding-quiz'
-import { onboardingSaveErrorMessage } from '../lib/user-facing-errors'
+import { onboardingSaveErrorMessage } from '@beerolog/shared'
 
 export const Route = createFileRoute('/onboarding')({
   component: OnboardingPage,

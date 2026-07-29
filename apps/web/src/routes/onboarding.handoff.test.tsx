@@ -19,7 +19,8 @@ vi.mock('@clerk/tanstack-react-start', () => ({
     when === 'signed-in' ? <>{children}</> : null,
 }))
 
-vi.mock('../lib/api-fetch', () => ({
+vi.mock('@beerolog/shared', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@beerolog/shared')>()),
   apiFetch: (...args: unknown[]) => apiFetch(...args),
 }))
 

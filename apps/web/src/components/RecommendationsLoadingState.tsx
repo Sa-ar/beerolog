@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Card } from '@beerolog/ui'
 import { BeerCardMedia } from './BeerCardMedia'
-import { PAGE_SHELL_X } from '../lib/page-shell'
+import { PAGE_SHELL_X } from '@beerolog/shared'
 import { RECS_PAGE_SIZE } from '../lib/session-intent'
 
 const CYCLE_MS = 1800

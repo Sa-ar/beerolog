@@ -2,7 +2,7 @@ import { RedirectToSignIn, Show } from '@clerk/tanstack-react-start'
 import { Link, Outlet, createFileRoute } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { Heading } from '@beerolog/ui'
-import { PAGE_SHELL_X } from '../lib/page-shell'
+import { PAGE_SHELL_X } from '@beerolog/shared'
 
 export const Route = createFileRoute('/account')({
   component: AccountLayout,

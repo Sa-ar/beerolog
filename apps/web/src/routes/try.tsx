@@ -17,7 +17,7 @@ import { ShareArchetypeButton } from '../components/ShareArchetypeButton'
 import { BeerJsonLd } from '../components/BeerJsonLd'
 import { isArchetypeKey } from '../lib/archetypes'
 import { QuizStepper } from '../components/QuizStepper'
-import { PAGE_MAIN } from '../lib/page-shell'
+import { PAGE_MAIN } from '@beerolog/shared'
 import { type Answers, prunedAnswers } from '../lib/onboarding-quiz'
 import {
   type GuestRecommendationsResponse,

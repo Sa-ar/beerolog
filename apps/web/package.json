@@ -14,7 +14,9 @@
     "e2e": "playwright test"
   },
   "dependencies": {
+    "@beerolog/api-client": "workspace:*",
     "@beerolog/db": "workspace:*",
+    "@beerolog/shared": "workspace:*",
     "@beerolog/icons": "workspace:*",
     "@beerolog/types": "workspace:*",
     "@beerolog/ui": "workspace:*",

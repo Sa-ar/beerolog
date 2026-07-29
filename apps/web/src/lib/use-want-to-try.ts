@@ -5,7 +5,7 @@
  * (pinned first, server-ordered). Removal is optimistic.
  */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { apiFetch } from './api-fetch'
+import { apiFetch } from '@beerolog/shared'
 
 export type WantToTryState = 'want' | 'must_try'
 

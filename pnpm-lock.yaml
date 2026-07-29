@@ -50,12 +50,18 @@ importers:
 
   apps/web:
     dependencies:
+      '@beerolog/api-client':
+        specifier: workspace:*
+        version: link:../../packages/api-client
       '@beerolog/db':
         specifier: workspace:*
         version: link:../../packages/db
       '@beerolog/icons':
         specifier: workspace:*
         version: link:../../packages/icons
+      '@beerolog/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       '@beerolog/types':
         specifier: workspace:*
         version: link:../../packages/types
@@ -169,6 +175,19 @@ importers:
         specifier: ^0.1.0
         version: 0.1.0(vitest@3.2.6(@types/node@22.19.19)(jiti@2.7.0)(jsdom@26.1.0)(lightningcss@1.32.0)(tsx@4.22.3))
 
+  packages/api-client:
+    dependencies:
+      '@beerolog/shared':
+        specifier: workspace:*
+        version: link:../shared
+      openapi-fetch:
+        specifier: ^0.17.0
+        version: 0.17.0
+    devDependencies:
+      typescript:
+        specifier: ^5.5.0
+        version: 5.9.3
+
   packages/db:
     dependencies:
       '@beerolog/types':
@@ -208,6 +227,22 @@ importers:
       typescript:
         specifier: ^5.5.0
         version: 5.9.3
+
+  packages/shared:
+    dependencies:
+      '@tanstack/react-query':
+        specifier: ^5.101.2
+        version: 5.101.2(react@19.2.6)
+      i18next:
+        specifier: ^26.3.1
+        version: 26.3.1(typescript@5.9.3)
+    devDependencies:
+      typescript:
+        specifier: ^5.5.0
+        version: 5.9.3
+      vite:
+        specifier: ^6.4.2
+        version: 6.4.2(@types/node@22.19.19)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.3)
 
   packages/types:
     devDependencies:
@@ -490,11 +525,11 @@ packages:
 
   '@esbuild-kit/core-utils@3.3.2':
     resolution: {integrity: sha512-sPRAnw9CdSsRmEtnsl2WXWdyquogVpB3yZ3dgwJfe8zrOzTsV7cJvmwrKVa+0ma5BoiGJ+BoqkMvawbayKUsqQ==}
-    deprecated: 'Merged into tsx: https://tsx.is'
+    deprecated: 'Merged into tsx: https://tsx.hirok.io'
 
   '@esbuild-kit/esm-loader@2.6.5':
     resolution: {integrity: sha512-FxEMIkJKnodyA1OaCUoEvbYRkoZlLZ4d/eXFu9Fh8CbBBgP5EmZxrfTRyN0qpXZ4vOvqnE5YdRdcrmUUXuU+dA==}
-    deprecated: 'Merged into tsx: https://tsx.is'
+    deprecated: 'Merged into tsx: https://tsx.hirok.io'
 
   '@esbuild/aix-ppc64@0.19.12':
     resolution: {integrity: sha512-bmoCYyWdEL3wDQIVbcyzRyeKLgk2WtWLTWz1ZIAZF/EGbNOwSA6ew3PftJ1PqMiOOGu0OyFMzG53L0zqIpPeNA==}

@@ -18,7 +18,7 @@ import {
 } from '../lib/archetypes'
 import { createI18n } from '../i18n'
 import { getLang } from '../i18n/locale-cookie'
-import { PAGE_MAIN } from '../lib/page-shell'
+import { PAGE_MAIN } from '@beerolog/shared'
 
 // OG tags need absolute URLs. Default to the canonical prod domain; override per
 // environment with VITE_WEB_URL. ponytail: the image is deterministic by key, so

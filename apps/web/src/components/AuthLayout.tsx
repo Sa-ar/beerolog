@@ -1,7 +1,7 @@
 import type { FormEvent, ReactNode } from 'react'
 import { Button, Card, CardContent, Heading } from '@beerolog/ui'
 import { useTranslation } from 'react-i18next'
-import { PAGE_MAIN } from '../lib/page-shell'
+import { PAGE_MAIN } from '@beerolog/shared'
 
 // Clerk flags an instance as development when its publishable key is a test key.
 // Same signal Clerk's prebuilt UI uses for its "Development mode" badge.

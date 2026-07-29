@@ -9,7 +9,8 @@ import en from '../i18n/locales/en/common.json'
 // Mock the network layer. apiFetch returns a Response-like object with ok,
 // status + json(). Each test installs an implementation that routes by path.
 const apiFetchMock = vi.fn()
-vi.mock('../lib/api-fetch', () => ({
+vi.mock('@beerolog/shared', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@beerolog/shared')>()),
   apiFetch: (...args: unknown[]) => apiFetchMock(...(args as [])),
 }))
 

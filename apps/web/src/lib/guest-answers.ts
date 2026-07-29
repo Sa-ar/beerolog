@@ -7,7 +7,7 @@
  * surface to the generated authed api-client schema.
  */
 
-import { apiFetch } from './api-fetch'
+import { apiFetch } from '@beerolog/shared'
 import { type Answers } from './onboarding-quiz'
 
 export const GUEST_ANSWERS_KEY = 'beerolog:guest_answers'

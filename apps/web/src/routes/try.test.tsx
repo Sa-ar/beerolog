@@ -17,7 +17,8 @@ const apiFetchMock = vi.fn(async () => ({
     unlocked_count: 3,
   }),
 }))
-vi.mock('../lib/api-fetch', () => ({
+vi.mock('@beerolog/shared', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@beerolog/shared')>()),
   apiFetch: (...args: unknown[]) => apiFetchMock(...(args as [])),
 }))
 

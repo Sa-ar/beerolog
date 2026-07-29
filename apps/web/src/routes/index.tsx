@@ -2,7 +2,7 @@ import { useUser } from '@clerk/tanstack-react-start'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { Button, Heading } from '@beerolog/ui'
-import { PAGE_MAIN } from '../lib/page-shell'
+import { PAGE_MAIN } from '@beerolog/shared'
 import { WhatIWantDeck } from '../components/WhatIWantDeck'
 
 export const Route = createFileRoute('/')({

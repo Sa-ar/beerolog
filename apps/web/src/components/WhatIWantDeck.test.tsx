@@ -24,7 +24,8 @@ vi.mock('../lib/menu-scan', () => ({
   }),
 }))
 
-vi.mock('../lib/api-fetch', () => ({
+vi.mock('@beerolog/shared', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@beerolog/shared')>()),
   apiFetch: vi.fn(async () => {
     if (apiState.status === 404) return { ok: false, status: 404, json: async () => ({}) }
     return {

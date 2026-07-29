@@ -1,6 +1,6 @@
 import { useAuth } from '@clerk/tanstack-react-start'
 import { useEffect } from 'react'
-import { registerAuthTokenGetter } from '../lib/auth-session'
+import { registerAuthTokenGetter } from '@beerolog/shared'
 
 export function AuthTokenBridge() {
   const { getToken, isLoaded } = useAuth()

@@ -1,9 +1,9 @@
-import { apiFetch } from './api-fetch'
+import { apiFetch } from '@beerolog/shared'
 import type { BaselineTaste } from './baseline-taste'
-import type { BaselineLoadErrorReason } from './user-facing-errors'
+import type { BaselineLoadErrorReason } from '@beerolog/shared'
 
-export type { BaselineLoadErrorReason } from './user-facing-errors'
-export { describeBaselineLoadError } from './user-facing-errors'
+export type { BaselineLoadErrorReason } from '@beerolog/shared'
+export { describeBaselineLoadError } from '@beerolog/shared'
 
 export type LoadBaselineResult =
   | { status: 'ready'; baseline: BaselineTaste }

@@ -13,7 +13,7 @@ import { Button, Heading } from '@beerolog/ui'
 import { apiClient } from '../lib/api-client/client'
 import { BeerDetail, type BeerDetailData } from '../components/BeerDetail'
 import { CatchBeerControl } from '../components/CatchBeerControl'
-import { PAGE_MAIN } from '../lib/page-shell'
+import { PAGE_MAIN } from '@beerolog/shared'
 import type { BeerColor } from '../lib/beer-color'
 import { capture } from '../lib/analytics'
 

@@ -3,7 +3,7 @@ import type { ErrorComponentProps } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@beerolog/ui'
 import { StatusCard } from './StatusCard'
-import { globalErrorMessage } from '../lib/user-facing-errors'
+import { globalErrorMessage } from '@beerolog/shared'
 
 export function GlobalErrorPage({ error, reset }: ErrorComponentProps) {
   const { t } = useTranslation()

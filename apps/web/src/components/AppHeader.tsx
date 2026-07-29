@@ -1,7 +1,7 @@
 import { Show } from '@clerk/tanstack-react-start'
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import { PAGE_HEADER_SHELL } from '../lib/page-shell'
+import { PAGE_HEADER_SHELL } from '@beerolog/shared'
 import { AuthControls } from './AuthControls'
 import { BeerologLogo } from './BeerologLogo'
 

@@ -11,7 +11,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { RateDeckFlow } from '../components/RateDeckFlow'
 import { RateSearch } from '../components/RateSearch'
-import { PAGE_SHELL_X } from '../lib/page-shell'
+import { PAGE_SHELL_X } from '@beerolog/shared'
 
 export const Route = createFileRoute('/rate')({
   component: RatePage,

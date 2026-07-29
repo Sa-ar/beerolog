@@ -1,6 +1,6 @@
 import { Card, CardContent, Heading } from '@beerolog/ui'
 import { useTranslation } from 'react-i18next'
-import { PAGE_SHELL_X } from '../lib/page-shell'
+import { PAGE_SHELL_X } from '@beerolog/shared'
 import type { LegalSlug } from '../lib/legal/registry'
 
 interface LegalSection {
