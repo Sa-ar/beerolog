@@ -180,9 +180,20 @@ export const venues = pgTable(
     area: text('area'),
     address: text('address'),
     url: text('url'),
+    // White-label tenancy (staff portal, #297). Nullable so curated/unmanaged
+    // venues keep working; a "managed" venue is one with org_id set. slug is the
+    // QR-addressable handle (only managed venues need one); is_active is the
+    // operator kill-switch.
+    orgId: uuid('org_id').references(() => organizations.id, { onDelete: 'set null' }),
+    slug: text('slug'),
+    isActive: boolean('is_active').notNull().default(true),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [index('venues_city_idx').on(t.city)],
+  (t) => [
+    index('venues_city_idx').on(t.city),
+    index('venues_org_idx').on(t.orgId),
+    uniqueIndex('venues_slug_uniq').on(t.slug),
+  ],
 )
 
 export const beerAvailability = pgTable(
@@ -375,3 +386,145 @@ export const guestSubmissions = pgTable('guest_submissions', {
   source: text('source').notNull().default('free'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
+
+// ---------------------------------------------------------------------------
+// White-label tenancy: markets, organizations, staff, invites, venue menus.
+// Staff Portal slice #297 (docs/prds/staff-portal.md, ADR 0009/0010).
+// Organizations ARE the tenants (ADR 0009 addendum); venues belong to an org
+// via venues.org_id. These tables have no consumers yet — this slice lands the
+// schema + migration only, as the foundation the portal + white-label slices
+// build on.
+// ---------------------------------------------------------------------------
+
+export const orgStatusEnum = pgEnum('org_status', ['pending', 'active', 'suspended'])
+
+export const staffRoleEnum = pgEnum('staff_role', ['org_owner', 'venue_manager', 'bartender'])
+
+export const menuItemStatusEnum = pgEnum('menu_item_status', ['on', 'off'])
+
+// A market scopes an organization to a country's config (locale, age gate).
+export const markets = pgTable('markets', {
+  id: text('id').primaryKey(), // e.g. 'IL'
+  countryCode: text('country_code').notNull(),
+  name: text('name').notNull(),
+  defaultLocale: text('default_locale').notNull(),
+  ageGateMinAge: integer('age_gate_min_age').notNull(),
+  supportedLocales: text('supported_locales').array().notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+// The white-label tenant. Branding + market live here (ADR 0009 unification:
+// organizations replace the separate white_label_tenants table).
+export const organizations = pgTable(
+  'organizations',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    slug: text('slug').notNull(),
+    name: text('name').notNull(),
+    marketId: text('market_id')
+      .notNull()
+      .references(() => markets.id),
+    brandingConfig: jsonb('branding_config'),
+    status: orgStatusEnum('status').notNull().default('pending'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex('organizations_slug_uniq').on(t.slug)],
+)
+
+// Portal staff, backed by the staff Clerk instance (separate issuer from the
+// consumer app). clerk_user_id is null until the invite is accepted.
+export const staffMembers = pgTable(
+  'staff_members',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => organizations.id, { onDelete: 'cascade' }),
+    clerkUserId: text('clerk_user_id'),
+    email: text('email').notNull(),
+    displayName: text('display_name'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('staff_members_org_idx').on(t.orgId),
+    uniqueIndex('staff_members_org_email_uniq').on(t.orgId, t.email),
+  ],
+)
+
+// Per-venue role assignment (a staff member can hold roles at several venues).
+export const staffVenueRoles = pgTable(
+  'staff_venue_roles',
+  {
+    staffMemberId: uuid('staff_member_id')
+      .notNull()
+      .references(() => staffMembers.id, { onDelete: 'cascade' }),
+    venueId: text('venue_id')
+      .notNull()
+      .references(() => venues.id, { onDelete: 'cascade' }),
+    role: staffRoleEnum('role').notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.staffMemberId, t.venueId] })],
+)
+
+// Discord-style per-capability grants/denies layered on role defaults.
+// venue_id null = org-wide override.
+export const staffPermissionOverrides = pgTable(
+  'staff_permission_overrides',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    staffMemberId: uuid('staff_member_id')
+      .notNull()
+      .references(() => staffMembers.id, { onDelete: 'cascade' }),
+    venueId: text('venue_id').references(() => venues.id, { onDelete: 'cascade' }),
+    capability: text('capability').notNull(),
+    granted: boolean('granted').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('staff_permission_overrides_member_idx').on(t.staffMemberId)],
+)
+
+// Single-use, expiring email invites. Role + venue are locked at invite time.
+export const staffInvites = pgTable(
+  'staff_invites',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => organizations.id, { onDelete: 'cascade' }),
+    venueId: text('venue_id').references(() => venues.id, { onDelete: 'cascade' }),
+    email: text('email').notNull(),
+    role: staffRoleEnum('role').notNull(),
+    token: text('token').notNull(),
+    invitedBy: uuid('invited_by').references(() => staffMembers.id, { onDelete: 'set null' }),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    acceptedAt: timestamp('accepted_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex('staff_invites_token_uniq').on(t.token)],
+)
+
+// A venue's managed tap list. References canonical beers (no per-venue copies).
+export const venueMenuItems = pgTable(
+  'venue_menu_items',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    venueId: text('venue_id')
+      .notNull()
+      .references(() => venues.id, { onDelete: 'cascade' }),
+    beerId: text('beer_id')
+      .notNull()
+      .references(() => beers.id, { onDelete: 'cascade' }),
+    status: menuItemStatusEnum('status').notNull().default('on'),
+    servingFormat: text('serving_format'),
+    priceIls: integer('price_ils'),
+    position: integer('position'),
+    addedBy: uuid('added_by').references(() => staffMembers.id, { onDelete: 'set null' }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex('venue_menu_items_venue_beer_uniq').on(t.venueId, t.beerId),
+    index('venue_menu_items_venue_idx').on(t.venueId),
+  ],
+)
