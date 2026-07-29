@@ -12,13 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TryRouteImport } from './routes/try'
 import { Route as RecommendationsRouteImport } from './routes/recommendations'
 import { Route as RateRouteImport } from './routes/rate'
-import { Route as PlacesRouteImport } from './routes/places'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as MenuRouteImport } from './routes/menu'
-import { Route as CatalogRouteImport } from './routes/catalog'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AccountIndexRouteImport } from './routes/account.index'
+import { Route as VVenueSlugRouteImport } from './routes/v.$venueSlug'
 import { Route as TasteKeyRouteImport } from './routes/taste.$key'
 import { Route as SignupSplatRouteImport } from './routes/signup.$'
 import { Route as SigninSplatRouteImport } from './routes/signin.$'
@@ -32,7 +31,6 @@ import { Route as AccountDetailsRouteImport } from './routes/account.details'
 import { Route as AccountCollectionRouteImport } from './routes/account.collection'
 import { Route as ApiOgCollectionRouteImport } from './routes/api.og.collection'
 import { Route as ApiOgCatchRouteImport } from './routes/api.og.catch'
-import { Route as ApiOgBeerRouteImport } from './routes/api.og.beer'
 import { Route as ApiOgTasteKeyRouteImport } from './routes/api.og.taste.$key'
 
 const TryRoute = TryRouteImport.update({
@@ -50,11 +48,6 @@ const RateRoute = RateRouteImport.update({
   path: '/rate',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PlacesRoute = PlacesRouteImport.update({
-  id: '/places',
-  path: '/places',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
@@ -63,11 +56,6 @@ const OnboardingRoute = OnboardingRouteImport.update({
 const MenuRoute = MenuRouteImport.update({
   id: '/menu',
   path: '/menu',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CatalogRoute = CatalogRouteImport.update({
-  id: '/catalog',
-  path: '/catalog',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AccountRoute = AccountRouteImport.update({
@@ -84,6 +72,11 @@ const AccountIndexRoute = AccountIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AccountRoute,
+} as any)
+const VVenueSlugRoute = VVenueSlugRouteImport.update({
+  id: '/v/$venueSlug',
+  path: '/v/$venueSlug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const TasteKeyRoute = TasteKeyRouteImport.update({
   id: '/taste/$key',
@@ -150,11 +143,6 @@ const ApiOgCatchRoute = ApiOgCatchRouteImport.update({
   path: '/api/og/catch',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiOgBeerRoute = ApiOgBeerRouteImport.update({
-  id: '/api/og/beer',
-  path: '/api/og/beer',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiOgTasteKeyRoute = ApiOgTasteKeyRouteImport.update({
   id: '/api/og/taste/$key',
   path: '/api/og/taste/$key',
@@ -164,10 +152,8 @@ const ApiOgTasteKeyRoute = ApiOgTasteKeyRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/account': typeof AccountRouteWithChildren
-  '/catalog': typeof CatalogRoute
   '/menu': typeof MenuRoute
   '/onboarding': typeof OnboardingRoute
-  '/places': typeof PlacesRoute
   '/rate': typeof RateRoute
   '/recommendations': typeof RecommendationsRoute
   '/try': typeof TryRoute
@@ -182,18 +168,16 @@ export interface FileRoutesByFullPath {
   '/signin/$': typeof SigninSplatRoute
   '/signup/$': typeof SignupSplatRoute
   '/taste/$key': typeof TasteKeyRoute
+  '/v/$venueSlug': typeof VVenueSlugRoute
   '/account/': typeof AccountIndexRoute
-  '/api/og/beer': typeof ApiOgBeerRoute
   '/api/og/catch': typeof ApiOgCatchRoute
   '/api/og/collection': typeof ApiOgCollectionRoute
   '/api/og/taste/$key': typeof ApiOgTasteKeyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/catalog': typeof CatalogRoute
   '/menu': typeof MenuRoute
   '/onboarding': typeof OnboardingRoute
-  '/places': typeof PlacesRoute
   '/rate': typeof RateRoute
   '/recommendations': typeof RecommendationsRoute
   '/try': typeof TryRoute
@@ -208,8 +192,8 @@ export interface FileRoutesByTo {
   '/signin/$': typeof SigninSplatRoute
   '/signup/$': typeof SignupSplatRoute
   '/taste/$key': typeof TasteKeyRoute
+  '/v/$venueSlug': typeof VVenueSlugRoute
   '/account': typeof AccountIndexRoute
-  '/api/og/beer': typeof ApiOgBeerRoute
   '/api/og/catch': typeof ApiOgCatchRoute
   '/api/og/collection': typeof ApiOgCollectionRoute
   '/api/og/taste/$key': typeof ApiOgTasteKeyRoute
@@ -218,10 +202,8 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/account': typeof AccountRouteWithChildren
-  '/catalog': typeof CatalogRoute
   '/menu': typeof MenuRoute
   '/onboarding': typeof OnboardingRoute
-  '/places': typeof PlacesRoute
   '/rate': typeof RateRoute
   '/recommendations': typeof RecommendationsRoute
   '/try': typeof TryRoute
@@ -236,8 +218,8 @@ export interface FileRoutesById {
   '/signin/$': typeof SigninSplatRoute
   '/signup/$': typeof SignupSplatRoute
   '/taste/$key': typeof TasteKeyRoute
+  '/v/$venueSlug': typeof VVenueSlugRoute
   '/account/': typeof AccountIndexRoute
-  '/api/og/beer': typeof ApiOgBeerRoute
   '/api/og/catch': typeof ApiOgCatchRoute
   '/api/og/collection': typeof ApiOgCollectionRoute
   '/api/og/taste/$key': typeof ApiOgTasteKeyRoute
@@ -247,10 +229,8 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/account'
-    | '/catalog'
     | '/menu'
     | '/onboarding'
-    | '/places'
     | '/rate'
     | '/recommendations'
     | '/try'
@@ -265,18 +245,16 @@ export interface FileRouteTypes {
     | '/signin/$'
     | '/signup/$'
     | '/taste/$key'
+    | '/v/$venueSlug'
     | '/account/'
-    | '/api/og/beer'
     | '/api/og/catch'
     | '/api/og/collection'
     | '/api/og/taste/$key'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/catalog'
     | '/menu'
     | '/onboarding'
-    | '/places'
     | '/rate'
     | '/recommendations'
     | '/try'
@@ -291,8 +269,8 @@ export interface FileRouteTypes {
     | '/signin/$'
     | '/signup/$'
     | '/taste/$key'
+    | '/v/$venueSlug'
     | '/account'
-    | '/api/og/beer'
     | '/api/og/catch'
     | '/api/og/collection'
     | '/api/og/taste/$key'
@@ -300,10 +278,8 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/account'
-    | '/catalog'
     | '/menu'
     | '/onboarding'
-    | '/places'
     | '/rate'
     | '/recommendations'
     | '/try'
@@ -318,8 +294,8 @@ export interface FileRouteTypes {
     | '/signin/$'
     | '/signup/$'
     | '/taste/$key'
+    | '/v/$venueSlug'
     | '/account/'
-    | '/api/og/beer'
     | '/api/og/catch'
     | '/api/og/collection'
     | '/api/og/taste/$key'
@@ -328,10 +304,8 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AccountRoute: typeof AccountRouteWithChildren
-  CatalogRoute: typeof CatalogRoute
   MenuRoute: typeof MenuRoute
   OnboardingRoute: typeof OnboardingRoute
-  PlacesRoute: typeof PlacesRoute
   RateRoute: typeof RateRoute
   RecommendationsRoute: typeof RecommendationsRoute
   TryRoute: typeof TryRoute
@@ -341,7 +315,7 @@ export interface RootRouteChildren {
   SigninSplatRoute: typeof SigninSplatRoute
   SignupSplatRoute: typeof SignupSplatRoute
   TasteKeyRoute: typeof TasteKeyRoute
-  ApiOgBeerRoute: typeof ApiOgBeerRoute
+  VVenueSlugRoute: typeof VVenueSlugRoute
   ApiOgCatchRoute: typeof ApiOgCatchRoute
   ApiOgCollectionRoute: typeof ApiOgCollectionRoute
   ApiOgTasteKeyRoute: typeof ApiOgTasteKeyRoute
@@ -370,13 +344,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RateRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/places': {
-      id: '/places'
-      path: '/places'
-      fullPath: '/places'
-      preLoaderRoute: typeof PlacesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/onboarding': {
       id: '/onboarding'
       path: '/onboarding'
@@ -389,13 +356,6 @@ declare module '@tanstack/react-router' {
       path: '/menu'
       fullPath: '/menu'
       preLoaderRoute: typeof MenuRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/catalog': {
-      id: '/catalog'
-      path: '/catalog'
-      fullPath: '/catalog'
-      preLoaderRoute: typeof CatalogRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/account': {
@@ -418,6 +378,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/account/'
       preLoaderRoute: typeof AccountIndexRouteImport
       parentRoute: typeof AccountRoute
+    }
+    '/v/$venueSlug': {
+      id: '/v/$venueSlug'
+      path: '/v/$venueSlug'
+      fullPath: '/v/$venueSlug'
+      preLoaderRoute: typeof VVenueSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/taste/$key': {
       id: '/taste/$key'
@@ -510,13 +477,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiOgCatchRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/og/beer': {
-      id: '/api/og/beer'
-      path: '/api/og/beer'
-      fullPath: '/api/og/beer'
-      preLoaderRoute: typeof ApiOgBeerRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/og/taste/$key': {
       id: '/api/og/taste/$key'
       path: '/api/og/taste/$key'
@@ -551,10 +511,8 @@ const AccountRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountRoute: AccountRouteWithChildren,
-  CatalogRoute: CatalogRoute,
   MenuRoute: MenuRoute,
   OnboardingRoute: OnboardingRoute,
-  PlacesRoute: PlacesRoute,
   RateRoute: RateRoute,
   RecommendationsRoute: RecommendationsRoute,
   TryRoute: TryRoute,
@@ -564,7 +522,7 @@ const rootRouteChildren: RootRouteChildren = {
   SigninSplatRoute: SigninSplatRoute,
   SignupSplatRoute: SignupSplatRoute,
   TasteKeyRoute: TasteKeyRoute,
-  ApiOgBeerRoute: ApiOgBeerRoute,
+  VVenueSlugRoute: VVenueSlugRoute,
   ApiOgCatchRoute: ApiOgCatchRoute,
   ApiOgCollectionRoute: ApiOgCollectionRoute,
   ApiOgTasteKeyRoute: ApiOgTasteKeyRoute,

@@ -528,3 +528,22 @@ export const venueMenuItems = pgTable(
     index('venue_menu_items_venue_idx').on(t.venueId),
   ],
 )
+
+// In-venue consumer visit log (white-label B1, #346). Written when a guest or
+// signed-in user lands on /v/$venueSlug via QR/link; funnel + area attribution.
+export const visitSourceEnum = pgEnum('visit_source', ['qr', 'link'])
+
+export const venueVisits = pgTable(
+  'venue_visits',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    venueId: text('venue_id')
+      .notNull()
+      .references(() => venues.id, { onDelete: 'cascade' }),
+    userId: text('user_id').references(() => users.id, { onDelete: 'set null' }),
+    sessionToken: text('session_token'),
+    source: visitSourceEnum('source').notNull().default('qr'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('venue_visits_venue_idx').on(t.venueId, t.createdAt)],
+)

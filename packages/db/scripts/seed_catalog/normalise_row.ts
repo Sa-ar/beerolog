@@ -122,6 +122,25 @@ export function deriveColor(raw: string | undefined, style: string): NormalisedB
   return 'gold'
 }
 
+// Style-based fallbacks for body/sweetness when the source omits them (most
+// rows do — #274). Mirrors deriveColor's style-fallback approach so chips render
+// for every beer. Kept in sync with migration 0013's backfill CASE.
+export function deriveBody(style: string): NormalisedBeer['body'] {
+  const s = style.toLowerCase()
+  if (/imperial stout|russian imperial|barleywine|barley wine|old ale|stout|porter/.test(s))
+    return 'full'
+  if (/wheat|witbier|hefe|weiss|gose|sour|lambic|berliner|pilsner|lager|blonde|golden|kölsch|kolsch|helles|saison/.test(s))
+    return 'light'
+  return 'medium'
+}
+
+export function deriveSweetness(style: string): NormalisedBeer['sweetness'] {
+  const s = style.toLowerCase()
+  if (/imperial stout|barleywine|barley wine|old ale|bock|dubbel|scotch/.test(s)) return 'sweet'
+  if (/ipa|india pale|pale ale|pilsner|lager|gose|sour|lambic|berliner|brut/.test(s)) return 'dry'
+  return 'balanced'
+}
+
 export function deriveSlug(name: string, brewery: string): string {
   const slug = (s: string) =>
     s
@@ -146,8 +165,8 @@ export function normaliseRow(input: ScrapedBeer): NormalisedBeer {
     malts: input.malts && input.malts.length > 0 ? input.malts : null,
     yeast: input.yeast ?? null,
     color: deriveColor(input.rawColor, style),
-    body: normaliseBody(input.rawBody),
-    sweetness: normaliseSweetness(input.rawSweetness),
+    body: normaliseBody(input.rawBody) ?? deriveBody(style),
+    sweetness: normaliseSweetness(input.rawSweetness) ?? deriveSweetness(style),
     marketTier: classifyMarketTier(input.brewery, input.breweryCountry),
     tastingNotes: input.tastingNotes ?? '',
     tastingNotesLang: input.tastingNotesLang ?? 'en',
