@@ -17,6 +17,7 @@ from app.errors import BeerologError
 from app.mcp_server import mcp as mcp_server
 from app.observability import configure_logging, instrument_requests, logger
 from app.routes import (
+    admin_moderation,
     availability,
     debug,
     guest_recommendations,
@@ -127,6 +128,7 @@ app.include_router(menu.router)
 app.include_router(onboarding.router)
 app.include_router(recommendations.router)
 app.include_router(availability.router)
+app.include_router(admin_moderation.router)
 app.include_router(guest_recommendations.router)
 app.include_router(ratings.router)
 app.include_router(want_to_try.router)
