@@ -239,7 +239,7 @@
         },
         {
           "heading": "What we collect & Lawful basis",
-          "body": "We collect your account identifier, email, and display name (shared via Clerk); your baseline taste metrics (taste dials, flavor family, novelty affinity); and your ratings and notes. Our lawful basis is Performance of a Contract (to provide recommendations) and Legitimate Interest (platform security). When you scan a bar menu, the photo is used only to read the menu items shown and is not stored afterward; reading the menu may involve our inference provider (OpenAI), and the image is not used for any other purpose."
+          "body": "We collect your account identifier, email, and display name (shared via Clerk); your baseline taste metrics (taste dials, flavor family, novelty affinity); and your ratings and notes. Our lawful basis is Performance of a Contract (to provide recommendations) and Legitimate Interest (platform security). When you scan a bar menu, the photo is sent to our inference provider (OpenAI) solely to read the menu items shown; we do not store it, and it is not used for any other purpose."
         },
         {
           "heading": "No sale of personal data; Anonymous aggregates",
@@ -263,7 +263,7 @@
         },
         {
           "heading": "Sub-processors & International transfers",
-          "body": "We share data with Clerk Inc. (authentication), Vercel Inc. (web hosting), Neon AD (database), OpenAI LLC (recommendation inference), and PostHog Inc. (product analytics + opt-in session replay). By using the service, you consent to your data being transferred to and stored in the US and the EU."
+          "body": "We share data with Clerk Inc. (authentication), Vercel Inc. (web hosting), Neon AD (database), OpenAI LLC (recommendation inference and menu-scan text extraction), and PostHog Inc. (product analytics + opt-in session replay). By using the service, you consent to your data being transferred to and stored in the US and the EU."
         },
         {
           "heading": "Data retention & Deletion",
