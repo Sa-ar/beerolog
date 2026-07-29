@@ -25,6 +25,7 @@ from app.routes import (
     menu,
     onboarding,
     public_catalog,
+    public_venues,
     rate,
     ratings,
     recommendations,
@@ -131,6 +132,7 @@ app.include_router(guest_recommendations.router)
 app.include_router(ratings.router)
 app.include_router(want_to_try.router)
 app.include_router(public_catalog.router)
+app.include_router(public_venues.router)
 app.include_router(rate.router)
 app.include_router(users.router)
 app.include_router(debug.router)
