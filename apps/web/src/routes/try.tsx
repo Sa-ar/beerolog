@@ -8,6 +8,7 @@
  */
 
 import { createFileRoute } from '@tanstack/react-router'
+import { getLang } from '../i18n/locale-cookie'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { capture } from '../lib/analytics'
@@ -27,7 +28,42 @@ import {
   writeGuestAnswers,
 } from '../lib/guest-answers'
 
+const TRY_SITE_URL = (import.meta.env.VITE_WEB_URL as string | undefined) ?? 'https://beerolog.com'
+
+// Bilingual share meta for the want-to-try / quiz landing (#309). No per-item
+// image here, so it's a text summary card; a branded og:image is a follow-up
+// (no brand asset exists yet). Local copy (not i18n) since it's meta, not UI.
+const TRY_OG = {
+  en: {
+    title: 'Your beer picks · Beerolog',
+    description: 'Beers you want to try, matched to your taste.',
+  },
+  he: {
+    title: 'הבירות שלכם · Beerolog',
+    description: 'הבירות שסימנתם לניסיון, מותאמות לטעם שלכם.',
+  },
+} as const
+
+// Exported for testing without a router.
+export function tryHead(lang: 'en' | 'he' = getLang() === 'he' ? 'he' : 'en') {
+  const { title, description } = TRY_OG[lang]
+  return {
+    meta: [
+      { title },
+      { name: 'description', content: description },
+      { property: 'og:type', content: 'website' },
+      { property: 'og:title', content: title },
+      { property: 'og:description', content: description },
+      { property: 'og:url', content: `${TRY_SITE_URL}/try` },
+      { name: 'twitter:card', content: 'summary' },
+      { name: 'twitter:title', content: title },
+      { name: 'twitter:description', content: description },
+    ],
+  }
+}
+
 export const Route = createFileRoute('/try')({
+  head: () => tryHead(),
   // `from=share` marks a visitor arriving from a shared /taste card, so a
   // quiz-start can be attributed to the growth loop (see quiz_start_from_share).
   validateSearch: (search: Record<string, unknown>): { from?: 'share' } =>

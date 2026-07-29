@@ -17,7 +17,59 @@ import { PAGE_MAIN } from '@beerolog/shared'
 import type { BeerColor } from '../lib/beer-color'
 import { capture } from '../lib/analytics'
 
+const SITE_URL = (import.meta.env.VITE_WEB_URL as string | undefined) ?? 'https://beerolog.com'
+
+export type BeerOgData = {
+  id: string
+  name: string
+  brewery: string
+  style: string
+  abv: number
+  image_url?: string | null
+}
+
+// Exported for testing without a router. Builds og/twitter meta from the beer so
+// a shared /beer/$id link previews with the beer's own photo (#309). Empty when
+// the beer is missing so we never emit a broken card.
+export function beerHead({ loaderData }: { loaderData?: { beer: BeerOgData | null } | undefined }) {
+  const b = loaderData?.beer
+  if (!b) return {}
+  const title = `${b.name} · Beerolog`
+  const description = `${b.brewery} · ${b.style} · ${b.abv}% ABV`
+  const image = b.image_url ?? null
+  const meta: Array<Record<string, string>> = [
+    { title },
+    { name: 'description', content: description },
+    { property: 'og:type', content: 'website' },
+    { property: 'og:title', content: title },
+    { property: 'og:description', content: description },
+    { property: 'og:url', content: `${SITE_URL}/beer/${b.id}` },
+    { name: 'twitter:title', content: title },
+    { name: 'twitter:description', content: description },
+    { name: 'twitter:card', content: image ? 'summary_large_image' : 'summary' },
+  ]
+  if (image) {
+    meta.push({ property: 'og:image', content: image })
+    meta.push({ name: 'twitter:image', content: image })
+  }
+  return { meta }
+}
+
 export const Route = createFileRoute('/beer/$id')({
+  // SSR-fetch the beer so head() can emit a rich per-beer preview. The component
+  // keeps its own useQuery for render; this loader is meta-only (public share
+  // page, low traffic — the extra fetch is acceptable here).
+  loader: async ({ params }): Promise<{ beer: BeerOgData | null }> => {
+    try {
+      const { data } = await apiClient.GET('/catalog/{beer_id}', {
+        params: { path: { beer_id: params.id } },
+      })
+      return { beer: (data as BeerOgData) ?? null }
+    } catch {
+      return { beer: null }
+    }
+  },
+  head: beerHead,
   component: BeerDetailPage,
 })
 
