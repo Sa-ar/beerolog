@@ -24,6 +24,7 @@ from app.routes import (
     icons,
     menu,
     onboarding,
+    orders,
     public_catalog,
     rate,
     rating_outcome,
@@ -150,6 +151,7 @@ app.include_router(guest_recommendations.router)
 app.include_router(ratings.router)
 app.include_router(want_to_try.router)
 app.include_router(public_catalog.router)
+app.include_router(orders.router)
 app.include_router(rating_outcome.router)
 app.include_router(rate.router)
 app.include_router(users.router)

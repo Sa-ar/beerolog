@@ -177,6 +177,10 @@ export const icons = pgTable(
 // freshness signal user reports will bump in a later slice.
 // ---------------------------------------------------------------------------
 
+// Ordering opt-in per venue (white-label B2, #347). Declared before `venues`
+// because pgEnum is evaluated eagerly at column definition.
+export const orderingModeEnum = pgEnum('ordering_mode', ['off', 'native', 'integrated'])
+
 export const venues = pgTable(
   'venues',
   {
@@ -195,6 +199,8 @@ export const venues = pgTable(
     orgId: uuid('org_id').references(() => organizations.id, { onDelete: 'set null' }),
     slug: text('slug'),
     isActive: boolean('is_active').notNull().default(true),
+    // Ordering is opt-in per venue (white-label B2, #347).
+    orderingMode: orderingModeEnum('ordering_mode').notNull().default('off'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
@@ -540,4 +546,47 @@ export const venueMenuItems = pgTable(
     uniqueIndex('venue_menu_items_venue_beer_uniq').on(t.venueId, t.beerId),
     index('venue_menu_items_venue_idx').on(t.venueId),
   ],
+)
+
+// In-venue ordering (white-label B2, #347).
+export const orderStatusEnum = pgEnum('order_status', [
+  'placed',
+  'acked',
+  'in_progress',
+  'served',
+  'cancelled',
+])
+
+export const orders = pgTable(
+  'orders',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    venueId: text('venue_id')
+      .notNull()
+      .references(() => venues.id, { onDelete: 'cascade' }),
+    userId: text('user_id').references(() => users.id, { onDelete: 'set null' }),
+    sessionToken: text('session_token'),
+    tableLabel: text('table_label'),
+    status: orderStatusEnum('status').notNull().default('placed'),
+    totalIls: integer('total_ils'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('orders_venue_status_idx').on(t.venueId, t.status, t.createdAt)],
+)
+
+export const orderItems = pgTable(
+  'order_items',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    orderId: uuid('order_id')
+      .notNull()
+      .references(() => orders.id, { onDelete: 'cascade' }),
+    beerId: text('beer_id')
+      .notNull()
+      .references(() => beers.id, { onDelete: 'cascade' }),
+    qty: integer('qty').notNull().default(1),
+    priceIlsSnapshot: integer('price_ils_snapshot'),
+  },
+  (t) => [index('order_items_order_idx').on(t.orderId)],
 )
