@@ -263,7 +263,7 @@
         },
         {
           "heading": "Sub-processors & International transfers",
-          "body": "We share data with Clerk Inc. (authentication), Vercel Inc. (web hosting), Neon AD (database), OpenAI LLC (recommendation inference), and PostHog Inc. (product analytics + opt-in session replay). By using the service, you consent to your data being transferred to and stored in the US and the EU."
+          "body": "We share data with Clerk Inc. (authentication), Vercel Inc. (web hosting plus cookieless web analytics and speed insights), Neon AD (database), OpenAI LLC (recommendation inference), and PostHog Inc. (product analytics + opt-in session replay). By using the service, you consent to your data being transferred to and stored in the US and the EU."
         },
         {
           "heading": "Data retention & Deletion",
@@ -339,7 +339,7 @@
         },
         {
           "heading": "Non-essential cookies",
-          "body": "We do not set any marketing, targeting, or analytics cookies. If we introduce them in the future, they will not be activated without your explicit, voluntary opt-in."
+          "body": "We do not set any marketing, targeting, or analytics cookies. Vercel Web Analytics and Speed Insights measure aggregate traffic and page performance without setting cookies or identifying you. If we introduce non-essential cookies in the future, they will not be activated without your explicit, voluntary opt-in."
         }
       ]
     },
