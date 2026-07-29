@@ -31,6 +31,7 @@ from app.routes import (
     staff,
     staff_analytics,
     staff_menu,
+    staff_org,
     users,
     want_to_try,
 )
@@ -132,6 +133,7 @@ app.include_router(recommendations.router)
 app.include_router(staff.router)
 app.include_router(staff_menu.router)
 app.include_router(staff_analytics.router)
+app.include_router(staff_org.router)
 app.include_router(availability.router)
 app.include_router(guest_recommendations.router)
 app.include_router(ratings.router)
