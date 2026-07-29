@@ -7,14 +7,43 @@ import { describe, expect, it } from 'vitest'
 
 import {
   classifyMarketTier,
+  deriveBody,
   deriveColor,
   deriveSlug,
+  deriveSweetness,
   normaliseRow,
   normaliseStyle,
   type ScrapedBeer,
 } from '../normalise_row'
 import { computeAdventurousness, computeStyleRarity } from '../adventurousness'
 import { composeBeerText } from '../compose_text'
+
+describe('deriveBody / deriveSweetness (#274 backfill)', () => {
+  it('gives stouts a full body and IPAs a dry, medium profile', () => {
+    expect(deriveBody('Imperial Stout')).toBe('full')
+    expect(deriveBody('American IPA')).toBe('medium')
+    expect(deriveSweetness('American IPA')).toBe('dry')
+    expect(deriveSweetness('Imperial Stout')).toBe('sweet')
+  })
+
+  it('makes lagers and wheats light-bodied and never returns null', () => {
+    expect(deriveBody('Pilsner')).toBe('light')
+    expect(deriveBody('Hefeweizen')).toBe('light')
+    expect(deriveBody('Saison')).toBe('light')
+  })
+
+  it('normaliseRow fills body/sweetness from style when the source omits them', () => {
+    const row = normaliseRow({
+      name: 'X',
+      brewery: 'Alexander',
+      breweryCountry: 'IL',
+      rawStyle: 'Stout',
+      abv: 5,
+    })
+    expect(row.body).toBe('full')
+    expect(row.sweetness).toBe('balanced')
+  })
+})
 
 const ALEXANDER_BLAZER: ScrapedBeer = {
   name: 'Blazer',
