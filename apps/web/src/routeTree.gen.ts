@@ -14,6 +14,7 @@ import { Route as RecommendationsRouteImport } from './routes/recommendations'
 import { Route as RateRouteImport } from './routes/rate'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as MenuRouteImport } from './routes/menu'
+import { Route as CatalogRouteImport } from './routes/catalog'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AccountIndexRouteImport } from './routes/account.index'
@@ -55,6 +56,11 @@ const OnboardingRoute = OnboardingRouteImport.update({
 const MenuRoute = MenuRouteImport.update({
   id: '/menu',
   path: '/menu',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CatalogRoute = CatalogRouteImport.update({
+  id: '/catalog',
+  path: '/catalog',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AccountRoute = AccountRouteImport.update({
@@ -146,6 +152,7 @@ const ApiOgTasteKeyRoute = ApiOgTasteKeyRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/account': typeof AccountRouteWithChildren
+  '/catalog': typeof CatalogRoute
   '/menu': typeof MenuRoute
   '/onboarding': typeof OnboardingRoute
   '/rate': typeof RateRoute
@@ -169,6 +176,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/catalog': typeof CatalogRoute
   '/menu': typeof MenuRoute
   '/onboarding': typeof OnboardingRoute
   '/rate': typeof RateRoute
@@ -194,6 +202,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/account': typeof AccountRouteWithChildren
+  '/catalog': typeof CatalogRoute
   '/menu': typeof MenuRoute
   '/onboarding': typeof OnboardingRoute
   '/rate': typeof RateRoute
@@ -220,6 +229,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/account'
+    | '/catalog'
     | '/menu'
     | '/onboarding'
     | '/rate'
@@ -243,6 +253,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/catalog'
     | '/menu'
     | '/onboarding'
     | '/rate'
@@ -267,6 +278,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/account'
+    | '/catalog'
     | '/menu'
     | '/onboarding'
     | '/rate'
@@ -292,6 +304,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AccountRoute: typeof AccountRouteWithChildren
+  CatalogRoute: typeof CatalogRoute
   MenuRoute: typeof MenuRoute
   OnboardingRoute: typeof OnboardingRoute
   RateRoute: typeof RateRoute
@@ -343,6 +356,13 @@ declare module '@tanstack/react-router' {
       path: '/menu'
       fullPath: '/menu'
       preLoaderRoute: typeof MenuRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/catalog': {
+      id: '/catalog'
+      path: '/catalog'
+      fullPath: '/catalog'
+      preLoaderRoute: typeof CatalogRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/account': {
@@ -491,6 +511,7 @@ const AccountRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountRoute: AccountRouteWithChildren,
+  CatalogRoute: CatalogRoute,
   MenuRoute: MenuRoute,
   OnboardingRoute: OnboardingRoute,
   RateRoute: RateRoute,

@@ -1,13 +1,21 @@
 /**
  * schema.org JSON-LD for the beer list so LLM browsers / crawlers can read the
  * catalog as structured data. schema.org has no Beer type -> Product.
- * ponytail: rendered on /try where guest results already exist; a dedicated
- * crawlable /catalog page is deferred (the quiz gates this list from bare
- * crawlers, but assistant browsers that complete the flow get the markup).
+ * Rendered on /try (guest results, quiz-gated from bare crawlers) and on the
+ * public /catalog index (#278), where the whole list is crawlable.
  */
-import type { GuestRecommendedBeer } from '../lib/guest-answers'
+// Structural subset of the fields the markup reads, so both guest results
+// (GuestRecommendedBeer) and the public catalog (CatalogBeer) satisfy it.
+export type BeerJsonLdItem = {
+  name: string
+  name_hebrew?: string | null
+  brewery: string
+  style: string
+  abv: number
+  image_url?: string | null
+}
 
-export function BeerJsonLd({ beers }: { beers: GuestRecommendedBeer[] }) {
+export function BeerJsonLd({ beers }: { beers: BeerJsonLdItem[] }) {
   if (beers.length === 0) return null
 
   const jsonLd = {

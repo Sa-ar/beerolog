@@ -56,6 +56,17 @@
     "cta": "What's YOUR type? Take the 30-second quiz",
     "ctaHint": "Free — no sign-up needed to start."
   },
+  "catalog": {
+    "title": "Beer catalog",
+    "intro": "Browse every beer in Beerolog. Tap any beer to see its sensory profile.",
+    "metaTitle": "Beer catalog · Beerolog",
+    "metaDescription": "Browse the full Beerolog beer catalog — every style, brewery, ABV and sensory profile in one place.",
+    "abv": "{{abv}}% ABV",
+    "prev": "Previous",
+    "next": "Next",
+    "pageStatus": "Page {{page}} of {{pages}}",
+    "empty": "No beers to show yet."
+  },
   "collection": {
     "loading": "Loading your catches…",
     "error": "Couldn't load your collection.",
