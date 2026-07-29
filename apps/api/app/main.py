@@ -25,10 +25,12 @@ from app.routes import (
     icons,
     menu,
     onboarding,
+    orders,
     public_catalog,
     public_places,
     public_venues,
     rate,
+    rating_outcome,
     ratings,
     recommendations,
     staff,
@@ -39,6 +41,7 @@ from app.routes import (
     staff_menu,
     staff_org,
     staff_qr,
+    staff_returns,
     users,
     want_to_try,
 )
@@ -145,6 +148,7 @@ app.include_router(staff_members.router)
 app.include_router(staff_qr.router)
 app.include_router(staff_catalog.router)
 app.include_router(staff_demand.router)
+app.include_router(staff_returns.router)
 app.include_router(availability.router)
 app.include_router(admin_moderation.router)
 app.include_router(guest_recommendations.router)
@@ -153,6 +157,8 @@ app.include_router(want_to_try.router)
 app.include_router(public_catalog.router)
 app.include_router(public_places.router)
 app.include_router(public_venues.router)
+app.include_router(orders.router)
+app.include_router(rating_outcome.router)
 app.include_router(rate.router)
 app.include_router(users.router)
 app.include_router(debug.router)
