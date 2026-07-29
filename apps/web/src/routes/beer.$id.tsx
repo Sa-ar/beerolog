@@ -11,6 +11,8 @@ import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button, Heading } from '@beerolog/ui'
 import { apiClient } from '../lib/api-client/client'
+import { loadBaselineTaste, type LoadBaselineResult } from '../lib/load-baseline-taste'
+import { getAuthToken } from '../lib/auth-session'
 import { BeerDetail, type BeerDetailData } from '../components/BeerDetail'
 import { CatchBeerControl } from '../components/CatchBeerControl'
 import { PAGE_MAIN } from '@beerolog/shared'
@@ -73,6 +75,21 @@ export const Route = createFileRoute('/beer/$id')({
   component: BeerDetailPage,
 })
 
+// The signed-in owner sees their BaselineTaste overlaid on the beer radar; a
+// shared/signed-out link stays objective (loadBaselineTaste yields non-ready
+// without a token). Exported pure for testing (#275).
+export function ownerOverlayTaste(
+  result?: LoadBaselineResult,
+): { bitterness: number; abv_affinity?: number | null; novelty_affinity: number } | null {
+  if (result?.status !== 'ready') return null
+  const b = result.baseline
+  return {
+    bitterness: b.bitterness,
+    abv_affinity: b.abv_affinity ?? null,
+    novelty_affinity: b.novelty_affinity,
+  }
+}
+
 function BeerDetailPage() {
   const { id } = Route.useParams()
   return <BeerDetailView id={id} />
@@ -91,6 +108,14 @@ export function BeerDetailView({ id }: { id: string }) {
       if (error || !data) throw new Error('not-found')
       return data
     },
+  })
+
+  // Owner overlay (#275): fetch my baseline so the radar shows "you vs this beer".
+  // No token (signed-out / shared link) short-circuits to non-ready → objective.
+  const overlayQuery = useQuery({
+    queryKey: ['beer-overlay-baseline'],
+    retry: false,
+    queryFn: () => loadBaselineTaste(getAuthToken),
   })
 
   // Must be before any early returns to satisfy Rules of Hooks.
@@ -138,6 +163,7 @@ export function BeerDetailView({ id }: { id: string }) {
     color: (b.color as BeerColor) ?? null,
     ibu: b.ibu ?? null,
     adventurousness: b.adventurousness,
+    taste: ownerOverlayTaste(overlayQuery.data),
   }
 
   return (
