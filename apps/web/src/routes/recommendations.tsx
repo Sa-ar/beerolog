@@ -38,6 +38,10 @@ import {
 } from '../lib/session-intent'
 
 export const Route = createFileRoute('/recommendations')({
+  // `?beer=<id>` deep-links the in-results detail modal (#276): opening the modal
+  // pushes the param, so the browser back button closes it.
+  validateSearch: (search: Record<string, unknown>): { beer?: string } =>
+    typeof search.beer === 'string' ? { beer: search.beer } : {},
   component: RecommendationsPage,
 })
 
@@ -180,6 +184,8 @@ async function resolveInitialRecommendations(
 }
 
 function RecommendationsContent() {
+  const { beer: openBeerId } = Route.useSearch()
+  const navigate = Route.useNavigate()
   const { t, i18n } = useTranslation()
   const queryClient = useQueryClient()
 
@@ -492,6 +498,14 @@ function RecommendationsContent() {
             matchPercent={tonightMatchPercent(beer.breakdown, hasSession, calibration, beta)}
             venues={availability[beer.id]}
             taste={taste}
+            detail={{
+              open: openBeerId === beer.id,
+              onOpenChange: (open) =>
+                void navigate({
+                  search: () => (open ? { beer: beer.id } : {}),
+                  resetScroll: false,
+                }),
+            }}
           />
         ))}
       </div>

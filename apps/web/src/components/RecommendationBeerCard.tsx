@@ -62,6 +62,9 @@ type RecommendationBeerCardProps = {
   venues?: Venue[] | undefined
   /** The viewer's BaselineTaste dials, overlaid on the detail radar. */
   taste?: { bitterness: number; abv_affinity?: number | null; novelty_affinity: number } | null
+  /** Opt-in URL-addressable detail modal (#276). When provided, the caller drives
+   *  open/close (e.g. a ?beer= search param) instead of the card's local state. */
+  detail?: { open: boolean; onOpenChange: (open: boolean) => void }
 }
 
 export function RecommendationBeerCard({
@@ -70,6 +73,7 @@ export function RecommendationBeerCard({
   matchPercent,
   venues,
   taste,
+  detail,
 }: RecommendationBeerCardProps) {
   const { t, i18n } = useTranslation()
   const isTopPick = rank === 1
@@ -99,7 +103,11 @@ export function RecommendationBeerCard({
   // saved confirmation; on error keep the tapper so the user can retry.
   const [rateStatus, setRateStatus] = useState<SaveStatus>(SAVE_STATUS.idle)
   const myRatings = useMyRatings()
-  const [detailOpen, setDetailOpen] = useState(false)
+  // Detail modal: local state by default; when `detail` is provided the caller
+  // drives open/close (e.g. a ?beer= search param, #276).
+  const [localDetailOpen, setLocalDetailOpen] = useState(false)
+  const detailOpen = detail ? detail.open : localDetailOpen
+  const setDetailOpen = detail ? detail.onOpenChange : setLocalDetailOpen
 
   async function handleRate(rating: Rating) {
     setRateStatus(SAVE_STATUS.saving)

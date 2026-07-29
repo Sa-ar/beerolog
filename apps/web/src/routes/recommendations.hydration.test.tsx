@@ -16,7 +16,13 @@ vi.mock('@beerolog/shared', async (importOriginal) => ({
 
 // TanStack router internals — stub createFileRoute + Link so the page renders.
 vi.mock('@tanstack/react-router', () => ({
-  createFileRoute: () => (opts: { component: unknown }) => opts,
+  // Route now reads a ?beer= search param (#276); expose no-op useSearch/useNavigate
+  // on the returned Route so the page renders without a real router.
+  createFileRoute: () => (opts: Record<string, unknown>) => ({
+    ...opts,
+    useSearch: () => ({}),
+    useNavigate: () => () => {},
+  }),
   Link: ({ children }: { children: React.ReactNode }) => <span>{children}</span>,
 }))
 

@@ -89,6 +89,50 @@ describe('RecommendationBeerCard why copy', () => {
   })
 })
 
+describe('RecommendationBeerCard detail deep-link (#276)', () => {
+  it('renders the detail dialog when the URL says open', () => {
+    renderWithI18n(
+      <RecommendationBeerCard
+        beer={BEER}
+        rank={1}
+        matchPercent={80}
+        detail={{ open: true, onOpenChange: vi.fn() }}
+      />,
+      'en',
+    )
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+  })
+
+  it('keeps the dialog closed when the URL says closed', () => {
+    renderWithI18n(
+      <RecommendationBeerCard
+        beer={BEER}
+        rank={1}
+        matchPercent={80}
+        detail={{ open: false, onOpenChange: vi.fn() }}
+      />,
+      'en',
+    )
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('asks the caller to open (updates the URL) when the detail CTA is tapped', async () => {
+    const user = userEvent.setup()
+    const onOpenChange = vi.fn()
+    renderWithI18n(
+      <RecommendationBeerCard
+        beer={BEER}
+        rank={1}
+        matchPercent={80}
+        detail={{ open: false, onOpenChange }}
+      />,
+      'en',
+    )
+    await user.click(screen.getByRole('button', { name: /view sensory profile/i }))
+    expect(onOpenChange).toHaveBeenCalledWith(true)
+  })
+})
+
 describe('RecommendationBeerCard rating', () => {
   it('posts the rating for this beer when a tap is chosen', async () => {
     const user = userEvent.setup()
