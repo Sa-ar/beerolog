@@ -61,6 +61,14 @@ export const ratingEnum = pgEnum('rating', ['loved', 'fine', 'disliked', 'unknow
 // `venue_verified` is the reserved white-label seam, defined now, unused.
 export const proofSourceEnum = pgEnum('proof_source', ['self_photo', 'venue_verified'])
 
+// Post-serve "was it right?" outcome (white-label B4, #350). Closes the matching
+// loop + grounds the return-rate KPI (C1).
+export const ratingOutcomeEnum = pgEnum('rating_outcome', [
+  'as_expected',
+  'not_what_expected',
+  'better_than_expected',
+])
+
 export const venueTypeEnum = pgEnum('venue_type', ['shop', 'pub'])
 
 // 'curated' rows come from our seed; 'user' rows come from crowdsourced reports.
@@ -327,6 +335,11 @@ export const beerRatings = pgTable(
     // photo-less ratings stay plain ratings.
     proofPhotoUrl: text('proof_photo_url'),
     proofSource: proofSourceEnum('proof_source'),
+    // Outcome signal (#350): attributed to the venue, and (later) the order that
+    // triggered the prompt. order_id has no FK yet — the orders table is B2 (#347).
+    outcome: ratingOutcomeEnum('outcome'),
+    outcomeVenueId: text('outcome_venue_id').references(() => venues.id, { onDelete: 'set null' }),
+    orderId: text('order_id'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
