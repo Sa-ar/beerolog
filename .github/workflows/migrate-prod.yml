@@ -22,7 +22,7 @@ concurrency:
 jobs:
   migrate:
     name: Apply Drizzle migrations to prod
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
