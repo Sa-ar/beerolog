@@ -1,7 +1,7 @@
 /**
  * The `What I know` deck (issue #326): swipe to rate beers you recognize —
- * up = loved, right = fine, left = not-for-me — on the shared image-forward
- * card, with on-screen button equivalents + undo (WCAG 2.5.1). Data +
+ * up = loved, right = fine, left = not-for-me, down = don't-know — on the shared
+ * image-forward card, with on-screen button equivalents + undo (WCAG 2.5.1). Data +
  * progression live in useRateDeck; each swipe posts to /ratings immediately.
  * The deck is ranked by recognition likelihood (mainstream first). A search
  * mode is retained as a secondary affordance on the /rate route.
@@ -33,6 +33,7 @@ const STAMPS: { rating: Rating; position: string; labelKey: string }[] = [
   { rating: RATINGS.loved, position: 'left-1/2 top-6 -translate-x-1/2 border-green-400 text-green-200', labelKey: 'rate.tapper.loved' },
   { rating: RATINGS.fine, position: 'end-4 top-1/2 -translate-y-1/2 border-brand-400 text-brand-200', labelKey: 'rate.tapper.fine' },
   { rating: RATINGS.disliked, position: 'start-4 top-1/2 -translate-y-1/2 border-red-400 text-red-200', labelKey: 'rate.tapper.disliked' },
+  { rating: RATINGS.unknown, position: 'left-1/2 bottom-6 -translate-x-1/2 border-neutral-400 text-neutral-200', labelKey: 'rate.dontKnow' },
 ]
 
 export function RateDeckFlow() {
@@ -149,19 +150,20 @@ export function RateDeckFlow() {
         </div>
       </div>
 
-      <div
-        className="flex items-center justify-center gap-3"
-        role="group"
-        aria-label={t('rate.swipeHint')}
-      >
-        <Button variant="outline" className="flex-1" onClick={() => track(RATINGS.disliked)}>
-          {t('rate.tapper.disliked', 'Not for me')}
-        </Button>
-        <Button variant="outline" className="flex-1" onClick={() => track(RATINGS.fine)}>
-          {t('rate.tapper.fine', 'It was fine')}
-        </Button>
-        <Button variant="default" className="flex-1" onClick={() => track(RATINGS.loved)}>
-          {t('rate.tapper.loved', 'Loved it')}
+      <div className="flex flex-col gap-2" role="group" aria-label={t('rate.swipeHint')}>
+        <div className="flex items-center justify-center gap-3">
+          <Button variant="outline" className="flex-1" onClick={() => track(RATINGS.disliked)}>
+            {t('rate.tapper.disliked', 'Not for me')}
+          </Button>
+          <Button variant="outline" className="flex-1" onClick={() => track(RATINGS.fine)}>
+            {t('rate.tapper.fine', 'It was fine')}
+          </Button>
+          <Button variant="default" className="flex-1" onClick={() => track(RATINGS.loved)}>
+            {t('rate.tapper.loved', 'Loved it')}
+          </Button>
+        </div>
+        <Button variant="ghost" className="w-full" onClick={() => track(RATINGS.unknown)}>
+          {t('rate.dontKnow', "I don't know this beer")}
         </Button>
       </div>
     </div>

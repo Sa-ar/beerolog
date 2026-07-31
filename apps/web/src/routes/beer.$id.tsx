@@ -1,38 +1,39 @@
 /**
- * /beer/$id — public, shareable per-beer page. Renders the same BeerDetail as
- * the in-results modal, but objective-only (no personal overlay), fed by the
- * public GET /catalog/{id}. This is the Share target; a logged-out recipient
- * gets a quiz CTA. Owner-overlay on this route is deferred (#275).
+ * /beer/$id — public, shareable per-beer page. Renders BeerDetail from
+ * GET /catalog/{id}. Signed-in: taste overlay, match %, rating tapper, catch.
+ * Signed-out: objective view + quiz CTA.
  */
-import { Show } from '@clerk/tanstack-react-start'
+import { Show, useAuth } from '@clerk/tanstack-react-start'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button, Heading } from '@beerolog/ui'
-import { apiClient } from '../lib/api-client/client'
+import type { Rating } from '@beerolog/types'
+import { Button, Heading, RatingTapper } from '@beerolog/ui'
+import { getAuthToken, PAGE_MAIN } from '@beerolog/shared'
+import {
+  catalogBeerQueryKey,
+  fetchCatalogBeer,
+  loadCatalogBeer,
+  type CatalogBeer,
+} from '../lib/catalog-beer'
+import { useBeerMatchPercent } from '../lib/beer-match'
 import { loadBaselineTaste, type LoadBaselineResult } from '../lib/load-baseline-taste'
-import { getAuthToken } from '@beerolog/shared'
+import { useMyRatings } from '../lib/my-ratings'
+import { useRateOne } from '../lib/rate-search'
 import { BeerDetail, type BeerDetailData } from '../components/BeerDetail'
+import { BeerDetailLoadingState } from '../components/BeerDetailLoadingState'
 import { CatchBeerControl } from '../components/CatchBeerControl'
-import { PAGE_MAIN } from '@beerolog/shared'
 import type { BeerColor } from '../lib/beer-color'
 import { capture } from '../lib/analytics'
 
 const SITE_URL = (import.meta.env.VITE_WEB_URL as string | undefined) ?? 'https://beerolog.com'
 
-export type BeerOgData = {
-  id: string
-  name: string
-  brewery: string
-  style: string
-  abv: number
-  image_url?: string | null
-}
+export type BeerOgData = Pick<
+  CatalogBeer,
+  'id' | 'name' | 'brewery' | 'style' | 'abv' | 'image_url'
+>
 
-// Exported for testing without a router. Builds og/twitter meta from the beer so
-// a shared /beer/$id link previews with the beer's own photo (#309). Empty when
-// the beer is missing so we never emit a broken card.
 export function beerHead({ loaderData }: { loaderData?: { beer: BeerOgData | null } | undefined }) {
   const b = loaderData?.beer
   if (!b) return {}
@@ -58,26 +59,15 @@ export function beerHead({ loaderData }: { loaderData?: { beer: BeerOgData | nul
 }
 
 export const Route = createFileRoute('/beer/$id')({
-  // SSR-fetch the beer so head() can emit a rich per-beer preview. The component
-  // keeps its own useQuery for render; this loader is meta-only (public share
-  // page, low traffic — the extra fetch is acceptable here).
-  loader: async ({ params }): Promise<{ beer: BeerOgData | null }> => {
-    try {
-      const { data } = await apiClient.GET('/catalog/{beer_id}', {
-        params: { path: { beer_id: params.id } },
-      })
-      return { beer: (data as BeerOgData) ?? null }
-    } catch {
-      return { beer: null }
-    }
-  },
+  loader: async ({ params }): Promise<{ beer: CatalogBeer | null }> => ({
+    beer: await loadCatalogBeer(params.id),
+  }),
+  pendingComponent: BeerDetailLoadingState,
+  pendingMs: 0,
   head: beerHead,
   component: BeerDetailPage,
 })
 
-// The signed-in owner sees their BaselineTaste overlaid on the beer radar; a
-// shared/signed-out link stays objective (loadBaselineTaste yields non-ready
-// without a token). Exported pure for testing (#275).
 export function ownerOverlayTaste(
   result?: LoadBaselineResult,
 ): { bitterness: number; abv_affinity?: number | null; novelty_affinity: number } | null {
@@ -92,53 +82,53 @@ export function ownerOverlayTaste(
 
 function BeerDetailPage() {
   const { id } = Route.useParams()
-  return <BeerDetailView id={id} />
+  const { beer } = Route.useLoaderData()
+  return <BeerDetailView id={id} initialBeer={beer} />
 }
 
-// Extracted so it can be tested without a router context.
-export function BeerDetailView({ id }: { id: string }) {
+export function BeerDetailView({
+  id,
+  initialBeer,
+}: {
+  id: string
+  initialBeer?: CatalogBeer | null
+}) {
   const { t } = useTranslation()
+  const { isSignedIn } = useAuth()
+  let queryOptions: { initialData?: CatalogBeer; staleTime?: number; enabled?: false }
+  if (initialBeer != null) {
+    queryOptions = { initialData: initialBeer, staleTime: 60_000 }
+  } else if (initialBeer === null) {
+    queryOptions = { enabled: false }
+  } else {
+    queryOptions = { staleTime: 60_000 }
+  }
   const query = useQuery({
-    queryKey: ['catalog-beer', id],
+    queryKey: catalogBeerQueryKey(id),
     retry: false,
-    queryFn: async () => {
-      const { data, error } = await apiClient.GET('/catalog/{beer_id}', {
-        params: { path: { beer_id: id } },
-      })
-      if (error || !data) throw new Error('not-found')
-      return data
-    },
+    queryFn: () => fetchCatalogBeer(id),
+    ...queryOptions,
   })
 
-  // Owner overlay (#275): fetch my baseline so the radar shows "you vs this beer".
-  // No token (signed-out / shared link) short-circuits to non-ready → objective.
   const overlayQuery = useQuery({
     queryKey: ['beer-overlay-baseline'],
     retry: false,
     queryFn: () => loadBaselineTaste(getAuthToken),
+    staleTime: 5 * 60_000,
+    enabled: !!isSignedIn,
   })
 
-  // Must be before any early returns to satisfy Rules of Hooks.
-  // Fire once when beer data is available — this is the share-loop landing page.
+  const matchQuery = useBeerMatchPercent(id, !!isSignedIn && !!query.data)
+  const myRatings = useMyRatings()
+  const rateOne = useRateOne()
+  const [localRating, setLocalRating] = useState<Rating | null>(null)
+
   useEffect(() => {
     if (!query.data) return
     capture('beer_detail_viewed', { beer_id: query.data.id, market_tier: query.data.market_tier })
   }, [query.data?.id, query.data?.market_tier])
 
-  if (query.isPending) {
-    return (
-      <main className={`${PAGE_MAIN} py-10`}>
-        <p
-          data-testid="beer-loading"
-          className="animate-pulse text-center text-sm text-neutral-400"
-        >
-          {t('beerDetail.route.loading')}
-        </p>
-      </main>
-    )
-  }
-
-  if (query.isError || !query.data) {
+  if (initialBeer === null || query.isError || (!query.isPending && !query.data)) {
     return (
       <main className={`${PAGE_MAIN} py-10`}>
         <section className="space-y-4 text-center">
@@ -151,7 +141,12 @@ export function BeerDetailView({ id }: { id: string }) {
     )
   }
 
+  if (query.isPending || !query.data) {
+    return <BeerDetailLoadingState />
+  }
+
   const b = query.data
+  const selectedRating = localRating ?? myRatings[b.id]
 
   const detail: BeerDetailData = {
     name: b.name,
@@ -161,28 +156,66 @@ export function BeerDetailView({ id }: { id: string }) {
     abv: b.abv,
     market_tier: b.market_tier as 'mainstream' | 'craft' | 'import',
     color: (b.color as BeerColor) ?? null,
+    image_url: b.image_url ?? null,
     ibu: b.ibu ?? null,
     adventurousness: b.adventurousness,
+    matchPercent: matchQuery.data ?? null,
     taste: ownerOverlayTaste(overlayQuery.data),
+  }
+
+  function onRate(rating: Rating) {
+    setLocalRating(rating)
+    rateOne.mutate({ beerId: b.id, rating })
   }
 
   return (
     <main className={`${PAGE_MAIN} py-8 sm:py-10`}>
       <div className="mx-auto max-w-md">
-        <BeerDetail beer={detail} />
-        {/* Signed-in: catch this beer with a proof photo (#330). Signed-out
-            recipients of a shared link keep the objective view + quiz CTA. */}
-        <Show when="signed-in">
-          <CatchBeerControl beerId={b.id} beerName={b.name} />
-        </Show>
-        <Show when="signed-out">
-          <div className="mt-6 flex flex-col items-center gap-2 text-center">
-            <p className="text-sm text-neutral-600">{t('beerDetail.route.ctaHint')}</p>
-            <Link to="/try">
-              <Button size="lg">{t('beerDetail.route.cta')}</Button>
-            </Link>
-          </div>
-        </Show>
+        <BeerDetail
+          beer={detail}
+          footer={
+            <>
+              <Show when="signed-in">
+                <div className="space-y-3 rounded-xl border border-neutral-200 bg-neutral-50/60 p-4">
+                  <p className="text-sm font-medium text-neutral-800">
+                    {t('recommendations.ratePrompt')}
+                  </p>
+                  <RatingTapper
+                    onRate={onRate}
+                    selected={selectedRating}
+                    disabled={rateOne.isPending}
+                    labels={{
+                      loved: t('rate.tapper.loved'),
+                      fine: t('rate.tapper.fine'),
+                      disliked: t('rate.tapper.disliked'),
+                    }}
+                  />
+                  {selectedRating ? (
+                    <p role="status" className="text-sm font-medium text-brand-600">
+                      {t('recommendations.rateSaved')}
+                    </p>
+                  ) : null}
+                  {rateOne.isError ? (
+                    <p role="alert" className="text-sm text-red-600">
+                      {t('recommendations.rateError')}
+                    </p>
+                  ) : null}
+                </div>
+                <div className="mt-4">
+                  <CatchBeerControl beerId={b.id} beerName={b.name} />
+                </div>
+              </Show>
+              <Show when="signed-out">
+                <div className="flex flex-col items-center gap-2 text-center">
+                  <p className="text-sm text-neutral-600">{t('beerDetail.route.ctaHint')}</p>
+                  <Link to="/try">
+                    <Button size="lg">{t('beerDetail.route.cta')}</Button>
+                  </Link>
+                </div>
+              </Show>
+            </>
+          }
+        />
       </div>
     </main>
   )

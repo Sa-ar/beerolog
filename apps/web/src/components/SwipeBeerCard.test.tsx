@@ -29,7 +29,11 @@ const base: CardBeer = {
 describe('SwipeBeerCard', () => {
   it('renders the hero photo, match %, name, and pills — no deep facts', () => {
     renderWithI18n(<SwipeBeerCard beer={base} matchPercent={91} why="Bright and juicy." />, 'en')
-    expect(document.querySelector('img')).toHaveAttribute('src', 'https://blob/hazy.jpg')
+    const photos = document.querySelectorAll('img')
+    expect(photos.length).toBeGreaterThanOrEqual(1)
+    expect([...photos].every((img) => img.getAttribute('src') === 'https://blob/hazy.jpg')).toBe(
+      true,
+    )
     expect(screen.getByText('91% match')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Hazy Days' })).toBeInTheDocument()
     expect(screen.getByText('IPA')).toBeInTheDocument()

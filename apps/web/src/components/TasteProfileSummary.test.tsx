@@ -13,10 +13,6 @@ vi.mock('../lib/rating-count', () => ({
   useRatingCount: () => ({ data: 7 }),
 }))
 
-vi.mock('./SessionQuickPick', () => ({
-  SessionQuickPick: () => <div data-testid="session-quick-pick" />,
-}))
-
 vi.mock('./TasteRadar', () => ({
   TasteRadar: () => <div data-testid="taste-radar" />,
 }))
@@ -41,11 +37,12 @@ const baseline: BaselineTaste = {
 const { TasteProfileSummary } = await import('./TasteProfileSummary')
 
 describe('TasteProfileSummary', () => {
-  it('shows scan CTA, session quick-pick, identity, and taste details always open', () => {
+  it('shows identity and taste details always open (no session/scan CTAs)', () => {
     renderWithI18n(<TasteProfileSummary greeting="Hi" baseline={baseline} />, 'en')
 
-    expect(screen.getByRole('link', { name: /scan a menu/i })).toHaveAttribute('href', '/menu')
-    expect(screen.getByTestId('session-quick-pick')).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /scan a menu/i })).not.toBeInTheDocument()
+    expect(screen.queryByTestId('session-quick-pick')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('session-hero')).not.toBeInTheDocument()
     expect(screen.getByTestId('persona-title')).toHaveTextContent('Malty comfort')
     expect(screen.getByTestId('taste-radar')).toBeInTheDocument()
     expect(screen.getByText(/7 beers rated/i)).toBeInTheDocument()

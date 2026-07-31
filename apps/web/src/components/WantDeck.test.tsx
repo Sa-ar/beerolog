@@ -90,11 +90,11 @@ describe('WantDeck', () => {
     expect(onOpenRefiner).toHaveBeenCalled()
   })
 
-  it('exposes the menu-scan action in the header when a handler is given', async () => {
-    const onScan = vi.fn()
+  it('exposes refine when a refiner handler is given', async () => {
+    const onOpenRefiner = vi.fn()
     const user = userEvent.setup()
-    renderWithI18n(<WantDeck beers={[beer('a')]} onScan={onScan} />, 'en')
-    await user.click(screen.getByRole('button', { name: 'Scan' }))
-    expect(onScan).toHaveBeenCalled()
+    renderWithI18n(<WantDeck beers={[beer('a')]} onOpenRefiner={onOpenRefiner} />, 'en')
+    await user.click(screen.getByRole('button', { name: /refine/i }))
+    expect(onOpenRefiner).toHaveBeenCalled()
   })
 })

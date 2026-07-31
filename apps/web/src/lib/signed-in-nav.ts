@@ -1,8 +1,7 @@
 /**
  * Single source of truth for signed-in primary destinations.
- * Two decks: `What I know` (rate) and `What I want` (home/default).
+ * Decks: `What I know` (rate), `What I want` (home). Plus menu scan.
  */
-
 import type { CatalogIconGroup } from '@beerolog/icons'
 
 export const SIGNED_IN_NAV = [
@@ -10,6 +9,7 @@ export const SIGNED_IN_NAV = [
     id: 'whatIKnow',
     to: '/rate',
     labelKey: 'nav.whatIKnow',
+    hintKey: 'nav.whatIKnowHint',
     iconGroup: 'journey' as const satisfies CatalogIconGroup,
     iconKey: 'quiz',
     match: (pathname: string) => pathname.startsWith('/rate'),
@@ -18,9 +18,19 @@ export const SIGNED_IN_NAV = [
     id: 'whatIWant',
     to: '/',
     labelKey: 'nav.whatIWant',
+    hintKey: 'nav.whatIWantHint',
     iconGroup: 'journey' as const satisfies CatalogIconGroup,
     iconKey: 'picks',
     match: (pathname: string) => pathname === '/',
+  },
+  {
+    id: 'scan',
+    to: '/menu',
+    labelKey: 'nav.scan',
+    hintKey: 'nav.scanHint',
+    iconGroup: 'journey' as const satisfies CatalogIconGroup,
+    iconKey: 'scan',
+    match: (pathname: string) => pathname.startsWith('/menu'),
   },
 ] as const
 

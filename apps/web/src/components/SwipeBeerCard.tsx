@@ -1,10 +1,9 @@
 /**
- * Shared image-forward swipe card (issue #323). Full-bleed hero photo (or a
- * designed color-swatch fallback), with overlays: match % (top-start),
- * super-like marker (top-end), name + brewery, up to two pills (style + ABV),
- * and one why-line in the scrim. Deep facts live on the /beer/$id tap-through,
- * not here. No in-card scroll. Both decks (`What I want`, `What I know`) render
- * it; the deck owns the swipe gesture + action buttons.
+ * Shared swipe card (issue #323). Product photo keeps its natural aspect
+ * (object-contain) over a blurred cover of the same image that fills letterbox
+ * gaps. Name / brewery / pills / why / details sit in a solid footer below —
+ * not overlaid on the bottle. Match % and super-like sit on the photo. Deep
+ * facts live on /beer/$id. Both decks render it; the deck owns swipe + actions.
  */
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
@@ -41,65 +40,83 @@ export function SwipeBeerCard({
   const color = deriveBeerColor(beer.style, beer.color ?? undefined)
 
   return (
-    <div className="relative h-full w-full overflow-hidden rounded-3xl bg-neutral-900 text-white shadow-xl ring-1 ring-black/10">
-      {/* Hero: photo fills the card; designed swatch fallback when imageless. */}
-      {beer.image_url ? (
-        <img src={beer.image_url} alt="" className="absolute inset-0 h-full w-full object-cover" />
-      ) : (
-        <div
-          className="absolute inset-0 flex items-center justify-center"
-          style={{ backgroundColor: BEER_COLOR_GLOW[color] }}
-          data-testid="card-swatch"
-        >
-          <BeerColorGlass color={color} className="h-44 w-44" />
-        </div>
-      )}
-
-      {/* Bottom scrim for legibility over the photo. */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/85 via-black/45 to-transparent" />
-
-      {matchPercent != null ? (
-        <div className="absolute start-3 top-3">
-          <Badge
-            variant="success"
-            className="tabular-nums text-xs font-semibold shadow"
-            aria-label={t('recommendations.matchAria', { percent: matchPercent })}
+    <div className="relative flex h-full w-full flex-col overflow-hidden rounded-3xl bg-neutral-50 text-neutral-900 shadow-xl ring-1 ring-black/10">
+      {/* Photo zone: sharp product at natural aspect; blurred cover fills the gaps. */}
+      <div className="relative min-h-0 flex-1 overflow-hidden bg-neutral-50">
+        {beer.image_url ? (
+          <>
+            <img
+              src={beer.image_url}
+              alt=""
+              aria-hidden
+              className="pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover blur-md"
+            />
+            <div className="pointer-events-none absolute inset-0 bg-black/20" aria-hidden />
+            {/* Contain fills width or height (touches at least one pair of edges), no stretch. */}
+            <img
+              src={beer.image_url}
+              alt=""
+              className="absolute inset-0 z-[1] h-full w-full object-contain"
+            />
+          </>
+        ) : (
+          <div
+            className="absolute inset-0 flex items-center justify-center"
+            style={{ backgroundColor: BEER_COLOR_GLOW[color] }}
+            data-testid="card-swatch"
           >
-            {t('recommendations.matchBadge', { percent: matchPercent })}
-          </Badge>
-        </div>
-      ) : null}
+            <BeerColorGlass color={color} className="h-44 w-44" />
+          </div>
+        )}
 
-      {superLiked ? (
-        <div
-          className="absolute end-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-brand-500 text-lg shadow"
-          aria-label={t('whatIWant.superLike')}
-        >
-          <span aria-hidden>★</span>
-        </div>
-      ) : null}
+        {matchPercent != null ? (
+          <div className="absolute start-3 top-3 z-10">
+            <Badge
+              variant="success"
+              className="tabular-nums text-xs font-semibold shadow"
+              aria-label={t('recommendations.matchAria', { percent: matchPercent })}
+            >
+              {t('recommendations.matchBadge', { percent: matchPercent })}
+            </Badge>
+          </div>
+        ) : null}
 
-      <div className="absolute inset-x-0 bottom-0 flex flex-col gap-2 p-5">
-        <Heading level={2} className="text-2xl font-semibold leading-tight text-white">
-          {displayName}
-        </Heading>
-        <p className="text-sm text-white/80">{beer.brewery}</p>
-        <div className="flex flex-wrap gap-2">
-          <Badge variant="outline" className="border-white/40 text-xs text-white">
+        {superLiked ? (
+          <div
+            className="absolute end-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-brand-500 text-lg shadow"
+            aria-label={t('whatIWant.superLike')}
+          >
+            <span aria-hidden>★</span>
+          </div>
+        ) : null}
+      </div>
+
+      {/* Cream text on real black — not remapped bg-white / text-white. Keep compact so the photo zone stays tall. */}
+      <div className="flex shrink-0 flex-col gap-1 bg-black px-3.5 py-2.5">
+        <div className="flex items-baseline justify-between gap-2">
+          <Heading level={2} className="min-w-0 flex-1 truncate text-lg font-semibold leading-tight text-neutral-900">
+            {displayName}
+          </Heading>
+          <Link
+            to="/beer/$id"
+            params={{ id: beer.id }}
+            className="shrink-0 text-sm font-semibold text-brand-300 underline-offset-2 hover:underline"
+          >
+            {t('whatIWant.details')}
+          </Link>
+        </div>
+        <p className="truncate text-sm text-neutral-600">{beer.brewery}</p>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <Badge variant="outline" className="border-neutral-500 text-xs text-neutral-900">
             {beer.style}
           </Badge>
-          <Badge variant="outline" className="border-white/40 text-xs text-white">
+          <Badge variant="outline" className="border-neutral-500 text-xs text-neutral-900">
             {t('recommendations.abvBadge', { abv: `${Number(beer.abv.toFixed(1))}%` })}
           </Badge>
         </div>
-        {why ? <p className="text-sm italic leading-relaxed text-white/90">{why}</p> : null}
-        <Link
-          to="/beer/$id"
-          params={{ id: beer.id }}
-          className="mt-1 inline-block text-sm font-semibold text-brand-200 underline-offset-2 hover:underline"
-        >
-          {t('whatIWant.details')}
-        </Link>
+        {why ? (
+          <p className="line-clamp-2 text-sm italic leading-snug text-neutral-800">{why}</p>
+        ) : null}
       </div>
     </div>
   )

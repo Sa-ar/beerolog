@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { resolveWantSwipe, wantActionForDirection } from './swipe-want'
+import { resolveWantSwipe, wantActionForArrowKey, wantActionForDirection } from './swipe-want'
 
 const T = 96
 
@@ -27,5 +27,14 @@ describe('swipe-want', () => {
     expect(wantActionForDirection('right')).toBe('want')
     expect(wantActionForDirection('left', true)).toBe('want')
     expect(wantActionForDirection(null)).toBeNull()
+  })
+
+  it('maps arrow keys like physical swipes (RTL mirrors L/R)', () => {
+    expect(wantActionForArrowKey('ArrowRight')).toBe('want')
+    expect(wantActionForArrowKey('ArrowLeft')).toBe('pass')
+    expect(wantActionForArrowKey('ArrowUp')).toBe('must_try')
+    expect(wantActionForArrowKey('ArrowDown')).toBeNull()
+    expect(wantActionForArrowKey('ArrowRight', true)).toBe('pass')
+    expect(wantActionForArrowKey('ArrowLeft', true)).toBe('want')
   })
 })

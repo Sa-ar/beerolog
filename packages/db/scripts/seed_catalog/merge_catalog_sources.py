@@ -150,6 +150,20 @@ SCHNITT_DISPLAY_NAMES: dict[str, str] = {
     "tea party masala": "Tea Party: Masala",
     "lazy bee mead": "Lazy Bee Classic",
     "lazy bee raspberry hibiscus mead": "Lazy Bee With Hibiscus and Raspberries",
+    # Rotating board / OCR variants
+    "alt shift": "Alt Shift",
+    "guavallicious": "Guavallicious",
+    "guavalicious": "Guavallicious",
+    "lazy bee": "Lazy Bee",
+    "de bruyne": "De Bruyne",
+    "who is dunkelman": "Who is Dunkelman",
+    "something something": "Something Something",
+    "sour stout tonka": "Sour Stout & Tonka",
+    "mr goldings ipa": "Mr Goldings IPA",
+    "cherry shower sour": "Cherry Shower Sour",
+    "when life gives you grapefruit": "When Life Gives You Grapefruit",
+    "hi techs": "Hi-Techs",
+    "hi-techs": "Hi-Techs",
 }
 
 # Untappd search noise without a retail source — not sold as catalog SKUs
@@ -614,6 +628,18 @@ def schnitt_beers_raw_entries() -> list[tuple]:
         ("Flu Fighters", None, "Spiced Ale", 5.2, None, "אירה מתובלת מפוצצת בטעמים."),
         ("Koresh", None, "Smoked Blonde Ale", 5.0, None, "בלונד מעושנת עם לימון פרסי ומלח."),
         ("Nightmare Fuel", None, "Porter", 8.0, None, "פורטר אמריקאית כהה וארומטית."),
+        # Rotating tap-board SKUs (guest/seasonal boards photographed on-site).
+        ("Alt Shift", None, "Session IPA", 5.0, 30, "סשן IPA קלילה ומרעננת — משמרת חלופית ל-Day Shift."),
+        ("Guavallicious", None, "Fruited IPA", 6.0, 35, "IPA עם מחית גויאבה — טרופית ועסיסית."),
+        ("Lazy Bee", None, "Honey Wheat Ale", 4.0, 12, "חיטה עם דבש — קלילה, פורחת ומתוקה בעדינות."),
+        ("De Bruyne", None, "Witbier", 5.5, 15, "וויטbier בלגית עם כוסברה והדרים — על שם De Bruyne."),
+        ("Who is Dunkelman", None, "Dunkelweizen", 5.3, 15, "חיטה כהה בווארית — קלויה, בננה ומין."),
+        ("Something Something", None, "Blonde Ale", 5.1, 18, "בלונד עם דריי הופ — קלילה וארומטית."),
+        ("Sour Stout & Tonka", None, "Sour Stout", 5.3, 20, "סטאוט חמוץ עם שעועית טונקה — קלוי, ונילי וחמצמץ."),
+        ("Mr Goldings IPA", None, "English IPA", 6.2, 45, "IPA אנגלי עם כשות Goldings — הדרים ופרחים."),
+        ("Cherry Shower Sour", None, "Fruited Sour", 7.0, 8, "סאוור עם דובדבנים — חמוץ, פירותי ועסיסי."),
+        ("When Life Gives You Grapefruit", None, "Fruited NEIPA", 6.5, 45, "NEIPA עם אשכולית — הדרית ומעוננת."),
+        ("Hi-Techs", None, "West Coast IPA", 7.2, 55, "West Coast IPA מרה ועצית."),
     ]
 
 

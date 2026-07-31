@@ -1,19 +1,20 @@
 import { useClerk, useUser } from '@clerk/tanstack-react-start'
-import { Link } from '@tanstack/react-router'
+import { Link, useRouterState } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { ACCOUNT_NAV } from '../lib/account-nav'
 
 type UserMenuProps = {
-  /** When `up`, menu opens above the trigger and shows name/email (sidebar footer). */
+  /** When `up`, menu opens above the trigger; name/email live on the trigger only. */
   menuPlacement?: 'down' | 'up'
 }
 
-// Branded replacement for Clerk's default <UserButton />. Avatar opens Account +
-// Sign out; account tabs live only in the /account shell.
+// Avatar menu lists every account destination + Sign out. No secondary account navbar.
 export function UserMenu({ menuPlacement = 'down' }: UserMenuProps) {
   const { t } = useTranslation()
   const { user } = useUser()
   const { signOut } = useClerk()
+  const pathname = useRouterState({ select: (s) => s.location.pathname })
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -82,18 +83,31 @@ export function UserMenu({ menuPlacement = 'down' }: UserMenuProps) {
               : 'end-0 top-full mt-2'
           }`}
         >
-          <div className="border-b border-neutral-100 px-4 py-3">
-            <p className="truncate text-sm font-semibold text-neutral-900">{name}</p>
-            {email && <p className="truncate text-xs text-neutral-500">{email}</p>}
-          </div>
-          <Link
-            to="/account/profile"
-            role="menuitem"
-            onClick={() => setOpen(false)}
-            className="block px-4 py-2 text-sm text-neutral-700 hover:bg-white/5"
-          >
-            {t('menu.accountLink')}
-          </Link>
+          {!showDetails ? (
+            <div className="border-b border-neutral-100 px-4 py-3">
+              <p className="truncate text-sm font-semibold text-neutral-900">{name}</p>
+              {email ? <p className="truncate text-xs text-neutral-500">{email}</p> : null}
+            </div>
+          ) : null}
+          {ACCOUNT_NAV.map((item) => {
+            const active = pathname === item.to || pathname.startsWith(`${item.to}/`)
+            return (
+              <Link
+                key={item.key}
+                to={item.to}
+                role="menuitem"
+                aria-current={active ? 'page' : undefined}
+                onClick={() => setOpen(false)}
+                className={`block px-4 py-2 text-sm transition-colors hover:bg-neutral-100 ${
+                  active
+                    ? 'bg-brand-50 font-semibold text-brand-800 hover:bg-brand-100'
+                    : 'text-neutral-700'
+                }`}
+              >
+                {t(`account.tabs.${item.key}`)}
+              </Link>
+            )
+          })}
           <button
             type="button"
             role="menuitem"

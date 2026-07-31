@@ -321,7 +321,6 @@ export function WhatIWantDeck() {
               ...(hasProfile ? { onOpenRefiner: () => setRefinerOpen(true) } : {}),
             })}
         endCard={scoped ? scopedEndCard : endCard}
-        onScan={() => fileRef.current?.click()}
         resetKey={scoped ? `scoped:${scoped.label}` : `${JSON.stringify(session)}|${notTried}`}
       />
       {baseline ? (

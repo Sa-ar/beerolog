@@ -334,8 +334,10 @@ export function RecommendationBeerCard({
               abv: beer.abv,
               market_tier: beer.market_tier,
               color: beer.color ?? null,
+              image_url: beer.image_url,
               ibu: beer.ibu ?? null,
               adventurousness: beer.adventurousness,
+              matchPercent,
               why: whyText(t, beer.why, displayName, beer.brewery) || null,
               taste: taste ?? null,
             }}

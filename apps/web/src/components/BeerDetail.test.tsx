@@ -22,6 +22,25 @@ describe('BeerDetail', () => {
     expect(screen.getByText('Alexander Blazer')).toBeInTheDocument()
     expect(screen.getByText('Alexander')).toBeInTheDocument()
     expect(screen.getByText(/Bright and hoppy/)).toBeInTheDocument()
+    expect(screen.getByText('60 IBU')).toBeInTheDocument()
+  })
+
+  it('shows the beer image and match badge when provided', () => {
+    renderWithI18n(
+      <BeerDetail
+        beer={{
+          ...base,
+          image_url: 'https://cdn.example/beer.jpg',
+          matchPercent: 87,
+        }}
+      />,
+      'en',
+    )
+    expect(screen.getByRole('img', { name: 'Alexander Blazer' })).toHaveAttribute(
+      'src',
+      'https://cdn.example/beer.jpg',
+    )
+    expect(screen.getByText('87% match')).toBeInTheDocument()
   })
 
   it('shows body and sweetness chips when present', () => {

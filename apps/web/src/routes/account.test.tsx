@@ -18,20 +18,11 @@ vi.mock('@clerk/tanstack-react-start', () => ({
 const { Route } = await import('./account')
 const AccountLayout = (Route as unknown as { component: () => ReactNode }).component
 
-describe('Account tabs', () => {
-  it('renders tabs in order with Profile (taste) first', () => {
+describe('Account layout', () => {
+  it('renders the account shell without a secondary tab navbar', () => {
     renderWithI18n(<AccountLayout />, 'en')
-    const nav = screen.getByRole('navigation', { name: 'Account' })
-    const tabs = Array.from(nav.querySelectorAll('a')).map((a) => [
-      a.getAttribute('href'),
-      a.textContent,
-    ])
-    expect(tabs).toEqual([
-      ['/account/profile', 'Profile'],
-      ['/account/collection', 'Collection'],
-      ['/account/details', 'Details'],
-      ['/account/security', 'Security'],
-      ['/account/settings', 'Settings'],
-    ])
+    expect(screen.getByRole('heading', { name: 'Account' })).toBeInTheDocument()
+    expect(screen.getByTestId('outlet')).toBeInTheDocument()
+    expect(screen.queryByRole('navigation', { name: 'Account' })).not.toBeInTheDocument()
   })
 })

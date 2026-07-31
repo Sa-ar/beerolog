@@ -1,8 +1,8 @@
 /**
- * `What I want` refiner bottom sheet (issue #324). Reuses SessionQuickPick
+ * `What I want` refiner sheet (issue #324). Reuses SessionQuickPick
  * (vibe + ABV + free text) to re-query in place, plus a "haven't tried yet"
- * toggle. Fixed-position overlay so it slides over the deck with zero page
- * layout shift; α/β tuning stays hidden.
+ * toggle. Mobile: bottom sheet. Desktop: centered card sized to fit filters
+ * without a tall scroll (α/β tuning stays hidden).
  */
 import { useTranslation } from 'react-i18next'
 import type { BaselineTaste } from '../lib/baseline-taste'
@@ -28,7 +28,7 @@ export function RefinerSheet({
   if (!open) return null
   return (
     <div
-      className="fixed inset-0 z-50 flex flex-col justify-end"
+      className="fixed inset-0 z-50 flex flex-col justify-end md:items-center md:justify-center md:p-6"
       role="dialog"
       aria-modal="true"
       aria-label={t('refiner.title')}
@@ -39,18 +39,18 @@ export function RefinerSheet({
         aria-label={t('common.close')}
         onClick={onClose}
       />
-      <div className="relative max-h-[85dvh] overflow-y-auto rounded-t-3xl bg-white p-5 shadow-2xl">
-        <div className="mx-auto mb-4 h-1.5 w-10 rounded-full bg-neutral-300" aria-hidden />
-        <label className="mb-5 flex items-center justify-between gap-3 rounded-xl border border-neutral-200 p-3">
+      <div className="relative max-h-[85dvh] w-full overflow-y-auto rounded-t-3xl bg-white p-4 shadow-2xl md:max-h-[min(90dvh,40rem)] md:max-w-2xl md:overflow-y-auto md:rounded-2xl md:p-5">
+        <div className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-neutral-300 md:hidden" aria-hidden />
+        <label className="mb-3 flex items-center justify-between gap-3 rounded-xl border border-neutral-200 px-3 py-2.5">
           <span className="text-sm font-medium text-neutral-800">{t('refiner.notTried')}</span>
           <input
             type="checkbox"
             checked={notTried}
             onChange={(e) => onToggleNotTried(e.target.checked)}
-            className="h-5 w-5 cursor-pointer"
+            className="h-5 w-5 shrink-0 cursor-pointer"
           />
         </label>
-        <SessionQuickPick baseline={baseline} onApply={onApply} />
+        <SessionQuickPick baseline={baseline} onApply={onApply} compact />
       </div>
     </div>
   )

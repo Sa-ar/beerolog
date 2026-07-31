@@ -92,6 +92,7 @@
     "body": { "light": "Light body", "medium": "Medium body", "full": "Full body" },
     "sweetness": { "dry": "Dry finish", "balanced": "Balanced finish", "sweet": "Sweet finish" },
     "colorLabel": "Color",
+    "ibuBadge": "{{ibu}} IBU",
     "openCta": "View sensory profile",
     "route": {
       "loading": "Loading beer…",
@@ -118,8 +119,16 @@
   "header": { "home": "Beerolog home" },
   "nav": {
     "primary": "Primary",
+    "decksEyebrow": "Your decks",
     "whatIKnow": "What I know",
-    "whatIWant": "What I want"
+    "whatIKnowHint": "Rate beers you recognize",
+    "whatIWant": "What I want",
+    "whatIWantHint": "Highest-match picks to swipe",
+    "scan": "Scan",
+    "scanHint": "Snap a menu for ranked picks",
+    "account": "Account",
+    "accountEyebrow": "Your account",
+    "backToApp": "Back to decks"
   },
   "whatIWant": {
     "title": "What I want",
@@ -141,7 +150,10 @@
     "endScan": "Scan a menu",
     "endList": "See your Want-to-try list",
     "swipeHint": "Swipe right to want, left to pass, up for must-try",
-    "progress": "{{current}} of {{total}}",
+    "keyboardHintTitle": "Use the arrow keys?",
+    "keyboardHintBody": "← Pass · → Want · ↑ Must try. This choice will count once you confirm.",
+    "keyboardHintConfirm": "Got it",
+    "keyboardHintCancel": "Not now",
     "scan": "Scan",
     "scanMenuLabel": "menu",
     "scanScopedChip": "Showing: {{label}}",
@@ -156,7 +168,8 @@
   },
   "refiner": {
     "title": "Refine your picks",
-    "notTried": "Only beers I haven't tried yet"
+    "notTried": "Only beers I haven't tried yet",
+    "apply": "Update picks"
   },
   "wantToTry": {
     "title": "Want to try",
@@ -176,10 +189,14 @@
     "scanAgain": "Scan another photo",
     "scanError": "Could not scan that image. Please try again.",
     "tonight": "What are you feeling tonight?",
+    "refine": "Refine",
+    "addBeer": "Add beer",
+    "clearVibe": "Clear {{vibe}}",
     "freeTextPlaceholder": "e.g. something hoppy to pair with spicy food",
     "rerank": "Re-rank for tonight",
     "notInCatalog": "not in our catalog · ranked by name",
     "tasteBadge": "{{pct}}% your taste",
+    "openBeer": "Open {{name}}",
     "remove": "Remove {{name}}",
     "notThisOne": "Not this one",
     "addTitle": "Missing a beer? Add it",
@@ -385,7 +402,13 @@
     "deniedTitle": "Sorry, you cannot use Beerolog",
     "deniedBody": "You must be 18 or older to use this app. Please close this page."
   },
-  "settings": { "title": "Settings", "language": "Language" },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "controls": "Controls",
+    "arrowKeys": "Arrow keys on What I want",
+    "arrowKeysHint": "Use ← Pass, → Want, and ↑ Must try while browsing picks. Turn this off if you prefer buttons only."
+  },
   "account": {
     "title": "Account",
     "tabs": { "profile": "Profile", "collection": "Collection", "details": "Details", "security": "Security", "settings": "Settings" },
@@ -795,7 +818,7 @@
   "rate": {
     "title": "Rate beers",
     "subtitle": "Each rating sharpens your recommendations.",
-    "swipeHint": "Swipe up for loved, right for fine, left for not-for-me",
+    "swipeHint": "Swipe up for loved, right for fine, left for not-for-me, down if you don't know it",
     "loading": "Loading beers…",
     "error": "Couldn't load the deck. Try again.",
     "empty": "No beers to rate right now — you've rated them all!",

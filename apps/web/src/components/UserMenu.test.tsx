@@ -10,16 +10,20 @@ vi.mock('@tanstack/react-router', () => ({
     children,
     role,
     onClick,
+    'aria-current': ariaCurrent,
   }: {
     to: string
     children: ReactNode
     role?: string
     onClick?: () => void
+    'aria-current'?: 'page' | undefined
   }) => (
-    <a href={to} role={role} onClick={onClick}>
+    <a href={to} role={role} onClick={onClick} aria-current={ariaCurrent}>
       {children}
     </a>
   ),
+  useRouterState: ({ select }: { select: (s: { location: { pathname: string } }) => string }) =>
+    select({ location: { pathname: '/account/profile' } }),
 }))
 
 vi.mock('@clerk/tanstack-react-start', () => ({
@@ -41,17 +45,32 @@ vi.mock('@clerk/tanstack-react-start', () => ({
 const { UserMenu } = await import('./UserMenu')
 
 describe('UserMenu', () => {
-  it('shows Account and Log out only (no per-tab deep links)', async () => {
+  it('lists every account destination plus Log out', async () => {
     const user = userEvent.setup()
     renderWithI18n(<UserMenu />, 'en')
     await user.click(screen.getByRole('button', { name: /account menu/i }))
-    expect(screen.getByRole('menuitem', { name: 'Account' })).toHaveAttribute(
+    expect(screen.getByRole('menuitem', { name: 'Profile' })).toHaveAttribute(
       'href',
       '/account/profile',
     )
+    expect(screen.getByRole('menuitem', { name: 'Collection' })).toHaveAttribute(
+      'href',
+      '/account/collection',
+    )
+    expect(screen.getByRole('menuitem', { name: 'Details' })).toHaveAttribute(
+      'href',
+      '/account/details',
+    )
+    expect(screen.getByRole('menuitem', { name: 'Security' })).toHaveAttribute(
+      'href',
+      '/account/security',
+    )
+    expect(screen.getByRole('menuitem', { name: 'Settings' })).toHaveAttribute(
+      'href',
+      '/account/settings',
+    )
     expect(screen.getByRole('menuitem', { name: /log out/i })).toBeInTheDocument()
-    expect(screen.queryByRole('menuitem', { name: /security/i })).not.toBeInTheDocument()
-    expect(screen.queryByRole('menuitem', { name: /settings/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('menuitem', { name: 'Account' })).not.toBeInTheDocument()
   })
 
   it('keeps the header trigger avatar-only (no name/email until menu opens)', () => {
@@ -62,6 +81,23 @@ describe('UserMenu', () => {
 
   it('shows name and email on the sidebar trigger when available', () => {
     renderWithI18n(<UserMenu menuPlacement="up" />, 'en')
+    expect(screen.getByText('Ada Lovelace')).toBeInTheDocument()
+    expect(screen.getByText('ada@example.com')).toBeInTheDocument()
+  })
+
+  it('does not repeat name/email in the sidebar dropdown', async () => {
+    const user = userEvent.setup()
+    renderWithI18n(<UserMenu menuPlacement="up" />, 'en')
+    await user.click(screen.getByRole('button', { name: /account menu/i }))
+    expect(screen.getAllByText('Ada Lovelace')).toHaveLength(1)
+    expect(screen.getAllByText('ada@example.com')).toHaveLength(1)
+    expect(screen.getByRole('menuitem', { name: 'Profile' })).toBeInTheDocument()
+  })
+
+  it('shows name and email in the header dropdown when the trigger is avatar-only', async () => {
+    const user = userEvent.setup()
+    renderWithI18n(<UserMenu />, 'en')
+    await user.click(screen.getByRole('button', { name: /account menu/i }))
     expect(screen.getByText('Ada Lovelace')).toBeInTheDocument()
     expect(screen.getByText('ada@example.com')).toBeInTheDocument()
   })

@@ -82,6 +82,31 @@
         "title": "AccountExport",
         "type": "object"
       },
+      "AddMenuItemRequest": {
+        "properties": {
+          "beer_id": {
+            "minLength": 1,
+            "title": "Beer Id",
+            "type": "string"
+          },
+          "price_ils": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price Ils"
+          }
+        },
+        "required": [
+          "beer_id"
+        ],
+        "title": "AddMenuItemRequest",
+        "type": "object"
+      },
       "AddPlaceRequest": {
         "properties": {
           "beer_id": {
@@ -1214,6 +1239,48 @@
         "title": "DeckBeer",
         "type": "object"
       },
+      "DemandBeer": {
+        "properties": {
+          "beer_id": {
+            "title": "Beer Id",
+            "type": "string"
+          },
+          "want_count": {
+            "title": "Want Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "beer_id",
+          "want_count"
+        ],
+        "title": "DemandBeer",
+        "type": "object"
+      },
+      "DemandOut": {
+        "properties": {
+          "off_menu": {
+            "items": {
+              "$ref": "#/components/schemas/DemandBeer"
+            },
+            "title": "Off Menu",
+            "type": "array"
+          },
+          "on_menu": {
+            "items": {
+              "$ref": "#/components/schemas/DemandBeer"
+            },
+            "title": "On Menu",
+            "type": "array"
+          }
+        },
+        "required": [
+          "on_menu",
+          "off_menu"
+        ],
+        "title": "DemandOut",
+        "type": "object"
+      },
       "DominantComponent": {
         "enum": [
           "baseline",
@@ -1293,6 +1360,29 @@
         "title": "ExportRating",
         "type": "object"
       },
+      "FlagOut": {
+        "properties": {
+          "beer_id": {
+            "title": "Beer Id",
+            "type": "string"
+          },
+          "flags": {
+            "title": "Flags",
+            "type": "integer"
+          },
+          "venue_id": {
+            "title": "Venue Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "beer_id",
+          "venue_id",
+          "flags"
+        ],
+        "title": "FlagOut",
+        "type": "object"
+      },
       "FlavorCue": {
         "enum": [
           "grapefruit",
@@ -1306,6 +1396,75 @@
         ],
         "title": "FlavorCue",
         "type": "string"
+      },
+      "GapDraft": {
+        "properties": {
+          "abv": {
+            "title": "Abv",
+            "type": "number"
+          },
+          "brewery": {
+            "title": "Brewery",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "style": {
+            "title": "Style",
+            "type": "string"
+          },
+          "tasting_notes": {
+            "default": "",
+            "title": "Tasting Notes",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "brewery",
+          "style",
+          "abv",
+          "source"
+        ],
+        "title": "GapDraft",
+        "type": "object"
+      },
+      "GapRequest": {
+        "properties": {
+          "brewery": {
+            "minLength": 1,
+            "title": "Brewery",
+            "type": "string"
+          },
+          "name": {
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "style_hint": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Style Hint"
+          }
+        },
+        "required": [
+          "name",
+          "brewery"
+        ],
+        "title": "GapRequest",
+        "type": "object"
       },
       "GuestRecommendationsResponse": {
         "properties": {
@@ -1481,6 +1640,50 @@
           }
         },
         "title": "IconCatalogResponse",
+        "type": "object"
+      },
+      "InviteRequest": {
+        "properties": {
+          "email": {
+            "minLength": 3,
+            "title": "Email",
+            "type": "string"
+          },
+          "role": {
+            "pattern": "^(org_owner|venue_manager|bartender)$",
+            "title": "Role",
+            "type": "string"
+          },
+          "venue_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Venue Id"
+          }
+        },
+        "required": [
+          "email",
+          "role"
+        ],
+        "title": "InviteRequest",
+        "type": "object"
+      },
+      "InviteResponse": {
+        "properties": {
+          "token": {
+            "title": "Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "token"
+        ],
+        "title": "InviteResponse",
         "type": "object"
       },
       "LovePref": {
@@ -1746,6 +1949,368 @@
           "adventure"
         ],
         "title": "OnboardingAnswers",
+        "type": "object"
+      },
+      "OrderItemIn": {
+        "properties": {
+          "beer_id": {
+            "minLength": 1,
+            "title": "Beer Id",
+            "type": "string"
+          },
+          "qty": {
+            "default": 1,
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Qty",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "beer_id"
+        ],
+        "title": "OrderItemIn",
+        "type": "object"
+      },
+      "OrderOut": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "table_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Table Label"
+          }
+        },
+        "required": [
+          "id",
+          "status"
+        ],
+        "title": "OrderOut",
+        "type": "object"
+      },
+      "OrgOnboardRequest": {
+        "properties": {
+          "market_id": {
+            "default": "IL",
+            "title": "Market Id",
+            "type": "string"
+          },
+          "org_name": {
+            "minLength": 1,
+            "title": "Org Name",
+            "type": "string"
+          },
+          "org_slug": {
+            "minLength": 1,
+            "pattern": "^[a-z0-9-]+$",
+            "title": "Org Slug",
+            "type": "string"
+          },
+          "venue_city": {
+            "minLength": 1,
+            "title": "Venue City",
+            "type": "string"
+          },
+          "venue_name": {
+            "minLength": 1,
+            "title": "Venue Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "org_name",
+          "org_slug",
+          "venue_name",
+          "venue_city"
+        ],
+        "title": "OrgOnboardRequest",
+        "type": "object"
+      },
+      "OrgOnboardResponse": {
+        "properties": {
+          "org_id": {
+            "title": "Org Id",
+            "type": "string"
+          },
+          "venue_id": {
+            "title": "Venue Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "org_id",
+          "venue_id"
+        ],
+        "title": "OrgOnboardResponse",
+        "type": "object"
+      },
+      "OrgRollupOut": {
+        "properties": {
+          "per_venue": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Per Venue",
+            "type": "array"
+          },
+          "total_on_menu": {
+            "title": "Total On Menu",
+            "type": "integer"
+          },
+          "total_visits": {
+            "title": "Total Visits",
+            "type": "integer"
+          },
+          "venues": {
+            "title": "Venues",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "venues",
+          "total_visits",
+          "total_on_menu",
+          "per_venue"
+        ],
+        "title": "OrgRollupOut",
+        "type": "object"
+      },
+      "OutcomeRequest": {
+        "properties": {
+          "beer_id": {
+            "minLength": 1,
+            "title": "Beer Id",
+            "type": "string"
+          },
+          "outcome": {
+            "pattern": "^(as_expected|not_what_expected|better_than_expected)$",
+            "title": "Outcome",
+            "type": "string"
+          },
+          "venue_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Venue Id"
+          }
+        },
+        "required": [
+          "beer_id",
+          "outcome"
+        ],
+        "title": "OutcomeRequest",
+        "type": "object"
+      },
+      "OverrideRequest": {
+        "properties": {
+          "capability": {
+            "minLength": 1,
+            "title": "Capability",
+            "type": "string"
+          },
+          "granted": {
+            "title": "Granted",
+            "type": "boolean"
+          },
+          "staff_member_id": {
+            "title": "Staff Member Id",
+            "type": "string"
+          },
+          "venue_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Venue Id"
+          }
+        },
+        "required": [
+          "staff_member_id",
+          "capability",
+          "granted"
+        ],
+        "title": "OverrideRequest",
+        "type": "object"
+      },
+      "PlaceOrderRequest": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/OrderItemIn"
+            },
+            "minItems": 1,
+            "title": "Items",
+            "type": "array"
+          },
+          "session_token": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Token"
+          },
+          "table_label": {
+            "anyOf": [
+              {
+                "maxLength": 40,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Table Label"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "PlaceOrderRequest",
+        "type": "object"
+      },
+      "PlaceOrderResponse": {
+        "properties": {
+          "order_id": {
+            "title": "Order Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "order_id"
+        ],
+        "title": "PlaceOrderResponse",
+        "type": "object"
+      },
+      "PlaceOut": {
+        "properties": {
+          "address": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address"
+          },
+          "area": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Area"
+          },
+          "beers": {
+            "title": "Beers",
+            "type": "integer"
+          },
+          "city": {
+            "title": "City",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "name_hebrew": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name Hebrew"
+          },
+          "type": {
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "city",
+          "type",
+          "beers"
+        ],
+        "title": "PlaceOut",
+        "type": "object"
+      },
+      "PublishedVenueOut": {
+        "properties": {
+          "branding": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Branding"
+          },
+          "menu": {
+            "items": {
+              "$ref": "#/components/schemas/app__routes__public_venues__MenuItemOut"
+            },
+            "title": "Menu",
+            "type": "array"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          }
+        },
+        "required": [
+          "slug",
+          "name",
+          "menu"
+        ],
+        "title": "PublishedVenueOut",
         "type": "object"
       },
       "RateDeckResponse": {
@@ -2181,6 +2746,77 @@
         "title": "RecommendedBeer",
         "type": "object"
       },
+      "ResolveFlagsRequest": {
+        "properties": {
+          "beer_id": {
+            "minLength": 1,
+            "title": "Beer Id",
+            "type": "string"
+          },
+          "venue_id": {
+            "minLength": 1,
+            "title": "Venue Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "beer_id",
+          "venue_id"
+        ],
+        "title": "ResolveFlagsRequest",
+        "type": "object"
+      },
+      "ReturnRate": {
+        "properties": {
+          "beer_id": {
+            "title": "Beer Id",
+            "type": "string"
+          },
+          "return_rate": {
+            "title": "Return Rate",
+            "type": "number"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "beer_id",
+          "total",
+          "return_rate"
+        ],
+        "title": "ReturnRate",
+        "type": "object"
+      },
+      "ReviewOut": {
+        "properties": {
+          "beer_id": {
+            "title": "Beer Id",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "score": {
+            "title": "Score",
+            "type": "number"
+          },
+          "venue_id": {
+            "title": "Venue Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "venue_id",
+          "beer_id",
+          "score"
+        ],
+        "title": "ReviewOut",
+        "type": "object"
+      },
       "RoastedPref": {
         "enum": [
           "love",
@@ -2506,6 +3142,73 @@
         "title": "ValidationError",
         "type": "object"
       },
+      "VenueAnalyticsOut": {
+        "properties": {
+          "enough_data": {
+            "title": "Enough Data",
+            "type": "boolean"
+          },
+          "menu_size": {
+            "title": "Menu Size",
+            "type": "integer"
+          },
+          "n_raters": {
+            "title": "N Raters",
+            "type": "integer"
+          },
+          "taste_distribution": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Taste Distribution"
+          },
+          "top_beers": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Top Beers",
+            "type": "array"
+          },
+          "visits": {
+            "title": "Visits",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "menu_size",
+          "visits",
+          "n_raters",
+          "enough_data",
+          "top_beers"
+        ],
+        "title": "VenueAnalyticsOut",
+        "type": "object"
+      },
+      "VenueQrOut": {
+        "properties": {
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "slug",
+          "url"
+        ],
+        "title": "VenueQrOut",
+        "type": "object"
+      },
       "Vibe": {
         "enum": [
           "refreshing",
@@ -2515,6 +3218,29 @@
         ],
         "title": "Vibe",
         "type": "string"
+      },
+      "VisitRequest": {
+        "properties": {
+          "session_token": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Token"
+          },
+          "source": {
+            "default": "qr",
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "title": "VisitRequest",
+        "type": "object"
       },
       "WantToTryListResponse": {
         "properties": {
@@ -2639,6 +3365,151 @@
         ],
         "title": "WhyLine",
         "type": "object"
+      },
+      "app__routes__orders__SetStatusRequest": {
+        "properties": {
+          "status": {
+            "pattern": "^(placed|acked|in_progress|served|cancelled)$",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "SetStatusRequest",
+        "type": "object"
+      },
+      "app__routes__public_venues__MenuItemOut": {
+        "properties": {
+          "abv": {
+            "title": "Abv",
+            "type": "number"
+          },
+          "beer_id": {
+            "title": "Beer Id",
+            "type": "string"
+          },
+          "brewery": {
+            "title": "Brewery",
+            "type": "string"
+          },
+          "color": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Color"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "price_ils": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price Ils"
+          },
+          "serving_format": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Serving Format"
+          },
+          "style": {
+            "title": "Style",
+            "type": "string"
+          }
+        },
+        "required": [
+          "beer_id",
+          "name",
+          "brewery",
+          "style",
+          "abv"
+        ],
+        "title": "MenuItemOut",
+        "type": "object"
+      },
+      "app__routes__staff_menu__MenuItemOut": {
+        "properties": {
+          "beer_id": {
+            "title": "Beer Id",
+            "type": "string"
+          },
+          "price_ils": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price Ils"
+          },
+          "serving_format": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Serving Format"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "beer_id",
+          "status"
+        ],
+        "title": "MenuItemOut",
+        "type": "object"
+      },
+      "app__routes__staff_menu__SetStatusRequest": {
+        "properties": {
+          "status": {
+            "pattern": "^(on|off)$",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "SetStatusRequest",
+        "type": "object"
       }
     },
     "securitySchemes": {
@@ -2654,6 +3525,200 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/admin/moderation/flags": {
+      "get": {
+        "operationId": "listOpenFlags",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-admin-secret",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "X-Admin-Secret",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FlagOut"
+                  },
+                  "title": "Response Listopenflags",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Flags",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/moderation/flags/resolve": {
+      "post": {
+        "operationId": "resolveFlags",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-admin-secret",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "X-Admin-Secret",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolveFlagsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Resolveflags",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Resolve Flags",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/moderation/reviews": {
+      "get": {
+        "operationId": "listOpenReviews",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-admin-secret",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "X-Admin-Secret",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ReviewOut"
+                  },
+                  "title": "Response Listopenreviews",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Reviews",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/moderation/reviews/{review_id}/resolve": {
+      "post": {
+        "operationId": "resolveReview",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "review_id",
+            "required": true,
+            "schema": {
+              "title": "Review Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-admin-secret",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "X-Admin-Secret",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Resolve Review",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
     "/availability": {
       "post": {
         "operationId": "postAvailability",
@@ -3716,6 +4781,118 @@
         ]
       }
     },
+    "/places": {
+      "get": {
+        "operationId": "listPlaces",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PlaceOut"
+                  },
+                  "title": "Response Listplaces",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Places",
+        "tags": [
+          "places"
+        ]
+      }
+    },
+    "/public/venues/{slug}": {
+      "get": {
+        "operationId": "getPublishedVenue",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "title": "Slug",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishedVenueOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Published Venue",
+        "tags": [
+          "public-venues"
+        ]
+      }
+    },
+    "/public/venues/{slug}/visit": {
+      "post": {
+        "operationId": "recordVenueVisit",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "title": "Slug",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VisitRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Post Venue Visit",
+        "tags": [
+          "public-venues"
+        ]
+      }
+    },
     "/rate/deck": {
       "get": {
         "operationId": "getRateDeck",
@@ -3834,6 +5011,45 @@
         ]
       }
     },
+    "/ratings/outcome": {
+      "post": {
+        "operationId": "setRatingOutcome",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OutcomeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Set Rating Outcome",
+        "tags": [
+          "ratings"
+        ]
+      }
+    },
     "/recommendations": {
       "post": {
         "operationId": "postRecommendations",
@@ -3877,6 +5093,796 @@
         "summary": "Post Recommendations",
         "tags": [
           "recommendations"
+        ]
+      }
+    },
+    "/staff/orgs": {
+      "post": {
+        "operationId": "onboardOrg",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrgOnboardRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgOnboardResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Onboard Org",
+        "tags": [
+          "staff"
+        ]
+      }
+    },
+    "/staff/orgs/{org_id}/analytics": {
+      "get": {
+        "operationId": "getOrgRollup",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgRollupOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Org Rollup",
+        "tags": [
+          "staff"
+        ]
+      }
+    },
+    "/staff/orgs/{org_id}/invites": {
+      "post": {
+        "operationId": "createStaffInvite",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InviteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InviteResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Staff Invite",
+        "tags": [
+          "staff"
+        ]
+      }
+    },
+    "/staff/orgs/{org_id}/overrides": {
+      "post": {
+        "operationId": "setStaffOverride",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OverrideRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Set Staff Override",
+        "tags": [
+          "staff"
+        ]
+      }
+    },
+    "/staff/venues/{venue_id}/analytics": {
+      "get": {
+        "operationId": "getVenueAnalytics",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "venue_id",
+            "required": true,
+            "schema": {
+              "title": "Venue Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VenueAnalyticsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Venue Analytics",
+        "tags": [
+          "staff"
+        ]
+      }
+    },
+    "/staff/venues/{venue_id}/catalog/gaps": {
+      "post": {
+        "operationId": "submitCatalogGap",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "venue_id",
+            "required": true,
+            "schema": {
+              "title": "Venue Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GapRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GapDraft"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Submit Catalog Gap",
+        "tags": [
+          "staff"
+        ]
+      }
+    },
+    "/staff/venues/{venue_id}/demand": {
+      "get": {
+        "operationId": "getVenueDemand",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "venue_id",
+            "required": true,
+            "schema": {
+              "title": "Venue Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DemandOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Venue Demand",
+        "tags": [
+          "staff"
+        ]
+      }
+    },
+    "/staff/venues/{venue_id}/menu": {
+      "get": {
+        "operationId": "listVenueMenu",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "venue_id",
+            "required": true,
+            "schema": {
+              "title": "Venue Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/app__routes__staff_menu__MenuItemOut"
+                  },
+                  "title": "Response Listvenuemenu",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Menu",
+        "tags": [
+          "staff"
+        ]
+      },
+      "post": {
+        "operationId": "addVenueMenuItem",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "venue_id",
+            "required": true,
+            "schema": {
+              "title": "Venue Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddMenuItemRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Add Menu Item",
+        "tags": [
+          "staff"
+        ]
+      }
+    },
+    "/staff/venues/{venue_id}/menu/{beer_id}": {
+      "patch": {
+        "operationId": "toggleVenueMenuItem",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "venue_id",
+            "required": true,
+            "schema": {
+              "title": "Venue Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "beer_id",
+            "required": true,
+            "schema": {
+              "title": "Beer Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/app__routes__staff_menu__SetStatusRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Toggle Menu Item",
+        "tags": [
+          "staff"
+        ]
+      }
+    },
+    "/staff/venues/{venue_id}/orders": {
+      "get": {
+        "operationId": "listVenueOrders",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "venue_id",
+            "required": true,
+            "schema": {
+              "title": "Venue Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/OrderOut"
+                  },
+                  "title": "Response Listvenueorders",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Venue Orders",
+        "tags": [
+          "orders"
+        ]
+      }
+    },
+    "/staff/venues/{venue_id}/orders/{order_id}": {
+      "patch": {
+        "operationId": "setOrderStatus",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "venue_id",
+            "required": true,
+            "schema": {
+              "title": "Venue Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "order_id",
+            "required": true,
+            "schema": {
+              "title": "Order Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/app__routes__orders__SetStatusRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Set Order Status",
+        "tags": [
+          "orders"
+        ]
+      }
+    },
+    "/staff/venues/{venue_id}/qr": {
+      "get": {
+        "operationId": "getVenueQr",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "venue_id",
+            "required": true,
+            "schema": {
+              "title": "Venue Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VenueQrOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Venue Qr",
+        "tags": [
+          "staff"
+        ]
+      }
+    },
+    "/staff/venues/{venue_id}/returns": {
+      "get": {
+        "operationId": "getVenueReturns",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "venue_id",
+            "required": true,
+            "schema": {
+              "title": "Venue Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ReturnRate"
+                  },
+                  "title": "Response Getvenuereturns",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Venue Returns",
+        "tags": [
+          "staff"
+        ]
+      }
+    },
+    "/venues/{slug}/orders": {
+      "post": {
+        "operationId": "placeOrder",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "title": "Slug",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlaceOrderRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaceOrderResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Place Order",
+        "tags": [
+          "orders"
         ]
       }
     }

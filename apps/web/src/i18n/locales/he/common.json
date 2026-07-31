@@ -92,6 +92,7 @@
     "body": { "light": "גוף קל", "medium": "גוף בינוני", "full": "גוף מלא" },
     "sweetness": { "dry": "סיומת יבשה", "balanced": "סיומת מאוזנת", "sweet": "סיומת מתוקה" },
     "colorLabel": "צבע",
+    "ibuBadge": "{{ibu}} IBU",
     "openCta": "צפייה בפרופיל הטעם",
     "route": {
       "loading": "טוען בירה…",
@@ -118,8 +119,16 @@
   "header": { "home": "בירולוג — דף הבית" },
   "nav": {
     "primary": "ניווט ראשי",
+    "decksEyebrow": "החפיסות שלכם",
     "whatIKnow": "מה אני מכיר",
-    "whatIWant": "מה בא לי"
+    "whatIKnowHint": "דרגו בירות שאתם מזהים",
+    "whatIWant": "מה בא לי",
+    "whatIWantHint": "הבירות שהכי מתאימות — להחלקה",
+    "scan": "סריקה",
+    "scanHint": "צלמו תפריט וקבלו דירוג",
+    "account": "חשבון",
+    "accountEyebrow": "החשבון שלכם",
+    "backToApp": "חזרה לחפיסות"
   },
   "whatIWant": {
     "title": "מה בא לי",
@@ -141,7 +150,10 @@
     "endScan": "סרקו תפריט",
     "endList": "לרשימת הבירות שבא לכם",
     "swipeHint": "החליקו ימינה כדי לרצות, שמאלה כדי לדלג, למעלה לחובה לטעום",
-    "progress": "{{current}} מתוך {{total}}",
+    "keyboardHintTitle": "להשתמש במקשי החיצים?",
+    "keyboardHintBody": "← לא עכשיו · → בא לי · ↑ חובה לטעום. אחרי האישור הבחירה תיספר.",
+    "keyboardHintConfirm": "הבנתי",
+    "keyboardHintCancel": "לא עכשיו",
     "scan": "סריקה",
     "scanMenuLabel": "תפריט",
     "scanScopedChip": "מציג: {{label}}",
@@ -156,7 +168,8 @@
   },
   "refiner": {
     "title": "חדדו את ההמלצות",
-    "notTried": "רק בירות שעוד לא טעמתי"
+    "notTried": "רק בירות שעוד לא טעמתי",
+    "apply": "עדכנו את ההמלצות"
   },
   "wantToTry": {
     "title": "בא לי לטעום",
@@ -176,10 +189,14 @@
     "scanAgain": "צלמו תמונה נוספת",
     "scanError": "לא הצלחנו לסרוק את התמונה. נסו שוב.",
     "tonight": "מה בא לכם הערב?",
+    "refine": "חדדו",
+    "addBeer": "הוסיפו בירה",
+    "clearVibe": "נקו את {{vibe}}",
     "freeTextPlaceholder": "למשל משהו כשותי לצד אוכל חריף",
     "rerank": "דרגו מחדש להערב",
     "notInCatalog": "לא בקטלוג שלנו · דורג לפי השם",
     "tasteBadge": "{{pct}}% מתאים לכם",
+    "openBeer": "פתחו את {{name}}",
     "remove": "הסירו את {{name}}",
     "notThisOne": "לא זו",
     "addTitle": "חסרה בירה? הוסיפו אותה",
@@ -385,7 +402,13 @@
     "deniedTitle": "מצטערים, לא ניתן להשתמש בבירולוג",
     "deniedBody": "יש להיות בן/בת 18 ומעלה כדי להשתמש באפליקציה. אנא סגרו את הדף."
   },
-  "settings": { "title": "הגדרות", "language": "שפה" },
+  "settings": {
+    "title": "הגדרות",
+    "language": "שפה",
+    "controls": "שליטה",
+    "arrowKeys": "מקשי חיצים במה בא לי",
+    "arrowKeysHint": "← לא עכשיו, → בא לי, ↑ חובה לטעום בזמן הגלישה. כבו אם אתם מעדיפים רק כפתורים."
+  },
   "account": {
     "title": "החשבון שלי",
     "tabs": { "profile": "פרופיל", "collection": "האוסף", "details": "פרטים", "security": "אבטחה", "settings": "הגדרות" },
@@ -786,7 +809,7 @@
   "rate": {
     "title": "דרגו בירות",
     "subtitle": "כל דירוג מחדד את ההמלצות שלכם.",
-    "swipeHint": "החליקו למעלה לאהבתי, ימינה לבסדר, שמאלה ללא בשבילי",
+    "swipeHint": "החליקו למעלה לאהבתי, ימינה לבסדר, שמאלה ללא בשבילי, למטה אם לא מכירים",
     "loading": "טוען בירות…",
     "error": "לא הצלחנו לטעון. נסו שוב.",
     "empty": "אין כרגע בירות לדירוג — דירגתם את כולן!",

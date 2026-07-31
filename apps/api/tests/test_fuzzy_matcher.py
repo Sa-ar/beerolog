@@ -41,3 +41,36 @@ def test_unrelated_name_filtered_out():
 
 def test_empty_catalog_returns_empty():
     assert fuzzy_match("Guinness Draught", [], threshold=0.6) == []
+
+
+def test_truncated_name_matches_via_containment():
+    salted = CatalogEntry(
+        id="schnitt-porter-sons-salted-caramel",
+        name="Porter & Sons Salted Caramel",
+        brewery="Schnitt",
+    )
+    results = fuzzy_match("Salted Caramel", [salted], threshold=0.85)
+    assert len(results) == 1
+    assert results[0].entry.id == salted.id
+    assert results[0].score >= 0.85
+    assert results[0].matched_on == "containment"
+
+
+def test_ocr_repeated_tokens_match_what_was_was():
+    entry = CatalogEntry(id="schnitt-what-was-was", name="What Was Was", brewery="Schnitt")
+    results = fuzzy_match("WHAT WAS WAS WAS", [entry], threshold=0.85)
+    assert len(results) == 1
+    assert results[0].entry.id == entry.id
+    assert results[0].score >= 0.85
+
+
+def test_guest_prefix_omitted_hobgoblin():
+    entry = CatalogEntry(
+        id="wychwood-hobgoblin-stout",
+        name="Wychwood Hobgoblin Stout",
+        brewery="Wychwood",
+    )
+    results = fuzzy_match("Hobgoblin Stout", [entry], threshold=0.85)
+    assert len(results) == 1
+    assert results[0].entry.id == entry.id
+    assert results[0].score >= 0.85

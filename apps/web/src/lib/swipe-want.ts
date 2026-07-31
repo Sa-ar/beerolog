@@ -49,3 +49,11 @@ export function resolveWantSwipe(
   if (axisDistance(dx, dy, dir) < threshold) return null
   return wantActionForDirection(dir, rtl)
 }
+
+/** Map arrow keys to the same actions as a physical swipe (RTL mirrors L/R). */
+export function wantActionForArrowKey(key: string, rtl = false): WantAction | null {
+  if (key === 'ArrowUp') return 'must_try'
+  if (key === 'ArrowRight') return wantActionForDirection('right', rtl)
+  if (key === 'ArrowLeft') return wantActionForDirection('left', rtl)
+  return null
+}

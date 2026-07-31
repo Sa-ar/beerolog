@@ -109,4 +109,19 @@ describe('RateDeckFlow', () => {
     renderWithI18n(<RateDeckFlow />, 'en')
     expect(await screen.findByText(/no beers/i)).toBeInTheDocument()
   })
+
+  it('posts unknown when I do not know this beer is clicked', async () => {
+    const user = userEvent.setup()
+    renderWithI18n(<RateDeckFlow />, 'en')
+
+    expect(await screen.findByText('Beer A')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /i don't know this beer/i }))
+
+    await waitFor(() =>
+      expect(postMock).toHaveBeenCalledWith('/ratings', {
+        body: { beer_id: 'a', rating: 'unknown' },
+      }),
+    )
+    expect(await screen.findByText('Beer B')).toBeInTheDocument()
+  })
 })

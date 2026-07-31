@@ -7,7 +7,7 @@
 import { Button, Heading } from '@beerolog/ui'
 import { RedirectToSignIn, Show } from '@clerk/tanstack-react-start'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { PAGE_MAIN } from '@beerolog/shared'
 import { capture } from '../lib/analytics'
@@ -20,6 +20,12 @@ import {
   type MenuScanResultItem,
   type MenuSessionIntent,
 } from '../lib/menu-scan'
+import {
+  clearMenuScanCache,
+  loadMenuScanCache,
+  saveMenuScanCache,
+} from '../lib/menu-scan-cache'
+import { apiClient } from '../lib/api-client/client'
 import { useBeerSearch, type SearchBeer } from '../lib/rate-search'
 import { useDebouncedValue } from '../lib/use-debounced-value'
 import { VIBE_OPTIONS, type SessionVibe } from '../lib/session-intent'
@@ -57,6 +63,10 @@ function scanButtonLabel(t: (k: string) => string, pending: boolean, hasResults:
   return hasResults ? t('menu.scanAgain') : t('menu.scanIdle')
 }
 
+function formatAbv(abv: number): string {
+  return `${Number(abv.toFixed(1))}%`
+}
+
 function MenuScanFlow() {
   const { t } = useTranslation()
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -69,17 +79,52 @@ function MenuScanFlow() {
   const [dismissed, setDismissed] = useState<Set<string>>(new Set())
   const [addedIds, setAddedIds] = useState<string[]>([])
   const [appliedSession, setAppliedSession] = useState<MenuSessionIntent | undefined>(undefined)
+  const [results, setResults] = useState<MenuScanResultItem[]>([])
+  const [cacheReady, setCacheReady] = useState(false)
   const [chatOpen, setChatOpen] = useState(false)
+  const [tonightOpen, setTonightOpen] = useState(false)
+  const [addOpen, setAddOpen] = useState(false)
+  const [ranking, setRanking] = useState(false)
 
   const scan = useScanMenu()
   const chat = useMenuChat()
   const rankAdded = useMenuRank(addedIds, appliedSession)
 
-  // Lock background scroll while the chat sheet is open on mobile; the desktop
-  // docked panel leaves the page scrollable. Tracks the breakpoint live so a
-  // resize/rotation across it toggles the lock without reopening.
+  // Hydrate from localStorage after mount (avoids SSR mismatch).
   useEffect(() => {
-    if (!chatOpen) return
+    const snap = loadMenuScanCache()
+    if (snap) {
+      setResults(snap.results)
+      setAppliedSession(snap.appliedSession ?? undefined)
+      setAddedIds(snap.addedIds)
+      setDismissed(new Set(snap.dismissed))
+      setVibe(snap.vibe)
+      setFreeText(snap.freeText)
+    }
+    setCacheReady(true)
+  }, [])
+
+  // Persist resume snapshot whenever the board changes.
+  useEffect(() => {
+    if (!cacheReady) return
+    if (results.length === 0) {
+      clearMenuScanCache()
+      return
+    }
+    saveMenuScanCache({
+      results,
+      appliedSession: appliedSession ?? null,
+      addedIds,
+      dismissed: [...dismissed],
+      vibe,
+      freeText,
+    })
+  }, [cacheReady, results, appliedSession, addedIds, dismissed, vibe, freeText])
+
+  // Lock background scroll while a sheet is open on mobile.
+  const sheetOpen = chatOpen || tonightOpen || addOpen
+  useEffect(() => {
+    if (!sheetOpen) return
     const mq = window.matchMedia('(max-width: 639px)')
     const prev = document.body.style.overflow
     const apply = () => {
@@ -91,9 +136,8 @@ function MenuScanFlow() {
       mq.removeEventListener('change', apply)
       document.body.style.overflow = prev
     }
-  }, [chatOpen])
+  }, [sheetOpen])
 
-  const results = scan.data ?? []
   const added = rankAdded.data ?? []
 
   const dismissKey = (r: MenuScanResultItem) => r.matched_id ?? r.raw_text
@@ -107,6 +151,8 @@ function MenuScanFlow() {
     (a, b) => (b.taste_fit ?? -1) - (a.taste_fit ?? -1),
   )
   const inComparison = new Set(comparison.map((r) => r.matched_id).filter((x): x is string => !!x))
+  const hasResults = results.length > 0
+  const busy = scan.isPending || ranking
 
   const pool: MenuChatPoolBeer[] = comparison.map((r) => ({
     id: r.matched_id ?? r.raw_text,
@@ -126,14 +172,53 @@ function MenuScanFlow() {
     const session = sessionFor(vibe, freeText)
     setAppliedSession(session)
     capture('menu_scanned', { has_vibe: vibe !== null, has_free_text: freeText.trim().length > 0 })
-    scan.mutate(scanArgs(file, session))
+    scan.mutate(scanArgs(file, session), {
+      onSuccess: (data) => setResults(data),
+    })
+  }
+
+  /** Re-rank via photo re-scan when we still have the file; otherwise rank
+   * matched catalog ids (resume-from-cache path). */
+  async function applySession(session: MenuSessionIntent | undefined) {
+    setAppliedSession(session)
+    if (lastFile) {
+      scan.mutate(scanArgs(lastFile, session), {
+        onSuccess: (data) => setResults(data),
+      })
+      return
+    }
+    const matchedIds = results
+      .map((r) => r.matched_id)
+      .filter((id): id is string => typeof id === 'string')
+    if (matchedIds.length === 0) return
+    setRanking(true)
+    try {
+      const { data, error } = await apiClient.POST('/menu/rank', {
+        body: { beer_ids: matchedIds, ...(session ? { session } : {}) },
+      })
+      if (error || !data) throw new Error('Menu rank failed')
+      const byId = new Map(data.map((r) => [r.matched_id ?? r.raw_text, r]))
+      setResults((prev) =>
+        prev.map((row) => {
+          if (!row.matched_id) return row
+          return byId.get(row.matched_id) ?? row
+        }),
+      )
+    } finally {
+      setRanking(false)
+    }
   }
 
   function reRank() {
-    if (!lastFile) return
     const session = sessionFor(vibe, freeText)
-    setAppliedSession(session)
-    scan.mutate(scanArgs(lastFile, session))
+    void applySession(session)
+    setTonightOpen(false)
+  }
+
+  function clearAppliedVibe() {
+    setVibe(null)
+    setFreeText('')
+    void applySession(undefined)
   }
 
   function addBeer(beer: SearchBeer) {
@@ -143,6 +228,7 @@ function MenuScanFlow() {
       return next
     })
     setAddedIds((prev) => (prev.includes(beer.id) ? prev : [...prev, beer.id]))
+    setAddOpen(false)
   }
 
   function sendChat() {
@@ -162,12 +248,29 @@ function MenuScanFlow() {
     )
   }
 
-  const scanLabel = scanButtonLabel(t, scan.isPending, results.length > 0)
+  const scanLabel = scanButtonLabel(t, busy, hasResults)
 
   return (
     <main className={`${PAGE_MAIN} py-8 pb-28`}>
-      <Heading className="text-2xl">{t('menu.title')}</Heading>
-      <p className="mt-2 text-sm text-neutral-600">{t('menu.subtitle')}</p>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <Heading className="text-2xl">{t('menu.title')}</Heading>
+          {!hasResults && (
+            <p className="mt-2 text-sm text-neutral-600">{t('menu.subtitle')}</p>
+          )}
+        </div>
+        {hasResults && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="shrink-0"
+            disabled={busy}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            {scanLabel}
+          </Button>
+        )}
+      </div>
 
       <input
         ref={fileInputRef}
@@ -182,13 +285,15 @@ function MenuScanFlow() {
         }}
       />
 
-      <Button
-        className="mt-6"
-        disabled={scan.isPending}
-        onClick={() => fileInputRef.current?.click()}
-      >
-        {scanLabel}
-      </Button>
+      {!hasResults && (
+        <Button
+          className="mt-6"
+          disabled={busy}
+          onClick={() => fileInputRef.current?.click()}
+        >
+          {scanLabel}
+        </Button>
+      )}
 
       {scan.isError && (
         <p className="mt-4 rounded border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">
@@ -196,87 +301,162 @@ function MenuScanFlow() {
         </p>
       )}
 
-      {results.length > 0 && (
-        <section className="mt-6 rounded-lg border border-neutral-200 bg-neutral-50 p-4">
-          <p className="text-sm font-medium text-neutral-900">{t('menu.tonight')}</p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {VIBE_OPTIONS.map((opt) => (
+      {hasResults && (
+        <div className="sticky top-0 z-10 mt-4 -mx-4 border-b border-neutral-200 bg-white/95 px-4 py-2 backdrop-blur sm:-mx-6 sm:px-6">
+          <div className="flex flex-wrap items-center gap-2">
+            {appliedSession?.vibe && (
               <button
-                key={opt}
                 type="button"
-                aria-pressed={vibe === opt}
-                onClick={() => setVibe(vibe === opt ? null : opt)}
-                className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
-                  vibe === opt
-                    ? 'border-brand-500 bg-brand-600 text-white'
-                    : 'border-neutral-300 bg-white text-neutral-700 hover:border-brand-300'
-                }`}
+                onClick={clearAppliedVibe}
+                aria-label={t('menu.clearVibe', {
+                  vibe: t(`enums.vibe.${appliedSession.vibe}.label`),
+                })}
+                className="cursor-pointer inline-flex items-center gap-1.5 rounded-full border border-brand-500 bg-brand-50 px-3 py-1.5 text-xs font-semibold text-brand-800"
               >
-                {t(`enums.vibe.${opt}.label`)}
+                {t(`enums.vibe.${appliedSession.vibe}.label`)}
+                <span aria-hidden>×</span>
               </button>
-            ))}
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setAddOpen(false)
+                setTonightOpen(true)
+              }}
+            >
+              {t('menu.refine')}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-neutral-700 hover:bg-neutral-100"
+              onClick={() => {
+                setTonightOpen(false)
+                setAddOpen(true)
+              }}
+            >
+              {t('menu.addBeer')}
+            </Button>
           </div>
-          <input
-            type="text"
-            value={freeText}
-            maxLength={200}
-            onChange={(e) => setFreeText(e.target.value)}
-            placeholder={t('menu.freeTextPlaceholder')}
-            className="mt-3 w-full rounded border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-brand-500 focus:outline-none"
-          />
-          <Button
-            className="mt-3"
-            disabled={scan.isPending || vibe === null || lastFile === null}
-            onClick={reRank}
-          >
-            {t('menu.rerank')}
-          </Button>
-        </section>
+        </div>
       )}
-
-      <AddBeerSearch inComparison={inComparison} onAdd={addBeer} />
 
       {comparison.length > 0 && (
-        <ul className="mt-6 flex flex-col gap-3">
-          {comparison.map((row, index) => (
-            <li
-              key={`${dismissKey(row)}-${index}`}
-              className={`flex items-center justify-between gap-3 rounded border p-4 ${
-                row.matched_id ? 'border-brand-400 bg-brand-50' : 'border-neutral-200 bg-neutral-50'
-              } ${
-                highlighted.includes(row.matched_id ?? row.raw_text) ? 'ring-2 ring-brand-500' : ''
-              }`}
-            >
-              <div>
-                <p className="text-sm font-medium text-neutral-900">{row.name ?? row.raw_text}</p>
-                <p className="mt-1 text-xs text-neutral-500">
-                  {row.matched_id
-                    ? [row.style, row.abv != null ? `${row.abv}%` : null]
-                        .filter(Boolean)
-                        .join(' · ')
-                    : t('menu.notInCatalog')}
+        <ul className="mt-4 flex flex-col gap-3">
+          {comparison.map((row, index) => {
+            const title = row.name ?? row.raw_text
+            const meta = row.matched_id
+              ? [
+                  row.brewery,
+                  row.style,
+                  row.abv != null ? formatAbv(row.abv) : null,
+                ]
+                  .filter(Boolean)
+                  .join(' · ')
+              : t('menu.notInCatalog')
+            const body = (
+              <>
+                <p className="text-sm font-medium text-neutral-900 underline-offset-2 group-hover:underline">
+                  {title}
                 </p>
-              </div>
-              <div className="flex shrink-0 items-center gap-2">
-                {row.taste_fit != null && (
-                  <span className="rounded-full bg-brand-600 px-2.5 py-1 text-xs font-semibold text-white">
-                    {t('menu.tasteBadge', { pct: Math.round(row.taste_fit * 100) })}
-                  </span>
+                <p className="mt-1 text-xs text-neutral-500">{meta}</p>
+              </>
+            )
+            return (
+              <li
+                key={`${dismissKey(row)}-${index}`}
+                className={`flex items-center justify-between gap-3 rounded border p-4 ${
+                  row.matched_id
+                    ? 'border-brand-400 bg-brand-50'
+                    : 'border-neutral-200 bg-neutral-50'
+                } ${
+                  highlighted.includes(row.matched_id ?? row.raw_text)
+                    ? 'ring-2 ring-brand-500'
+                    : ''
+                }`}
+              >
+                {row.matched_id ? (
+                  <Link
+                    to="/beer/$id"
+                    params={{ id: row.matched_id }}
+                    aria-label={t('menu.openBeer', { name: title })}
+                    className="group min-w-0 flex-1 cursor-pointer"
+                  >
+                    {body}
+                  </Link>
+                ) : (
+                  <div className="min-w-0 flex-1">{body}</div>
                 )}
-                <button
-                  type="button"
-                  aria-label={t('menu.remove', { name: row.name ?? row.raw_text })}
-                  title={t('menu.notThisOne')}
-                  onClick={() => setDismissed((prev) => new Set(prev).add(dismissKey(row)))}
-                  className="flex h-7 w-7 items-center justify-center rounded-full text-neutral-400 hover:bg-neutral-200 hover:text-neutral-700"
-                >
-                  ✕
-                </button>
-              </div>
-            </li>
-          ))}
+                <div className="flex shrink-0 items-center gap-2">
+                  {row.taste_fit != null && (
+                    <span className="rounded-full bg-brand-600 px-2.5 py-1 text-xs font-semibold text-white">
+                      {t('menu.tasteBadge', { pct: Math.round(row.taste_fit * 100) })}
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    aria-label={t('menu.remove', { name: title })}
+                    title={t('menu.notThisOne')}
+                    onClick={() => setDismissed((prev) => new Set(prev).add(dismissKey(row)))}
+                    className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full text-neutral-400 hover:bg-neutral-200 hover:text-neutral-700"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </li>
+            )
+          })}
         </ul>
       )}
+
+      <MenuSheetShell
+        open={tonightOpen}
+        onClose={() => setTonightOpen(false)}
+        ariaLabel={t('menu.tonight')}
+      >
+        <p className="text-sm font-medium text-neutral-900">{t('menu.tonight')}</p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {VIBE_OPTIONS.map((opt) => (
+            <button
+              key={opt}
+              type="button"
+              aria-pressed={vibe === opt}
+              onClick={() => setVibe(vibe === opt ? null : opt)}
+              className={`cursor-pointer rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
+                vibe === opt
+                  ? 'border-brand-500 bg-brand-600 text-white'
+                  : 'border-neutral-300 bg-white text-neutral-700 hover:border-brand-300'
+              }`}
+            >
+              {t(`enums.vibe.${opt}.label`)}
+            </button>
+          ))}
+        </div>
+        <input
+          type="text"
+          value={freeText}
+          maxLength={200}
+          onChange={(e) => setFreeText(e.target.value)}
+          placeholder={t('menu.freeTextPlaceholder')}
+          className="mt-3 w-full rounded border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-brand-500 focus:outline-none"
+        />
+        <Button
+          className="mt-4 w-full"
+          disabled={busy || vibe === null}
+          onClick={reRank}
+        >
+          {t('menu.rerank')}
+        </Button>
+      </MenuSheetShell>
+
+      <MenuSheetShell
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+        ariaLabel={t('menu.addTitle')}
+      >
+        <AddBeerSearch inComparison={inComparison} onAdd={addBeer} />
+      </MenuSheetShell>
 
       {pool.length > 0 && !chatOpen && (
         <button
@@ -359,6 +539,40 @@ function MenuScanFlow() {
   )
 }
 
+function MenuSheetShell({
+  open,
+  onClose,
+  ariaLabel,
+  children,
+}: {
+  open: boolean
+  onClose: () => void
+  ariaLabel: string
+  children: ReactNode
+}) {
+  const { t } = useTranslation()
+  if (!open) return null
+  return (
+    <div
+      className="fixed inset-0 z-50 flex flex-col justify-end md:items-center md:justify-center md:p-6"
+      role="dialog"
+      aria-modal="true"
+      aria-label={ariaLabel}
+    >
+      <button
+        type="button"
+        className="absolute inset-0 cursor-pointer bg-black/50"
+        aria-label={t('common.close')}
+        onClick={onClose}
+      />
+      <div className="relative max-h-[85dvh] w-full overflow-y-auto rounded-t-3xl bg-white p-4 shadow-2xl md:max-h-[min(90dvh,40rem)] md:max-w-2xl md:rounded-2xl md:p-5">
+        <div className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-neutral-300 md:hidden" aria-hidden />
+        {children}
+      </div>
+    </div>
+  )
+}
+
 function AddBeerSearch({
   inComparison,
   onAdd,
@@ -373,7 +587,7 @@ function AddBeerSearch({
   const results = search.data ?? []
 
   return (
-    <section className="mt-6 rounded-lg border border-neutral-200 bg-neutral-50 p-4">
+    <div>
       <p className="text-sm font-medium text-neutral-900">{t('menu.addTitle')}</p>
       <input
         type="text"
@@ -401,7 +615,7 @@ function AddBeerSearch({
                     onAdd(b)
                     setQuery('')
                   }}
-                  className={`shrink-0 rounded-lg border px-3 py-1.5 text-xs font-semibold ${
+                  className={`cursor-pointer shrink-0 rounded-lg border px-3 py-1.5 text-xs font-semibold ${
                     already
                       ? 'border-neutral-200 text-neutral-400'
                       : 'border-brand-500 bg-brand-600 text-white hover:bg-brand-700'
@@ -414,6 +628,6 @@ function AddBeerSearch({
           })}
         </ul>
       )}
-    </section>
+    </div>
   )
 }

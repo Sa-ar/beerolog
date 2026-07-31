@@ -3,16 +3,31 @@
  * viewport; swipe right = want, left = pass, up = must-try, each with an
  * on-screen button equivalent + undo (WCAG 2.5.1). Renders a generic DeckCard so
  * both the recommendations feed and menu-scan results (scoped deck) reuse it.
- * Batch preload via onNearEnd; a menu-scan action (onScan) scopes the deck.
+ * Batch preload via onNearEnd. Menu scan lives in primary nav (/menu).
  */
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button } from '@beerolog/ui'
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from '@beerolog/ui'
 import { capture } from '../lib/analytics'
 import { WANT_DECK_PRELOAD_AT } from '../lib/session-intent'
 import { useSwipeCard } from '../lib/use-swipe-card'
-import { resolveWantSwipe, wantActionForDirection, type WantAction } from '../lib/swipe-want'
+import {
+  resolveWantSwipe,
+  wantActionForArrowKey,
+  wantActionForDirection,
+  type WantAction,
+} from '../lib/swipe-want'
 import type { BeerColor } from '../lib/beer-color'
+import {
+  getWantArrowKeysPref,
+  setWantArrowKeysPref,
+} from '../lib/want-arrow-keys'
 import { SwipeBeerCard } from './SwipeBeerCard'
 
 /** A ready-to-render deck card: card fields + a precomputed match % and why. */
@@ -48,7 +63,6 @@ export function WantDeck({
   onNearEnd,
   endCard,
   onOpenRefiner,
-  onScan,
   resetKey,
 }: {
   beers: DeckCard[]
@@ -61,8 +75,6 @@ export function WantDeck({
   endCard?: ReactNode
   /** Opens the refiner bottom sheet (header filter button). */
   onOpenRefiner?: () => void
-  /** Opens the menu-scan action (header camera button). */
-  onScan?: () => void
   /** Changes when the deck is re-queried (refiner change / scope change) so the
    * index resets; stable across preloaded batches so the position is kept. */
   resetKey?: string
@@ -70,6 +82,7 @@ export function WantDeck({
   const { t, i18n } = useTranslation()
   const rtl = i18n.dir() === 'rtl'
   const [index, setIndex] = useState(0)
+  const [pendingArrowAction, setPendingArrowAction] = useState<WantAction | null>(null)
 
   useEffect(() => {
     const previous = document.body.style.overflow
@@ -99,6 +112,51 @@ export function WantDeck({
     [rtl],
   )
   const { state, handlers } = useSwipeCard<WantAction>(commit, resolve)
+
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.metaKey || e.ctrlKey || e.altKey) return
+      const target = e.target as HTMLElement | null
+      if (
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.tagName === 'SELECT' ||
+          target.isContentEditable)
+      ) {
+        return
+      }
+      // While the teach dialog is open, don't queue another pending action.
+      if (pendingArrowAction) return
+
+      const action = wantActionForArrowKey(e.key, rtl)
+      if (!action) return
+
+      const pref = getWantArrowKeysPref()
+      if (pref === 'off') return
+
+      e.preventDefault()
+
+      if (pref !== 'on') {
+        setPendingArrowAction(action)
+        return
+      }
+      commit(action)
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [commit, pendingArrowAction, rtl])
+
+  function confirmArrowKeys() {
+    const action = pendingArrowAction
+    setWantArrowKeysPref('on')
+    setPendingArrowAction(null)
+    if (action) commit(action)
+  }
+
+  function dismissArrowHint() {
+    setPendingArrowAction(null)
+  }
 
   const remaining = beers.length - index
   useEffect(() => {
@@ -139,15 +197,7 @@ export function WantDeck({
         >
           {t('whatIWant.undo')}
         </Button>
-        <span className="text-xs font-medium text-neutral-400" aria-live="polite">
-          {t('whatIWant.progress', { current: index + 1, total: beers.length })}
-        </span>
         <div className="flex items-center gap-1">
-          {onScan ? (
-            <Button variant="ghost" size="sm" onClick={onScan}>
-              {t('whatIWant.scan')}
-            </Button>
-          ) : null}
           {onOpenRefiner ? (
             <Button variant="ghost" size="sm" onClick={onOpenRefiner}>
               {t('whatIWant.refine')}
@@ -197,6 +247,39 @@ export function WantDeck({
           {t('whatIWant.superLike')}
         </Button>
       </div>
+
+      <Dialog
+        open={pendingArrowAction != null}
+        dismissible
+        onOpenChange={(open) => {
+          if (!open) dismissArrowHint()
+        }}
+      >
+        <DialogContent
+          aria-labelledby="want-keyboard-hint-title"
+          aria-describedby="want-keyboard-hint-body"
+        >
+          <DialogTitle id="want-keyboard-hint-title">
+            {t('whatIWant.keyboardHintTitle')}
+          </DialogTitle>
+          <DialogDescription id="want-keyboard-hint-body">
+            {t('whatIWant.keyboardHintBody')}
+          </DialogDescription>
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row-reverse">
+            <Button type="button" className="w-full sm:w-auto" onClick={confirmArrowKeys}>
+              {t('whatIWant.keyboardHintConfirm')}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full sm:w-auto"
+              onClick={dismissArrowHint}
+            >
+              {t('whatIWant.keyboardHintCancel')}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

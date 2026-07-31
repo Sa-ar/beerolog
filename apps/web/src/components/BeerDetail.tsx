@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Badge, Heading } from '@beerolog/ui'
 import { TasteRadar } from './TasteRadar'
@@ -13,23 +14,31 @@ export type BeerDetailData = {
   abv: number
   market_tier: 'mainstream' | 'craft' | 'import'
   color?: BeerColor | null
+  image_url?: string | null
   ibu?: number | null
   adventurousness: number
   body?: 'light' | 'medium' | 'full' | null
   sweetness?: 'dry' | 'balanced' | 'sweet' | null
   /** Already-resolved why-this-beer sentence in the request locale. */
   why?: string | null
+  /** User-facing match % when known (profile / session). */
+  matchPercent?: number | null
   /** The viewer's BaselineTaste dials, overlaid on the radar. null = objective-only. */
   taste?: { bitterness: number; abv_affinity?: number | null; novelty_affinity: number } | null
 }
 
 /**
- * Presentational per-beer detail: the objective sensory radar, a color swatch,
- * body/sweetness chips when known, and the why line. Rendered inside the
- * in-results modal and (later) the standalone /beer/{id} route. Pure — it takes
- * a resolved `why` string and never fetches.
+ * Presentational per-beer detail: hero image, match %, facts, sensory radar,
+ * color swatch, body/sweetness chips, and why line. Pure — never fetches.
  */
-export function BeerDetail({ beer }: { beer: BeerDetailData }) {
+export function BeerDetail({
+  beer,
+  footer,
+}: {
+  beer: BeerDetailData
+  /** Optional slot under the detail (rating tapper, catch control, etc.). */
+  footer?: ReactNode
+}) {
   const { t, i18n } = useTranslation()
   const displayName =
     i18n.language.startsWith('he') && beer.name_hebrew ? beer.name_hebrew : beer.name
@@ -52,8 +61,33 @@ export function BeerDetail({ beer }: { beer: BeerDetailData }) {
 
   return (
     <div data-testid="beer-detail" className="flex flex-col gap-4">
+      <div className="relative mx-auto w-full max-w-sm overflow-hidden rounded-2xl bg-neutral-100 ring-1 ring-neutral-200/80">
+        <div className="relative aspect-[4/5] w-full">
+          {beer.image_url ? (
+            <img
+              src={beer.image_url}
+              alt={displayName}
+              className="h-full w-full object-contain p-4"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-neutral-50">
+              <BeerColorGlass color={beerColor} className="h-28 w-28" />
+            </div>
+          )}
+          {beer.matchPercent != null ? (
+            <Badge
+              variant="success"
+              className="absolute start-3 top-3 whitespace-nowrap text-xs font-semibold tabular-nums shadow-sm"
+              aria-label={t('recommendations.matchAria', { percent: beer.matchPercent })}
+            >
+              {t('recommendations.matchBadge', { percent: beer.matchPercent })}
+            </Badge>
+          ) : null}
+        </div>
+      </div>
+
       <header className="space-y-1 text-center">
-        <Heading level={2} className="text-lg leading-snug">
+        <Heading level={2} className="text-xl leading-snug sm:text-2xl">
           {displayName}
         </Heading>
         <p className="text-sm text-neutral-600">{beer.brewery}</p>
@@ -64,6 +98,11 @@ export function BeerDetail({ beer }: { beer: BeerDetailData }) {
           <Badge variant="default" className="text-xs">
             {formatAbv(beer.abv)}
           </Badge>
+          {beer.ibu != null ? (
+            <Badge variant="outline" className="text-xs">
+              {t('beerDetail.ibuBadge', { ibu: beer.ibu })}
+            </Badge>
+          ) : null}
           <Badge variant="outline" className="text-xs">
             {t(`recommendations.tier.${beer.market_tier}`)}
           </Badge>
@@ -104,6 +143,8 @@ export function BeerDetail({ beer }: { beer: BeerDetailData }) {
           {beer.why}
         </blockquote>
       ) : null}
+
+      {footer ? <div className="mt-2">{footer}</div> : null}
     </div>
   )
 }
