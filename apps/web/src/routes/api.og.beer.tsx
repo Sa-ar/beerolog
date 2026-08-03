@@ -10,8 +10,8 @@ import { beerOgSubtitle } from '../lib/og-beer'
 const API_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:8000'
 const ESPRESSO = 'hsl(26 24% 9%)'
 const CREAM = 'hsl(44 46% 93%)'
-const GOLD = 'hsl(30 75% 70%)'
-const FRAME = 'hsl(30 60% 40%)'
+const GOLD = 'hsl(43 80% 70%)'
+const FRAME = 'hsl(40 62% 40%)'
 
 type Beer = { name: string; brewery: string; style: string; abv: number; image_url?: string | null }
 

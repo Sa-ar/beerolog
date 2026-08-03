@@ -12,8 +12,8 @@ import type { OgSize } from '../lib/og-image'
 
 const ESPRESSO = 'hsl(26 24% 9%)'
 const CREAM = 'hsl(44 46% 93%)'
-const GOLD = 'hsl(30 75% 70%)'
-const FRAME = 'hsl(30 60% 40%)'
+const GOLD = 'hsl(43 80% 70%)'
+const FRAME = 'hsl(40 62% 40%)'
 
 function CollectionCard({
   size,

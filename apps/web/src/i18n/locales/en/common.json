@@ -550,7 +550,7 @@
     "loadingSession": "Loading session…",
     "eyebrow": "Solo taste learning",
     "headline": "Find beers you'll actually enjoy",
-    "subhead": "Beerolog learns how you taste, then matches every session to what you want right now.",
+    "subhead": "Beerolog learns how you taste, then ranks any bar's menu to match what you want tonight.",
     "howItWorks": "How it works",
     "howItWorksHint": "Sign in so your quiz answers and picks are saved to your profile.",
     "cta": "Sign in to start",
@@ -561,13 +561,17 @@
         "title": "Quick taste quiz",
         "detail": "Seven everyday food & drink questions — no beer jargon."
       },
-      "vibe": {
-        "title": "Tonight's vibe",
-        "detail": "Pick refreshing or cozy, low or high ABV, optional free text."
+      "scan": {
+        "title": "Scan any menu",
+        "detail": "Snap a bar's beer list and we'll rank every beer by your taste."
       },
-      "picks": {
-        "title": "Your top 5 picks",
-        "detail": "Recommendations matched to your saved taste profile."
+      "vibe": {
+        "title": "Tune tonight's vibe",
+        "detail": "Refreshing or cozy, low or high ABV — matched to the moment."
+      },
+      "collect": {
+        "title": "Rate & collect",
+        "detail": "Log the beers you drink to build your collection — every rating sharpens your next picks."
       }
     }
   },

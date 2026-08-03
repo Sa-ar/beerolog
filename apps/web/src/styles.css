@@ -21,15 +21,13 @@
 }
 
 @theme {
-  --color-brand-50: hsl(38 92% 96%);
-  --color-brand-100: hsl(38 92% 90%);
-  --color-brand-200: hsl(38 80% 85%);
-  --color-brand-300: hsl(30 75% 70%);
-  --color-brand-400: hsl(28 80% 60%);
-  --color-brand-500: hsl(25 85% 50%);
-  --color-brand-600: hsl(25 85% 43%);
-  --color-brand-700: hsl(25 70% 35%);
-  --color-brand-900: hsl(25 50% 15%);
+  --color-brand-200: hsl(43 80% 84%);
+  --color-brand-300: hsl(43 80% 70%);
+  --color-brand-400: hsl(42 82% 60%);
+  --color-brand-500: hsl(41 84% 49%);
+  --color-brand-600: hsl(40 84% 42%);
+  --color-brand-700: hsl(38 66% 34%);
+  --color-brand-900: hsl(38 48% 15%);
   --color-danger-50: hsl(0 86% 97%);
   --color-danger-200: hsl(0 74% 90%);
   --color-danger-700: hsl(0 65% 40%);
@@ -53,8 +51,8 @@
   /* Light-amber tints become dark warm tints so light-theme hover/fill
      utilities (hover:bg-brand-50, alert info) stay readable on the board
      instead of flashing as low-contrast pale patches. */
-  --color-brand-50: hsl(30 30% 15%);
-  --color-brand-100: hsl(30 28% 21%);
+  --color-brand-50: hsl(40 30% 15%);
+  --color-brand-100: hsl(40 26% 21%);
   --color-white: hsl(28 16% 13%); /* card/header surface */
   --color-neutral-50: hsl(28 16% 11%);
   --color-neutral-100: hsl(28 15% 15%);
@@ -78,7 +76,7 @@ body {
   color: hsl(44 46% 93%);
   background-color: hsl(26 24% 9%);
   /* faint warm spotlight from the top, like light over a bar board */
-  background-image: radial-gradient(120% 80% at 50% -10%, hsl(34 38% 18% / 0.55), transparent 62%);
+  background-image: radial-gradient(120% 80% at 50% -10%, hsl(40 40% 18% / 0.55), transparent 62%);
   background-attachment: fixed;
 }
 

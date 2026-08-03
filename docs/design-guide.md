@@ -20,8 +20,8 @@ hardcode hex except for the documented one-off button-ink (`hsl(26 30% 10%)`).
 | Secondary text | `text-neutral-600` | `hsl(40 28% 78%)` | subhead — AA |
 | Muted text | `text-neutral-500` | `hsl(38 22% 68%)` | hints, captions — AA |
 | Borders / tracks | `border-neutral-200`, `bg-neutral-200` | `hsl(30 12% 24%)` | rules, meter tracks |
-| Gold accent (bright) | `text-brand-300` / `bg-brand-300` | `hsl(30 75% 70%)` | accents, selected fills, meter |
-| Gold accent (mid) | `bg-brand-500` | `hsl(25 85% 50%)` | primary button fill |
+| Gold accent (bright) | `text-brand-300` / `bg-brand-300` | `hsl(43 80% 70%)` | accents, selected fills, meter |
+| Gold accent (mid) | `bg-brand-500` | `hsl(41 84% 49%)` | primary button fill |
 | Frame / hairline gold | `border-brand-700/40` | — | board & card frames |
 | Button ink (on gold) | `text-[hsl(26_30%_10%)]` | dark espresso | text on any gold fill |
 

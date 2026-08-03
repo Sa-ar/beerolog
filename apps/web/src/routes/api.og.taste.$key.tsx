@@ -19,8 +19,8 @@ import { parseOgParams, type OgSize } from '../lib/og-image'
 const ESPRESSO = 'hsl(26 24% 9%)'
 const CREAM = 'hsl(44 46% 93%)'
 const CREAM_MUTED = 'hsl(40 28% 78%)'
-const GOLD = 'hsl(30 75% 70%)'
-const FRAME = 'hsl(30 60% 40%)'
+const GOLD = 'hsl(43 80% 70%)'
+const FRAME = 'hsl(40 62% 40%)'
 
 // base64 of the archetype SVG so Satori can render it as an <img>. btoa exists
 // in both the edge and node serverless runtimes.

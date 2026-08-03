@@ -10,7 +10,7 @@ export const Route = createFileRoute('/')({
 })
 
 // Labels come from home.steps.<step>.{title,detail}; icon keyed by step.
-const STEPS = ['quiz', 'vibe', 'picks'] as const
+const STEPS = ['quiz', 'scan', 'vibe', 'collect'] as const
 
 function HomePage() {
   const { isLoaded, isSignedIn } = useUser()
