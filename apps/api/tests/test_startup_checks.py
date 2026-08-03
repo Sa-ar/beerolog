@@ -81,7 +81,13 @@ def test_production_reports_multiple_problems_in_one_error() -> None:
     msg = str(ei.value)
     assert "DATABASE_URL missing" in msg
     assert "OPENAI_API_KEY missing" in msg
-    assert "API_SECRET is still the dev default" in msg
+    assert "API_SECRET is empty or still the dev default" in msg
+
+
+def test_production_rejects_empty_api_secret() -> None:
+    with pytest.raises(ConfigError) as ei:
+        enforce_non_development_safety(_ok_settings(api_secret=""))
+    assert "API_SECRET is empty" in str(ei.value)
 
 
 def test_preview_is_treated_the_same_as_production() -> None:

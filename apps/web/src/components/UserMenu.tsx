@@ -2,6 +2,7 @@ import { useClerk, useUser } from '@clerk/tanstack-react-start'
 import { Link, useRouterState } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Alert } from '@beerolog/ui'
 import { ACCOUNT_NAV } from '../lib/account-nav'
 
 type UserMenuProps = {
@@ -16,7 +17,11 @@ export function UserMenu({ menuPlacement = 'down' }: UserMenuProps) {
   const { signOut } = useClerk()
   const pathname = useRouterState({ select: (s) => s.location.pathname })
   const [open, setOpen] = useState(false)
+  const [signOutFailed, setSignOutFailed] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+  // In-flight guard: a second click while sign-out is pending must not fire a
+  // second request (whose outcome could race the first and leave stale state).
+  const signingOut = useRef(false)
 
   useEffect(() => {
     if (!open) return
@@ -41,6 +46,25 @@ export function UserMenu({ menuPlacement = 'down' }: UserMenuProps) {
   const initials = (user.firstName?.[0] ?? name[0] ?? '?').toUpperCase()
   const showDetails = menuPlacement === 'up'
   const detailEmail = email && email !== name ? email : ''
+
+  // A swallowed sign-out rejection would leave the user believing they're signed
+  // out when they aren't. Surface the failure and keep a retry path instead.
+  async function handleSignOut() {
+    if (signingOut.current) return
+    signingOut.current = true
+    setSignOutFailed(false)
+    try {
+      await signOut()
+      setOpen(false)
+    } catch {
+      // Close the menu and surface the error outside it (a menu must only
+      // contain menu items), keeping a retry path via the Alert.
+      setOpen(false)
+      setSignOutFailed(true)
+    } finally {
+      signingOut.current = false
+    }
+  }
 
   return (
     <div ref={ref} className="relative">
@@ -111,16 +135,24 @@ export function UserMenu({ menuPlacement = 'down' }: UserMenuProps) {
           <button
             type="button"
             role="menuitem"
-            onClick={() => {
-              setOpen(false)
-              void signOut()
-            }}
+            onClick={handleSignOut}
             className="block w-full border-t border-neutral-100 px-4 py-2 text-start text-sm text-red-600 hover:bg-red-50"
           >
             {t('menu.logout')}
           </button>
         </div>
       )}
+      {signOutFailed ? (
+        <div
+          className={`absolute z-30 w-56 ${
+            menuPlacement === 'up' ? 'bottom-full start-0 mb-2' : 'end-0 top-full mt-2'
+          }`}
+        >
+          <Alert variant="error" onRetry={handleSignOut} retryLabel={t('common.tryAgain')}>
+            {t('menu.logoutError')}
+          </Alert>
+        </div>
+      ) : null}
     </div>
   )
 }

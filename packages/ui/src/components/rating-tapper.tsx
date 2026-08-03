@@ -32,7 +32,7 @@ export function RatingTapper({ onRate, disabled, selected, labels }: RatingTappe
             opt.value === selected && 'border-brand-500 bg-brand-50 ring-1 ring-brand-500',
           )}
         >
-          <span className="text-2xl">{opt.emoji}</span>
+          <span className="text-2xl" aria-hidden>{opt.emoji}</span>
           <span>{labels?.[opt.value] ?? opt.label}</span>
         </button>
       ))}

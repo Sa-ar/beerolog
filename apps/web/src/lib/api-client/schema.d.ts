@@ -724,6 +724,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/staff/venues/{venue_id}/catalog/enrich": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Enrich Catalog Gap */
+        post: operations["enrichCatalogGap"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/staff/venues/{venue_id}/catalog/gaps": {
         parameters: {
             query?: never;
@@ -791,6 +808,23 @@ export interface paths {
         head?: never;
         /** Toggle Menu Item */
         patch: operations["toggleVenueMenuItem"];
+        trace?: never;
+    };
+    "/staff/venues/{venue_id}/menu/{beer_id}/details": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update Menu Item Details */
+        patch: operations["updateVenueMenuItemDetails"];
         trace?: never;
     };
     "/staff/venues/{venue_id}/orders": {
@@ -916,6 +950,8 @@ export interface components {
             beer_id: string;
             /** Price Ils */
             price_ils?: number | null;
+            /** Serving Format */
+            serving_format?: ("draft" | "bottle" | "can") | null;
         };
         /** AddPlaceRequest */
         AddPlaceRequest: {
@@ -1342,6 +1378,28 @@ export interface components {
          * @enum {string}
          */
         DominantComponent: "baseline" | "session" | "abv" | "novelty_positive" | "novelty_negative";
+        /** DraftOut */
+        DraftOut: {
+            /** Abv */
+            abv?: number | null;
+            /** Confidence */
+            confidence: number;
+            /** Flavor Vector */
+            flavor_vector: number[];
+            /** Ibu */
+            ibu?: number | null;
+            /** Style */
+            style?: string | null;
+            /** Tasting Notes */
+            tasting_notes?: string | null;
+        };
+        /** EnrichRequest */
+        EnrichRequest: {
+            /** Brewery */
+            brewery?: string | null;
+            /** Name */
+            name: string;
+        };
         /** ExportBaselineTaste */
         ExportBaselineTaste: {
             /** Bitterness */
@@ -1378,32 +1436,27 @@ export interface components {
          * @enum {string}
          */
         FlavorCue: "grapefruit" | "caramel" | "pine" | "tropical" | "banana_bread" | "citrus_zest" | "coffee" | "bread_crust";
-        /** GapDraft */
-        GapDraft: {
+        /** GapSubmitRequest */
+        GapSubmitRequest: {
             /** Abv */
-            abv: number;
+            abv?: number | null;
             /** Brewery */
-            brewery: string;
+            brewery?: string | null;
+            /** Flavor Vector */
+            flavor_vector?: number[] | null;
+            /** Ibu */
+            ibu?: number | null;
             /** Name */
             name: string;
-            /** Source */
-            source: string;
             /** Style */
-            style: string;
-            /**
-             * Tasting Notes
-             * @default
-             */
-            tasting_notes: string;
+            style?: string | null;
+            /** Tasting Notes */
+            tasting_notes?: string | null;
         };
-        /** GapRequest */
-        GapRequest: {
-            /** Brewery */
-            brewery: string;
-            /** Name */
-            name: string;
-            /** Style Hint */
-            style_hint?: string | null;
+        /** GapSubmitResponse */
+        GapSubmitResponse: {
+            /** Gap Id */
+            gap_id: string;
         };
         /** GuestRecommendationsResponse */
         GuestRecommendationsResponse: {
@@ -1979,6 +2032,13 @@ export interface components {
             /** Title He */
             title_he: string;
         };
+        /** UpdateDetailsRequest */
+        UpdateDetailsRequest: {
+            /** Price Ils */
+            price_ils?: number | null;
+            /** Serving Format */
+            serving_format?: ("draft" | "bottle" | "can") | null;
+        };
         /** ValidationError */
         ValidationError: {
             /** Context */
@@ -2119,6 +2179,10 @@ export interface components {
         app__routes__staff_menu__MenuItemOut: {
             /** Beer Id */
             beer_id: string;
+            /** Brewery */
+            brewery?: string | null;
+            /** Name */
+            name?: string | null;
             /** Price Ils */
             price_ils?: number | null;
             /** Serving Format */
@@ -2143,9 +2207,7 @@ export interface operations {
     listOpenFlags: {
         parameters: {
             query?: never;
-            header?: {
-                "x-admin-secret"?: string;
-            };
+            header?: never;
             path?: never;
             cookie?: never;
         };
@@ -2160,23 +2222,12 @@ export interface operations {
                     "application/json": components["schemas"]["FlagOut"][];
                 };
             };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
         };
     };
     resolveFlags: {
         parameters: {
             query?: never;
-            header?: {
-                "x-admin-secret"?: string;
-            };
+            header?: never;
             path?: never;
             cookie?: never;
         };
@@ -2211,9 +2262,7 @@ export interface operations {
     listOpenReviews: {
         parameters: {
             query?: never;
-            header?: {
-                "x-admin-secret"?: string;
-            };
+            header?: never;
             path?: never;
             cookie?: never;
         };
@@ -2228,23 +2277,12 @@ export interface operations {
                     "application/json": components["schemas"]["ReviewOut"][];
                 };
             };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
         };
     };
     resolveReview: {
         parameters: {
             query?: never;
-            header?: {
-                "x-admin-secret"?: string;
-            };
+            header?: never;
             path: {
                 review_id: string;
             };
@@ -3390,6 +3428,41 @@ export interface operations {
             };
         };
     };
+    enrichCatalogGap: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                venue_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EnrichRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DraftOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     submitCatalogGap: {
         parameters: {
             query?: never;
@@ -3401,17 +3474,17 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["GapRequest"];
+                "application/json": components["schemas"]["GapSubmitRequest"];
             };
         };
         responses: {
             /** @description Successful Response */
-            200: {
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["GapDraft"];
+                    "application/json": components["schemas"]["GapSubmitResponse"];
                 };
             };
             /** @description Validation Error */
@@ -3533,6 +3606,40 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["app__routes__staff_menu__SetStatusRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    updateVenueMenuItemDetails: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                venue_id: string;
+                beer_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateDetailsRequest"];
             };
         };
         responses: {

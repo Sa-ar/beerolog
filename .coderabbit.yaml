@@ -13,9 +13,12 @@ reviews:
     drafts: false
     base_branches:
       # Regexes. Current feature work stacks onto white-label before it reaches
-      # main, so review PRs targeting either.
+      # main, so review PRs targeting either. Add fix/.* or chore/.* if you want
+      # the intra-stack PRs reviewed too.
       - main
       - white-label
+      - feat/.*
+      - fix/.*
   path_filters:
     - "!**/*.lock"
     - "!**/pnpm-lock.yaml"

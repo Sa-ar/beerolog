@@ -60,7 +60,9 @@ export function SessionQuickPick({ baseline, onApply, compact = false }: Session
     }
     setNavigating(true)
     markSessionPending({ baseline: toSessionBaseline(baseline), session })
-    navigate({ to: '/recommendations' })
+    // A blocked/cancelled navigation must re-enable submit rather than leave it
+    // permanently disabled.
+    navigate({ to: '/recommendations' }).catch(() => setNavigating(false))
   }
 
   return (

@@ -46,8 +46,10 @@ async def readiness() -> JSONResponse:
         config_problems.append("OPENAI_API_KEY missing")
     if not settings.clerk_publishable_key or not settings.clerk_secret_key:
         config_problems.append("Clerk keys missing")
-    if settings.app_env != "development" and settings.api_secret == "dev-secret":
-        config_problems.append("API_SECRET is still the dev default")
+    if settings.app_env != "development" and (
+        not settings.api_secret or settings.api_secret == "dev-secret"
+    ):
+        config_problems.append("API_SECRET is empty or still the dev default")
 
     components.append(
         ComponentStatus(

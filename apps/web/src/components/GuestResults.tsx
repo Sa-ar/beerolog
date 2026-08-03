@@ -11,9 +11,11 @@
 
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import { Badge, Button, Card, Heading } from '@beerolog/ui'
+import { Badge, buttonVariants, Card, cn, Heading } from '@beerolog/ui'
 import { BeerCardMedia } from './BeerCardMedia'
 import { deriveBeerColor } from '../lib/beer-color'
+import { formatAbv } from '../lib/format-abv'
+import { displayBeerName } from '../lib/display-beer-name'
 import type { GuestRecommendedBeer } from '../lib/guest-answers'
 
 type GuestResultsProps = {
@@ -47,10 +49,9 @@ export function GuestResults({ results, unlockedCount }: GuestResultsProps) {
                 params={{ _splat: '' }}
                 search={{ next: '/recommendations' }}
                 data-testid="guest-signup-cta"
+                className={cn(buttonVariants({ size: 'lg' }), 'px-8')}
               >
-                <Button size="lg" className="px-8">
-                  {t('try.unlockCta')}
-                </Button>
+                {t('try.unlockCta')}
               </Link>
             </div>
           </Card>
@@ -81,8 +82,7 @@ type GuestBeerCardProps = {
 // the authed card requires authed-only data it cannot supply.
 function GuestBeerCard({ beer, rank }: GuestBeerCardProps) {
   const { t, i18n } = useTranslation()
-  const displayName =
-    i18n.language.startsWith('he') && beer.name_hebrew ? beer.name_hebrew : beer.name
+  const displayName = displayBeerName(beer, i18n.language)
   const beerColor = deriveBeerColor(beer.style, beer.color)
 
   return (
@@ -109,7 +109,7 @@ function GuestBeerCard({ beer, rank }: GuestBeerCardProps) {
 
         <BeerCardMedia imageUrl={beer.image_url ?? null} color={beerColor} />
 
-        <div className="order-3 flex w-full min-w-0 flex-1 flex-col items-center gap-3 p-4 text-center sm:order-2 sm:items-start sm:p-6 sm:ps-4 sm:text-left">
+        <div className="order-3 flex w-full min-w-0 flex-1 flex-col items-center gap-3 p-4 text-center sm:order-2 sm:items-start sm:p-6 sm:ps-4 sm:text-start">
           <div className="min-w-0 space-y-1">
             <Heading level={2} className="text-base leading-snug break-words sm:text-lg sm:leading-tight">
               {displayName}
@@ -135,8 +135,4 @@ function GuestBeerCard({ beer, rank }: GuestBeerCardProps) {
       </div>
     </Card>
   )
-}
-
-function formatAbv(abv: number): string {
-  return `${Number(abv.toFixed(1))}%`
 }

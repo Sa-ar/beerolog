@@ -5,6 +5,7 @@
  */
 
 import { Button, Heading } from '@beerolog/ui'
+import { CatalogIcon } from '@beerolog/icons'
 import { RedirectToSignIn, Show } from '@clerk/tanstack-react-start'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
@@ -140,12 +141,15 @@ function MenuScanFlow() {
 
   const added = rankAdded.data ?? []
 
-  const dismissKey = (r: MenuScanResultItem) => r.matched_id ?? r.raw_text
   const scannedIds = new Set(results.map((r) => r.matched_id).filter((x): x is string => !!x))
-  const visibleScanned = results.filter((r) => !dismissed.has(dismissKey(r)))
-  const addedVisible = added.filter(
-    (r) => !dismissed.has(dismissKey(r)) && !(r.matched_id && scannedIds.has(r.matched_id)),
-  )
+  // Assign stable per-row identifiers: source index prefixed with 's:' or 'a:' to
+  // ensure duplicate raw_text values can be dismissed independently.
+  const visibleScanned = results
+    .map((r, idx) => ({ ...r, _rowId: `s:${idx}` }))
+    .filter((r) => !dismissed.has(r._rowId))
+  const addedVisible = added
+    .map((r, idx) => ({ ...r, _rowId: `a:${idx}` }))
+    .filter((r) => !dismissed.has(r._rowId) && !(r.matched_id && scannedIds.has(r.matched_id)))
   // One comparison list: scanned + manually added, best taste-fit first.
   const comparison = [...visibleScanned, ...addedVisible].sort(
     (a, b) => (b.taste_fit ?? -1) - (a.taste_fit ?? -1),
@@ -209,6 +213,8 @@ function MenuScanFlow() {
     }
   }
 
+  // ponytail: re-runs the full vision scan on every steer; a backend rank-only
+  // endpoint (re-rank matched_ids without re-OCR) is the upgrade path.
   function reRank() {
     const session = sessionFor(vibe, freeText)
     void applySession(session)
@@ -344,14 +350,10 @@ function MenuScanFlow() {
 
       {comparison.length > 0 && (
         <ul className="mt-4 flex flex-col gap-3">
-          {comparison.map((row, index) => {
+          {comparison.map((row) => {
             const title = row.name ?? row.raw_text
             const meta = row.matched_id
-              ? [
-                  row.brewery,
-                  row.style,
-                  row.abv != null ? formatAbv(row.abv) : null,
-                ]
+              ? [row.brewery, row.style, row.abv != null ? formatAbv(row.abv) : null]
                   .filter(Boolean)
                   .join(' · ')
               : t('menu.notInCatalog')
@@ -365,7 +367,7 @@ function MenuScanFlow() {
             )
             return (
               <li
-                key={`${dismissKey(row)}-${index}`}
+                key={row._rowId}
                 className={`flex items-center justify-between gap-3 rounded border p-4 ${
                   row.matched_id
                     ? 'border-brand-400 bg-brand-50'
@@ -376,6 +378,9 @@ function MenuScanFlow() {
                     : ''
                 }`}
               >
+                {highlighted.includes(row.matched_id ?? row.raw_text) && (
+                  <span className="sr-only">{t('menu.highlighted')}</span>
+                )}
                 {row.matched_id ? (
                   <Link
                     to="/beer/$id"
@@ -398,10 +403,10 @@ function MenuScanFlow() {
                     type="button"
                     aria-label={t('menu.remove', { name: title })}
                     title={t('menu.notThisOne')}
-                    onClick={() => setDismissed((prev) => new Set(prev).add(dismissKey(row)))}
+                    onClick={() => setDismissed((prev) => new Set(prev).add(row._rowId))}
                     className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full text-neutral-400 hover:bg-neutral-200 hover:text-neutral-700"
                   >
-                    ✕
+                    <CatalogIcon group="action" iconKey="close" className="h-4 w-4" />
                   </button>
                 </div>
               </li>
@@ -462,9 +467,10 @@ function MenuScanFlow() {
         <button
           type="button"
           onClick={() => setChatOpen(true)}
+          aria-label={t('menu.chatOpen')}
           className="fixed bottom-4 right-4 z-30 flex items-center gap-2 rounded-full bg-brand-600 px-4 py-3 text-sm font-semibold text-white shadow-lg hover:bg-brand-700"
         >
-          <span aria-hidden>💬</span>
+          <CatalogIcon group="action" iconKey="chat" className="h-5 w-5" />
           <span className="hidden sm:inline">{t('menu.chatOpen')}</span>
         </button>
       )}
@@ -488,7 +494,7 @@ function MenuScanFlow() {
               aria-label={t('menu.close')}
               className="flex h-7 w-7 items-center justify-center rounded-full text-neutral-400 hover:bg-neutral-200 hover:text-neutral-700"
             >
-              ✕
+              <CatalogIcon group="action" iconKey="close" className="h-4 w-4" />
             </button>
           </header>
           <div className="flex-1 overflow-y-auto px-4 py-3">

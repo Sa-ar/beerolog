@@ -2,7 +2,7 @@ import { Link } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CatalogIcon, GeneratedTasteIcon, resolveProfileHeroSvg } from '@beerolog/icons'
-import { Badge, Button, Card, Heading } from '@beerolog/ui'
+import { Badge, buttonVariants, Card, cn, Heading } from '@beerolog/ui'
 import {
   flavorTitle,
   noveltyLabel,
@@ -129,10 +129,11 @@ export function TasteProfileSummary({ greeting, baseline }: TasteProfileSummaryP
               {t('profile.summary.ratingProgress', { count: ratingCount })}
             </p>
           ) : null}
-          <Link to="/onboarding">
-            <Button className="w-full" size="md" variant="outline">
-              {t('profile.summary.retake')}
-            </Button>
+          <Link
+            to="/onboarding"
+            className={cn(buttonVariants({ size: 'md', variant: 'outline' }), 'w-full')}
+          >
+            {t('profile.summary.retake')}
           </Link>
           <p className="text-center text-xs text-neutral-500">{t('profile.summary.retakeHint')}</p>
         </div>

@@ -54,6 +54,7 @@ from app.services.catalog_repo import (
     fetch_catalog,
 )
 from app.services.embedding_service import get_embedding_client
+from app.services.gap_enricher import GPTGapEnricher
 from app.services.icon_repo import AsyncpgIconRepo
 from app.services.note_analyzer import GPTNoteExtractor, NoteAnalyzer
 from app.services.ratings_repo import AsyncpgRatingsRepo
@@ -112,6 +113,12 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
                 settings=settings,
             )
             app.dependency_overrides[get_note_analyzer] = lambda: note_analyzer
+            # Build the enricher once (owns an OpenAI client + HTTP pool); the
+            # lambda must return the shared instance, not construct per request.
+            gap_enricher = GPTGapEnricher(
+                api_key=settings.openai_api_key, model=settings.note_model
+            )
+            app.dependency_overrides[staff_catalog.get_gap_enricher] = lambda: gap_enricher
 
     try:
         # Run the MCP streamable-http session manager alongside the app so the

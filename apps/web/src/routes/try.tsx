@@ -8,6 +8,7 @@
  */
 
 import { createFileRoute } from '@tanstack/react-router'
+import { useMutation } from '@tanstack/react-query'
 import { getLang } from '../i18n/locale-cookie'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -71,66 +72,67 @@ export const Route = createFileRoute('/try')({
   component: TryPage,
 })
 
-type View =
-  | { status: 'resume' } // stored answers exist — offer see-results / retake
-  | { status: 'quiz' }
-  | { status: 'loading' }
-  | { status: 'results'; data: GuestRecommendationsResponse }
-  | { status: 'error' }
+// The pre-fetch choice. Once a fetch starts, the mutation's status (loading /
+// results / error) drives the screen instead.
+type Phase = 'resume' | 'quiz'
 
 function TryPage() {
   const { t } = useTranslation()
   const { from } = Route.useSearch()
 
   // Seed once from storage so a returning guest can skip straight to results.
-  const [view, setView] = useState<View>(() =>
-    readGuestAnswers() ? { status: 'resume' } : { status: 'quiz' },
-  )
+  const [phase, setPhase] = useState<Phase>(() => (readGuestAnswers() ? 'resume' : 'quiz'))
+  const [lastAnswers, setLastAnswers] = useState<Answers | null>(null)
+
+  const recs = useMutation({
+    mutationFn: (answers: Answers): Promise<GuestRecommendationsResponse> =>
+      fetchGuestRecommendations(answers),
+    onSuccess: (data) => {
+      localStorage.removeItem('beerolog_try_quiz')
+      if (data.archetype && isArchetypeKey(data.archetype.key)) {
+        capture('archetype_revealed', { key: data.archetype.key, surface: 'try' })
+      }
+    },
+  })
+
+  // The fetch (loading / results / error) always wins over the pre-fetch choice.
+  const showResults = recs.isSuccess
+  const showLoading = recs.isPending
+  const showError = recs.isError
+  const showChoice = !showResults && !showLoading && !showError
+  const showResume = showChoice && phase === 'resume'
+  const showQuiz = showChoice && phase === 'quiz'
 
   // A quiz-start attributed to the share loop when the visitor arrived via a
   // shared /taste card (`referred`). Fires on each entry into the quiz view.
   useEffect(() => {
-    if (view.status === 'quiz') capture('quiz_start', { surface: 'try', referred: from === 'share' })
-  }, [view.status, from])
-  const [lastAnswers, setLastAnswers] = useState<Answers | null>(null)
-
-  async function run(answers: Answers) {
-    setView({ status: 'loading' })
-    try {
-      const data = await fetchGuestRecommendations(answers)
-      localStorage.removeItem('beerolog_try_quiz')
-      setView({ status: 'results', data })
-      if (data.archetype && isArchetypeKey(data.archetype.key)) {
-        capture('archetype_revealed', { key: data.archetype.key, surface: 'try' })
-      }
-    } catch {
-      setView({ status: 'error' })
-    }
-  }
+    if (showQuiz) capture('quiz_start', { surface: 'try', referred: from === 'share' })
+  }, [showQuiz, from])
 
   function onComplete(answers: Answers) {
     capture('quiz_complete', { surface: 'try' })
     const pruned = prunedAnswers(answers)
     writeGuestAnswers(pruned)
     setLastAnswers(pruned)
-    void run(pruned)
+    recs.mutate(pruned)
   }
 
   function seeStoredResults() {
     const stored = readGuestAnswers()
     if (!stored) {
-      setView({ status: 'quiz' })
+      setPhase('quiz')
       return
     }
     setLastAnswers(stored)
-    void run(stored)
+    recs.mutate(stored)
   }
 
   function retake() {
     clearGuestAnswers()
     localStorage.removeItem('beerolog_try_quiz')
     setLastAnswers(null)
-    setView({ status: 'quiz' })
+    recs.reset()
+    setPhase('quiz')
   }
 
   return (
@@ -143,7 +145,7 @@ function TryPage() {
         <p className="text-neutral-600">{t('try.intro')}</p>
       </section>
 
-      {view.status === 'resume' ? (
+      {showResume ? (
         <Card>
           <CardContent className="flex flex-col gap-3 pt-6">
             <Button size="lg" data-testid="try-see-results" onClick={seeStoredResults}>
@@ -156,38 +158,42 @@ function TryPage() {
         </Card>
       ) : null}
 
-      {view.status === 'quiz' ? (
+      {showQuiz ? (
         <QuizStepper onComplete={onComplete} storageKey="beerolog_try_quiz" />
       ) : null}
 
-      {view.status === 'loading' ? (
+      {showLoading ? (
         <p className="text-sm text-neutral-500 animate-pulse" aria-live="polite">
           {t('try.loading')}
         </p>
       ) : null}
 
-      {view.status === 'error' ? (
-        <Alert variant="error" onRetry={() => lastAnswers && void run(lastAnswers)}>
+      {showError ? (
+        <Alert
+          variant="error"
+          onRetry={() => lastAnswers && recs.mutate(lastAnswers)}
+          retryLabel={t('common.tryAgain')}
+        >
           {t('common.tryAgain')}
         </Alert>
       ) : null}
 
-      {view.status === 'results' ? (
+      {showResults && recs.data ? (
         <section data-testid="try-results" className="space-y-4">
           <p className="text-sm text-neutral-600" data-testid="try-unlocked-count">
-            {t('try.unlocked', { count: view.data.unlocked_count })}
+            {t('try.unlocked', { count: recs.data.unlocked_count })}
           </p>
-          {view.data.archetype && isArchetypeKey(view.data.archetype.key) ? (
+          {recs.data.archetype && isArchetypeKey(recs.data.archetype.key) ? (
             <ShareArchetypeButton
-              archetypeKey={view.data.archetype.key}
+              archetypeKey={recs.data.archetype.key}
               surface="try"
               className="w-full"
             />
           ) : null}
-          <BeerJsonLd beers={view.data.results} />
+          <BeerJsonLd beers={recs.data.results} />
           <GuestResults
-            results={view.data.results}
-            unlockedCount={view.data.unlocked_count}
+            results={recs.data.results}
+            unlockedCount={recs.data.unlocked_count}
           />
         </section>
       ) : null}

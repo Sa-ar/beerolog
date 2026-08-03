@@ -58,63 +58,55 @@ and write the corresponding ADR or PRD update.
 
 ---
 
-## OD-006: In-venue payment provider + IL alcohol-sale legal review
+## OD-006: IL payment provider + alcohol-sale legal review
 
-**Blocks**: White-label slice B3 (payments) — see `white-label-platform.md` and ADR 0012.
+**Blocks**: Payments (Phase B3).
 
-**Open** (raised 2026-07-28). Two questions that must resolve together:
+Two separable questions.
 
-1. **Provider**: which IL payment provider ships first for the payment adapter?
-   Candidates: PayPlus, Meshulam/Grow, Tranzila, Cardcom. Stripe is not an
-   option — it does not onboard Israeli businesses. Selection criteria: API
-   quality (tokenized checkout + webhooks), per-bar merchant onboarding
-   friction, refund API, fees. The bar's own merchant account is used;
-   Beerolog is never merchant of record (ADR 0012).
-2. **Legal**: how do Israeli alcohol-sale rules apply to in-app purchase at a
-   licensed venue — is transaction-time age verification required beyond the
-   existing 18+ age gate, and do hours-of-sale restrictions (23:00–06:00 sales
-   limits) apply to an in-app order served on premises? Needs counsel review
-   before any paid order ships.
+Beerolog is a **smart menu**: software the bar uses to sell. The **bar is the seller and merchant of record**; Beerolog does not sell alcohol or take custody of funds. That framing (not "facilitator of sale") drives both questions below.
+
+**(a) Payment provider — Recommended (pending owner sign-off, 2026-08-01)**: **Grow (Meshulam)**, configured so the **bar is merchant / sub-merchant** and funds settle to the bar, not into Beerolog's account. Hosted checkout keeps PCI scope minimal and supports Bit + Apple/Google Pay. **Alternative**: Tranzila (both support sub-merchant/marketplace settlement). Where the first POS (OD-006b, Tabit) already owns payment, Beerolog may inject the order and let the bar's existing POS payment settle it — no separate Beerolog gateway needed. **Routing rule (to ratify):** use Grow by default; route through Tabit-owned payment only when the venue's ordering runs on Tabit's POS; in **both** paths the bar is merchant of record and funds never enter Beerolog's custody. The provider is not ratified until this routing contract is signed off.
+
+**(b) Legal structure — Blocked on counsel (narrowed).** As pure SaaS where the licensed bar is the seller and merchant of record, Beerolog's alcohol-regulatory exposure is low. The counsel job is to **confirm the structure holds** — that Beerolog carries no alcohol-licensing obligation as long as funds settle to the bar and the bar is the contractual seller — and to say which enforcement duties (23:00 rule, age verification) the *software* must actively implement on the bar's behalf vs merely enable. Prepared questions: `docs/legal/counsel-brief-payments-and-data.md` §A.
+
+**ADR needed**: Payment-provider integration ADR once the provider is ratified and counsel confirms the merchant-of-record structure — not before.
 
 ---
 
-## OD-006b: First external POS/ordering integration target
+## OD-006b: First POS / ordering integration target
 
-**Blocks**: White-label slice B3b (`ordering_mode='integrated'`) — see ADR 0012.
+**Blocks**: Ordering integration (Phase B3b).
 
-**Open** (raised 2026-07-28). Which POS/ordering service does the order-dispatch
-adapter integrate first? IL candidates: Tabit, Presto, Cash-It. Needs market
-research: which systems the target bars actually run, API availability
-(order injection + status webhook/poll), and partnership terms. Independent of
-OD-006 — a bar picks native, integrated, or off.
+**Recommended (pending owner sign-off, 2026-08-01)**: **Tabit**. It is the dominant IL mobile-first restaurant/bar POS, exposes an open partner API (menu sync + order injection), and has proven third-party integrations (e.g. OpenTable). Integrating one POS well beats a generic abstraction over several — start with Tabit; generalise only when a second partner POS is actually required.
 
----
+**Rationale**: A first integration target should maximise (footprint × API quality); Tabit wins both in the IL market. Depends on OD-006 alcohol-sale legality clearing counsel before any live ordering ships.
 
-## OD-007: Privacy floor K for operator-facing aggregates
-
-**Blocks**: White-label analytics panels (#301, #305, B5, C1, C2) — see ADR 0010 amendment.
-
-**Open** (raised 2026-07-28). The minimum distinct-user count below which no
-operator-facing aggregate is served. **Proposed default: K=20**, defined once
-as a shared constant used by both API endpoints and aggregate jobs. Trade-off:
-too high → empty dashboards at small venues; too low → re-identification risk
-in small crowds. Owner may tune the default before Phase C ships; panels ship
-with the constant either way.
+**ADR needed**: POS-integration ADR when the first integration is built.
 
 ---
 
-## OD-008: B2C data feeding B2B area insights
+## OD-007: Analytics distinct-user suppression floor
 
-**Blocks**: White-label slices C2 (area taste aggregates) and C3 (supply recommendations) — see ADR 0010 amendment.
+**Blocks**: Phase C analytics (operator-facing aggregate views).
 
-**Open** (raised 2026-07-28). Area taste aggregates derive from consumer
-(B2C) baseline-taste profiles and visit/rating attribution, then feed
-bar-facing (B2B) intelligence. That is a processing purpose the privacy policy
-does not currently state. Required before C2/C3 ship: (1) a purpose line in
-the privacy policy covering aggregate, k-floored area insights, (2)
-confirmation with counsel that k-anonymised aggregates keep this outside
-GDPR/Israeli-law individual-consent territory (ADR 0010's reasoning suggests
-yes, but the cross-context B2C→B2B use is new), (3) owner sign-off.
+**Decision (2026-08-01, pending owner ratification)**: **K = 20**. Any operator-facing aggregate cell or segment computed over fewer than 20 distinct users is **withheld** (suppressed), not shown as a small or rounded number.
+
+**Rationale**: ADR 0010 already mandates "aggregate, anonymised only" for bar operators (e.g. "70% of your customers prefer bitter beers tonight") but never specified the minimum cell size below which an "aggregate" can re-identify individuals. OD-007 sets that floor. K = 20 is a conservative, widely-used suppression threshold. This is an internal privacy-engineering parameter — counsel's concern is the *disclosure* (OD-008), not the number.
+
+**ADR needed**: Yes — captured in `docs/adr/0011-analytics-k-anonymity-floor.md` (follow-on to ADR 0010). Close this item once that ADR is Accepted.
+
+---
+
+## OD-008: B2C data feeding B2B insights — privacy policy + counsel sign-off
+
+**Blocks**: Phase C analytics that reuse consumer (B2C) data for B2B intelligence (C2/C3).
+
+**Status**: **Blocked on counsel.** Using B2C consumer taste data to generate B2B insights is a **new processing purpose**. ADR 0010 already enumerates what that requires: a GDPR Art 13/14 purpose disclosure, a PPL (Amendment 13) consent basis, a per-tenant DPA, and a revocation mechanism. OD-007's K-floor (aggregate-only, ≥ K distinct users) is the **baseline** technical safeguard, **not the complete one**: a suppression floor alone does not stop linkage, differencing, overlapping/repeated-query, or homogeneous-cell attacks (NIST documents these limits). Before OD-008 closes, the ADR/policy must also define query scope, composition / re-release limits, access + audit controls, and revocation behaviour — captured in ADR 0011's "Residual risks" + "Typed suppression contract" — or adopt a formal mechanism (differential privacy).
+
+**Prepared for counsel**: `docs/legal/counsel-brief-payments-and-data.md` §B contains the processing-purpose analysis and a **draft privacy-policy clause**. Counsel confirms the lawful basis and whether the K-floor **plus these additional controls** are sufficient (or a formal mechanism such as differential privacy is required) and edits the clause; engineering keeps the draft banner until they sign off. Do not present OD-008 as resolved.
+
+**ADR needed**: A follow-on to ADR 0010 only if the data-access model changes; the immediate output is the policy clause + counsel sign-off, not an architectural change.
 
 ---
 

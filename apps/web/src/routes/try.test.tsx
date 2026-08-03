@@ -1,4 +1,5 @@
 import type React from 'react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18next from 'i18next'
@@ -50,10 +51,15 @@ beforeAll(async () => {
 })
 
 function renderTry() {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  })
   return render(
-    <I18nextProvider i18n={i18n}>
-      <TryPage />
-    </I18nextProvider>,
+    <QueryClientProvider client={queryClient}>
+      <I18nextProvider i18n={i18n}>
+        <TryPage />
+      </I18nextProvider>
+    </QueryClientProvider>,
   )
 }
 

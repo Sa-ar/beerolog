@@ -23,6 +23,9 @@ export interface AlertProps
     VariantProps<typeof alertVariants> {
   title?: string
   onRetry?: () => void
+  /** Label for the retry control; falls back to "Try again" for callers that
+   * predate localization. Pass a translated string where i18n is available. */
+  retryLabel?: string
 }
 
 function AlertIcon({ variant }: { variant: 'error' | 'warning' | 'info' | null | undefined }) {
@@ -73,7 +76,7 @@ function AlertIcon({ variant }: { variant: 'error' | 'warning' | 'info' | null |
 }
 
 export const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
-  ({ className, variant, title, children, onRetry, ...props }, ref) => (
+  ({ className, variant, title, children, onRetry, retryLabel, ...props }, ref) => (
     <div
       ref={ref}
       role="alert"
@@ -92,7 +95,7 @@ export const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
             onClick={onRetry}
             className="mt-2 cursor-pointer text-sm font-medium underline underline-offset-2 hover:no-underline"
           >
-            Try again
+            {retryLabel ?? 'Try again'}
           </button>
         ) : null}
       </div>

@@ -1,7 +1,7 @@
 import { useUser } from '@clerk/tanstack-react-start'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import { Button, Heading } from '@beerolog/ui'
+import { buttonVariants, cn, Heading } from '@beerolog/ui'
 import { PAGE_MAIN } from '@beerolog/shared'
 import { WhatIWantDeck } from '../components/WhatIWantDeck'
 
@@ -120,26 +120,24 @@ function VisitorHome() {
         {/* Call: a solid chalk-gold button. */}
         <div className="relative mt-12 flex flex-col items-center gap-3">
           <Link
-            className="w-full sm:w-auto"
+            className={cn(
+              buttonVariants({ size: 'lg' }),
+              'w-full px-12 font-display text-lg font-semibold uppercase tracking-[0.12em] sm:w-auto',
+            )}
             to="/signin/$"
             params={{ _splat: '' }}
             search={{ next: '/onboarding' }}
           >
-            <Button
-              className="w-full px-12 font-display text-lg font-semibold uppercase tracking-[0.12em] sm:w-auto"
-              size="lg"
-            >
-              {t('home.cta')}
-            </Button>
+            {t('home.cta')}
           </Link>
-          <Link className="w-full sm:w-auto" to="/try">
-            <Button
-              className="w-full px-12 font-display text-lg font-semibold uppercase tracking-[0.12em] sm:w-auto"
-              size="lg"
-              variant="outline"
-            >
-              {t('home.tryCta')}
-            </Button>
+          <Link
+            className={cn(
+              buttonVariants({ size: 'lg', variant: 'outline' }),
+              'w-full px-12 font-display text-lg font-semibold uppercase tracking-[0.12em] sm:w-auto',
+            )}
+            to="/try"
+          >
+            {t('home.tryCta')}
           </Link>
           <p className="font-script text-lg text-neutral-500">{t('home.ctaHint')}</p>
         </div>

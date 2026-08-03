@@ -4,17 +4,19 @@
  */
 import type { Rating } from '@beerolog/types'
 import { Card, Heading, RatingTapper } from '@beerolog/ui'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { PAGE_SHELL_X } from '@beerolog/shared'
 import { useMyRatings } from '../lib/my-ratings'
 import { type SearchBeer, useBeerSearch, useRateOne } from '../lib/rate-search'
 import { useDebouncedValue } from '../lib/use-debounced-value'
+import { displayBeerName } from '../lib/display-beer-name'
 
 export function RateSearch() {
   const { t } = useTranslation()
   const [query, setQuery] = useState('')
   const [rated, setRated] = useState<Record<string, Rating>>({})
+  const [failed, setFailed] = useState<Record<string, boolean>>({})
   // Debounce feeds react-query's key; the query stays declarative (no manual
   // effect wiring here).
   const debounced = useDebouncedValue(query.trim(), 250)
@@ -23,10 +25,41 @@ export function RateSearch() {
   // Server truth for already-rated beers; local `rated` overrides it after a
   // change so the tap feels instant.
   const myRatings = useMyRatings()
+  // Order same-beer saves: each takes a seq and a save's onError only rolls back
+  // if it's still the latest — so a slow older request can't clobber a newer one.
+  const saveSeq = useRef(0)
+  const latestSeq = useRef<Record<string, number>>({})
 
   function rate(beer: SearchBeer, rating: Rating) {
+    const seq = ++saveSeq.current
+    latestSeq.current[beer.id] = seq
+    // Optimistically show the new rating; capture the prior local value so a
+    // failed POST rolls back instead of leaving a false "saved" and silently
+    // dropping the rating.
+    const previous = rated[beer.id]
     setRated((prev) => ({ ...prev, [beer.id]: rating }))
-    rateOne.mutate({ beerId: beer.id, rating })
+    setFailed((prev) => {
+      if (!prev[beer.id]) return prev
+      const next = { ...prev }
+      delete next[beer.id]
+      return next
+    })
+    rateOne.mutate(
+      { beerId: beer.id, rating },
+      {
+        onError: () => {
+          // Superseded by a newer save for this beer — leave its result intact.
+          if (latestSeq.current[beer.id] !== seq) return
+          setRated((prev) => {
+            const next = { ...prev }
+            if (previous === undefined) delete next[beer.id]
+            else next[beer.id] = previous
+            return next
+          })
+          setFailed((prev) => ({ ...prev, [beer.id]: true }))
+        },
+      },
+    )
   }
 
   return (
@@ -51,6 +84,7 @@ export function RateSearch() {
           isError={search.isError}
           beers={search.data ?? []}
           rated={{ ...myRatings, ...rated }}
+          failed={failed}
           onRate={rate}
         />
       </div>
@@ -64,6 +98,7 @@ function RateSearchResults({
   isError,
   beers,
   rated,
+  failed,
   onRate,
 }: {
   query: string
@@ -71,6 +106,7 @@ function RateSearchResults({
   isError: boolean
   beers: SearchBeer[]
   rated: Record<string, Rating>
+  failed: Record<string, boolean>
   onRate: (beer: SearchBeer, rating: Rating) => void
 }) {
   const { t } = useTranslation()
@@ -97,7 +133,13 @@ function RateSearchResults({
   return (
     <>
       {beers.map((beer) => (
-        <RateSearchResult key={beer.id} beer={beer} rated={rated[beer.id]} onRate={onRate} />
+        <RateSearchResult
+          key={beer.id}
+          beer={beer}
+          rated={rated[beer.id]}
+          failed={failed[beer.id]}
+          onRate={onRate}
+        />
       ))}
     </>
   )
@@ -106,15 +148,16 @@ function RateSearchResults({
 function RateSearchResult({
   beer,
   rated,
+  failed,
   onRate,
 }: {
   beer: SearchBeer
   rated: Rating | undefined
+  failed: boolean | undefined
   onRate: (beer: SearchBeer, rating: Rating) => void
 }) {
   const { t, i18n } = useTranslation()
-  const displayName =
-    i18n.language.startsWith('he') && beer.name_hebrew ? beer.name_hebrew : beer.name
+  const displayName = displayBeerName(beer, i18n.language)
 
   return (
     <Card className="border-neutral-200 bg-white p-4 text-start shadow-sm">
@@ -134,7 +177,12 @@ function RateSearchResult({
             disliked: t('rate.tapper.disliked'),
           }}
         />
-        {rated && (
+        {failed && (
+          <p role="alert" className="text-sm font-medium text-red-600">
+            {t('rate.search.saveError')}
+          </p>
+        )}
+        {!failed && rated && (
           <p role="status" className="text-sm font-medium text-brand-600">
             {t('rate.search.saved')}
           </p>

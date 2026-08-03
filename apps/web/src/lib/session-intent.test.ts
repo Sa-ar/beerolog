@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   fetchBaselineRecommendations,
+  LOAD_MORE_ERROR,
+  LoadMoreError,
   loadMoreRecommendations,
   RECS_PAGE_SIZE,
   RECS_STORAGE_KEY,
@@ -100,8 +102,10 @@ describe('baseline recommendations + load more', () => {
     expect(loadMoreBody.session).toBeUndefined()
   })
 
-  it('fails load-more only when nothing is stored at all', async () => {
-    await expect(loadMoreRecommendations([])).rejects.toThrow(/No saved picks/)
+  it('fails load-more with a coded reason (not English copy) when nothing is stored', async () => {
+    const error = await loadMoreRecommendations([]).catch((e: unknown) => e)
+    expect(error).toBeInstanceOf(LoadMoreError)
+    expect((error as LoadMoreError).code).toBe(LOAD_MORE_ERROR.noStoredPicks)
   })
 
   it('discards stored recs that lack match facts so the page re-fetches', async () => {

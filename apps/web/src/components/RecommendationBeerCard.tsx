@@ -4,10 +4,13 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Rating } from '@beerolog/types'
 import { Badge, Button, Card, Dialog, DialogContent, DialogTitle, Heading, RatingTapper } from '@beerolog/ui'
+import { CatalogIcon } from '@beerolog/icons'
 import { apiClient } from '../lib/api-client/client'
+import { displayBeerName } from '../lib/display-beer-name'
 import { BeerCardMedia } from './BeerCardMedia'
 import { BeerDetail } from './BeerDetail'
 import { deriveBeerColor, type BeerColor } from '../lib/beer-color'
+import { formatAbv } from '../lib/format-abv'
 import { useMyRatings } from '../lib/my-ratings'
 import { SAVE_STATUS, type SaveStatus } from '../lib/save-status'
 import { venueMapsUrl } from '../lib/beer-store-search'
@@ -96,8 +99,7 @@ export function RecommendationBeerCard({
     })
   }
   // Catalog names are bilingual; show Hebrew when the UI is Hebrew, fall back to English.
-  const displayName =
-    i18n.language.startsWith('he') && beer.name_hebrew ? beer.name_hebrew : beer.name
+  const displayName = displayBeerName(beer, i18n.language)
   const beerColor = deriveBeerColor(beer.style, beer.color)
   // Immediate (card) rating path. Optimistic: show 'saving' at once, then the
   // saved confirmation; on error keep the tapper so the user can retry.
@@ -195,8 +197,7 @@ export function RecommendationBeerCard({
               </p>
               <ul className="w-full space-y-1">
                 {venues.map((v) => {
-                  const venueName =
-                    i18n.language.startsWith('he') && v.name_hebrew ? v.name_hebrew : v.name
+                  const venueName = displayBeerName(v, i18n.language)
                   const place = [v.address, v.city].filter(Boolean).join(', ')
                   return (
                     <li key={v.id}>
@@ -206,12 +207,16 @@ export function RecommendationBeerCard({
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-1.5 text-xs text-neutral-700 hover:text-brand-600 hover:underline"
                       >
-                        <span aria-hidden>{v.type === 'shop' ? '🛒' : '🍺'}</span>
+                        <CatalogIcon
+                          group="action"
+                          iconKey={v.type === 'shop' ? 'cart' : 'beer'}
+                          className="h-4 w-4"
+                        />
                         <span className="font-medium">{venueName}</span>
                         {place ? <span className="text-neutral-500">— {place}</span> : null}
                       </a>
                       {v.last_confirmed_at ? (
-                        <p className="text-[11px] text-neutral-400">
+                        <p className="text-[11px] text-neutral-500">
                           {t('recommendations.findNearby.confirmed', {
                             date: new Date(v.last_confirmed_at).toLocaleDateString(i18n.language),
                           })}
@@ -220,7 +225,7 @@ export function RecommendationBeerCard({
                       {(() => {
                         if (reportErr.has(v.id))
                           return (
-                            <span className="text-[11px] text-neutral-400">
+                            <span className="text-[11px] text-neutral-500">
                               {t('recommendations.findNearby.reportFailed')}
                             </span>
                           )
@@ -238,7 +243,8 @@ export function RecommendationBeerCard({
                               onClick={() => report(v.id, 'user_confirm')}
                               className="h-auto p-0 text-[11px] font-normal text-neutral-500 hover:bg-transparent hover:text-brand-600"
                             >
-                              👍 {t('recommendations.findNearby.stillHere')}
+                              <CatalogIcon group="action" iconKey="thumbs-up" className="h-4 w-4" />
+                              {t('recommendations.findNearby.stillHere')}
                             </Button>
                             <Button
                               type="button"
@@ -246,10 +252,11 @@ export function RecommendationBeerCard({
                               onClick={() => report(v.id, 'user_deny')}
                               className="h-auto p-0 text-[11px] font-normal text-neutral-500 hover:bg-transparent hover:text-brand-600"
                             >
-                              🚫 {t('recommendations.findNearby.gone')}
+                              <CatalogIcon group="action" iconKey="block" className="h-4 w-4" />
+                              {t('recommendations.findNearby.gone')}
                             </Button>
                             {flagged.has(v.id) ? (
-                              <span className="text-[11px] text-neutral-400">
+                              <span className="text-[11px] text-neutral-500">
                                 {t('recommendations.findNearby.flagged')}
                               </span>
                             ) : (
@@ -257,9 +264,10 @@ export function RecommendationBeerCard({
                                 type="button"
                                 variant="ghost"
                                 onClick={() => flag(v.id)}
-                                className="h-auto p-0 text-[11px] font-normal text-neutral-400 hover:bg-transparent hover:text-red-600"
+                                className="h-auto p-0 text-[11px] font-normal text-neutral-500 hover:bg-transparent hover:text-red-600"
                               >
-                                🚩 {t('recommendations.findNearby.flagWrong')}
+                                <CatalogIcon group="action" iconKey="flag" className="h-4 w-4" />
+                                {t('recommendations.findNearby.flagWrong')}
                               </Button>
                             )}
                           </span>
@@ -277,12 +285,12 @@ export function RecommendationBeerCard({
       </div>
       <div className="border-t border-neutral-200 px-4 py-3 sm:px-6">
         <p className="mb-2 text-xs font-medium text-neutral-600">
-          {t('recommendations.ratePrompt', 'Had this one? Rate it')}
+          {t('recommendations.ratePrompt')}
         </p>
         {rateStatus === SAVE_STATUS.saved ? (
           <div className="space-y-2">
             <p role="status" className="text-sm text-neutral-700">
-              {t('recommendations.rateSaved', 'Thanks — saved your rating')}
+              {t('recommendations.rateSaved')}
             </p>
             <Link
               to="/rate"
@@ -297,15 +305,15 @@ export function RecommendationBeerCard({
             selected={myRatings[beer.id]}
             disabled={rateStatus === SAVE_STATUS.saving}
             labels={{
-              loved: t('rate.tapper.loved', 'Loved it'),
-              fine: t('rate.tapper.fine', 'It was fine'),
-              disliked: t('rate.tapper.disliked', 'Not for me'),
+              loved: t('rate.tapper.loved'),
+              fine: t('rate.tapper.fine'),
+              disliked: t('rate.tapper.disliked'),
             }}
           />
         )}
         {rateStatus === SAVE_STATUS.error && (
           <p role="alert" className="mt-2 text-sm text-red-600">
-            {t('recommendations.rateError', "Couldn't save — tap to retry")}
+            {t('recommendations.rateError')}
           </p>
         )}
       </div>
@@ -322,7 +330,7 @@ export function RecommendationBeerCard({
               aria-label={t('common.close')}
               className="h-8 w-8 rounded-full text-neutral-500 hover:bg-neutral-100 hover:text-neutral-800"
             >
-              ✕
+              <CatalogIcon group="action" iconKey="close" className="h-4 w-4" />
             </Button>
           </div>
           <BeerDetail
@@ -346,10 +354,6 @@ export function RecommendationBeerCard({
       </Dialog>
     </Card>
   )
-}
-
-function formatAbv(abv: number): string {
-  return `${Number(abv.toFixed(1))}%`
 }
 
 // Prefer the LLM one-liner (unique per beer). If the model fails, still make the

@@ -22,7 +22,7 @@ function Shell({ children, subtitle }: { children: React.ReactNode; subtitle?: b
   const { t } = useTranslation()
   return (
     <div className={`mx-auto max-w-md py-8 text-center ${PAGE_SHELL_X}`}>
-      <Heading className="text-2xl">{t('rate.title', 'Rate beers')}</Heading>
+      <Heading className="text-2xl">{t('rate.title')}</Heading>
       {subtitle ? <p className="mt-2 text-sm text-neutral-600">{t('rate.subtitle')}</p> : null}
       <div className="mt-6">{children}</div>
     </div>
@@ -63,12 +63,12 @@ export function RateDeckFlow() {
   const { state: swipe, handlers } = useSwipeCard<Rating>(track, resolve)
 
   if (state.status === 'loading') {
-    return <Shell subtitle>{t('rate.loading', 'Loading beers…')}</Shell>
+    return <Shell subtitle>{t('rate.loading')}</Shell>
   }
   if (state.status === 'error') {
     return (
       <Shell>
-        <p role="alert">{t('rate.error', "Couldn't load the deck. Try again.")}</p>
+        <p role="alert">{t('rate.error')}</p>
         <Button className="mt-4" onClick={restart}>
           {t('common.tryAgain')}
         </Button>
@@ -78,9 +78,9 @@ export function RateDeckFlow() {
   if (state.status === 'empty') {
     return (
       <Shell>
-        <p>{t('rate.empty', "No beers to rate right now — you've rated them all!")}</p>
+        <p>{t('rate.empty')}</p>
         <Link to="/recommendations" className="mt-3 inline-block text-brand-600 underline">
-          {t('rate.backToRecs', 'Back to recommendations')}
+          {t('rate.backToRecs')}
         </Link>
       </Shell>
     )
@@ -89,22 +89,22 @@ export function RateDeckFlow() {
     return (
       <Shell>
         <p role="status" className="text-lg font-semibold">
-          {t('rate.done', 'Thanks! Your taste profile just got sharper.')}
+          {t('rate.done')}
         </p>
         <p className="mt-2 text-sm text-neutral-600">
           {t('rate.doneDetail', { count: state.count })}
         </p>
         {saveError ? (
           <p role="alert" className="mt-2 text-sm text-red-600">
-            {t('rate.saveWarning', "Some ratings couldn't be saved — check your connection.")}
+            {t('rate.saveWarning')}
           </p>
         ) : null}
         <div className="mt-4 flex flex-col items-center gap-3">
           <Link to="/recommendations" className={buttonVariants()}>
-            {t('rate.seeRecs', 'See fresh recommendations')}
+            {t('rate.seeRecs')}
           </Link>
           <Button variant="outline" onClick={restart}>
-            {t('rate.rateMore', 'Rate more beers')}
+            {t('rate.rateMore')}
           </Button>
         </div>
       </Shell>
@@ -120,7 +120,7 @@ export function RateDeckFlow() {
     <div className={`mx-auto flex h-full w-full max-w-md flex-col gap-3 px-4 pb-4 ${PAGE_SHELL_X}`}>
       <div className="flex items-center justify-between pt-2">
         <Button variant="ghost" size="sm" onClick={undo} disabled={state.index === 0}>
-          {t('rate.undo', 'Undo last')}
+          {t('rate.undo')}
         </Button>
         <span className="text-xs font-medium text-neutral-400" aria-live="polite">
           {state.index + 1}/{total}
@@ -153,17 +153,17 @@ export function RateDeckFlow() {
       <div className="flex flex-col gap-2" role="group" aria-label={t('rate.swipeHint')}>
         <div className="flex items-center justify-center gap-3">
           <Button variant="outline" className="flex-1" onClick={() => track(RATINGS.disliked)}>
-            {t('rate.tapper.disliked', 'Not for me')}
+            {t('rate.tapper.disliked')}
           </Button>
           <Button variant="outline" className="flex-1" onClick={() => track(RATINGS.fine)}>
-            {t('rate.tapper.fine', 'It was fine')}
+            {t('rate.tapper.fine')}
           </Button>
           <Button variant="default" className="flex-1" onClick={() => track(RATINGS.loved)}>
-            {t('rate.tapper.loved', 'Loved it')}
+            {t('rate.tapper.loved')}
           </Button>
         </div>
         <Button variant="ghost" className="w-full" onClick={() => track(RATINGS.unknown)}>
-          {t('rate.dontKnow', "I don't know this beer")}
+          {t('rate.dontKnow')}
         </Button>
       </div>
     </div>

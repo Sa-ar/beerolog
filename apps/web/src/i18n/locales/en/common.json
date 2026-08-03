@@ -180,6 +180,7 @@
     "account": "Account menu",
     "accountLink": "Account",
     "logout": "Log out",
+    "logoutError": "Couldn't sign out. Try again.",
     "dashboardCta": "Scan a menu",
     "dashboardHint": "Snap a photo of the menu and we'll rank what's on it by your taste — the fastest way to pick your next beer.",
     "title": "Scan a menu",
@@ -193,6 +194,7 @@
     "addBeer": "Add beer",
     "clearVibe": "Clear {{vibe}}",
     "freeTextPlaceholder": "e.g. something hoppy to pair with spicy food",
+    "highlighted": "Suggested from your question",
     "rerank": "Re-rank for tonight",
     "notInCatalog": "not in our catalog · ranked by name",
     "tasteBadge": "{{pct}}% your taste",
@@ -234,7 +236,9 @@
       "confirm": "Permanently delete",
       "cancel": "Cancel",
       "deleting": "Deleting…",
-      "error": "Something went wrong. Please try again."
+      "error": "Something went wrong. Please try again.",
+      "signOutError": "Your account was deleted, but signing out failed. Retry to finish.",
+      "retrySignOut": "Retry sign-out"
     },
     "export": {
       "title": "Export your data",
@@ -771,8 +775,10 @@
       "maybeExists": "We may already have this place.",
       "attachExisting": "Add to existing",
       "addAnyway": "Add as new",
+      "addFailed": "Couldn't add that — try again.",
       "nearMeToggle": "Only beers I can get near me",
       "nearMeEmpty": "No matches are available in this area yet — try a wider area or turn off the filter.",
+      "venueType": "Venue type",
       "shop": "Bottle shop",
       "pub": "Pub",
       "areaLabel": "Search area",
@@ -843,7 +849,8 @@
       "searching": "Searching…",
       "error": "Search failed. Try again.",
       "empty": "No beers match “{{query}}”.",
-      "saved": "Rated ✓"
+      "saved": "Rated ✓",
+      "saveError": "Couldn't save — tap to retry"
     }
   },
   "errors": {
@@ -871,6 +878,10 @@
     },
     "sessionStart": "We couldn't start your session. Check your connection and try again.",
     "loadMore": "We couldn't load more picks. Give it a moment and try again.",
+    "loadMoreReason": {
+      "no_session": "Start a new session from your home page to load more picks.",
+      "no_stored_picks": "No saved picks yet — start a new session first."
+    },
     "onboardingSave": "We couldn't save your taste profile. Try again in a moment."
   }
 }

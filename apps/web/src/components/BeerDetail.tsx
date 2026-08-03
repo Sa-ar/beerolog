@@ -5,6 +5,7 @@ import { TasteRadar } from './TasteRadar'
 import { BeerColorGlass } from './BeerColorGlass'
 import { beerSensoryAxes, tasteOverlayAxes } from '../lib/beer-radar'
 import { deriveBeerColor, type BeerColor } from '../lib/beer-color'
+import { displayBeerName } from '../lib/display-beer-name'
 
 export type BeerDetailData = {
   name: string
@@ -40,8 +41,7 @@ export function BeerDetail({
   footer?: ReactNode
 }) {
   const { t, i18n } = useTranslation()
-  const displayName =
-    i18n.language.startsWith('he') && beer.name_hebrew ? beer.name_hebrew : beer.name
+  const displayName = displayBeerName(beer, i18n.language)
   const beerColor = deriveBeerColor(beer.style, beer.color)
   const axes = beerSensoryAxes({
     ibu: beer.ibu ?? null,

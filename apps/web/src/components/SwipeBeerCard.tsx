@@ -11,6 +11,8 @@ import { Badge, Heading } from '@beerolog/ui'
 import { BeerColorGlass } from './BeerColorGlass'
 import { deriveBeerColor, type BeerColor } from '../lib/beer-color'
 import { BEER_COLOR_GLOW } from '../lib/beer-color'
+import { displayBeerName } from '../lib/display-beer-name'
+import { formatAbv } from '../lib/format-abv'
 
 export type CardBeer = {
   id: string
@@ -35,8 +37,7 @@ export function SwipeBeerCard({
   superLiked?: boolean
 }) {
   const { t, i18n } = useTranslation()
-  const displayName =
-    i18n.language.startsWith('he') && beer.name_hebrew ? beer.name_hebrew : beer.name
+  const displayName = displayBeerName(beer, i18n.language)
   const color = deriveBeerColor(beer.style, beer.color ?? undefined)
 
   return (
@@ -111,7 +112,7 @@ export function SwipeBeerCard({
             {beer.style}
           </Badge>
           <Badge variant="outline" className="border-neutral-500 text-xs text-neutral-900">
-            {t('recommendations.abvBadge', { abv: `${Number(beer.abv.toFixed(1))}%` })}
+            {t('recommendations.abvBadge', { abv: formatAbv(beer.abv) })}
           </Badge>
         </div>
         {why ? (

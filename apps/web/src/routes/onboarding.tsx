@@ -7,7 +7,8 @@
 
 import { RedirectToSignIn, Show } from '@clerk/tanstack-react-start'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
+import { useMutation } from '@tanstack/react-query'
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { capture } from '../lib/analytics'
 import { Alert, Heading } from '@beerolog/ui'
@@ -37,32 +38,31 @@ function OnboardingPage() {
 function OnboardingForm() {
   const navigate = useNavigate()
   const { t } = useTranslation()
-  const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
   // The signed-in taste quiz has no share referral; surface tells the two flows apart.
   useEffect(() => capture('quiz_start', { surface: 'onboarding', referred: false }), [])
 
-  async function submit(answers: Answers) {
-    if (submitting) return
-    capture('quiz_complete', { surface: 'onboarding' })
-    setSubmitting(true)
-    setError(null)
-    try {
+  const save = useMutation({
+    mutationFn: async (answers: Answers) => {
       const res = await apiFetch('/onboarding', {
         method: 'POST',
         body: JSON.stringify(prunedAnswers(answers)),
       })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    },
+    onSuccess: () => {
       localStorage.removeItem('beerolog_onboarding_quiz')
       // After the taste quiz, land on the main dashboard (home) so the user sees
       // their taste profile (radar + persona), not straight into recommendations.
       navigate({ to: '/' })
-    } catch (e) {
-      setError(onboardingSaveErrorMessage(t, e))
-    } finally {
-      setSubmitting(false)
-    }
+    },
+  })
+  const error = save.isError ? onboardingSaveErrorMessage(t, save.error) : null
+
+  function submit(answers: Answers) {
+    if (save.isPending) return
+    capture('quiz_complete', { surface: 'onboarding' })
+    save.mutate(answers)
   }
 
   return (
@@ -76,8 +76,8 @@ function OnboardingForm() {
       </section>
 
       <QuizStepper
-        onComplete={(answers) => void submit(answers)}
-        completing={submitting}
+        onComplete={submit}
+        completing={save.isPending}
         storageKey="beerolog_onboarding_quiz"
       >
         {error ? <Alert variant="error">{error}</Alert> : null}

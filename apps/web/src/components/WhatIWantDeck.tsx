@@ -10,7 +10,7 @@ import { useRef, useState } from 'react'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import { Button, Heading } from '@beerolog/ui'
+import { Button, buttonVariants, cn, Heading } from '@beerolog/ui'
 import { apiFetch } from '@beerolog/shared'
 import { capture } from '../lib/analytics'
 import type { BaselineTaste } from '../lib/baseline-taste'
@@ -224,10 +224,11 @@ export function WhatIWantDeck() {
         <Button variant="outline" onClick={() => fileRef.current?.click()}>
           {t('whatIWant.endScan')}
         </Button>
-        <Link to="/account/profile" className="block">
-          <Button variant="outline" className="w-full">
-            {t('whatIWant.endList')}
-          </Button>
+        <Link
+          to="/account/profile"
+          className={cn(buttonVariants({ variant: 'outline' }), 'w-full')}
+        >
+          {t('whatIWant.endList')}
         </Link>
       </div>
     </div>
@@ -259,10 +260,11 @@ export function WhatIWantDeck() {
             {t('whatIWant.leadTitle')}
           </Heading>
           <p className="text-neutral-500">{t('whatIWant.leadBody')}</p>
-          <Link to="/onboarding" className="w-full max-w-xs">
-            <Button size="lg" className="w-full">
-              {t('whatIWant.emptyCta')}
-            </Button>
+          <Link
+            to="/onboarding"
+            className={cn(buttonVariants({ size: 'lg' }), 'w-full max-w-xs')}
+          >
+            {t('whatIWant.emptyCta')}
           </Link>
           <Button
             variant="outline"

@@ -27,7 +27,6 @@
     "@vercel/analytics": "^2.0.1",
     "@vercel/blob": "^0.27.3",
     "@vercel/og": "^0.11.1",
-    "@vercel/speed-insights": "^2.0.0",
     "ai": "^4.0.0",
     "i18next": "^26.3.1",
     "openapi-fetch": "^0.17.0",

@@ -1,5 +1,5 @@
 import { useReverification, useSession, useUser } from '@clerk/tanstack-react-start'
-import { Button, Card, CardContent, Heading } from '@beerolog/ui'
+import { Button, Card, CardContent, Heading, Input } from '@beerolog/ui'
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
@@ -9,9 +9,6 @@ import { clerkErrorMessage } from '../lib/clerkError'
 export const Route = createFileRoute('/account/security')({
   component: SecurityPage,
 })
-
-const inputClass =
-  'w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-brand-500'
 
 // Loosely typed view of Clerk's SessionWithActivities (avoids importing an
 // internal type path that shifts between versions).
@@ -98,20 +95,18 @@ function SecurityPage() {
           <form onSubmit={onChangePassword} className="flex flex-col gap-4">
             <label className="flex flex-col gap-1 text-sm font-medium text-neutral-700">
               {t('account.security.currentPassword')}
-              <input
+              <Input
                 type="password"
                 autoComplete="current-password"
-                className={inputClass}
                 value={pwd.current}
                 onChange={(e) => setPwd((p) => ({ ...p, current: e.target.value }))}
               />
             </label>
             <label className="flex flex-col gap-1 text-sm font-medium text-neutral-700">
               {t('account.security.newPassword')}
-              <input
+              <Input
                 type="password"
                 autoComplete="new-password"
-                className={inputClass}
                 value={pwd.next}
                 onChange={(e) => setPwd((p) => ({ ...p, next: e.target.value }))}
               />

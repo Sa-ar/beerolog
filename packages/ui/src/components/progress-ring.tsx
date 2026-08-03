@@ -22,7 +22,7 @@ export function ProgressRing({
 
   return (
     <div className="relative inline-flex items-center justify-center">
-      <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
+      <svg aria-hidden width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
         <circle
           cx={size / 2}
           cy={size / 2}

@@ -7,7 +7,7 @@ import { CatalogIcon } from '@beerolog/icons'
 import { Alert, Button, Heading } from '@beerolog/ui'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { capture } from '../lib/analytics'
 import { RecommendationBeerCard, type RecommendedBeer } from '../components/RecommendationBeerCard'
@@ -20,8 +20,10 @@ import { filterByAvailability } from '../lib/near-me-filter'
 import { clearGuestAnswers, readGuestAnswers } from '../lib/guest-answers'
 import { DEFAULT_MATCH_CALIBRATION, tonightMatchPercent } from '../lib/match-score'
 import { prunedAnswers } from '../lib/onboarding-quiz'
-import { PAGE_SHELL_X } from '@beerolog/shared'
-import { loadMoreErrorMessage, sessionStartErrorMessage } from '@beerolog/shared'
+import { PAGE_SHELL_X, loadMoreErrorMessage, sessionStartErrorMessage } from '@beerolog/shared'
+import { displayBeerName } from '../lib/display-beer-name'
+import { useDebouncedValue } from '../lib/use-debounced-value'
+import { LoadMoreError } from '../lib/session-intent'
 import {
   clearPendingSession,
   fetchBaselineRecommendations,
@@ -198,18 +200,23 @@ function RecommendationsContent() {
     return p
   })
   const locale = recommendationsLocale(i18n.language)
+  // Parse the stored tonight-session page once instead of on every render inside
+  // initialData. Paint it instantly unless a session-start or guest hydration is
+  // pending — those show the loading state while their query runs.
+  const initialStoredRecs = useMemo((): RecsData | undefined => {
+    if (pendingRequest || readGuestAnswers()) return undefined
+    const stored = readStoredRecommendations()
+    // Only reuse a real tonight-session page. A baseline-only payload must fall
+    // through to the live profile fetch, or staleTime:Infinity would pin the
+    // "same five beers" forever (matches the session guard in readStored...).
+    return stored?.request?.session && stored.results.length > 0
+      ? { ...stored, hasMore: hasMoreResultsAvailable(stored.results.length) }
+      : undefined
+  }, [pendingRequest])
   const recs = useQuery<RecsData, Error>({
     queryKey: ['recommendations'],
     queryFn: () => resolveInitialRecommendations(pendingRequest, locale),
-    // Paint stored recs instantly unless we have a session to start or guest
-    // answers to hydrate — those show the loading state while their query runs.
-    initialData: (): RecsData | undefined => {
-      if (pendingRequest || readGuestAnswers()) return undefined
-      const stored = readStoredRecommendations()
-      return stored && stored.results.length > 0
-        ? { ...stored, hasMore: hasMoreResultsAvailable(stored.results.length) }
-        : undefined
-    },
+    initialData: () => initialStoredRecs,
     initialDataUpdatedAt: 0,
     // Session-start / hydration are one-shot; retry is explicit via refetch().
     staleTime: Infinity,
@@ -244,13 +251,9 @@ function RecommendationsContent() {
   const areaFilter = features.findNearbySearch ? searchArea : ''
   const nearMeFilter = features.findNearbySearch && nearMeOnly
 
-  // Debounce the area filter so typing doesn't refetch on every keystroke. This
-  // effect only derives a value — the fetch itself is a react-query query below.
-  const [debouncedArea, setDebouncedArea] = useState(areaFilter)
-  useEffect(() => {
-    const handle = setTimeout(() => setDebouncedArea(areaFilter), 300)
-    return () => clearTimeout(handle)
-  }, [areaFilter])
+  // Debounce the area filter so typing doesn't refetch on every keystroke; the
+  // fetch itself is the react-query query below.
+  const debouncedArea = useDebouncedValue(areaFilter, 300)
 
   const shownIds = recs.data?.results.map((b) => b.id) ?? []
   // "Available at" venues for the shown beers. fetchAvailability resolves to {}
@@ -287,7 +290,13 @@ function RecommendationsContent() {
   })
   const taste = tasteQuery.data ?? null
 
-  const loadError = loadMore.isError ? loadMoreErrorMessage(t, loadMore.error) : null
+  // Coded load-more reasons carry a sentinel (not user copy); resolve them to a
+  // localized string here rather than leaking the English message verbatim.
+  function loadMoreError(error: unknown): string {
+    if (error instanceof LoadMoreError) return t(`errors.loadMoreReason.${error.code}`)
+    return loadMoreErrorMessage(t, error)
+  }
+  const loadError = loadMore.isError ? loadMoreError(loadMore.error) : null
 
   // Fire once when recommendations first render successfully.
   useEffect(() => {
@@ -387,8 +396,7 @@ function RecommendationsContent() {
   const topBeer = shownResults[0]
   async function shareResults() {
     if (!topBeer) return
-    const beerName =
-      i18n.language.startsWith('he') && topBeer.name_hebrew ? topBeer.name_hebrew : topBeer.name
+    const beerName = displayBeerName(topBeer, i18n.language)
     const url = `${window.location.origin}/beer/${topBeer.id}`
     const text = t('recommendations.shareText', { beer: beerName })
     if (typeof navigator !== 'undefined' && navigator.share) {
@@ -513,7 +521,12 @@ function RecommendationsContent() {
       {hasMore || loadError ? (
         <section className="border-t border-neutral-200 pt-8 pb-2">
           {loadError ? (
-            <Alert className="mb-4" variant="error" onRetry={() => loadMore.mutate(results)}>
+            <Alert
+              className="mb-4"
+              variant="error"
+              onRetry={() => loadMore.mutate(results)}
+              retryLabel={t('common.tryAgain')}
+            >
               {loadError}
             </Alert>
           ) : null}

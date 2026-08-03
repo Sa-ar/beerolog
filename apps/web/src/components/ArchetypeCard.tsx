@@ -47,7 +47,11 @@ export function ArchetypeCard({ archetypeKey, variant }: ArchetypeCardProps) {
   const meta = ARCHETYPES[archetypeKey]
   const name = t(archetypeNameKey(archetypeKey))
   const tagline = t(archetypeTaglineKey(archetypeKey))
-  const traits = t(archetypeTraitsKey(archetypeKey), { returnObjects: true }) as string[]
+  // i18next returns the raw string (not an array) if the traits key is missing or
+  // misconfigured; guard so a bad key renders no traits instead of crashing the
+  // card on `.map`.
+  const rawTraits = t(archetypeTraitsKey(archetypeKey), { returnObjects: true })
+  const traits = Array.isArray(rawTraits) ? (rawTraits as string[]) : []
 
   const axes: RadarAxis[] = ARCHETYPE_RADAR_AXES.map((key) => ({ key, value: meta.radar[key] }))
   const labels: Record<string, string> = Object.fromEntries(

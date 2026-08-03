@@ -46,7 +46,9 @@ export function useIconCatalog() {
   return useContext(IconCatalogContext)
 }
 
-const GROUP_TO_CATALOG_KEY: Record<CatalogIconGroup, keyof IconCatalog> = {
+// `action` icons are static-only (UI affordances built in the icon factory), so
+// they have no server-generated catalog bucket — the map is partial by design.
+const GROUP_TO_CATALOG_KEY: Partial<Record<CatalogIconGroup, keyof IconCatalog>> = {
   'session.vibe': 'session_vibes',
   'session.abv': 'session_abv',
   journey: 'journey',
@@ -56,5 +58,7 @@ const GROUP_TO_CATALOG_KEY: Record<CatalogIconGroup, keyof IconCatalog> = {
 
 export function useCatalogSvg(group: CatalogIconGroup, iconKey: string): string | null {
   const { catalog } = useIconCatalog()
-  return catalogLookup(catalog, GROUP_TO_CATALOG_KEY[group], iconKey)
+  const catalogKey = GROUP_TO_CATALOG_KEY[group]
+  if (!catalogKey) return null
+  return catalogLookup(catalog, catalogKey, iconKey)
 }

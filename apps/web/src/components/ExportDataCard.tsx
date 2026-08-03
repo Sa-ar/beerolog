@@ -1,27 +1,21 @@
 import { Card, CardContent, Heading } from '@beerolog/ui'
-import { useState } from 'react'
+import { useMutation } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { apiClient } from '../lib/api-client/client'
 
 // Right-to-portability UI. Fetches GET /me/export and offers the JSON for
-// download / inspection.
+// download / inspection. Server state lives in a mutation; loading/error derive
+// from its status rather than hand-rolled useState + async.
 export function ExportDataCard() {
   const { t } = useTranslation()
-  const [json, setJson] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(false)
-
-  async function handleExport() {
-    setError(false)
-    setLoading(true)
-    const { data, error: apiError } = await apiClient.GET('/me/export')
-    setLoading(false)
-    if (apiError || !data) {
-      setError(true)
-      return
-    }
-    setJson(JSON.stringify(data, null, 2))
-  }
+  const exportData = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await apiClient.GET('/me/export')
+      if (error || !data) throw new Error('Export failed')
+      return JSON.stringify(data, null, 2)
+    },
+  })
+  const json = exportData.data ?? null
 
   return (
     <Card>
@@ -30,13 +24,13 @@ export function ExportDataCard() {
         <p className="mb-4 text-sm text-neutral-600">{t('privacy.export.description')}</p>
         <button
           type="button"
-          onClick={handleExport}
-          disabled={loading}
+          onClick={() => exportData.mutate()}
+          disabled={exportData.isPending}
           className="rounded-lg border border-amber-200 px-3 py-2 text-sm font-medium text-brand-300 hover:bg-white/5 disabled:opacity-50"
         >
-          {loading ? t('privacy.export.loading') : t('privacy.export.cta')}
+          {exportData.isPending ? t('privacy.export.loading') : t('privacy.export.cta')}
         </button>
-        {error && (
+        {exportData.isError && (
           <p role="alert" className="mt-3 text-sm text-red-600">
             {t('privacy.export.error')}
           </p>

@@ -1,5 +1,5 @@
 import { useUser } from '@clerk/tanstack-react-start'
-import { Button, Card, CardContent } from '@beerolog/ui'
+import { Button, Card, CardContent, Input } from '@beerolog/ui'
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -10,9 +10,6 @@ import { clerkErrorMessage } from '../lib/clerkError'
 export const Route = createFileRoute('/account/details')({
   component: DetailsPage,
 })
-
-const inputClass =
-  'w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-brand-500'
 
 function DetailsPage() {
   const { t } = useTranslation()
@@ -111,24 +108,21 @@ function DetailsPage() {
         <form onSubmit={onSubmit} className="flex flex-col gap-4">
           <label className="flex flex-col gap-1 text-sm font-medium text-neutral-700">
             {t('account.details.firstName')}
-            <input
-              className={inputClass}
+            <Input
               value={form.firstName}
               onChange={(e) => setForm((f) => ({ ...f, firstName: e.target.value }))}
             />
           </label>
           <label className="flex flex-col gap-1 text-sm font-medium text-neutral-700">
             {t('account.details.lastName')}
-            <input
-              className={inputClass}
+            <Input
               value={form.lastName}
               onChange={(e) => setForm((f) => ({ ...f, lastName: e.target.value }))}
             />
           </label>
           <label className="flex flex-col gap-1 text-sm font-medium text-neutral-700">
             {t('account.details.username')}
-            <input
-              className={inputClass}
+            <Input
               value={form.username}
               onChange={(e) => setForm((f) => ({ ...f, username: e.target.value }))}
             />

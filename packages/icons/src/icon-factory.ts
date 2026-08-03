@@ -60,6 +60,21 @@ const MARKETING_BODIES: Record<string, string> = {
   'taste-quiz-hero': `<ellipse cx="100" cy="148" rx="56" ry="8" fill="${M}"/><rect x="62" y="48" width="76" height="88" rx="10" fill="${L}" stroke="${S}" stroke-width="2" stroke-dasharray="6 4"/><path d="M62 68 Q100 58 138 68" fill="none" stroke="${S}" stroke-width="2" opacity="0.5"/><circle cx="84" cy="92" r="6" fill="${S}" opacity="0.2"/><circle cx="116" cy="102" r="5" fill="${S}" opacity="0.15"/><text x="100" y="98" text-anchor="middle" font-size="28" fill="hsl(25 50% 15%)" opacity="0.35">?</text><circle cx="148" cy="28" r="18" fill="${M}" stroke="${S}" stroke-width="2"/><path d="M144 24c2-4 6-6 8-4" fill="none" stroke="${S}" stroke-width="1.5" stroke-linecap="round"/><circle cx="36" cy="36" r="16" fill="${M}" stroke="${S}" stroke-width="2"/><rect x="31" y="32" width="10" height="8" rx="2" fill="${S}" opacity="0.25"/><circle cx="100" cy="16" r="14" fill="${S}"/><path d="M96 16l3 3 5-6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`,
 }
 
+// UI action affordances (finding: emoji → @beerolog/icons). Stroke-forward,
+// brand-styled 32×32 glyphs that clearly name the control they sit on — cart
+// (shop), beer (bar), thumbs-up (confirm), block (gone), flag (report), close,
+// camera (menu scan), chat. Never emoji.
+const ACTION_BODIES: Record<string, string> = {
+  cart: `<path d="M5 7h3l3.2 13.5c.2.9 1 1.5 1.9 1.5h9l2.7-9H9" fill="none" stroke="${S}" stroke-width="${W}" stroke-linecap="round" stroke-linejoin="round"/><circle cx="13" cy="26" r="2.2" fill="${L}" stroke="${S}" stroke-width="${W}"/><circle cx="23" cy="26" r="2.2" fill="${L}" stroke="${S}" stroke-width="${W}"/>`,
+  beer: `<path d="M9 9h13v17c0 1.5-1 2.5-2.5 2.5h-8C10 28.5 9 27.5 9 26V9z" fill="${L}" stroke="${S}" stroke-width="${W}" stroke-linejoin="round"/><path d="M9 9c0-2.2 2.4-3.5 6.5-3.5S22 6.8 22 9" fill="none" stroke="${S}" stroke-width="${W}" stroke-linecap="round"/><path d="M22 13h3.3c1.5 0 2.7 1.2 2.7 2.9v3.2c0 1.7-1.2 2.9-2.7 2.9H22" fill="none" stroke="${S}" stroke-width="${W}"/><path d="M9 14h13" stroke="${S}" stroke-width="1.5" opacity="0.4"/>`,
+  'thumbs-up': `<path d="M10 15v11H7.5A1.5 1.5 0 0 1 6 24.5v-8A1.5 1.5 0 0 1 7.5 15H10z" fill="${M}" stroke="${S}" stroke-width="${W}" stroke-linejoin="round"/><path d="M10 15l4.5-8.5c1.6 0 2.9 1.3 2.9 2.9L16.5 14h6.6c1.5 0 2.6 1.4 2.3 2.9l-1.5 7.5c-.2 1.2-1.3 2.1-2.5 2.1H10V15z" fill="${L}" stroke="${S}" stroke-width="${W}" stroke-linejoin="round"/>`,
+  block: `<circle cx="16" cy="16" r="11" fill="none" stroke="${S}" stroke-width="${W}"/><path d="M8.5 8.5l15 15" stroke="${S}" stroke-width="${W}" stroke-linecap="round"/>`,
+  flag: `<path d="M9 4v25" stroke="${S}" stroke-width="${W}" stroke-linecap="round"/><path d="M9 5h15l-3.2 5.2L24 15.5H9z" fill="${M}" stroke="${S}" stroke-width="${W}" stroke-linejoin="round"/>`,
+  close: `<path d="M9 9l14 14M23 9L9 23" stroke="${S}" stroke-width="${W}" stroke-linecap="round"/>`,
+  camera: `<path d="M4 11h5l2.2-3.2h9.6L23 11h5c1.1 0 2 .9 2 2v11.5c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V13c0-1.1.9-2 2-2z" fill="${L}" stroke="${S}" stroke-width="${W}" stroke-linejoin="round"/><circle cx="16" cy="18.5" r="5" fill="${M}" stroke="${S}" stroke-width="${W}"/>`,
+  chat: `<path d="M6 6h20c1.1 0 2 .9 2 2v11c0 1.1-.9 2-2 2H14l-6 5v-5H6c-1.1 0-2-.9-2-2V8c0-1.1.9-2 2-2z" fill="${L}" stroke="${S}" stroke-width="${W}" stroke-linejoin="round"/><path d="M10 11.5h12M10 15.5h8" stroke="${S}" stroke-width="1.6" stroke-linecap="round" opacity="0.55"/>`,
+}
+
 // Archetype icons (slice #286): one per shareable taste archetype. The six
 // flavor-led archetypes reuse the flavor artwork (maximally representative); the
 // scalar-led ones get their own brand-style bodies. All are 32x32 @beerolog/icons
@@ -102,6 +117,9 @@ for (const [key, body] of Object.entries(MARKETING_BODIES)) {
 }
 for (const [key, body] of Object.entries(ARCHETYPE_BODIES)) {
   registerPurpose(`archetype:${key}`, '0 0 32 32', body)
+}
+for (const [key, body] of Object.entries(ACTION_BODIES)) {
+  registerPurpose(`action:${key}`, '0 0 32 32', body)
 }
 
 function flavorBody(key: string): string {
@@ -150,6 +168,10 @@ export function buildCatalogSvg(group: CatalogIconGroup, iconKey: string): strin
     case 'marketing': {
       const body = MARKETING_BODIES[iconKey]
       return body ? wrap('0 0 200 160', body) : null
+    }
+    case 'action': {
+      const body = ACTION_BODIES[iconKey]
+      return body ? wrap('0 0 32 32', body) : null
     }
     default:
       return null

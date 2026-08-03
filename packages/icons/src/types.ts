@@ -4,6 +4,7 @@ export type CatalogIconGroup =
   | 'journey'
   | 'flavor'
   | 'marketing'
+  | 'action'
 
 export type CatalogIconItem = {
   key: string

@@ -41,8 +41,8 @@ def enforce_non_development_safety(settings: Settings) -> None:
         if not getattr(settings, name):
             problems.append(f"{name.upper()} missing")
 
-    if settings.api_secret == "dev-secret":
-        problems.append("API_SECRET is still the dev default")
+    if not settings.api_secret or settings.api_secret == "dev-secret":
+        problems.append("API_SECRET is empty or still the dev default")
 
     origin_problem = _validate_origins(settings.cors_allowed_origins)
     if origin_problem:

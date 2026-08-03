@@ -11,11 +11,14 @@ import {
   GoogleButton,
   clerkError,
 } from '../components/AuthLayout'
+import { safeNextPath } from '../lib/safe-next-path'
 
 // Splat route so Clerk's OAuth redirect can land on /signup/sso-callback.
 export const Route = createFileRoute('/signup/$')({
-  validateSearch: (search: Record<string, unknown>) =>
-    typeof search['next'] === 'string' ? { next: search['next'] } : {},
+  validateSearch: (search: Record<string, unknown>) => {
+    const next = safeNextPath(search['next'])
+    return next ? { next } : {}
+  },
   component: SignUpPage,
 })
 

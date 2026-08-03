@@ -25,6 +25,24 @@ export type StoredSessionRequest = {
   session?: SessionRequest
 }
 
+// Coded load-more failures. The message is a sentinel code (not user copy), so
+// the display layer maps it to a localized string instead of leaking English
+// through apiOrFallback. See lib/user-facing-errors.ts (loadMoreErrorMessage).
+export const LOAD_MORE_ERROR = {
+  noSession: 'no_session',
+  noStoredPicks: 'no_stored_picks',
+} as const
+export type LoadMoreErrorCode = (typeof LOAD_MORE_ERROR)[keyof typeof LOAD_MORE_ERROR]
+
+export class LoadMoreError extends Error {
+  readonly code: LoadMoreErrorCode
+  constructor(code: LoadMoreErrorCode) {
+    super(code)
+    this.name = 'LoadMoreError'
+    this.code = code
+  }
+}
+
 export type RecommendationsPayload = {
   results: RecommendedBeer[]
   alpha: number
@@ -147,7 +165,7 @@ function resolveSessionRequest(stored: RecommendationsPayload): StoredSessionReq
   const legacy = readLegacyRequest()
   if (legacy) return legacy
 
-  throw new Error('Start a new session from your dashboard to load more picks.')
+  throw new LoadMoreError(LOAD_MORE_ERROR.noSession)
 }
 
 // Baseline-only fetch (no tonight session intent) — used by post-signup
@@ -226,7 +244,7 @@ export async function loadMoreRecommendations(
 ): Promise<{ results: RecommendedBeer[]; hasMore: boolean }> {
   const stored = readStoredRecommendations()
   if (!stored) {
-    throw new Error('No saved picks — start a new session first.')
+    throw new LoadMoreError(LOAD_MORE_ERROR.noStoredPicks)
   }
 
   const request = resolveSessionRequest(stored)

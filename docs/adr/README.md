@@ -31,3 +31,4 @@ Write or update an ADR when a decision changes product boundary, system shape, o
 - `0008-shared-catalog-with-market-tags.md`
 - `0009-international-scaling-and-white-label-tenancy.md`
 - `0010-tenant-data-governance.md`
+- `0011-analytics-k-anonymity-floor.md`

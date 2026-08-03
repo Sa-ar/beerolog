@@ -138,7 +138,10 @@ export const Route = createFileRoute('/api/og/taste/$key')({
 
         // Resolve copy from i18n server-side (no react context here).
         const t = createI18n(lang).getFixedT(lang)
-        const traits = t(archetypeTraitsKey(key), { returnObjects: true }) as string[]
+        // Guard: i18next returns a string (not an array) for a missing/misconfigured
+        // traits key; `.map` on it would 500 the image. Fall back to no traits.
+        const rawTraits = t(archetypeTraitsKey(key), { returnObjects: true })
+        const traits = Array.isArray(rawTraits) ? (rawTraits as string[]) : []
 
         const font = await loadOgFont()
         // Lazy-load @vercel/og ONLY inside the handler. Importing it at module

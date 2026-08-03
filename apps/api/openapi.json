@@ -92,6 +92,7 @@
           "price_ils": {
             "anyOf": [
               {
+                "minimum": 0.0,
                 "type": "integer"
               },
               {
@@ -99,6 +100,22 @@
               }
             ],
             "title": "Price Ils"
+          },
+          "serving_format": {
+            "anyOf": [
+              {
+                "enum": [
+                  "draft",
+                  "bottle",
+                  "can"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Serving Format"
           }
         },
         "required": [
@@ -1292,6 +1309,96 @@
         "title": "DominantComponent",
         "type": "string"
       },
+      "DraftOut": {
+        "properties": {
+          "abv": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abv"
+          },
+          "confidence": {
+            "title": "Confidence",
+            "type": "number"
+          },
+          "flavor_vector": {
+            "items": {
+              "type": "number"
+            },
+            "title": "Flavor Vector",
+            "type": "array"
+          },
+          "ibu": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ibu"
+          },
+          "style": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Style"
+          },
+          "tasting_notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tasting Notes"
+          }
+        },
+        "required": [
+          "flavor_vector",
+          "confidence"
+        ],
+        "title": "DraftOut",
+        "type": "object"
+      },
+      "EnrichRequest": {
+        "properties": {
+          "brewery": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brewery"
+          },
+          "name": {
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "EnrichRequest",
+        "type": "object"
+      },
       "ExportBaselineTaste": {
         "properties": {
           "bitterness": {
@@ -1397,57 +1504,20 @@
         "title": "FlavorCue",
         "type": "string"
       },
-      "GapDraft": {
+      "GapSubmitRequest": {
         "properties": {
           "abv": {
-            "title": "Abv",
-            "type": "number"
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abv"
           },
           "brewery": {
-            "title": "Brewery",
-            "type": "string"
-          },
-          "name": {
-            "title": "Name",
-            "type": "string"
-          },
-          "source": {
-            "title": "Source",
-            "type": "string"
-          },
-          "style": {
-            "title": "Style",
-            "type": "string"
-          },
-          "tasting_notes": {
-            "default": "",
-            "title": "Tasting Notes",
-            "type": "string"
-          }
-        },
-        "required": [
-          "name",
-          "brewery",
-          "style",
-          "abv",
-          "source"
-        ],
-        "title": "GapDraft",
-        "type": "object"
-      },
-      "GapRequest": {
-        "properties": {
-          "brewery": {
-            "minLength": 1,
-            "title": "Brewery",
-            "type": "string"
-          },
-          "name": {
-            "minLength": 1,
-            "title": "Name",
-            "type": "string"
-          },
-          "style_hint": {
             "anyOf": [
               {
                 "type": "string"
@@ -1456,14 +1526,82 @@
                 "type": "null"
               }
             ],
-            "title": "Style Hint"
+            "title": "Brewery"
+          },
+          "flavor_vector": {
+            "anyOf": [
+              {
+                "items": {
+                  "maximum": 1.0,
+                  "minimum": 0.0,
+                  "type": "number"
+                },
+                "maxItems": 7,
+                "minItems": 7,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Flavor Vector"
+          },
+          "ibu": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ibu"
+          },
+          "name": {
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "style": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Style"
+          },
+          "tasting_notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tasting Notes"
           }
         },
         "required": [
-          "name",
-          "brewery"
+          "name"
         ],
-        "title": "GapRequest",
+        "title": "GapSubmitRequest",
+        "type": "object"
+      },
+      "GapSubmitResponse": {
+        "properties": {
+          "gap_id": {
+            "title": "Gap Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "gap_id"
+        ],
+        "title": "GapSubmitResponse",
         "type": "object"
       },
       "GuestRecommendationsResponse": {
@@ -3102,6 +3240,40 @@
         "title": "TasteProfilePersona",
         "type": "object"
       },
+      "UpdateDetailsRequest": {
+        "properties": {
+          "price_ils": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price Ils"
+          },
+          "serving_format": {
+            "anyOf": [
+              {
+                "enum": [
+                  "draft",
+                  "bottle",
+                  "can"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Serving Format"
+          }
+        },
+        "title": "UpdateDetailsRequest",
+        "type": "object"
+      },
       "ValidationError": {
         "properties": {
           "ctx": {
@@ -3463,6 +3635,28 @@
             "title": "Beer Id",
             "type": "string"
           },
+          "brewery": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brewery"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
           "price_ils": {
             "anyOf": [
               {
@@ -3513,6 +3707,11 @@
       }
     },
     "securitySchemes": {
+      "APIKeyHeader": {
+        "in": "header",
+        "name": "x-admin-secret",
+        "type": "apiKey"
+      },
       "HTTPBearer": {
         "scheme": "bearer",
         "type": "http"
@@ -3528,18 +3727,6 @@
     "/admin/moderation/flags": {
       "get": {
         "operationId": "listOpenFlags",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-admin-secret",
-            "required": false,
-            "schema": {
-              "default": "",
-              "title": "X-Admin-Secret",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -3554,18 +3741,13 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
         "summary": "List Flags",
         "tags": [
           "admin"
@@ -3575,18 +3757,6 @@
     "/admin/moderation/flags/resolve": {
       "post": {
         "operationId": "resolveFlags",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-admin-secret",
-            "required": false,
-            "schema": {
-              "default": "",
-              "title": "X-Admin-Secret",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -3621,6 +3791,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
         "summary": "Resolve Flags",
         "tags": [
           "admin"
@@ -3630,18 +3805,6 @@
     "/admin/moderation/reviews": {
       "get": {
         "operationId": "listOpenReviews",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-admin-secret",
-            "required": false,
-            "schema": {
-              "default": "",
-              "title": "X-Admin-Secret",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -3656,18 +3819,13 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
         "summary": "List Reviews",
         "tags": [
           "admin"
@@ -3684,16 +3842,6 @@
             "required": true,
             "schema": {
               "title": "Review Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-admin-secret",
-            "required": false,
-            "schema": {
-              "default": "",
-              "title": "X-Admin-Secret",
               "type": "string"
             }
           }
@@ -3713,6 +3861,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
         "summary": "Resolve Review",
         "tags": [
           "admin"
@@ -5343,6 +5496,63 @@
         ]
       }
     },
+    "/staff/venues/{venue_id}/catalog/enrich": {
+      "post": {
+        "operationId": "enrichCatalogGap",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "venue_id",
+            "required": true,
+            "schema": {
+              "title": "Venue Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnrichRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DraftOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Enrich Catalog Gap",
+        "tags": [
+          "staff"
+        ]
+      }
+    },
     "/staff/venues/{venue_id}/catalog/gaps": {
       "post": {
         "operationId": "submitCatalogGap",
@@ -5361,18 +5571,18 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/GapRequest"
+                "$ref": "#/components/schemas/GapSubmitRequest"
               }
             }
           },
           "required": true
         },
         "responses": {
-          "200": {
+          "201": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GapDraft"
+                  "$ref": "#/components/schemas/GapSubmitResponse"
                 }
               }
             },
@@ -5600,6 +5810,65 @@
           }
         ],
         "summary": "Toggle Menu Item",
+        "tags": [
+          "staff"
+        ]
+      }
+    },
+    "/staff/venues/{venue_id}/menu/{beer_id}/details": {
+      "patch": {
+        "operationId": "updateVenueMenuItemDetails",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "venue_id",
+            "required": true,
+            "schema": {
+              "title": "Venue Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "beer_id",
+            "required": true,
+            "schema": {
+              "title": "Beer Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDetailsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Update Menu Item Details",
         "tags": [
           "staff"
         ]

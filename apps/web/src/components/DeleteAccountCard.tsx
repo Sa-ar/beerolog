@@ -1,5 +1,6 @@
 import { Card, CardContent, Heading } from '@beerolog/ui'
 import { useClerk } from '@clerk/tanstack-react-start'
+import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { apiClient } from '../lib/api-client/client'
@@ -11,23 +12,38 @@ export function DeleteAccountCard() {
   const { signOut } = useClerk()
   const [confirming, setConfirming] = useState(false)
   const [phrase, setPhrase] = useState('')
-  const [deleting, setDeleting] = useState(false)
-  const [error, setError] = useState(false)
+  // Once DELETE /me succeeds the account is gone — never send it again. If
+  // sign-out then fails, the only action left is retrying sign-out.
+  const [accountDeleted, setAccountDeleted] = useState(false)
 
   const expected = t('privacy.delete.confirmPhrase')
-  const canDelete = phrase.trim().toLowerCase() === expected.toLowerCase() && !deleting
 
-  async function handleDelete() {
-    setError(false)
-    setDeleting(true)
-    const { data, error: apiError } = await apiClient.DELETE('/me')
-    if (apiError || !data?.deleted) {
-      setDeleting(false)
-      setError(true)
-      return
-    }
-    await signOut()
+  // Server state via react-query so a thrown signOut() (or a failed DELETE) resets
+  // the busy state and surfaces an error, instead of hanging on "deleting" forever.
+  const del = useMutation({
+    mutationFn: async () => {
+      if (!accountDeleted) {
+        const { data, error: apiError } = await apiClient.DELETE('/me')
+        if (apiError || !data?.deleted) throw new Error('delete-account-failed')
+        setAccountDeleted(true)
+      }
+      await signOut()
+    },
+  })
+  const deleting = del.isPending
+  const error = del.isError
+  const phraseOk = phrase.trim().toLowerCase() === expected.toLowerCase()
+  // After deletion the phrase gate is moot — the only remaining action is retry.
+  const canSubmit = !deleting && (accountDeleted || phraseOk)
+
+  function handleDelete() {
+    if (!canSubmit) return
+    del.mutate()
   }
+
+  let submitLabel = t('privacy.delete.confirm')
+  if (deleting) submitLabel = t('privacy.delete.deleting')
+  else if (accountDeleted) submitLabel = t('privacy.delete.retrySignOut')
 
   return (
     <Card>
@@ -57,24 +73,24 @@ export function DeleteAccountCard() {
             />
             {error && (
               <p role="alert" className="text-sm text-red-600">
-                {t('privacy.delete.error')}
+                {accountDeleted ? t('privacy.delete.signOutError') : t('privacy.delete.error')}
               </p>
             )}
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={handleDelete}
-                disabled={!canDelete}
+                disabled={!canSubmit}
                 className="rounded-lg bg-red-600 px-3 py-2 text-sm font-medium text-[#fff] disabled:opacity-50"
               >
-                {deleting ? t('privacy.delete.deleting') : t('privacy.delete.confirm')}
+                {submitLabel}
               </button>
               <button
                 type="button"
                 onClick={() => {
                   setConfirming(false)
                   setPhrase('')
-                  setError(false)
+                  del.reset()
                 }}
                 disabled={deleting}
                 className="rounded-lg px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-50"

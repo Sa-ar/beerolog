@@ -1,8 +1,10 @@
 import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { renderWithI18n } from '../test/render'
+
+const signOutMock = vi.hoisted(() => vi.fn())
 
 vi.mock('@tanstack/react-router', () => ({
   Link: ({
@@ -38,13 +40,39 @@ vi.mock('@clerk/tanstack-react-start', () => ({
     },
   }),
   useClerk: () => ({
-    signOut: vi.fn(),
+    signOut: signOutMock,
   }),
 }))
 
 const { UserMenu } = await import('./UserMenu')
 
 describe('UserMenu', () => {
+  beforeEach(() => {
+    signOutMock.mockReset()
+  })
+
+  it('does not fire a second sign-out while one is in flight', async () => {
+    let resolveSignOut: () => void = () => {}
+    signOutMock.mockReturnValue(new Promise<void>((r) => (resolveSignOut = r)))
+    const user = userEvent.setup()
+    renderWithI18n(<UserMenu />, 'en')
+    await user.click(screen.getByRole('button', { name: /account menu/i }))
+    const logout = screen.getByRole('menuitem', { name: /log out/i })
+    await user.click(logout)
+    await user.click(logout) // second click while the first is still pending
+    expect(signOutMock).toHaveBeenCalledTimes(1)
+    resolveSignOut()
+  })
+
+  it('surfaces a retry alert when sign-out fails', async () => {
+    signOutMock.mockRejectedValue(new Error('sign-out failed'))
+    const user = userEvent.setup()
+    renderWithI18n(<UserMenu />, 'en')
+    await user.click(screen.getByRole('button', { name: /account menu/i }))
+    await user.click(screen.getByRole('menuitem', { name: /log out/i }))
+    expect(await screen.findByRole('alert')).toBeInTheDocument()
+  })
+
   it('lists every account destination plus Log out', async () => {
     const user = userEvent.setup()
     renderWithI18n(<UserMenu />, 'en')

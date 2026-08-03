@@ -74,10 +74,6 @@ function ProfileTastePage() {
     return <TasteProfileEmptyState greeting={greeting} />
   }
 
-  if (!profile.data || !('ready' in profile.data)) {
-    return <TasteProfileLoadingState greeting={greeting} />
-  }
-
   return (
     <div className="flex flex-col gap-8">
       <WantToTryList />

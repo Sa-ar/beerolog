@@ -548,6 +548,42 @@ export const venueMenuItems = pgTable(
   ],
 )
 
+// Catalog gaps: a beer a venue wants that isn't in the shared catalog yet.
+// Staff submit a name; an LLM pre-fills a draft; a catalog.submit holder confirms.
+// The row is queued (status=pending) for operator review before it becomes a
+// canonical `beers` record — so a gap is NOT yet a venue_menu_items entry (those
+// reference canonical beers only). See docs/prds/staff-portal.md menu/catalog flow.
+export const catalogGapStatusEnum = pgEnum('catalog_gap_status', [
+  'pending',
+  'approved',
+  'rejected',
+])
+
+export const catalogGaps = pgTable(
+  'catalog_gaps',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    venueId: text('venue_id')
+      .notNull()
+      .references(() => venues.id, { onDelete: 'cascade' }),
+    submittedBy: uuid('submitted_by').references(() => staffMembers.id, { onDelete: 'set null' }),
+    name: text('name').notNull(),
+    brewery: text('brewery'),
+    style: text('style'),
+    abv: real('abv'),
+    ibu: integer('ibu'),
+    tastingNotes: text('tasting_notes'),
+    flavorVector: real('flavor_vector').array(),
+    status: catalogGapStatusEnum('status').notNull().default('pending'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('catalog_gaps_status_idx').on(t.status),
+    index('catalog_gaps_venue_idx').on(t.venueId),
+  ],
+)
+
 // In-venue consumer visit log (white-label B1, #346). Written when a guest or
 // signed-in user lands on /v/$venueSlug via QR/link; funnel + area attribution.
 export const visitSourceEnum = pgEnum('visit_source', ['qr', 'link'])
