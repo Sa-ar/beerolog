@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import pytest  # type: ignore[import-not-found]
 
-from tests.eval.offline_embedding import AXES, PHRASE_WEIGHTS, project
 from app.api_contracts import (
     AbvIntent,
     AdventureLevel,
@@ -28,6 +27,7 @@ from app.api_contracts import (
     Vibe,
 )
 from app.services import baseline_taste, session_intent
+from tests.eval.offline_embedding import AXES, PHRASE_WEIGHTS, project
 
 # Sentences the composers emit that legitimately carry no axis signal.
 NON_SIGNAL = {
