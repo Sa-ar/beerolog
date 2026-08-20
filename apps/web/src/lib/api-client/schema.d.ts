@@ -4,244 +4,6 @@
  */
 
 export interface paths {
-    "/admin/moderation/flags": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List Flags */
-        get: operations["listOpenFlags"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/admin/moderation/flags/resolve": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Resolve Flags */
-        post: operations["resolveFlags"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/admin/moderation/reviews": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List Reviews */
-        get: operations["listOpenReviews"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/admin/moderation/reviews/{review_id}/resolve": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Resolve Review */
-        post: operations["resolveReview"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/availability": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Post Availability */
-        post: operations["postAvailability"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/availability/add": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Post Add Place */
-        post: operations["postAddPlace"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/availability/flag": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Post Availability Flag */
-        post: operations["postAvailabilityFlag"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/availability/reports": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Post Availability Report */
-        post: operations["postAvailabilityReport"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/catalog": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List Catalog */
-        get: operations["listCatalog"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/catalog/recommend": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Recommend Catalog */
-        post: operations["recommendCatalog"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/catalog/search": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Search Catalog Route */
-        get: operations["searchCatalog"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/catalog/{beer_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get Catalog Beer */
-        get: operations["getCatalogBeer"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/debug/recommendations": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Debug Recommendations */
-        get: operations["debugRecommendations"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/guest-recommendations": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Post Guest Recommendations */
-        post: operations["postGuestRecommendations"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/health": {
         parameters: {
             query?: never;
@@ -293,7 +55,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/me": {
+    "/menu/scan": {
         parameters: {
             query?: never;
             header?: never;
@@ -302,9 +64,65 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post?: never;
-        /** Delete My Account */
-        delete: operations["deleteMyAccount"];
+        /** Scan Menu Image */
+        post: operations["scanMenu"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/menu/rank": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Rank Menu Beers
+         * @description Rank an explicit set of catalog beers against the user's taste — the manual
+         *     'add a beer we missed' path. Same taste_fit scale as /menu/scan so results
+         *     merge cleanly into the same comparison list. Unknown ids are dropped.
+         */
+        post: operations["rankMenuBeers"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/menu/chat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Menu Chat */
+        post: operations["menuChat"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/onboarding": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Complete Onboarding */
+        post: operations["completeOnboarding"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -319,6 +137,74 @@ export interface paths {
         };
         /** Get My Baseline Taste */
         get: operations["getMyBaselineTaste"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/recommendations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Post Recommendations */
+        post: operations["postRecommendations"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/guest-recommendations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Post Guest Recommendations */
+        post: operations["postGuestRecommendations"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ratings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Rating */
+        post: operations["createRating"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/ratings/map": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get My Ratings Map */
+        get: operations["getMyRatingsMap"];
         put?: never;
         post?: never;
         delete?: never;
@@ -344,23 +230,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/me/export": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Export My Account */
-        get: operations["exportMyAccount"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/me/ratings": {
         parameters: {
             query?: never;
@@ -370,23 +239,6 @@ export interface paths {
         };
         /** List My Ratings */
         get: operations["listMyRatings"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/me/ratings/map": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get My Ratings Map */
-        get: operations["getMyRatingsMap"];
         put?: never;
         post?: never;
         delete?: never;
@@ -430,88 +282,15 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/menu/chat": {
+    "/catalog": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get?: never;
-        put?: never;
-        /** Menu Chat */
-        post: operations["menuChat"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/menu/rank": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Rank Menu Beers
-         * @description Rank an explicit set of catalog beers against the user's taste — the manual
-         *     'add a beer we missed' path. Same taste_fit scale as /menu/scan so results
-         *     merge cleanly into the same comparison list. Unknown ids are dropped.
-         */
-        post: operations["rankMenuBeers"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/menu/scan": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Scan Menu Image */
-        post: operations["scanMenu"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/onboarding": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Complete Onboarding */
-        post: operations["completeOnboarding"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/places": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List Places */
-        get: operations["listPlaces"];
+        /** List Catalog */
+        get: operations["listCatalog"];
         put?: never;
         post?: never;
         delete?: never;
@@ -520,15 +299,15 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/public/venues/{slug}": {
+    "/catalog/search": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get Published Venue */
-        get: operations["getPublishedVenue"];
+        /** Search Catalog Route */
+        get: operations["searchCatalog"];
         put?: never;
         post?: never;
         delete?: never;
@@ -537,7 +316,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/public/venues/{slug}/visit": {
+    "/catalog/recommend": {
         parameters: {
             query?: never;
             header?: never;
@@ -546,8 +325,42 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Post Venue Visit */
-        post: operations["recordVenueVisit"];
+        /** Recommend Catalog */
+        post: operations["recommendCatalog"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/catalog/{beer_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Catalog Beer */
+        get: operations["getCatalogBeer"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ratings/outcome": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Set Rating Outcome */
+        post: operations["setRatingOutcome"];
         delete?: never;
         options?: never;
         head?: never;
@@ -588,212 +401,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/ratings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Create Rating */
-        post: operations["createRating"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/ratings/outcome": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Set Rating Outcome */
-        post: operations["setRatingOutcome"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/recommendations": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Post Recommendations */
-        post: operations["postRecommendations"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/staff/orgs": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Onboard Org */
-        post: operations["onboardOrg"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/staff/orgs/{org_id}/analytics": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Org Rollup */
-        get: operations["getOrgRollup"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/staff/orgs/{org_id}/invites": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Create Staff Invite */
-        post: operations["createStaffInvite"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/staff/orgs/{org_id}/overrides": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Set Staff Override */
-        post: operations["setStaffOverride"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/staff/venues/{venue_id}/analytics": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Venue Analytics */
-        get: operations["getVenueAnalytics"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/staff/venues/{venue_id}/catalog/enrich": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Enrich Catalog Gap */
-        post: operations["enrichCatalogGap"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/staff/venues/{venue_id}/catalog/gaps": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Submit Catalog Gap */
-        post: operations["submitCatalogGap"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/staff/venues/{venue_id}/demand": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Venue Demand */
-        get: operations["getVenueDemand"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/staff/venues/{venue_id}/menu": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List Menu */
-        get: operations["listVenueMenu"];
-        put?: never;
-        /** Add Menu Item */
-        post: operations["addVenueMenuItem"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/staff/venues/{venue_id}/menu/{beer_id}": {
+    "/me": {
         parameters: {
             query?: never;
             header?: never;
@@ -803,39 +411,22 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        delete?: never;
+        /** Delete My Account */
+        delete: operations["deleteMyAccount"];
         options?: never;
         head?: never;
-        /** Toggle Menu Item */
-        patch: operations["toggleVenueMenuItem"];
+        patch?: never;
         trace?: never;
     };
-    "/staff/venues/{venue_id}/menu/{beer_id}/details": {
+    "/me/export": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /** Update Menu Item Details */
-        patch: operations["updateVenueMenuItemDetails"];
-        trace?: never;
-    };
-    "/staff/venues/{venue_id}/orders": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List Venue Orders */
-        get: operations["listVenueOrders"];
+        /** Export My Account */
+        get: operations["exportMyAccount"];
         put?: never;
         post?: never;
         delete?: never;
@@ -844,68 +435,17 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/staff/venues/{venue_id}/orders/{order_id}": {
+    "/debug/recommendations": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** Debug Recommendations */
+        get: operations["debugRecommendations"];
         put?: never;
         post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /** Set Order Status */
-        patch: operations["setOrderStatus"];
-        trace?: never;
-    };
-    "/staff/venues/{venue_id}/qr": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Venue Qr */
-        get: operations["getVenueQr"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/staff/venues/{venue_id}/returns": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Venue Returns */
-        get: operations["getVenueReturns"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/venues/{slug}/orders": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Place Order */
-        post: operations["placeOrder"];
         delete?: never;
         options?: never;
         head?: never;
@@ -934,49 +474,15 @@ export interface components {
          * @description Portable copy of a user's Beerolog-owned data (no internal embedding).
          */
         AccountExport: {
-            baseline_taste: components["schemas"]["ExportBaselineTaste"] | null;
-            /** Display Name */
-            display_name: string | null;
-            /** Email */
-            email: string | null;
             /** Id */
             id: string;
+            /** Email */
+            email: string | null;
+            /** Display Name */
+            display_name: string | null;
+            baseline_taste: components["schemas"]["ExportBaselineTaste"] | null;
             /** Ratings */
             ratings: components["schemas"]["ExportRating"][];
-        };
-        /** AddMenuItemRequest */
-        AddMenuItemRequest: {
-            /** Beer Id */
-            beer_id: string;
-            /** Price Ils */
-            price_ils?: number | null;
-            /** Serving Format */
-            serving_format?: ("draft" | "bottle" | "can") | null;
-        };
-        /** AddPlaceRequest */
-        AddPlaceRequest: {
-            /** Beer Id */
-            beer_id: string;
-            /**
-             * Force New
-             * @default false
-             */
-            force_new: boolean;
-            venue?: components["schemas"]["NewVenueInput"] | null;
-            /** Venue Id */
-            venue_id?: string | null;
-        };
-        /** AddPlaceResponse */
-        AddPlaceResponse: {
-            /** Reason */
-            reason?: string | null;
-            /**
-             * Status
-             * @enum {string}
-             */
-            status: "created" | "attached" | "suggested" | "rejected";
-            /** Venue Id */
-            venue_id?: string | null;
         };
         /**
          * AdventureLevel
@@ -1000,84 +506,6 @@ export interface components {
          * @enum {string}
          */
         ArchetypeKey: "adventurer" | "hop-chaser" | "bitter-zealot" | "malt-romantic" | "roast-devotee" | "fruit-forward" | "sour-seeker" | "smoke-wanderer" | "heavyweight" | "easy-drinker" | "crisp-classicist" | "balanced-explorer";
-        /** AvailabilityFlagRequest */
-        AvailabilityFlagRequest: {
-            /** Beer Id */
-            beer_id: string;
-            /** Reason */
-            reason?: string | null;
-            /** Venue Id */
-            venue_id: string;
-        };
-        /** AvailabilityFlagResponse */
-        AvailabilityFlagResponse: {
-            /** Accepted */
-            accepted: boolean;
-            /**
-             * Hidden
-             * @default false
-             */
-            hidden: boolean;
-        };
-        /** AvailabilityReportRequest */
-        AvailabilityReportRequest: {
-            /** Beer Id */
-            beer_id: string;
-            /**
-             * Kind
-             * @enum {string}
-             */
-            kind: "user_confirm" | "user_deny";
-            /** Venue Id */
-            venue_id: string;
-        };
-        /** AvailabilityReportResponse */
-        AvailabilityReportResponse: {
-            /** Accepted */
-            accepted: boolean;
-            /** Reason */
-            reason?: string | null;
-        };
-        /** AvailabilityRequest */
-        AvailabilityRequest: {
-            /** Area */
-            area?: string | null;
-            /** Beer Ids */
-            beer_ids: string[];
-        };
-        /** AvailabilityResponse */
-        AvailabilityResponse: {
-            /** Availability */
-            availability: {
-                [key: string]: components["schemas"]["AvailabilityVenue"][];
-            };
-        };
-        /** AvailabilityVenue */
-        AvailabilityVenue: {
-            /** Address */
-            address?: string | null;
-            /** Area */
-            area?: string | null;
-            /** City */
-            city: string;
-            /** Confidence */
-            confidence: number;
-            /** Id */
-            id: string;
-            /** Last Confirmed At */
-            last_confirmed_at?: string | null;
-            /** Name */
-            name: string;
-            /** Name Hebrew */
-            name_hebrew?: string | null;
-            /**
-             * Type
-             * @enum {string}
-             */
-            type: "shop" | "pub";
-            /** Url */
-            url?: string | null;
-        };
         /**
          * AvoidCue
          * @enum {string}
@@ -1088,64 +516,64 @@ export interface components {
          * @description User-facing, editable taste dials derived from onboarding answers.
          */
         BaselineTasteDials: {
-            /**
-             * Abv Affinity
-             * @default 0.5
-             */
-            abv_affinity: number;
+            /** Bubbles */
+            bubbles: number;
             /** Bitterness */
             bitterness: number;
+            /**
+             * Sweetness
+             * @default 0.5
+             */
+            sweetness: number;
             /**
              * Body
              * @default 0.5
              */
             body: number;
-            /** Bubbles */
-            bubbles: number;
+            /**
+             * Abv Affinity
+             * @default 0.5
+             */
+            abv_affinity: number;
             /** Flavor Family */
             flavor_family: {
                 [key: string]: number;
             };
             /** Novelty Affinity */
             novelty_affinity: number;
-            /**
-             * Sweetness
-             * @default 0.5
-             */
-            sweetness: number;
         };
         /**
          * BaselineTasteRecord
          * @description Persisted BaselineTaste returned by /me/baseline-taste.
          */
         BaselineTasteRecord: {
-            /** Abv Affinity */
-            abv_affinity: number;
-            archetype: components["schemas"]["Archetype"];
-            /** Bitterness */
-            bitterness: number;
-            /** Body */
-            body: number;
+            /** User Id */
+            user_id: string;
             /** Bubbles */
             bubbles: number;
-            /** Embedding Fresh At */
-            embedding_fresh_at: string;
+            /** Bitterness */
+            bitterness: number;
+            /** Sweetness */
+            sweetness: number;
+            /** Body */
+            body: number;
+            /** Abv Affinity */
+            abv_affinity: number;
             /** Flavor Family */
             flavor_family: {
                 [key: string]: number;
             };
-            icons?: components["schemas"]["TasteProfileIcons"] | null;
-            /** Model Version */
-            model_version: number;
             /** Novelty Affinity */
             novelty_affinity: number;
+            /** Model Version */
+            model_version: number;
             persona?: components["schemas"]["TasteProfilePersona"] | null;
-            /** Sweetness */
-            sweetness: number;
+            /** Embedding Fresh At */
+            embedding_fresh_at: string;
             /** Updated At */
             updated_at: string;
-            /** User Id */
-            user_id: string;
+            icons?: components["schemas"]["TasteProfileIcons"] | null;
+            archetype: components["schemas"]["Archetype"];
         };
         /**
          * BitternessDirect
@@ -1159,28 +587,28 @@ export interface components {
         Carbonation: "still" | "light" | "strong";
         /** CatalogBeer */
         CatalogBeer: {
-            /** Abv */
-            abv: number;
-            /** Adventurousness */
-            adventurousness: number;
-            /** Brewery */
-            brewery: string;
-            /** Color */
-            color: string;
-            /** Ibu */
-            ibu?: number | null;
             /** Id */
             id: string;
-            /** Image Url */
-            image_url?: string | null;
-            /** Market Tier */
-            market_tier: string;
             /** Name */
             name: string;
             /** Name Hebrew */
             name_hebrew?: string | null;
+            /** Brewery */
+            brewery: string;
             /** Style */
             style: string;
+            /** Abv */
+            abv: number;
+            /** Market Tier */
+            market_tier: string;
+            /** Color */
+            color: string;
+            /** Image Url */
+            image_url?: string | null;
+            /** Adventurousness */
+            adventurousness: number;
+            /** Ibu */
+            ibu?: number | null;
         };
         /** CatalogIconItem */
         CatalogIconItem: {
@@ -1204,13 +632,13 @@ export interface components {
         };
         /** CatalogRecommendRequest */
         CatalogRecommendRequest: {
+            /** Preference Text */
+            preference_text: string;
             /**
              * Limit
              * @default 5
              */
             limit: number;
-            /** Preference Text */
-            preference_text: string;
         };
         /** CatalogRecommendResponse */
         CatalogRecommendResponse: {
@@ -1236,18 +664,18 @@ export interface components {
         CatchItem: {
             /** Beer Id */
             beer_id: string;
-            /** Brewery */
-            brewery: string;
-            /** Color */
-            color?: string | null;
-            /** Created At */
-            created_at: string;
-            /** Image Url */
-            image_url?: string | null;
             /** Name */
             name: string;
             /** Name Hebrew */
             name_hebrew?: string | null;
+            /** Brewery */
+            brewery: string;
+            /** Style */
+            style: string;
+            /** Color */
+            color?: string | null;
+            /** Image Url */
+            image_url?: string | null;
             /** Proof Photo Url */
             proof_photo_url: string;
             /**
@@ -1255,31 +683,31 @@ export interface components {
              * @enum {string}
              */
             rating: "loved" | "fine" | "disliked" | "unknown";
-            /** Style */
-            style: string;
+            /** Created At */
+            created_at: string;
         };
         /** ChatMessage */
         ChatMessage: {
-            /** Content */
-            content: string;
             /**
              * Role
              * @enum {string}
              */
             role: "user" | "assistant";
+            /** Content */
+            content: string;
         };
         /** ChatPoolBeer */
         ChatPoolBeer: {
-            /** Abv */
-            abv?: number | null;
-            /** Brewery */
-            brewery?: string | null;
             /** Id */
             id: string;
             /** Name */
             name: string;
+            /** Brewery */
+            brewery?: string | null;
             /** Style */
             style?: string | null;
+            /** Abv */
+            abv?: number | null;
             /** Taste Fit */
             taste_fit?: number | null;
         };
@@ -1295,8 +723,6 @@ export interface components {
         CoffeeStyle: "black" | "milk_based" | "sweet" | "none";
         /** ComponentStatus */
         ComponentStatus: {
-            /** Detail */
-            detail?: string | null;
             /**
              * Name
              * @enum {string}
@@ -1307,22 +733,24 @@ export interface components {
              * @enum {string}
              */
             status: "ok" | "degraded" | "down";
+            /** Detail */
+            detail?: string | null;
         };
         /** CreateRatingRequest */
         CreateRatingRequest: {
             /** Beer Id */
             beer_id: string;
+            /**
+             * Rating
+             * @enum {string}
+             */
+            rating: "loved" | "fine" | "disliked" | "unknown";
             /** Note */
             note?: string | null;
             /** Proof Photo Url */
             proof_photo_url?: string | null;
             /** Proof Source */
             proof_source?: "self_photo" | null;
-            /**
-             * Rating
-             * @enum {string}
-             */
-            rating: "loved" | "fine" | "disliked" | "unknown";
         };
         /** CreateWantToTryRequest */
         CreateWantToTryRequest: {
@@ -1337,75 +765,39 @@ export interface components {
         };
         /** DeckBeer */
         DeckBeer: {
-            /** Abv */
-            abv: number;
-            /** Brewery */
-            brewery: string;
-            /** Color */
-            color?: string | null;
             /** Id */
             id: string;
-            /** Image Url */
-            image_url?: string | null;
+            /** Name */
+            name: string;
+            /** Name Hebrew */
+            name_hebrew?: string | null;
+            /** Brewery */
+            brewery: string;
+            /** Style */
+            style: string;
+            /** Abv */
+            abv: number;
             /**
              * Market Tier
              * @enum {string}
              */
             market_tier: "mainstream" | "craft" | "import";
-            /** Name */
-            name: string;
-            /** Name Hebrew */
-            name_hebrew?: string | null;
-            /** Style */
-            style: string;
-        };
-        /** DemandBeer */
-        DemandBeer: {
-            /** Beer Id */
-            beer_id: string;
-            /** Want Count */
-            want_count: number;
-        };
-        /** DemandOut */
-        DemandOut: {
-            /** Off Menu */
-            off_menu: components["schemas"]["DemandBeer"][];
-            /** On Menu */
-            on_menu: components["schemas"]["DemandBeer"][];
+            /** Color */
+            color?: string | null;
+            /** Image Url */
+            image_url?: string | null;
         };
         /**
          * DominantComponent
          * @enum {string}
          */
         DominantComponent: "baseline" | "session" | "abv" | "novelty_positive" | "novelty_negative";
-        /** DraftOut */
-        DraftOut: {
-            /** Abv */
-            abv?: number | null;
-            /** Confidence */
-            confidence: number;
-            /** Flavor Vector */
-            flavor_vector: number[];
-            /** Ibu */
-            ibu?: number | null;
-            /** Style */
-            style?: string | null;
-            /** Tasting Notes */
-            tasting_notes?: string | null;
-        };
-        /** EnrichRequest */
-        EnrichRequest: {
-            /** Brewery */
-            brewery?: string | null;
-            /** Name */
-            name: string;
-        };
         /** ExportBaselineTaste */
         ExportBaselineTaste: {
-            /** Bitterness */
-            bitterness: number;
             /** Bubbles */
             bubbles: number;
+            /** Bitterness */
+            bitterness: number;
             /** Flavor Family */
             flavor_family: {
                 [key: string]: number;
@@ -1417,54 +809,23 @@ export interface components {
         ExportRating: {
             /** Beer Id */
             beer_id: string;
-            /** Note */
-            note: string | null;
             /** Rating */
             rating: string | null;
-        };
-        /** FlagOut */
-        FlagOut: {
-            /** Beer Id */
-            beer_id: string;
-            /** Flags */
-            flags: number;
-            /** Venue Id */
-            venue_id: string;
+            /** Note */
+            note: string | null;
         };
         /**
          * FlavorCue
          * @enum {string}
          */
         FlavorCue: "grapefruit" | "caramel" | "pine" | "tropical" | "banana_bread" | "citrus_zest" | "coffee" | "bread_crust";
-        /** GapSubmitRequest */
-        GapSubmitRequest: {
-            /** Abv */
-            abv?: number | null;
-            /** Brewery */
-            brewery?: string | null;
-            /** Flavor Vector */
-            flavor_vector?: number[] | null;
-            /** Ibu */
-            ibu?: number | null;
-            /** Name */
-            name: string;
-            /** Style */
-            style?: string | null;
-            /** Tasting Notes */
-            tasting_notes?: string | null;
-        };
-        /** GapSubmitResponse */
-        GapSubmitResponse: {
-            /** Gap Id */
-            gap_id: string;
-        };
         /** GuestRecommendationsResponse */
         GuestRecommendationsResponse: {
-            archetype: components["schemas"]["Archetype"];
             /** Results */
             results: components["schemas"]["GuestRecommendedBeer"][];
             /** Unlocked Count */
             unlocked_count: number;
+            archetype: components["schemas"]["Archetype"];
         };
         /**
          * GuestRecommendedBeer
@@ -1474,27 +835,27 @@ export interface components {
          *     breakdown, a plain integer match_percent, and a plain `why` string.
          */
         GuestRecommendedBeer: {
-            /** Abv */
-            abv: number;
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /** Name Hebrew */
+            name_hebrew?: string | null;
             /** Brewery */
             brewery: string;
+            /** Style */
+            style: string;
+            /** Abv */
+            abv: number;
             /**
              * Color
              * @enum {string}
              */
             color: "pale" | "gold" | "amber" | "brown" | "dark";
-            /** Id */
-            id: string;
             /** Image Url */
             image_url?: string | null;
             /** Match Percent */
             match_percent: number;
-            /** Name */
-            name: string;
-            /** Name Hebrew */
-            name_hebrew?: string | null;
-            /** Style */
-            style: string;
             /** Why */
             why: string;
         };
@@ -1514,44 +875,30 @@ export interface components {
         /** IconCatalogResponse */
         IconCatalogResponse: {
             /**
-             * Flavors
+             * Session Vibes
              * @default []
              */
-            flavors: components["schemas"]["CatalogIconItem"][];
-            /**
-             * Journey
-             * @default []
-             */
-            journey: components["schemas"]["CatalogIconItem"][];
-            /**
-             * Marketing
-             * @default []
-             */
-            marketing: components["schemas"]["CatalogIconItem"][];
+            session_vibes: components["schemas"]["CatalogIconItem"][];
             /**
              * Session Abv
              * @default []
              */
             session_abv: components["schemas"]["CatalogIconItem"][];
             /**
-             * Session Vibes
+             * Journey
              * @default []
              */
-            session_vibes: components["schemas"]["CatalogIconItem"][];
-        };
-        /** InviteRequest */
-        InviteRequest: {
-            /** Email */
-            email: string;
-            /** Role */
-            role: string;
-            /** Venue Id */
-            venue_id?: string | null;
-        };
-        /** InviteResponse */
-        InviteResponse: {
-            /** Token */
-            token: string;
+            journey: components["schemas"]["CatalogIconItem"][];
+            /**
+             * Flavors
+             * @default []
+             */
+            flavors: components["schemas"]["CatalogIconItem"][];
+            /**
+             * Marketing
+             * @default []
+             */
+            marketing: components["schemas"]["CatalogIconItem"][];
         };
         /**
          * LovePref
@@ -1563,24 +910,24 @@ export interface components {
          * @description Fixed affine anchors for user-facing cosine % (not result-set normalization).
          */
         MatchCalibration: {
-            /** Cos Ceiling */
-            cos_ceiling: number;
             /** Cos Floor */
             cos_floor: number;
+            /** Cos Ceiling */
+            cos_ceiling: number;
         };
         /** MenuChatRequest */
         MenuChatRequest: {
-            /** Messages */
-            messages: components["schemas"]["ChatMessage"][];
             /** Pool */
             pool: components["schemas"]["ChatPoolBeer"][];
+            /** Messages */
+            messages: components["schemas"]["ChatMessage"][];
         };
         /** MenuChatResponse */
         MenuChatResponse: {
-            /** Beer Ids */
-            beer_ids: string[];
             /** Reply */
             reply: string;
+            /** Beer Ids */
+            beer_ids: string[];
         };
         /** MenuRankRequest */
         MenuRankRequest: {
@@ -1594,94 +941,23 @@ export interface components {
             image_base64: string;
             session?: components["schemas"]["SessionIntent"] | null;
         };
-        /** NewVenueInput */
-        NewVenueInput: {
-            /** Address */
-            address?: string | null;
-            /** Area */
-            area?: string | null;
-            /** City */
-            city: string;
-            /** Name */
-            name: string;
-            /**
-             * Type
-             * @enum {string}
-             */
-            type: "shop" | "pub";
-        };
         /** OnboardingAnswers */
         OnboardingAnswers: {
+            coffee: components["schemas"]["CoffeeStyle"];
+            chocolate?: components["schemas"]["ChocoPref"] | null;
+            bitterness_direct?: components["schemas"]["BitternessDirect"] | null;
+            roasted?: components["schemas"]["RoastedPref"] | null;
+            water: components["schemas"]["Carbonation"];
+            sour_foods: components["schemas"]["LovePref"];
+            sour_wild?: components["schemas"]["SourWild"] | null;
+            smoked_foods: components["schemas"]["LovePref"];
+            sweet_tooth: components["schemas"]["SweetPref"];
+            strength: components["schemas"]["StrengthPref"];
             adventure: components["schemas"]["AdventureLevel"];
             /** Avoids */
             avoids?: components["schemas"]["AvoidCue"][];
-            bitterness_direct?: components["schemas"]["BitternessDirect"] | null;
-            chocolate?: components["schemas"]["ChocoPref"] | null;
-            coffee: components["schemas"]["CoffeeStyle"];
             /** Flavor Cues */
             flavor_cues?: components["schemas"]["FlavorCue"][];
-            roasted?: components["schemas"]["RoastedPref"] | null;
-            smoked_foods: components["schemas"]["LovePref"];
-            sour_foods: components["schemas"]["LovePref"];
-            sour_wild?: components["schemas"]["SourWild"] | null;
-            strength: components["schemas"]["StrengthPref"];
-            sweet_tooth: components["schemas"]["SweetPref"];
-            water: components["schemas"]["Carbonation"];
-        };
-        /** OrderItemIn */
-        OrderItemIn: {
-            /** Beer Id */
-            beer_id: string;
-            /**
-             * Qty
-             * @default 1
-             */
-            qty: number;
-        };
-        /** OrderOut */
-        OrderOut: {
-            /** Id */
-            id: string;
-            /** Status */
-            status: string;
-            /** Table Label */
-            table_label?: string | null;
-        };
-        /** OrgOnboardRequest */
-        OrgOnboardRequest: {
-            /**
-             * Market Id
-             * @default IL
-             */
-            market_id: string;
-            /** Org Name */
-            org_name: string;
-            /** Org Slug */
-            org_slug: string;
-            /** Venue City */
-            venue_city: string;
-            /** Venue Name */
-            venue_name: string;
-        };
-        /** OrgOnboardResponse */
-        OrgOnboardResponse: {
-            /** Org Id */
-            org_id: string;
-            /** Venue Id */
-            venue_id: string;
-        };
-        /** OrgRollupOut */
-        OrgRollupOut: {
-            /** Per Venue */
-            per_venue: {
-                [key: string]: unknown;
-            }[];
-            /** Total On Menu */
-            total_on_menu: number;
-            /** Total Visits */
-            total_visits: number;
-            /** Venues */
-            venues: number;
         };
         /** OutcomeRequest */
         OutcomeRequest: {
@@ -1691,63 +967,6 @@ export interface components {
             outcome: string;
             /** Venue Id */
             venue_id?: string | null;
-        };
-        /** OverrideRequest */
-        OverrideRequest: {
-            /** Capability */
-            capability: string;
-            /** Granted */
-            granted: boolean;
-            /** Staff Member Id */
-            staff_member_id: string;
-            /** Venue Id */
-            venue_id?: string | null;
-        };
-        /** PlaceOrderRequest */
-        PlaceOrderRequest: {
-            /** Items */
-            items: components["schemas"]["OrderItemIn"][];
-            /** Session Token */
-            session_token?: string | null;
-            /** Table Label */
-            table_label?: string | null;
-        };
-        /** PlaceOrderResponse */
-        PlaceOrderResponse: {
-            /** Order Id */
-            order_id: string;
-        };
-        /** PlaceOut */
-        PlaceOut: {
-            /** Address */
-            address?: string | null;
-            /** Area */
-            area?: string | null;
-            /** Beers */
-            beers: number;
-            /** City */
-            city: string;
-            /** Id */
-            id: string;
-            /** Name */
-            name: string;
-            /** Name Hebrew */
-            name_hebrew?: string | null;
-            /** Type */
-            type: string;
-        };
-        /** PublishedVenueOut */
-        PublishedVenueOut: {
-            /** Branding */
-            branding?: {
-                [key: string]: unknown;
-            } | null;
-            /** Menu */
-            menu: components["schemas"]["app__routes__public_venues__MenuItemOut"][];
-            /** Name */
-            name: string;
-            /** Slug */
-            slug: string;
         };
         /** RateDeckResponse */
         RateDeckResponse: {
@@ -1768,51 +987,51 @@ export interface components {
         RateSwipe: {
             /** Beer Id */
             beer_id: string;
-            /** Note */
-            note?: string | null;
             /**
              * Rating
              * @enum {string}
              */
             rating: "loved" | "fine" | "disliked" | "unknown";
+            /** Note */
+            note?: string | null;
         };
         /** RatingRecord */
         RatingRecord: {
-            /** Beer Brewery */
-            beer_brewery: string;
+            /** Id */
+            id: string;
             /** Beer Id */
             beer_id: string;
             /** Beer Name */
             beer_name: string;
+            /** Beer Brewery */
+            beer_brewery: string;
             /**
-             * Caught
-             * @description A Rating with proof is a Catch (ADR 0011). Single source of truth.
+             * Rating
+             * @enum {string}
              */
-            readonly caught: boolean;
-            /** Created At */
-            created_at: string;
-            /** Id */
-            id: string;
+            rating: "loved" | "fine" | "disliked" | "unknown";
             /** Note */
             note: string | null;
+            /** Created At */
+            created_at: string;
             /** Proof Photo Url */
             proof_photo_url?: string | null;
             /** Proof Source */
             proof_source?: string | null;
             /**
-             * Rating
-             * @enum {string}
+             * Caught
+             * @description A Rating with proof is a Catch (ADR 0011). Single source of truth.
              */
-            rating: "loved" | "fine" | "disliked" | "unknown";
+            readonly caught: boolean;
         };
         /** RatingsHistoryResponse */
         RatingsHistoryResponse: {
+            /** Ratings */
+            ratings: components["schemas"]["RatingRecord"][];
             /** Page */
             page: number;
             /** Page Size */
             page_size: number;
-            /** Ratings */
-            ratings: components["schemas"]["RatingRecord"][];
             /** Total */
             total: number;
         };
@@ -1825,13 +1044,13 @@ export interface components {
         };
         /** ReadinessResponse */
         ReadinessResponse: {
-            /** Components */
-            components: components["schemas"]["ComponentStatus"][];
             /**
              * Status
              * @enum {string}
              */
             status: "ready" | "not_ready";
+            /** Components */
+            components: components["schemas"]["ComponentStatus"][];
         };
         /**
          * RecommendationsRequest
@@ -1841,93 +1060,66 @@ export interface components {
          *     answers inline to keep the smoke test independent of user persistence.
          */
         RecommendationsRequest: {
+            baseline: components["schemas"]["BaselineTasteDials"];
+            session?: components["schemas"]["SessionIntent"] | null;
             /** Alpha */
             alpha?: number | null;
-            baseline: components["schemas"]["BaselineTasteDials"];
             /** Beta */
             beta?: number | null;
+            /**
+             * Top K
+             * @default 5
+             */
+            top_k: number;
             /**
              * Locale
              * @default en
              * @enum {string}
              */
             locale: "en" | "he";
-            session?: components["schemas"]["SessionIntent"] | null;
-            /**
-             * Top K
-             * @default 5
-             */
-            top_k: number;
         };
         /** RecommendationsResponse */
         RecommendationsResponse: {
+            /** Results */
+            results: components["schemas"]["RecommendedBeer"][];
             /** Alpha */
             alpha: number;
             /** Beta */
             beta: number;
             calibration: components["schemas"]["MatchCalibration"];
-            /** Results */
-            results: components["schemas"]["RecommendedBeer"][];
         };
         /** RecommendedBeer */
         RecommendedBeer: {
-            /** Abv */
-            abv: number;
-            /** Adventurousness */
-            adventurousness: number;
-            breakdown: components["schemas"]["ScoreBreakdown"];
-            /** Brewery */
-            brewery: string;
-            /**
-             * Color
-             * @enum {string}
-             */
-            color: "pale" | "gold" | "amber" | "brown" | "dark";
-            /** Ibu */
-            ibu?: number | null;
             /** Id */
             id: string;
-            /** Image Url */
-            image_url?: string | null;
+            /** Name */
+            name: string;
+            /** Name Hebrew */
+            name_hebrew?: string | null;
+            /** Brewery */
+            brewery: string;
+            /** Style */
+            style: string;
+            /** Abv */
+            abv: number;
             /**
              * Market Tier
              * @enum {string}
              */
             market_tier: "mainstream" | "craft" | "import";
-            /** Name */
-            name: string;
-            /** Name Hebrew */
-            name_hebrew?: string | null;
-            /** Style */
-            style: string;
+            /**
+             * Color
+             * @enum {string}
+             */
+            color: "pale" | "gold" | "amber" | "brown" | "dark";
+            /** Image Url */
+            image_url?: string | null;
+            /** Adventurousness */
+            adventurousness: number;
+            /** Ibu */
+            ibu?: number | null;
             why: components["schemas"]["WhyLine"];
-        };
-        /** ResolveFlagsRequest */
-        ResolveFlagsRequest: {
-            /** Beer Id */
-            beer_id: string;
-            /** Venue Id */
-            venue_id: string;
-        };
-        /** ReturnRate */
-        ReturnRate: {
-            /** Beer Id */
-            beer_id: string;
-            /** Return Rate */
-            return_rate: number;
-            /** Total */
-            total: number;
-        };
-        /** ReviewOut */
-        ReviewOut: {
-            /** Beer Id */
-            beer_id: string;
-            /** Id */
-            id: string;
-            /** Score */
-            score: number;
-            /** Venue Id */
-            venue_id: string;
+            breakdown: components["schemas"]["ScoreBreakdown"];
         };
         /**
          * RoastedPref
@@ -1936,57 +1128,57 @@ export interface components {
         RoastedPref: "love" | "like" | "neutral" | "dislike" | "hate";
         /** ScanResultItem */
         ScanResultItem: {
-            /** Abv */
-            abv?: number | null;
-            /** Brewery */
-            brewery?: string | null;
-            /** Confidence */
-            confidence: number;
+            /** Raw Text */
+            raw_text: string;
             /** Matched Id */
             matched_id?: string | null;
-            /** Name */
-            name?: string | null;
+            /** Confidence */
+            confidence: number;
             /**
              * Needs Review
              * @default false
              */
             needs_review: boolean;
-            /** Raw Text */
-            raw_text: string;
+            /** Name */
+            name?: string | null;
+            /** Brewery */
+            brewery?: string | null;
             /** Style */
             style?: string | null;
+            /** Abv */
+            abv?: number | null;
             /** Taste Fit */
             taste_fit?: number | null;
         };
         /** ScoreBreakdown */
         ScoreBreakdown: {
-            /** Abv Fits Intent */
-            abv_fits_intent?: boolean | null;
-            /** Abv Score */
-            abv_score: number;
             /** Baseline Cos */
             baseline_cos: number;
-            /** Baseline Score */
-            baseline_score: number;
-            dominant_component: components["schemas"]["DominantComponent"];
-            /** Novelty Score */
-            novelty_score: number;
             /** Session Cos */
             session_cos: number;
+            /** Baseline Score */
+            baseline_score: number;
             /** Session Score */
             session_score: number;
+            /** Abv Score */
+            abv_score: number;
+            /** Abv Fits Intent */
+            abv_fits_intent?: boolean | null;
+            /** Novelty Score */
+            novelty_score: number;
             /** Total Score */
             total_score: number;
+            dominant_component: components["schemas"]["DominantComponent"];
         };
         /** SessionIntent */
         SessionIntent: {
+            vibe: components["schemas"]["Vibe"];
             abv_intent: components["schemas"]["AbvIntent"];
             /**
              * Free Text
              * @default
              */
             free_text: string;
-            vibe: components["schemas"]["Vibe"];
         };
         /**
          * SourWild
@@ -2005,94 +1197,51 @@ export interface components {
         SweetPref: "rich" | "balanced" | "dry";
         /** TasteProfileIcon */
         TasteProfileIcon: {
-            /** Flavor Key */
-            flavor_key?: string | null;
             /** Purpose */
             purpose: string;
+            /** Flavor Key */
+            flavor_key?: string | null;
             /** Svg */
             svg: string;
         };
         /** TasteProfileIcons */
         TasteProfileIcons: {
+            hero: components["schemas"]["TasteProfileIcon"];
             /** Flavors */
             flavors: components["schemas"]["TasteProfileIcon"][];
-            hero: components["schemas"]["TasteProfileIcon"];
         };
         /**
          * TasteProfilePersona
          * @description LLM-generated, cosmetic taste persona, persisted per language.
          */
         TasteProfilePersona: {
-            /** Blurb En */
-            blurb_en: string;
-            /** Blurb He */
-            blurb_he: string;
             /** Title En */
             title_en: string;
+            /** Blurb En */
+            blurb_en: string;
             /** Title He */
             title_he: string;
-        };
-        /** UpdateDetailsRequest */
-        UpdateDetailsRequest: {
-            /** Price Ils */
-            price_ils?: number | null;
-            /** Serving Format */
-            serving_format?: ("draft" | "bottle" | "can") | null;
+            /** Blurb He */
+            blurb_he: string;
         };
         /** ValidationError */
         ValidationError: {
-            /** Context */
-            ctx?: Record<string, never>;
-            /** Input */
-            input?: unknown;
             /** Location */
             loc: (string | number)[];
             /** Message */
             msg: string;
             /** Error Type */
             type: string;
-        };
-        /** VenueAnalyticsOut */
-        VenueAnalyticsOut: {
-            /** Enough Data */
-            enough_data: boolean;
-            /** Menu Size */
-            menu_size: number;
-            /** N Raters */
-            n_raters: number;
-            /** Taste Distribution */
-            taste_distribution?: {
-                [key: string]: unknown;
-            } | null;
-            /** Top Beers */
-            top_beers: {
-                [key: string]: unknown;
-            }[];
-            /** Visits */
-            visits: number;
-        };
-        /** VenueQrOut */
-        VenueQrOut: {
-            /** Slug */
-            slug: string;
-            /** Url */
-            url: string;
+            /** Input */
+            input?: unknown;
+            /** Context */
+            ctx?: Record<string, never>;
         };
         /**
          * Vibe
          * @enum {string}
          */
         Vibe: "refreshing" | "cozy" | "adventurous" | "familiar";
-        /** VisitRequest */
-        VisitRequest: {
-            /** Session Token */
-            session_token?: string | null;
-            /**
-             * Source
-             * @default qr
-             */
-            source: string;
-        };
         /** WantToTryListResponse */
         WantToTryListResponse: {
             /** Items */
@@ -2100,21 +1249,21 @@ export interface components {
         };
         /** WantToTryRecord */
         WantToTryRecord: {
-            /** Beer Brewery */
-            beer_brewery: string;
             /** Beer Id */
             beer_id: string;
-            /** Beer Image Url */
-            beer_image_url?: string | null;
             /** Beer Name */
             beer_name: string;
-            /** Created At */
-            created_at: string;
+            /** Beer Brewery */
+            beer_brewery: string;
+            /** Beer Image Url */
+            beer_image_url?: string | null;
             /**
              * State
              * @enum {string}
              */
             state: "want" | "must_try";
+            /** Created At */
+            created_at: string;
         };
         /**
          * WhyFact
@@ -2140,60 +1289,14 @@ export interface components {
         WhyLine: {
             /** Code */
             code: string;
-            /** Facts */
-            facts?: components["schemas"]["WhyFact"][];
             /** Params */
             params?: {
                 [key: string]: string;
             };
             /** Text */
             text?: string | null;
-        };
-        /** SetStatusRequest */
-        app__routes__orders__SetStatusRequest: {
-            /** Status */
-            status: string;
-        };
-        /** MenuItemOut */
-        app__routes__public_venues__MenuItemOut: {
-            /** Abv */
-            abv: number;
-            /** Beer Id */
-            beer_id: string;
-            /** Brewery */
-            brewery: string;
-            /** Color */
-            color?: string | null;
-            /** Image Url */
-            image_url?: string | null;
-            /** Name */
-            name: string;
-            /** Price Ils */
-            price_ils?: number | null;
-            /** Serving Format */
-            serving_format?: string | null;
-            /** Style */
-            style: string;
-        };
-        /** MenuItemOut */
-        app__routes__staff_menu__MenuItemOut: {
-            /** Beer Id */
-            beer_id: string;
-            /** Brewery */
-            brewery?: string | null;
-            /** Name */
-            name?: string | null;
-            /** Price Ils */
-            price_ils?: number | null;
-            /** Serving Format */
-            serving_format?: string | null;
-            /** Status */
-            status: string;
-        };
-        /** SetStatusRequest */
-        app__routes__staff_menu__SetStatusRequest: {
-            /** Status */
-            status: string;
+            /** Facts */
+            facts?: components["schemas"]["WhyFact"][];
         };
     };
     responses: never;
@@ -2204,427 +1307,6 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    listOpenFlags: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FlagOut"][];
-                };
-            };
-        };
-    };
-    resolveFlags: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ResolveFlagsRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    listOpenReviews: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ReviewOut"][];
-                };
-            };
-        };
-    };
-    resolveReview: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                review_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    postAvailability: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AvailabilityRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AvailabilityResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    postAddPlace: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AddPlaceRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AddPlaceResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    postAvailabilityFlag: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AvailabilityFlagRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AvailabilityFlagResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    postAvailabilityReport: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AvailabilityReportRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AvailabilityReportResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    listCatalog: {
-        parameters: {
-            query?: {
-                page?: number;
-                page_size?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CatalogListResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    recommendCatalog: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CatalogRecommendRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CatalogRecommendResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    searchCatalog: {
-        parameters: {
-            query?: {
-                q?: string | null;
-                style?: string | null;
-                brewery?: string | null;
-                min_abv?: number | null;
-                max_abv?: number | null;
-                limit?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CatalogBeer"][];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    getCatalogBeer: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                beer_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CatalogBeer"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    debugRecommendations: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RecommendationsResponse"];
-                };
-            };
-        };
-    };
-    postGuestRecommendations: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["OnboardingAnswers"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["GuestRecommendationsResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
     getHealth: {
         parameters: {
             query?: never;
@@ -2685,14 +1367,18 @@ export interface operations {
             };
         };
     };
-    deleteMyAccount: {
+    scanMenu: {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MenuScanRequest"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {
@@ -2700,7 +1386,115 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AccountDeletionResponse"];
+                    "application/json": components["schemas"]["ScanResultItem"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    rankMenuBeers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MenuRankRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScanResultItem"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    menuChat: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MenuChatRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MenuChatResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    completeOnboarding: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OnboardingAnswers"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BaselineTasteRecord"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -2725,6 +1519,125 @@ export interface operations {
             };
         };
     };
+    postRecommendations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecommendationsRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecommendationsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    postGuestRecommendations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OnboardingAnswers"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GuestRecommendationsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    createRating: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateRatingRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RatingRecord"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    getMyRatingsMap: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RatingsMapResponse"];
+                };
+            };
+        };
+    };
     listMyCatches: {
         parameters: {
             query?: never;
@@ -2741,26 +1654,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CatchCollectionResponse"];
-                };
-            };
-        };
-    };
-    exportMyAccount: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AccountExport"];
                 };
             };
         };
@@ -2793,26 +1686,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    getMyRatingsMap: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RatingsMapResponse"];
                 };
             };
         };
@@ -2899,141 +1772,12 @@ export interface operations {
             };
         };
     };
-    menuChat: {
+    listCatalog: {
         parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["MenuChatRequest"];
+            query?: {
+                page?: number;
+                page_size?: number;
             };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MenuChatResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    rankMenuBeers: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["MenuRankRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ScanResultItem"][];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    scanMenu: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["MenuScanRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ScanResultItem"][];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    completeOnboarding: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["OnboardingAnswers"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BaselineTasteRecord"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    listPlaces: {
-        parameters: {
-            query?: never;
             header?: never;
             path?: never;
             cookie?: never;
@@ -3046,29 +1790,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PlaceOut"][];
-                };
-            };
-        };
-    };
-    getPublishedVenue: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                slug: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PublishedVenueOut"];
+                    "application/json": components["schemas"]["CatalogListResponse"];
                 };
             };
             /** @description Validation Error */
@@ -3082,18 +1804,116 @@ export interface operations {
             };
         };
     };
-    recordVenueVisit: {
+    searchCatalog: {
+        parameters: {
+            query?: {
+                q?: string | null;
+                style?: string | null;
+                brewery?: string | null;
+                min_abv?: number | null;
+                max_abv?: number | null;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogBeer"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    recommendCatalog: {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                slug: string;
-            };
+            path?: never;
             cookie?: never;
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["VisitRequest"];
+                "application/json": components["schemas"]["CatalogRecommendRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogRecommendResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    getCatalogBeer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                beer_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogBeer"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    setRatingOutcome: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OutcomeRequest"];
             };
         };
         responses: {
@@ -3168,82 +1988,54 @@ export interface operations {
             };
         };
     };
-    createRating: {
+    deleteMyAccount: {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateRatingRequest"];
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description Successful Response */
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["RatingRecord"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/json": components["schemas"]["AccountDeletionResponse"];
                 };
             };
         };
     };
-    setRatingOutcome: {
+    exportMyAccount: {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["OutcomeRequest"];
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description Successful Response */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/json": components["schemas"]["AccountExport"];
                 };
             };
         };
     };
-    postRecommendations: {
+    debugRecommendations: {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RecommendationsRequest"];
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description Successful Response */
             200: {
@@ -3252,575 +2044,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RecommendationsResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    onboardOrg: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["OrgOnboardRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["OrgOnboardResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    getOrgRollup: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                org_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["OrgRollupOut"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    createStaffInvite: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                org_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["InviteRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["InviteResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    setStaffOverride: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                org_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["OverrideRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    getVenueAnalytics: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                venue_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["VenueAnalyticsOut"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    enrichCatalogGap: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                venue_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["EnrichRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DraftOut"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    submitCatalogGap: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                venue_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["GapSubmitRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["GapSubmitResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    getVenueDemand: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                venue_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DemandOut"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    listVenueMenu: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                venue_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["app__routes__staff_menu__MenuItemOut"][];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    addVenueMenuItem: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                venue_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AddMenuItemRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    toggleVenueMenuItem: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                venue_id: string;
-                beer_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["app__routes__staff_menu__SetStatusRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    updateVenueMenuItemDetails: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                venue_id: string;
-                beer_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateDetailsRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    listVenueOrders: {
-        parameters: {
-            query?: {
-                status?: string | null;
-            };
-            header?: never;
-            path: {
-                venue_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["OrderOut"][];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    setOrderStatus: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                venue_id: string;
-                order_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["app__routes__orders__SetStatusRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    getVenueQr: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                venue_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["VenueQrOut"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    getVenueReturns: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                venue_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ReturnRate"][];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    placeOrder: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                slug: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PlaceOrderRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PlaceOrderResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

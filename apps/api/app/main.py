@@ -17,31 +17,17 @@ from app.errors import BeerologError
 from app.mcp_server import mcp as mcp_server
 from app.observability import configure_logging, instrument_requests, logger
 from app.routes import (
-    admin_moderation,
-    availability,
     debug,
     guest_recommendations,
     health,
     icons,
     menu,
     onboarding,
-    orders,
     public_catalog,
-    public_places,
-    public_venues,
     rate,
     rating_outcome,
     ratings,
     recommendations,
-    staff,
-    staff_analytics,
-    staff_catalog,
-    staff_demand,
-    staff_members,
-    staff_menu,
-    staff_org,
-    staff_qr,
-    staff_returns,
     users,
     want_to_try,
 )
@@ -54,7 +40,6 @@ from app.services.catalog_repo import (
     fetch_catalog,
 )
 from app.services.embedding_service import get_embedding_client
-from app.services.gap_enricher import GPTGapEnricher
 from app.services.icon_repo import AsyncpgIconRepo
 from app.services.note_analyzer import GPTNoteExtractor, NoteAnalyzer
 from app.services.ratings_repo import AsyncpgRatingsRepo
@@ -113,12 +98,6 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
                 settings=settings,
             )
             app.dependency_overrides[get_note_analyzer] = lambda: note_analyzer
-            # Build the enricher once (owns an OpenAI client + HTTP pool); the
-            # lambda must return the shared instance, not construct per request.
-            gap_enricher = GPTGapEnricher(
-                api_key=settings.openai_api_key, model=settings.note_model
-            )
-            app.dependency_overrides[staff_catalog.get_gap_enricher] = lambda: gap_enricher
 
     try:
         # Run the MCP streamable-http session manager alongside the app so the
@@ -147,24 +126,10 @@ app.include_router(icons.router)
 app.include_router(menu.router)
 app.include_router(onboarding.router)
 app.include_router(recommendations.router)
-app.include_router(staff.router)
-app.include_router(staff_menu.router)
-app.include_router(staff_analytics.router)
-app.include_router(staff_org.router)
-app.include_router(staff_members.router)
-app.include_router(staff_qr.router)
-app.include_router(staff_catalog.router)
-app.include_router(staff_demand.router)
-app.include_router(staff_returns.router)
-app.include_router(availability.router)
-app.include_router(admin_moderation.router)
 app.include_router(guest_recommendations.router)
 app.include_router(ratings.router)
 app.include_router(want_to_try.router)
 app.include_router(public_catalog.router)
-app.include_router(public_places.router)
-app.include_router(public_venues.router)
-app.include_router(orders.router)
 app.include_router(rating_outcome.router)
 app.include_router(rate.router)
 app.include_router(users.router)

@@ -12,14 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TryRouteImport } from './routes/try'
 import { Route as RecommendationsRouteImport } from './routes/recommendations'
 import { Route as RateRouteImport } from './routes/rate'
-import { Route as PlacesRouteImport } from './routes/places'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as MenuRouteImport } from './routes/menu'
 import { Route as CatalogRouteImport } from './routes/catalog'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AccountIndexRouteImport } from './routes/account.index'
-import { Route as VVenueSlugRouteImport } from './routes/v.$venueSlug'
 import { Route as TasteKeyRouteImport } from './routes/taste.$key'
 import { Route as SignupSplatRouteImport } from './routes/signup.$'
 import { Route as SigninSplatRouteImport } from './routes/signin.$'
@@ -51,11 +49,6 @@ const RateRoute = RateRouteImport.update({
   path: '/rate',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PlacesRoute = PlacesRouteImport.update({
-  id: '/places',
-  path: '/places',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
@@ -85,11 +78,6 @@ const AccountIndexRoute = AccountIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AccountRoute,
-} as any)
-const VVenueSlugRoute = VVenueSlugRouteImport.update({
-  id: '/v/$venueSlug',
-  path: '/v/$venueSlug',
-  getParentRoute: () => rootRouteImport,
 } as any)
 const TasteKeyRoute = TasteKeyRouteImport.update({
   id: '/taste/$key',
@@ -173,7 +161,6 @@ export interface FileRoutesByFullPath {
   '/catalog': typeof CatalogRoute
   '/menu': typeof MenuRoute
   '/onboarding': typeof OnboardingRoute
-  '/places': typeof PlacesRoute
   '/rate': typeof RateRoute
   '/recommendations': typeof RecommendationsRoute
   '/try': typeof TryRoute
@@ -188,7 +175,6 @@ export interface FileRoutesByFullPath {
   '/signin/$': typeof SigninSplatRoute
   '/signup/$': typeof SignupSplatRoute
   '/taste/$key': typeof TasteKeyRoute
-  '/v/$venueSlug': typeof VVenueSlugRoute
   '/account/': typeof AccountIndexRoute
   '/api/og/beer': typeof ApiOgBeerRoute
   '/api/og/catch': typeof ApiOgCatchRoute
@@ -200,7 +186,6 @@ export interface FileRoutesByTo {
   '/catalog': typeof CatalogRoute
   '/menu': typeof MenuRoute
   '/onboarding': typeof OnboardingRoute
-  '/places': typeof PlacesRoute
   '/rate': typeof RateRoute
   '/recommendations': typeof RecommendationsRoute
   '/try': typeof TryRoute
@@ -215,7 +200,6 @@ export interface FileRoutesByTo {
   '/signin/$': typeof SigninSplatRoute
   '/signup/$': typeof SignupSplatRoute
   '/taste/$key': typeof TasteKeyRoute
-  '/v/$venueSlug': typeof VVenueSlugRoute
   '/account': typeof AccountIndexRoute
   '/api/og/beer': typeof ApiOgBeerRoute
   '/api/og/catch': typeof ApiOgCatchRoute
@@ -229,7 +213,6 @@ export interface FileRoutesById {
   '/catalog': typeof CatalogRoute
   '/menu': typeof MenuRoute
   '/onboarding': typeof OnboardingRoute
-  '/places': typeof PlacesRoute
   '/rate': typeof RateRoute
   '/recommendations': typeof RecommendationsRoute
   '/try': typeof TryRoute
@@ -244,7 +227,6 @@ export interface FileRoutesById {
   '/signin/$': typeof SigninSplatRoute
   '/signup/$': typeof SignupSplatRoute
   '/taste/$key': typeof TasteKeyRoute
-  '/v/$venueSlug': typeof VVenueSlugRoute
   '/account/': typeof AccountIndexRoute
   '/api/og/beer': typeof ApiOgBeerRoute
   '/api/og/catch': typeof ApiOgCatchRoute
@@ -259,7 +241,6 @@ export interface FileRouteTypes {
     | '/catalog'
     | '/menu'
     | '/onboarding'
-    | '/places'
     | '/rate'
     | '/recommendations'
     | '/try'
@@ -274,7 +255,6 @@ export interface FileRouteTypes {
     | '/signin/$'
     | '/signup/$'
     | '/taste/$key'
-    | '/v/$venueSlug'
     | '/account/'
     | '/api/og/beer'
     | '/api/og/catch'
@@ -286,7 +266,6 @@ export interface FileRouteTypes {
     | '/catalog'
     | '/menu'
     | '/onboarding'
-    | '/places'
     | '/rate'
     | '/recommendations'
     | '/try'
@@ -301,7 +280,6 @@ export interface FileRouteTypes {
     | '/signin/$'
     | '/signup/$'
     | '/taste/$key'
-    | '/v/$venueSlug'
     | '/account'
     | '/api/og/beer'
     | '/api/og/catch'
@@ -314,7 +292,6 @@ export interface FileRouteTypes {
     | '/catalog'
     | '/menu'
     | '/onboarding'
-    | '/places'
     | '/rate'
     | '/recommendations'
     | '/try'
@@ -329,7 +306,6 @@ export interface FileRouteTypes {
     | '/signin/$'
     | '/signup/$'
     | '/taste/$key'
-    | '/v/$venueSlug'
     | '/account/'
     | '/api/og/beer'
     | '/api/og/catch'
@@ -343,7 +319,6 @@ export interface RootRouteChildren {
   CatalogRoute: typeof CatalogRoute
   MenuRoute: typeof MenuRoute
   OnboardingRoute: typeof OnboardingRoute
-  PlacesRoute: typeof PlacesRoute
   RateRoute: typeof RateRoute
   RecommendationsRoute: typeof RecommendationsRoute
   TryRoute: typeof TryRoute
@@ -353,7 +328,6 @@ export interface RootRouteChildren {
   SigninSplatRoute: typeof SigninSplatRoute
   SignupSplatRoute: typeof SignupSplatRoute
   TasteKeyRoute: typeof TasteKeyRoute
-  VVenueSlugRoute: typeof VVenueSlugRoute
   ApiOgBeerRoute: typeof ApiOgBeerRoute
   ApiOgCatchRoute: typeof ApiOgCatchRoute
   ApiOgCollectionRoute: typeof ApiOgCollectionRoute
@@ -381,13 +355,6 @@ declare module '@tanstack/react-router' {
       path: '/rate'
       fullPath: '/rate'
       preLoaderRoute: typeof RateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/places': {
-      id: '/places'
-      path: '/places'
-      fullPath: '/places'
-      preLoaderRoute: typeof PlacesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/onboarding': {
@@ -431,13 +398,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/account/'
       preLoaderRoute: typeof AccountIndexRouteImport
       parentRoute: typeof AccountRoute
-    }
-    '/v/$venueSlug': {
-      id: '/v/$venueSlug'
-      path: '/v/$venueSlug'
-      fullPath: '/v/$venueSlug'
-      preLoaderRoute: typeof VVenueSlugRouteImport
-      parentRoute: typeof rootRouteImport
     }
     '/taste/$key': {
       id: '/taste/$key'
@@ -574,7 +534,6 @@ const rootRouteChildren: RootRouteChildren = {
   CatalogRoute: CatalogRoute,
   MenuRoute: MenuRoute,
   OnboardingRoute: OnboardingRoute,
-  PlacesRoute: PlacesRoute,
   RateRoute: RateRoute,
   RecommendationsRoute: RecommendationsRoute,
   TryRoute: TryRoute,
@@ -584,7 +543,6 @@ const rootRouteChildren: RootRouteChildren = {
   SigninSplatRoute: SigninSplatRoute,
   SignupSplatRoute: SignupSplatRoute,
   TasteKeyRoute: TasteKeyRoute,
-  VVenueSlugRoute: VVenueSlugRoute,
   ApiOgBeerRoute: ApiOgBeerRoute,
   ApiOgCatchRoute: ApiOgCatchRoute,
   ApiOgCollectionRoute: ApiOgCollectionRoute,

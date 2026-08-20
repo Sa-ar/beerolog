@@ -13,9 +13,6 @@ import { deriveBeerColor, type BeerColor } from '../lib/beer-color'
 import { formatAbv } from '../lib/format-abv'
 import { useMyRatings } from '../lib/my-ratings'
 import { SAVE_STATUS, type SaveStatus } from '../lib/save-status'
-import { venueMapsUrl } from '../lib/beer-store-search'
-import { flagAvailability, reportAvailability, type Venue } from '../lib/beer-availability'
-import { AvailabilityAddPlace } from './AvailabilityAddPlace'
 
 type Breakdown = {
   baseline_cos?: number
@@ -62,7 +59,6 @@ type RecommendationBeerCardProps = {
   beer: RecommendedBeer
   rank: number
   matchPercent: number
-  venues?: Venue[] | undefined
   /** The viewer's BaselineTaste dials, overlaid on the detail radar. */
   taste?: { bitterness: number; abv_affinity?: number | null; novelty_affinity: number } | null
   /** Opt-in URL-addressable detail modal (#276). When provided, the caller drives
@@ -74,30 +70,11 @@ export function RecommendationBeerCard({
   beer,
   rank,
   matchPercent,
-  venues,
   taste,
   detail,
 }: RecommendationBeerCardProps) {
   const { t, i18n } = useTranslation()
   const isTopPick = rank === 1
-  // The recommendations page is signed-in-only, so reports can always be offered.
-  const [reported, setReported] = useState<Set<string>>(new Set())
-  const [reportErr, setReportErr] = useState<Set<string>>(new Set())
-  const report = (venueId: string, kind: 'user_confirm' | 'user_deny') => {
-    void reportAvailability(beer.id, venueId, kind).then((r) => {
-      if (r.accepted) {
-        setReported((prev) => new Set(prev).add(venueId))
-      } else {
-        setReportErr((prev) => new Set(prev).add(venueId))
-      }
-    })
-  }
-  const [flagged, setFlagged] = useState<Set<string>>(new Set())
-  const flag = (venueId: string) => {
-    void flagAvailability(beer.id, venueId).then((r) => {
-      if (r.accepted) setFlagged((prev) => new Set(prev).add(venueId))
-    })
-  }
   // Catalog names are bilingual; show Hebrew when the UI is Hebrew, fall back to English.
   const displayName = displayBeerName(beer, i18n.language)
   const beerColor = deriveBeerColor(beer.style, beer.color)
@@ -190,97 +167,6 @@ export function RecommendationBeerCard({
             {t('beerDetail.openCta')}
           </Button>
 
-          {venues && venues.length > 0 ? (
-            <div className="flex w-full flex-col gap-1.5">
-              <p className="text-xs font-medium text-neutral-500">
-                {t('recommendations.findNearby.availableAt')}
-              </p>
-              <ul className="w-full space-y-1">
-                {venues.map((v) => {
-                  const venueName = displayBeerName(v, i18n.language)
-                  const place = [v.address, v.city].filter(Boolean).join(', ')
-                  return (
-                    <li key={v.id}>
-                      <a
-                        href={v.url || venueMapsUrl(v)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-xs text-neutral-700 hover:text-brand-600 hover:underline"
-                      >
-                        <CatalogIcon
-                          group="action"
-                          iconKey={v.type === 'shop' ? 'cart' : 'beer'}
-                          className="h-4 w-4"
-                        />
-                        <span className="font-medium">{venueName}</span>
-                        {place ? <span className="text-neutral-500">— {place}</span> : null}
-                      </a>
-                      {v.last_confirmed_at ? (
-                        <p className="text-[11px] text-neutral-500">
-                          {t('recommendations.findNearby.confirmed', {
-                            date: new Date(v.last_confirmed_at).toLocaleDateString(i18n.language),
-                          })}
-                        </p>
-                      ) : null}
-                      {(() => {
-                        if (reportErr.has(v.id))
-                          return (
-                            <span className="text-[11px] text-neutral-500">
-                              {t('recommendations.findNearby.reportFailed')}
-                            </span>
-                          )
-                        if (reported.has(v.id))
-                          return (
-                            <span className="text-[11px] text-brand-600">
-                              {t('recommendations.findNearby.reportThanks')}
-                            </span>
-                          )
-                        return (
-                          <span className="mt-0.5 flex gap-3">
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              onClick={() => report(v.id, 'user_confirm')}
-                              className="h-auto p-0 text-[11px] font-normal text-neutral-500 hover:bg-transparent hover:text-brand-600"
-                            >
-                              <CatalogIcon group="action" iconKey="thumbs-up" className="h-4 w-4" />
-                              {t('recommendations.findNearby.stillHere')}
-                            </Button>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              onClick={() => report(v.id, 'user_deny')}
-                              className="h-auto p-0 text-[11px] font-normal text-neutral-500 hover:bg-transparent hover:text-brand-600"
-                            >
-                              <CatalogIcon group="action" iconKey="block" className="h-4 w-4" />
-                              {t('recommendations.findNearby.gone')}
-                            </Button>
-                            {flagged.has(v.id) ? (
-                              <span className="text-[11px] text-neutral-500">
-                                {t('recommendations.findNearby.flagged')}
-                              </span>
-                            ) : (
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                onClick={() => flag(v.id)}
-                                className="h-auto p-0 text-[11px] font-normal text-neutral-500 hover:bg-transparent hover:text-red-600"
-                              >
-                                <CatalogIcon group="action" iconKey="flag" className="h-4 w-4" />
-                                {t('recommendations.findNearby.flagWrong')}
-                              </Button>
-                            )}
-                          </span>
-                        )
-                      })()}
-                    </li>
-                  )
-                })}
-              </ul>
-            </div>
-          ) : null}
-
-          <AvailabilityAddPlace beerId={beer.id} />
         </div>
       </div>
       <div className="border-t border-neutral-200 px-4 py-3 sm:px-6">

@@ -14,9 +14,7 @@ import { RecommendationBeerCard, type RecommendedBeer } from '../components/Reco
 import { RecommendationsLoadingState } from '../components/RecommendationsLoadingState'
 import { StatusCard } from '../components/StatusCard'
 import { apiFetch } from '@beerolog/shared'
-import { fetchAvailability } from '../lib/beer-availability'
 import { features } from '@beerolog/shared'
-import { filterByAvailability } from '../lib/near-me-filter'
 import { clearGuestAnswers, readGuestAnswers } from '../lib/guest-answers'
 import { DEFAULT_MATCH_CALIBRATION, tonightMatchPercent } from '../lib/match-score'
 import { prunedAnswers } from '../lib/onboarding-quiz'
@@ -237,36 +235,8 @@ function RecommendationsContent() {
     },
   })
 
-  const [searchArea, setSearchArea] = useState(() => {
-    if (!features.findNearbySearch) return ''
-    try {
-      return localStorage.getItem('beerolog.searchArea') ?? ''
-    } catch {
-      return ''
-    }
-  })
-  const [nearMeOnly, setNearMeOnly] = useState(false)
   const [shareCopied, setShareCopied] = useState(false)
   const loadedTracked = useRef(false)
-  const areaFilter = features.findNearbySearch ? searchArea : ''
-  const nearMeFilter = features.findNearbySearch && nearMeOnly
-
-  // Debounce the area filter so typing doesn't refetch on every keystroke; the
-  // fetch itself is the react-query query below.
-  const debouncedArea = useDebouncedValue(areaFilter, 300)
-
-  const shownIds = recs.data?.results.map((b) => b.id) ?? []
-  // "Available at" venues for the shown beers. fetchAvailability resolves to {}
-  // on failure, so cards fall back to the maps link. placeholderData keeps the
-  // previous map visible while a new area refetches.
-  const availabilityQuery = useQuery({
-    queryKey: ['availability', shownIds, debouncedArea],
-    enabled: shownIds.length > 0,
-    queryFn: () => fetchAvailability(shownIds, debouncedArea),
-    placeholderData: (prev) => prev,
-  })
-  const availability = availabilityQuery.data ?? {}
-  const availabilityLoaded = availabilityQuery.isSuccess
 
   // Baseline dials for the per-beer radar overlay ("your taste" in the modal).
   // A signed-in user on this page always has a profile; degrade to null on miss.
@@ -382,14 +352,7 @@ function RecommendationsContent() {
   }
 
   const { results, hasMore } = recs.data
-  // Only apply the near-me filter once availability has actually loaded;
-  // otherwise the in-flight `{}` would strip every beer and flash a false
-  // empty-state while the (debounced) fetch is still running.
-  const { beers: shownResults, empty: nearMeEmpty } = filterByAvailability(
-    results,
-    availability,
-    nearMeFilter && availabilityLoaded,
-  )
+  const shownResults = results
   // Share the top pick + a link home. Native share sheet on mobile; clipboard
   // fallback elsewhere. Shares the site root, not this authed page, so the
   // recipient lands somewhere they can act. ponytail: no share lib.
@@ -459,44 +422,6 @@ function RecommendationsContent() {
         </div>
       </section>
 
-      {features.findNearbySearch ? (
-        <section className="flex flex-col gap-1.5 rounded-xl border border-neutral-200 bg-neutral-50/60 p-3 sm:p-4">
-          <label htmlFor="search-area" className="text-sm font-medium text-neutral-700">
-            {t('recommendations.findNearby.areaLabel')}
-          </label>
-          <input
-            id="search-area"
-            type="text"
-            value={searchArea}
-            onChange={(e) => {
-              setSearchArea(e.target.value)
-              try {
-                localStorage.setItem('beerolog.searchArea', e.target.value)
-              } catch {
-                /* ignore storage failures */
-              }
-            }}
-            placeholder={t('recommendations.findNearby.areaPlaceholder')}
-            className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-brand-400 focus:outline-none focus:ring-1 focus:ring-brand-400"
-          />
-          <p className="text-xs text-neutral-500">{t('recommendations.findNearby.areaHint')}</p>
-          <label className="mt-1 flex items-center gap-2 text-sm text-neutral-700">
-            <input
-              type="checkbox"
-              checked={nearMeOnly}
-              onChange={(e) => setNearMeOnly(e.target.checked)}
-            />
-            {t('recommendations.findNearby.nearMeToggle')}
-          </label>
-        </section>
-      ) : null}
-
-      {features.findNearbySearch && nearMeEmpty ? (
-        <p className="rounded-xl border border-neutral-200 bg-neutral-50/60 p-4 text-sm text-neutral-600">
-          {t('recommendations.findNearby.nearMeEmpty')}
-        </p>
-      ) : null}
-
       <div className="flex flex-col gap-3 sm:gap-4">
         {shownResults.map((beer, index) => (
           <RecommendationBeerCard
@@ -504,7 +429,6 @@ function RecommendationsContent() {
             beer={beer}
             rank={index + 1}
             matchPercent={tonightMatchPercent(beer.breakdown, hasSession, calibration, beta)}
-            venues={availability[beer.id]}
             taste={taste}
             detail={{
               open: openBeerId === beer.id,

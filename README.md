@@ -1,6 +1,38 @@
 # Beerolog
 
-Beer recommendation and social expert app. Take a short quiz, get three beers matched to your taste profile. Rate what you drink to evolve your profile over time.
+Take a short quiz, get beers matched to your taste profile, rate what you drink,
+and watch the profile move. Live at **[beerolog.com](https://beerolog.com)**.
+
+This is the public source of the consumer product — the taste model, the
+two-stage ranker, the quiz, the menu scanner, the rating feedback loop and the
+web client. Built and maintained by one engineer.
+
+> **What is not here.** The operator side — the staff and venue portal (`apps/portal`),
+> org and member management, in-venue ordering, QR flows, availability signals,
+> the catalog scrape pipeline and moderation tooling — is not published. It has
+> been removed from every commit, not just from the tip, so `git log` will not
+> turn it up. The catalog's beer photography is third-party and not
+> redistributable, so it is absent as well; the UI falls back to generated
+> icons. Everything that remains builds, typechecks, and passes its tests.
+
+## What is worth reading
+
+- **`apps/api/app/services/match_engine.py`** — the ranker. A weighted cosine
+  merge of a long-run taste embedding and a tonight's-mood embedding, a signed
+  novelty re-rank, an ABV band term, and a graded avoid-penalty that down-ranks
+  rather than filters.
+- **`apps/api/app/services/baseline_taste.py`** — quiz answers become a synthetic
+  preference sentence *and* the user-facing dials from a single source, so what
+  the model scores and what the UI shows cannot drift apart.
+- **`apps/api/app/services/dial_match.py`** — a second, embedding-free matcher in
+  12-dimensional dial space, for the signed-out preview.
+- **`apps/api/app/services/menu_scanner.py`** / **`menu_chat.py`** — photograph a bar
+  menu, resolve the entries against the catalog with a fuzzy matcher, rank them
+  against your profile.
+- **`apps/api/tests/eval/`** — a persona harness reporting precision@5 and MRR,
+  plus live probes for cross-lingual retrieval and hop-name semantics.
+- **`docs/adr/`** — the architecture decisions, including the two-layer taste
+  model and the auth boundary.
 
 ## Architecture
 
@@ -91,3 +123,10 @@ pnpm test
 - [OpenAI](docs/services/openai.md)
 - [Vercel (API deployment)](docs/services/vercel-api.md)
 - [Vercel (web deployment)](docs/services/vercel.md)
+
+
+## License
+
+MIT — see [LICENSE](LICENSE). The license covers the source in this repository.
+Beer, brewery and venue names appearing in fixtures and tests belong to their
+respective owners.

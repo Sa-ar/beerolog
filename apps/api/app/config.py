@@ -60,24 +60,6 @@ class Settings(BaseSettings):
     note_min_chars: int = 8
     # Blend weight for the note-derived (dials) embedding vs the nudged one.
     note_embedding_blend: float = 0.5
-    # Availability confidence (ADR-0006): decay + visibility + per-source weights
-    availability_half_life_days: float = 90.0
-    availability_threshold: float = 0.3
-    availability_weight_scrape: float = 1.0
-    availability_weight_user: float = 0.6
-    availability_weight_curated: float = 1.0
-    # User-added pairings publish low (won't dominate; rise as others confirm)
-    availability_weight_user_add: float = 0.4
-    # Signals contributing below this are safe to compact (slice #167)
-    availability_compaction_epsilon: float = 0.001
-    # Unresolved flags at/above this hide a (beer, venue) pairing from reads
-    availability_flag_hide_threshold: int = 2
-    # Scraper (slice #161): public sources to ingest + match thresholds
-    availability_scrape_sources: list[str] = []
-    availability_link_threshold: float = 0.92
-    availability_review_threshold: float = 0.80
-    availability_venue_match_threshold: float = 0.88
-    availability_venue_review_threshold: float = 0.70
     # Guest preview (public, OpenAI-free): how many results are unlocked before
     # sign-up, and how many to score/return from the dial-space matcher.
     guest_unlocked_count: int = 3
@@ -93,7 +75,7 @@ class Settings(BaseSettings):
     posthog_project_token: str = ""
     posthog_host: str = "https://us.i.posthog.com"
 
-    @field_validator("availability_scrape_sources", "cors_allowed_origins", mode="before")
+    @field_validator("cors_allowed_origins", mode="before")
     @classmethod
     def parse_cors_allowed_origins(cls, value: str | list[str]) -> list[str]:
         if isinstance(value, str):
