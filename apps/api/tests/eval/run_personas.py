@@ -29,15 +29,16 @@ import json
 import sys
 from pathlib import Path
 
-_ROOT = Path(__file__).resolve().parents[3]
-sys.path.insert(0, str(_ROOT / "apps" / "api"))
+# apps/api, so `app.*` and `tests.*` import the same way as under pytest.
+_API_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(_API_ROOT))
 
-from tests.eval.offline_embedding import OfflineEmbeddingClient  # noqa: E402
 from app.api_contracts import OnboardingAnswers, SessionIntent  # noqa: E402
 from app.placeholder_catalog import PLACEHOLDER_CATALOG, get_embedded_catalog  # noqa: E402
 from app.services import baseline_taste, session_intent  # noqa: E402
 from app.services.embedding_service import get_embedding_client  # noqa: E402
 from app.services.match_engine import rank  # noqa: E402
+from tests.eval.offline_embedding import OfflineEmbeddingClient  # noqa: E402
 
 # Style-family groups for the relaxed relevance definition.
 STYLE_FAMILIES: dict[str, set[str]] = {
@@ -140,8 +141,10 @@ async def main() -> int:
     personas = data["personas"]
 
     print(f"\n=== Persona harness ({mode}, alpha={args.alpha}, beta={args.beta}) ===\n")
-    results = [await evaluate_persona(p, alpha=args.alpha, beta=args.beta, client=client, catalog=catalog)
-        for p in personas]
+    results = [
+        await evaluate_persona(p, alpha=args.alpha, beta=args.beta, client=client, catalog=catalog)
+        for p in personas
+    ]
 
     for r in results:
         print(f"  {r['id']:40s}  P@5={r['p_at_5']:.2f}  MRR={r['mrr']:.2f}")
@@ -151,8 +154,10 @@ async def main() -> int:
 
     if args.compare_beta:
         print("\n=== Side-by-side (beta=0, Higgins-null) ===\n")
-        null_results = [await evaluate_persona(p, alpha=args.alpha, beta=0.0, client=client, catalog=catalog)
-            for p in personas]
+        null_results = [
+            await evaluate_persona(p, alpha=args.alpha, beta=0.0, client=client, catalog=catalog)
+            for p in personas
+        ]
         for r in null_results:
             print(f"  {r['id']:40s}  P@5={r['p_at_5']:.2f}  MRR={r['mrr']:.2f}")
         null_agg = sum(r["p_at_5"] for r in null_results) / max(1, len(null_results))
