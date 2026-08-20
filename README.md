@@ -3,22 +3,6 @@
 Take a short quiz, get beers matched to your taste profile, rate what you drink,
 and watch the profile move. Live at **[beerolog.com](https://beerolog.com)**.
 
-This is the public source of the consumer product — the taste model, the
-two-stage ranker, the quiz, the menu scanner, the rating feedback loop and the
-web client. Built and maintained by one engineer.
-
-> **What is not here.** The operator side — the staff and venue portal, org and
-> member management, in-venue ordering, QR flows, availability signals, the
-> catalog scrape pipeline and moderation tooling — is not published. Its source
-> was rewritten out of every commit rather than deleted at the tip, so no revision
-> in this repository contains it; the commit *subjects* that built it are still
-> in `git log`, which is why you will see messages referencing a portal whose code
-> is absent. The white-label tenancy tables in `packages/db` are the exception —
-> they stay, because they are part of the shipped schema and `docs/adr/0009`
-> and `0010` explain why. The catalog's beer photography is third-party and not
-> redistributable, so it is absent as well; the UI falls back to generated
-> icons. Everything that remains builds, typechecks, and passes its tests.
-
 ## What is worth reading
 
 - **`apps/api/app/services/match_engine.py`** — the ranker. A weighted cosine
@@ -162,10 +146,3 @@ test failure rather than a formatting nit.
 - [OpenAI](docs/services/openai.md)
 - [Vercel (API deployment)](docs/services/vercel-api.md)
 - [Vercel (web deployment)](docs/services/vercel.md)
-
-
-## License
-
-MIT — see [LICENSE](LICENSE). The license covers the source in this repository.
-Beer, brewery and venue names appearing in fixtures and tests belong to their
-respective owners.
