@@ -1,38 +1,113 @@
 {
-  "$schema": "./personas.schema.json",
-  "_comment": "Hand-authored personas for the matcher validation harness. Slice #79 ships one example persona; the remaining 5 are HITL pickups by the maintainer who has beer-domain knowledge. See README.md.",
+  "_comment": "Hand-authored personas for the matcher validation harness. Onboarding payloads validate against the current OnboardingAnswers schema; expected_top_5 ids are drawn from the placeholder catalog. Relevance is scored as exact id match OR shared style family.",
   "personas": [
     {
       "id": "hop-head-ipa-enthusiast",
-      "description": "High bitterness tolerance, novelty-seeking craft drinker. Should match IPAs.",
+      "description": "High bitterness tolerance, novelty-seeking craft drinker. Should match IPAs and pale ales.",
       "onboarding": {
         "coffee": "black",
+        "bitterness_direct": "love",
+        "roasted": "like",
         "water": "strong",
-        "novelty_seeking": true,
-        "snack": "dark_chocolate",
         "sour_foods": "okay",
-        "citrus": "grapefruit",
-        "smoked_foods": "okay"
+        "smoked_foods": "okay",
+        "sweet_tooth": "dry",
+        "strength": "medium",
+        "adventure": "high",
+        "flavor_cues": ["grapefruit", "pine", "citrus_zest"]
       },
-      "session": {
-        "vibe": "adventurous",
-        "abv_intent": "medium",
-        "free_text": ""
+      "session": {"vibe": "adventurous", "abv_intent": "medium"},
+      "expected_top_5": ["alexander-blazer", "schnitt-pale", "alexander-green"]
+    },
+    {
+      "id": "mainstream-comfort-drinker",
+      "description": "Bitterness-averse, low novelty. Should match mainstream lagers and approachable imports.",
+      "onboarding": {
+        "coffee": "sweet",
+        "bitterness_direct": "wince",
+        "roasted": "dislike",
+        "water": "strong",
+        "sour_foods": "avoid",
+        "smoked_foods": "avoid",
+        "sweet_tooth": "balanced",
+        "strength": "light",
+        "adventure": "low",
+        "avoids": ["too_bitter", "too_dark"]
       },
-      "expected_top_5": [
-        "alexander-blazer",
-        "alexander-green",
-        "schnitt-pale",
-        "herzl-saison",
-        "beerbazaar-gose"
-      ]
+      "session": {"vibe": "familiar", "abv_intent": "low"},
+      "expected_top_5": ["maccabee", "goldstar", "hoegaarden"]
+    },
+    {
+      "id": "dark-malt-fan",
+      "description": "Roast- and body-forward. Should match stouts and porters.",
+      "onboarding": {
+        "coffee": "black",
+        "chocolate": "dark_90",
+        "bitterness_direct": "some",
+        "roasted": "love",
+        "water": "light",
+        "sour_foods": "okay",
+        "smoked_foods": "love",
+        "sweet_tooth": "rich",
+        "strength": "medium",
+        "adventure": "medium",
+        "flavor_cues": ["coffee", "caramel", "bread_crust"]
+      },
+      "session": {"vibe": "cozy", "abv_intent": "medium"},
+      "expected_top_5": ["malka-stout", "guinness"]
+    },
+    {
+      "id": "sour-and-funky-craft-nerd",
+      "description": "Wild fermentation seeker. Should match gose and saison.",
+      "onboarding": {
+        "coffee": "milk_based",
+        "bitterness_direct": "some",
+        "roasted": "neutral",
+        "water": "strong",
+        "sour_foods": "love",
+        "sour_wild": "funky",
+        "smoked_foods": "okay",
+        "sweet_tooth": "dry",
+        "strength": "medium",
+        "adventure": "high"
+      },
+      "session": {"vibe": "adventurous", "abv_intent": "any"},
+      "expected_top_5": ["beerbazaar-gose", "herzl-saison"]
+    },
+    {
+      "id": "sessionable-wheat-lager-drinker",
+      "description": "Light, fizzy, low-ABV. Should match witbier and pale lagers.",
+      "onboarding": {
+        "coffee": "milk_based",
+        "bitterness_direct": "wince",
+        "roasted": "neutral",
+        "water": "strong",
+        "sour_foods": "okay",
+        "smoked_foods": "avoid",
+        "sweet_tooth": "balanced",
+        "strength": "light",
+        "adventure": "low"
+      },
+      "session": {"vibe": "refreshing", "abv_intent": "low"},
+      "expected_top_5": ["hoegaarden", "maccabee", "goldstar"]
+    },
+    {
+      "id": "adventurous-omnivore",
+      "description": "Likes everything intense. Should match the high-adventurousness end of the catalog.",
+      "onboarding": {
+        "coffee": "black",
+        "bitterness_direct": "love",
+        "roasted": "like",
+        "water": "light",
+        "sour_foods": "love",
+        "sour_wild": "bright",
+        "smoked_foods": "love",
+        "sweet_tooth": "balanced",
+        "strength": "strong",
+        "adventure": "high"
+      },
+      "session": {"vibe": "adventurous", "abv_intent": "high"},
+      "expected_top_5": ["herzl-saison", "beerbazaar-gose", "alexander-blazer", "malka-stout"]
     }
-  ],
-  "_hitl_todo": [
-    "Add: mainstream-comfort-drinker (Goldstar/Maccabee leaning; low novelty; low bitterness)",
-    "Add: dark-malt-fan (Stout/Porter; medium bitterness; sweet/roasty)",
-    "Add: sour-and-funky-craft-nerd (high novelty; sour-leaning)",
-    "Add: sessionable-wheat-or-lager-drinker (low ABV intent; medium body)",
-    "Add: adventurous-omnivore (high novelty across styles; no strong axis)"
   ]
 }

@@ -29,8 +29,29 @@ web client. Built and maintained by one engineer.
 - **`apps/api/app/services/menu_scanner.py`** / **`menu_chat.py`** — photograph a bar
   menu, resolve the entries against the catalog with a fuzzy matcher, rank them
   against your profile.
-- **`apps/api/tests/eval/`** — a persona harness reporting precision@5 and MRR,
-  plus live probes for cross-lingual retrieval and hop-name semantics.
+- **`apps/api/tests/eval/`** — a persona harness reporting precision@5 and MRR.
+  Six personas run end to end through the real composers and the real ranker.
+  It is offline and deterministic — text is vectorised by a fixed projection
+  into the catalog's eight axes, so it needs no key and returns the same numbers
+  on every machine — and it gates CI at `P@5 >= 0.5` against a current 0.567.
+  `--live` runs the same personas through `text-embedding-3-large`; two further
+  probes measure Hebrew-to-English retrieval and whether hop *names* carry
+  semantic signal at all.
+
+  ```
+  $ python tests/eval/run_personas.py
+    hop-head-ipa-enthusiast        P@5=0.60  MRR=0.50
+    mainstream-comfort-drinker     P@5=0.60  MRR=1.00
+    dark-malt-fan                  P@5=0.40  MRR=1.00
+    sour-and-funky-craft-nerd      P@5=0.40  MRR=1.00
+    sessionable-wheat-lager-drinker P@5=0.60 MRR=1.00
+    adventurous-omnivore           P@5=0.80  MRR=1.00
+    AGGREGATE   P@5=0.567   MRR=0.917
+  ```
+
+  The harness is honest about its own limits: on a ten-beer catalog with
+  family-level relevance, `--compare-beta` cannot yet distinguish the novelty
+  re-rank from no re-rank at all. See `tests/eval/README.md`.
 - **`docs/adr/`** — the architecture decisions, including the two-layer taste
   model and the auth boundary.
 
