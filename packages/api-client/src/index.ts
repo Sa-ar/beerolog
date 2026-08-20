@@ -7,9 +7,9 @@ export type CreateApiClientOptions = {
   onUnauthorized?: () => void
 }
 
-// @beerolog/api-client (staff-portal slice #296). The openapi-fetch client
-// factory + auth wiring, shared by apps/web and apps/portal. The generated
-// OpenAPI `paths` type stays app-specific and is supplied by the caller.
+// @beerolog/api-client — the openapi-fetch client factory + auth wiring, shared
+// by every app in the workspace. The generated OpenAPI `paths` type stays
+// app-specific and is supplied by the caller.
 export function createApiClient<Paths extends object>(options: CreateApiClientOptions) {
   const client = createClient<Paths>({ baseUrl: options.baseUrl })
   const authMiddleware: Middleware = {

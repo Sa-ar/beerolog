@@ -15,7 +15,7 @@ The primary business is a **paid white-label B2B product**: bars and venues lice
 - The supported runtime surface is the signed-in solo flow.
 - A user can sign in, complete the quiz, scan a bar menu, get catalog or menu-scoped recommendations (optionally session-scoped via vibe/ABV intent), rate beers, and keep an evolving taste profile.
 - Core in-scope systems are auth, menu photo scan (`/menu`), profile, recommendations, ratings/history, and persona.
-- Managed venue QR / tap-list operator workflows remain deferred (see ADR 0001 and `docs/prds/venue-and-menu-scan.md`).
+- Managed venue QR / tap-list operator workflows remain deferred (see ADR 0001).
 
 ## Deferred surfaces
 

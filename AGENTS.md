@@ -1,97 +1,91 @@
-# Beerolog — Agent Guide
+# Beerolog — Contributor Guide
 
-Canonical instructions for every coding agent (Cursor, Claude Code, Codex, etc.).
-Tool-specific stubs (`CLAUDE.md`, `.cursorrules`) only point here.
-
-You are an automated software engineer. Do not write speculative features or
-unverified code changes. Execute feature work through Matt Pocock's composable
-skills ([reference](https://github.com/mattpocock/skills)).
+Canonical working instructions for this repo, for humans and coding agents alike.
+`CLAUDE.md` and `.cursorrules` only point here.
 
 ---
 
-## 7-Phase Dual-Agent Pipeline
-
-### Phase 1 & 2: /grill-with-docs (Exploration & Alignment)
-
-Before drafting code or proposing an architecture:
-
-- Invoke the `/grill-with-docs` skill.
-- Cross-reference the concept with `CONTEXT.md` and existing decisions in `docs/adr/`.
-- Interrogate the developer **one question at a time** to discover edge cases,
-  typing boundaries, and schema requirements.
-
-### Phase 3 & 4: /to-prd (Formalizing Strategy)
-
-- Synthesize the finalized chat context into a Product Requirements Document via
-  the `/to-prd` skill.
-- Write it to `docs/prds/[feature-name].md`. Stop and await confirmation.
-
-### Phase 5: /to-issues (Vertical Slicing)
-
-- Run `/to-issues` on the local PRD markdown file.
-- Break the plan into atomic vertical slices (Schema → API → UI → Integration Tests).
-- Publish approved slices as GitHub issues, each linking back to its parent PRD.
-- Print the task list and ask: *"Do you approve this slice execution plan?"*
-
-### Phase 6 & 7: /tdd & /improve-codebase-architecture
-
-For each ticket in sequence:
-
-1. Initialize the `/tdd` skill wrapper.
-2. **Red:** write an isolated failing test; run the local runner and verify failure.
-3. **Green:** write the minimum production code to pass; verify.
-4. **Refactor:** run `/improve-codebase-architecture` before the next ticket.
-
----
-
-## Agent docs map
+## Orientation
 
 | Topic | Doc |
 |-------|-----|
-| Shared primitives (UI, icons, types, API/connection helpers, hooks, utils) — use, create, when | [`docs/agents/primitives.md`](docs/agents/primitives.md) |
-| Frontend coding conventions (enums, nesting, debounced search) | [`docs/agents/frontend-conventions.md`](docs/agents/frontend-conventions.md) |
-| Domain vocabulary & ADR discipline | [`docs/agents/domain.md`](docs/agents/domain.md) |
-| GitHub issues / PRDs | [`docs/agents/issue-tracker.md`](docs/agents/issue-tracker.md) |
-| Triage fields on issues | [`docs/agents/triage-labels.md`](docs/agents/triage-labels.md) |
-| Product language & MVP boundary | [`CONTEXT.md`](CONTEXT.md) |
-| Durable decisions | [`docs/adr/`](docs/adr/) |
+| What the product is, and the MVP boundary | [`CONTEXT.md`](CONTEXT.md) |
+| Durable architectural decisions | [`docs/adr/`](docs/adr/) |
+| Feature-level requirements | [`docs/prds/`](docs/prds/) |
+| System architecture | [`docs/architecture.md`](docs/architecture.md) |
+| Shared primitives (UI, icons, types, connection helpers, hooks, utils) | [`docs/contributing/primitives.md`](docs/contributing/primitives.md) |
+| Frontend coding conventions | [`docs/contributing/frontend-conventions.md`](docs/contributing/frontend-conventions.md) |
 | Visual identity | [`docs/design-guide.md`](docs/design-guide.md) |
-
-### Non-negotiable reuse rule
-
-Prefer existing **primitives** over local one-offs. That includes `@beerolog/ui`
-components, `@beerolog/icons`, `@beerolog/types`, `apps/web/src/lib` connection
-functions / react-query hooks, and shared utils — not only buttons and headings.
-See [`docs/agents/primitives.md`](docs/agents/primitives.md).
+| Environment matrix, deploy checklists, incidents | [`docs/ops/`](docs/ops/) |
+| External service configuration | [`docs/services/`](docs/services/) |
 
 ---
 
-## Learned User Preferences
+## Commands
 
-- UI icons must be custom SVGs from `@beerolog/icons` (CatalogIcon / icon factory); they must clearly represent their label—no emojis or abstract one-off shapes.
-- Launch auth with a single OAuth button; social-only (Google, Apple, Facebook, Instagram) with no email/password flow.
-- Keep answers concise and to the point.
-- Create small, per-feature commits that make logical sense.
-- Show user-facing match % and per-card why-lines (LLM: fast, short, accurate, in the user's locale); each beer needs a unique reason—do not show identical shared fact bullets as the primary why. Hide α/β tuning parameters. Match % is the session ("tonight") score and must be a real percentage, not normalized or rescaled. Why-line copy must not repeat style already shown in pills—put the match explanation in the why text only.
-- Follow the repo's 7-phase Matt Pocock skill pipeline for feature work (grill-with-docs → to-prd → to-issues → tdd).
-- Home flow: inline quick selection starts a session and navigates immediately to recommendations with skeleton loading on that page; after the taste quiz, land on the main dashboard (not session-intent). Logged-in home should show the user's taste profile or an empty state with CTA and differ from the visitor landing page; taste-profile details stay an always-open section on home (not a collapsible details) and should not be duplicated under Account profile. Remove redundant nav links when the primary flow is available on the home page. Quiz habit proxies (e.g. coffee) stay single-choice with "pick your usual" framing when they feel multi-select. Rate deck needs an explicit "I don't know this beer" option (not only loved/fine/not-for-me). Want-deck keyboard arrows should drive choices after a first-use confirmation, with a settings toggle to disable. Beer detail pages need a real loading state and should surface the beer image, match %, the user's rating when present, and other useful fields we already have.
-- Prefer shared primitives (UI, icons, types, connection helpers, hooks, utils — see `docs/agents/primitives.md`) over raw HTML or ad-hoc fetch/copy-paste; beer images on cards and search results should be larger and fill card height on desktop, keeping natural bottle proportions (soft blur/fill behind rather than stretching the bottle); match % belongs on top of the card image.
-- Hebrew UI copy should read as natural Israeli Hebrew—avoid calques, inconsistent singular/plural register, and tech loanwords (e.g. אווירת הערב not מצב הרוח; consistent שלכם throughout).
-- Marketing copy must present Beerolog as always free for users, not a free trial.
-- Signed-out marketing surfaces (landing, sign-in, age gate, header/footer shell) must be mobile-friendly and fully responsive across breakpoints—not a mobile-only layout on desktop.
-- Layout: user-friendly route paths; sticky header and main content share `PAGE_SHELL` width (`apps/web/src/lib/page-shell.ts`); footer language switcher stays in a fixed physical position (`dir="ltr"` on the switcher); scrollbars only when content overflows; clickable controls use `cursor-pointer`. Signed-in chrome: desktop uses sidebar-only nav (logo at top, user menu at bottom)—minimal but not visually empty, no double top+side nav, and no separate Account link outside UserMenu; on account routes, replace the main desktop sidebar with account subnav plus a return control to the main app (do not hide account nav or stack a second navbar); mobile keeps top logo + user menu; do not repeat name/email in the UserMenu dropdown when the sidebar trigger already shows them. Beer details overlaid on card images (e.g. swipe cards) must stay readable with sufficient contrast. Infinite/paginated decks should not show misleading “N of M” counters when M is only the loaded batch. Menu scan (`Scan`) belongs in primary nav on both desktop and mobile. Session/refiner filter sheets should fit the default desktop modal height so filtering does not feel overwhelming.
+```bash
+pnpm install                       # install JS workspace deps
+pnpm dev                           # web app on :3000
+pnpm typecheck                     # tsc --noEmit across the workspace
+pnpm lint                          # eslint + ruff
+pnpm --dir apps/web test           # vitest unit + axe accessibility tests
 
-## Learned Workspace Facts
+cd apps/api
+uv sync --extra dev
+uv run pytest tests/ -q            # API test suite
+uv run uvicorn app.main:app --reload
+uv run python tests/eval/run_personas.py   # offline ranking-quality harness
+```
 
-- Beerolog is a pnpm monorepo: apps/web (TanStack Start), apps/api (FastAPI), packages/db (Drizzle), packages/types, packages/ui, packages/icons (@beerolog/icons), packages/icon-service.
-- `@beerolog/icons` and `beerolog-icon-service` generate GPT SVG icons, cache them in the `icons` table by canonical purpose, and reuse on cache hit.
-- Supported MVP is the signed-in solo flow: auth, menu scan, quiz, menu-scoped recommendations, ratings, and taste profile.
-- Deferred surfaces include venue QR, group sessions, challenges, leaderboards, badges, and broader bar tooling. Recommendations "find nearby" search UI is gated by `VITE_FEATURE_FIND_NEARBY_SEARCH` (`features.findNearbySearch`) until places are ready; place entry is still desired, venue list TBD.
-- GitHub issues are the source of truth for planning; PRDs live in docs/prds/.
-- Production stack: Vercel hosts apps/web (`beerolog`, TanStack Start SSR) and apps/api (`beerolog-api`, FastAPI via uv); Neon Postgres is the database; Clerk handles authentication. Domains: beerolog.com / api.beerolog.com (defaults beerolog.vercel.app / beerolog-api.vercel.app). Web mounts Vercel Analytics + PostHog in the root layout. PostHog runs the FULL suite (autocapture, $pageview, session replay [input-masked], feature flags, exception tracking, cookie identity — see `docs/services/posthog.md`), **gated on explicit opt-in consent** (`analytics-consent.ts` + `CookieNotice`): nothing initialises until the user accepts, declining opts out. Active once `VITE_POSTHOG_PROJECT_TOKEN` is set (all Vercel envs).
-- Vercel web deploy uses Nitro `preset: 'vercel'`, root `vercel.json`, and `api/index.mjs` SSR handler; API deploy uses `apps/api/vercel.json`, monorepo-root install for `packages/icon-service`, and `apps/api/api/index.py`. Public `POST /guest-recommendations` is rate-limited per IP via a dashboard-published Vercel WAF rule (documented in `docs/services/vercel-api.md` and ADR 0004), not auto-applied from the repo.
-- Shared product vocabulary and MVP boundary live in CONTEXT.md; durable decisions live in docs/adr/.
-- Age gate blocks first visit until simple 18+ confirmation; uses `age_verified` cookie (Israel drinking age 18; Beerolog does not sell alcohol).
-- Compliance program PRD: `docs/prds/compliance-privacy-and-accessibility.md` (GDPR, Israeli privacy law, SI 5568 / WCAG 2.0 AA).
-- Beer catalog includes a `color` field (pale | gold | amber | brown | dark) for UI beer-color swatches; catalog seed data must not persist Untappd references and uses Vercel Blob URLs only (no third-party CDNs).
-- Recommendation why-lines: one batched `gpt-4o-mini` call per recommendations request, grounded on structured match facts, in client locale (`en` | `he`); cards should prefer unique per-beer LLM `why.text`, with deterministic templates/facts as fallback—not identical primary copy across cards.
+CI (`.github/workflows/ci.yml`) runs typecheck, both linters, both test suites,
+a real production build, a Drizzle migration drift check, and the persona
+harness with a `P@5 >= 0.5` floor. Everything above must pass locally first.
+
+---
+
+## How work gets done
+
+1. **Establish the boundary before writing code.** Cross-reference the change
+   against `CONTEXT.md` and the existing decisions in `docs/adr/`. If a change
+   moves the product boundary, changes system shape, or reverses an earlier
+   decision, it needs an ADR — write it, don't override silently.
+2. **Write the PRD for anything non-trivial.** `docs/prds/<feature-slug>.md`,
+   with concrete acceptance criteria. GitHub Issues carry the execution slices
+   and link back to the parent PRD.
+3. **Slice vertically.** Schema → API → UI → integration test. One slice should
+   be independently shippable.
+4. **Test-first.** Write the failing test, watch it fail, write the minimum code
+   to pass, then refactor. Ranking changes must also be run through the persona
+   harness — it is the regression gate on recommendation quality.
+
+No speculative features, and no unverified changes: if it isn't exercised by a
+test or run against the real app, it isn't done.
+
+---
+
+## Non-negotiable reuse rule
+
+Prefer existing **primitives** over local one-offs. That covers `@beerolog/ui`
+components, `@beerolog/icons`, `@beerolog/types`, the connection helpers and
+react-query hooks in `apps/web/src/lib`, and shared utils — not only buttons and
+headings. Some of this is lint-enforced: raw `<h1>`–`<h6>` and native `<dialog>`
+under `apps/web/src` are CI errors.
+
+See [`docs/contributing/primitives.md`](docs/contributing/primitives.md).
+
+---
+
+## Product conventions worth knowing
+
+- **Icons** are custom SVGs from `@beerolog/icons` and must clearly depict their
+  label — no emoji, no abstract one-off shapes.
+- **Auth** is social-only (Google, Apple, Facebook, Instagram) through a single
+  OAuth entry point. There is no email/password flow.
+- **Match %** shown on a card is the session ("tonight") score and must be a real
+  percentage — never normalised or rescaled for presentation. The α/β tuning
+  parameters stay internal.
+- **Why-lines** are per-beer and unique; they explain the match and must not
+  repeat information already shown in the style pills.
+- **Hebrew copy** must read as natural Israeli Hebrew — no calques, consistent
+  register, no unnecessary tech loanwords.
+- **Commits** are small and per-feature, each one a logically complete change.

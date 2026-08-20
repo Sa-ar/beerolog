@@ -87,7 +87,7 @@ Key shape decisions (locked with the product owner in the plan session):
 
 - `apps/web/src/lib/archetypes.ts`: const-object map
   `key → { icon, nameEn, nameHe, taglineEn, taglineHe, traits, radar }`
-  (const-object enum per `docs/agents/frontend-conventions.md`).
+  (const-object enum per `docs/contributing/frontend-conventions.md`).
 - Icons are **custom SVGs via `@beerolog/icons`** (one per archetype, clearly
   representative — no emoji, per the repo icon rule).
 - `ArchetypeCard.tsx` is presentational, brand chalkboard styling, reusing the
@@ -139,7 +139,7 @@ Key shape decisions (locked with the product owner in the plan session):
   custom-event cap + lack of funnels drove the switch; see
   `docs/services/posthog.md`. Sub-processor disclosure is landed, but PostHog was
   since expanded to its full suite (replay, cookies, autocapture), which reopened
-  the consent/cookie compliance gate before prod (`docs/legal/legal-launch-followups.md`).
+  the consent/cookie compliance gate before prod (see the launch follow-ups tracked in `docs/ops/compliance-readiness.md`).
 
 ## Explicitly Out of Scope
 

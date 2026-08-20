@@ -7,11 +7,15 @@ This is the public source of the consumer product — the taste model, the
 two-stage ranker, the quiz, the menu scanner, the rating feedback loop and the
 web client. Built and maintained by one engineer.
 
-> **What is not here.** The operator side — the staff and venue portal (`apps/portal`),
-> org and member management, in-venue ordering, QR flows, availability signals,
-> the catalog scrape pipeline and moderation tooling — is not published. It has
-> been removed from every commit, not just from the tip, so `git log` will not
-> turn it up. The catalog's beer photography is third-party and not
+> **What is not here.** The operator side — the staff and venue portal, org and
+> member management, in-venue ordering, QR flows, availability signals, the
+> catalog scrape pipeline and moderation tooling — is not published. Its source
+> was rewritten out of every commit rather than deleted at the tip, so no revision
+> in this repository contains it; the commit *subjects* that built it are still
+> in `git log`, which is why you will see messages referencing a portal whose code
+> is absent. The white-label tenancy tables in `packages/db` are the exception —
+> they stay, because they are part of the shipped schema and `docs/adr/0009`
+> and `0010` explain why. The catalog's beer photography is third-party and not
 > redistributable, so it is absent as well; the UI falls back to generated
 > icons. Everything that remains builds, typechecks, and passes its tests.
 
@@ -121,23 +125,37 @@ cd apps/api && uv run uvicorn app.main:app --reload
 ## Verification
 
 ```bash
-pnpm typecheck
-pnpm lint
-pnpm test
+pnpm typecheck   # tsc --noEmit across every workspace package
+pnpm lint        # eslint (web/packages) + ruff check & format (api)
+pnpm test        # API pytest, web vitest + axe, and the OpenAPI contract check
+pnpm test:eval   # persona harness, the ranking-quality regression gate
 ```
 
-## Supported MVP After Cleanup
+`pnpm test`'s contract step regenerates `apps/api/openapi.json` and the typed
+client in `apps/web/src/lib/api-client/` and fails if either drifts from what is
+committed — a drifted client is a silent production break, so it is treated as a
+test failure rather than a formatting nit.
 
-- Canonical supported journey: signed-in, profile-centered solo flow
-- Authoritative recommendation path: API `/recommendations`
-- Deferred from the cleaned MVP: venue/scan flows, group sessions, friend challenges, leaderboards/social proof, badges, and broader bar tooling/operator workflows
-- Launch/runtime config: API CORS, log level, and environment are configured via `APP_ENV`, `CORS_ALLOWED_ORIGINS`, and `LOG_LEVEL`
+## Scope
+
+- The supported journey is the signed-in solo flow: sign in, take the quiz, scan
+  a bar menu or browse the catalog, get ranked recommendations, rate what you
+  drank, watch the profile move.
+- The authoritative recommendation path is the API's `/recommendations`.
+- Deliberately out of scope: group sessions, friend challenges, leaderboards and
+  social proof, badges, and operator/venue tooling. `CONTEXT.md` records why, and
+  `docs/adr/0001-launch-first-product-boundary.md` is the decision itself.
+- Runtime configuration is environment-driven — `APP_ENV`,
+  `CORS_ALLOWED_ORIGINS`, `LOG_LEVEL`; the full matrix is in
+  `docs/ops/environment-matrix.md`.
 
 ## Further reading
 
 - [API setup](apps/api/README.md)
 - [Web app setup](apps/web/README.md)
 - [Architecture](docs/architecture.md)
+- [Architecture decision records](docs/adr/)
+- [Contributor guide](AGENTS.md) · [shared primitives](docs/contributing/primitives.md) · [frontend conventions](docs/contributing/frontend-conventions.md)
 - [Operational artifacts](docs/ops/README.md)
 - [Clerk (authentication)](docs/services/clerk.md)
 - [Neon PostgreSQL](docs/services/neon.md)

@@ -2,7 +2,7 @@
 
 - Status: Draft
 - Type: enhancement
-- Parent feedback: [docs/feedback/2026-07-results-page-review.md](../feedback/2026-07-results-page-review.md) (item 1)
+- Parent feedback: results-page design review, 2026-07 (item 1)
 - Related ADRs: [0003 two-layer taste](../adr/0003-two-layer-taste-architecture.md), [0005 richer taste model](../adr/0005-richer-taste-model-and-adaptive-quiz.md), [0007 agent-ready interfaces](../adr/0007-agent-ready-interfaces.md)
 - Design source: resolved in a `/grill-with-docs` session (2026-07-21)
 

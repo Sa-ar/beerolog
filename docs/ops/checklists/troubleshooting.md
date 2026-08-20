@@ -17,7 +17,7 @@ Likely **Clerk JWKS unreachable** or **mismatched publishable key**.
 ## Symptom: every API call returns 401
 
 - The user's Clerk session expired or was revoked. Have them sign out and back in.
-- If a **fresh** sign-in still 401s: API and web are pointing at different Clerk instances. Check `CLERK_SECRET_KEY` on Railway vs `VITE_CLERK_PUBLISHABLE_KEY` on Vercel.
+- If a **fresh** sign-in still 401s: API and web are pointing at different Clerk instances. Check `CLERK_SECRET_KEY` on `beerolog-api` vs `VITE_CLERK_PUBLISHABLE_KEY` on the web project.
 
 ## Symptom: API responses include `error_type: "config"`
 
@@ -25,7 +25,7 @@ The non-development safety enforcer (#45) raised at runtime, OR a route
 dependency raised `ConfigError`.
 
 - `GET /health/ready` will repeat the same component breakdown
-- Set the missing env var in Railway, redeploy
+- Set the missing env var on `beerolog-api`, redeploy
 - **Never** redeploy with the dev `API_SECRET` — the enforcer refuses it
 
 ## Symptom: API responses include `error_type: "dependency"`
@@ -50,7 +50,7 @@ If the bias persists after slice #75:
 
 - Run the persona harness (slice #79). If `precision@5 < 0.4`, the
   algorithm regressed — file a bug, do not tune knobs by hand in prod.
-- Check that `MATCH_ALPHA` and `MATCH_BETA` in Railway match the values
+- Check that `MATCH_ALPHA` and `MATCH_BETA` on `beerolog-api` match the values
   validated by the most recent persona-harness run.
 
 ## Symptom: `/health/ready` says `database: down`
@@ -72,11 +72,11 @@ Common cases:
 The lifespan ran the safety enforcer (#45) and one of its rules failed.
 The startup log line names every problem. Common cases:
 
-- `CORS_ALLOWED_ORIGINS contains wildcard` — someone set `*` in Railway
+- `CORS_ALLOWED_ORIGINS contains wildcard` — someone set `*` on `beerolog-api`
 - `API_SECRET is still the dev default` — nobody overrode it in prod
-- `Clerk keys missing` — env vars never made it to Railway
+- `Clerk keys missing` — env vars never made it to `beerolog-api`
 
-Fix in Railway, redeploy. Do **not** add an exception to the enforcer.
+Fix on `beerolog-api`, redeploy. Do **not** add an exception to the enforcer.
 
 ## When to escalate
 

@@ -144,9 +144,8 @@ exists with enough coverage to produce useful matches.
 
 ## Addendum (2026-07-28): unified tenant model, seams rescheduled
 
-Written while planning the white-label platform
-(`docs/prds/white-label-platform.md`). Two corrections to the original
-decision:
+Written while planning the white-label platform (PRD not published; see the
+note in the repository README). Two corrections to the original decision:
 
 1. **The "built in now" seams were never implemented.** As of this date
    `packages/db/src/schema.ts` contains none of `markets`,

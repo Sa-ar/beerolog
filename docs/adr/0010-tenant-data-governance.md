@@ -97,8 +97,7 @@ This decision aligns with:
 
 This amendment is the review this ADR's own audit clause requires ("material
 changes to tenant data access rules require a new ADR and a privacy impact
-review before shipping") for the white-label platform's Phase B/C analytics
-(`docs/prds/white-label-platform.md`).
+review before shipping") for the white-label platform's Phase B/C analytics.
 
 ### Additional operator-visible data (all aggregate, all tenant-scoped)
 
@@ -108,7 +107,7 @@ review before shipping") for the white-label platform's Phase B/C analytics
 2. **Order and return-rate rollups** — per-beer order counts and outcome
    distribution (`as_expected | not_what_expected | better_than_expected`)
    from ratings attributed to served orders. Extends the already-permitted
-   "recommendation outcomes" view with the ordering module (ADR 0012).
+   "recommendation outcomes" view with the in-venue ordering module.
 3. **Area taste aggregates** — distribution of taste dials, flavor families,
    and archetypes for a city/area, computed by job from consenting users'
    baseline taste × visit/rating attribution. Cross-tenant by nature but

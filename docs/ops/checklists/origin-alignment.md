@@ -1,6 +1,6 @@
 # Origin alignment
 
-Vercel (web), Railway (API), and Clerk all have their own notion of
+Vercel (web), Vercel (API), and Clerk all have their own notion of
 “allowed origin.” When they disagree, the user sees a 401 or a CORS
 failure with no obvious culprit. This checklist locks the three
 systems together as one durable contract — supersedes `wontfix`’d ad‐hoc
@@ -12,22 +12,23 @@ A mismatch here is a **deploy blocker** — do not ship past step 2 of
 ## Per-environment origins
 
 Every environment owns exactly **two** web origins (Vercel preview
-branch + branch alias) and **one** API origin (Railway).
+branch + branch alias) and **one** API origin (the `beerolog-api`
+Vercel project).
 
 | Env | Web origin | API origin | Clerk instance |
 |---|---|---|---|
 | development | `http://localhost:3000` | `http://localhost:8000` | Clerk dev shared credentials |
-| preview | `https://<branch>-beerolog.vercel.app` | `https://<branch>-beerolog-api.up.railway.app` | Clerk dev instance |
-| production | `https://beerolog.example.com` | `https://api.beerolog.example.com` | Clerk production instance |
+| preview | `https://<branch>-beerolog.vercel.app` | `https://<branch>-beerolog-api.vercel.app` | Clerk dev instance |
+| production | `https://beerolog.com` | `https://api.beerolog.com` | Clerk production instance |
 
-Fill the production hosts with the real values from
-`docs/ops/environment-matrix.md` before relying on this table.
+Variable names and ownership for every value below live in
+`docs/ops/environment-matrix.md`.
 
 ## The contract
 
 For each environment, **all three** must agree:
 
-### 1. Railway → `CORS_ALLOWED_ORIGINS`
+### 1. `beerolog-api` → `CORS_ALLOWED_ORIGINS`
 
 The API enforces a hard allowlist via `app/main.py`'s `CORSMiddleware`
 and the `enforce_non_development_safety` enforcer (#45):
@@ -57,11 +58,11 @@ Clerk also enforces JWT issuer/audience per-instance. The web's
 
 Fill these in before merging a deploy PR:
 
-- [ ] Railway `CORS_ALLOWED_ORIGINS` includes every web origin for this env
-- [ ] Railway has no wildcards in `CORS_ALLOWED_ORIGINS` (the #45 enforcer would refuse the deploy anyway, but catching it pre-deploy saves a roll-forward)
-- [ ] Vercel `VITE_API_BASE_URL` matches the Railway API origin
+- [ ] `beerolog-api` `CORS_ALLOWED_ORIGINS` includes every web origin for this env
+- [ ] `beerolog-api` has no wildcards in `CORS_ALLOWED_ORIGINS` (the #45 enforcer would refuse the deploy anyway, but catching it pre-deploy saves a roll-forward)
+- [ ] Web `VITE_API_BASE_URL` matches the API origin
 - [ ] Vercel `VITE_CLERK_PUBLISHABLE_KEY` matches Clerk's published key for the env
-- [ ] Railway `CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY` come from the same Clerk instance as Vercel's publishable
+- [ ] `beerolog-api` `CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY` come from the same Clerk instance as the web project's publishable
 - [ ] Clerk dashboard “Allowed Origins” for the env includes every Vercel origin (preview alias + branch URL)
 - [ ] If the deploy is for a long-lived preview, the branch's auto-generated URL has been added too — Vercel issues a per-branch URL that Clerk does not auto-discover
 
@@ -78,7 +79,7 @@ between API and web must be in sync, per `deploy-sequence.md` step 2:
 An origin mismatch never requires a code change — it's always a
 config fix. Order of operations:
 
-1. Fix the offending dashboard value (Railway, Vercel, or Clerk)
+1. Fix the offending dashboard value (Vercel or Clerk)
 2. Redeploy the affected side (Vercel rebuild is fastest)
 3. Re-run `post-deploy-smoke.md` step 1 (sign-in path)
 
@@ -90,8 +91,8 @@ changes and still have the bad config.
 Every production deploy records to
 `docs/ops/releases/<YYYY-MM-DD>-<version>.md`:
 
-- The exact origin triple in effect (Railway + Vercel + Clerk Allowed Origins screenshot or text dump)
-- The Vercel + Railway build URLs
+- The exact origin triple in effect (web + API + Clerk Allowed Origins screenshot or text dump)
+- Both Vercel build URLs (`beerolog` and `beerolog-api`)
 - `GET /health/ready` JSON output
 - The smoke output from `post-deploy-smoke.md`
 

@@ -26,9 +26,9 @@ Write or update an ADR when a decision changes product boundary, system shape, o
 - `0003-two-layer-taste-architecture.md`
 - `0004-compliance-privacy-and-accessibility.md`
 - `0005-richer-taste-model-and-adaptive-quiz.md`
-- `0006-availability-signal-log.md`
+- `0006-rating-feedback-loop.md`
 - `0007-agent-ready-interfaces.md`
 - `0008-shared-catalog-with-market-tags.md`
 - `0009-international-scaling-and-white-label-tenancy.md`
 - `0010-tenant-data-governance.md`
-- `0011-analytics-k-anonymity-floor.md`
+- `0011-catch-proof-by-presence.md`

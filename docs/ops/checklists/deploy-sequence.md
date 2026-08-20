@@ -6,15 +6,15 @@ production. Stop at any step that fails — do not skip ahead.
 ## 0. Prerequisites (one-time per environment)
 
 - Vercel project linked to the repo, branch → environment mapping set
-- Railway project linked, env vars populated from `docs/ops/environment-matrix.md`
+- `beerolog-api` Vercel project linked, env vars populated from `docs/ops/environment-matrix.md`
 - Neon database provisioned with the `vector` extension enabled
 - Clerk instance provisioned per `docs/services/clerk.md`
-- Vercel + Railway + Clerk origin alignment confirmed (`docs/ops/checklists/origin-alignment.md`)
+- Web + API + Clerk origin alignment confirmed (`docs/ops/checklists/origin-alignment.md`)
 
 ## 1. Environment review (before merge)
 
 - [ ] Read `docs/ops/environment-matrix.md` end-to-end
-- [ ] Diff the PR's `.env.example` against the running Vercel + Railway env vars; add any new key to **both** before merge
+- [ ] Diff the PR's `.env.example` against the running env vars on both Vercel projects; add any new key to **both** before merge
 - [ ] If the PR adds an env knob with a non-default value (e.g. `MATCH_ALPHA`, `EMBEDDING_MODEL`), confirm the prod value is intentional, not the local dev value
 
 ## 2. Contract sync verification (deploy blocker)
@@ -36,20 +36,20 @@ the browser breaks silently.
 - [ ] Migrations are forward-only — do **not** edit a merged migration;
       author a new one
 
-## 4. API deploy (Railway)
+## 4. API deploy (Vercel — `beerolog-api`)
 
-- [ ] Push to the deploy branch (Railway picks it up automatically)
+- [ ] Push to the deploy branch (Vercel picks it up automatically)
 - [ ] Watch the build log for the lifespan start line:
       `Starting Beerolog API env=... database_configured=true openai_configured=true`
 - [ ] If startup fails, look for `ConfigError` in the log — the
       non-development safety enforcer (#45) lists every missing piece in
-      one line. Fix env vars in Railway, redeploy. **Do not bypass.**
+      one line. Fix env vars on `beerolog-api`, redeploy. **Do not bypass.**
 
 ## 5. Web deploy (Vercel)
 
 - [ ] Vercel auto-deploys from the same branch
 - [ ] Confirm the build references the right `VITE_API_BASE_URL` and `VITE_CLERK_PUBLISHABLE_KEY` (matching the API + Clerk env)
-- [ ] After deploy, the build URL must hit the right Railway origin (test once with the network tab)
+- [ ] After deploy, the build URL must hit the right API origin (test once with the network tab)
 
 ## 6. Health and readiness verification
 
@@ -68,12 +68,12 @@ request IDs from each step for the release evidence record.
 
 ## 8. Release evidence (production only)
 
-- [ ] Save the smoke output + readiness output + Railway/Vercel build URLs to `docs/ops/releases/<YYYY-MM-DD>-<version>.md`
+- [ ] Save the smoke output + readiness output + both Vercel build URLs to `docs/ops/releases/<YYYY-MM-DD>-<version>.md`
 - [ ] Reference the new file in the PR's deploy comment
 
 ## Roll-back
 
 - Web: redeploy the prior Vercel build (one click)
-- API: redeploy the prior Railway image (one click)
+- API: promote the prior `beerolog-api` deployment (one click)
 - DB migrations: **forward-only**. If a migration is bad, ship a
   follow-up migration that reverts the schema. Do not edit history.

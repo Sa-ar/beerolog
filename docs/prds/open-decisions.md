@@ -68,7 +68,7 @@ Beerolog is a **smart menu**: software the bar uses to sell. The **bar is the se
 
 **(a) Payment provider — Recommended (pending owner sign-off, 2026-08-01)**: **Grow (Meshulam)**, configured so the **bar is merchant / sub-merchant** and funds settle to the bar, not into Beerolog's account. Hosted checkout keeps PCI scope minimal and supports Bit + Apple/Google Pay. **Alternative**: Tranzila (both support sub-merchant/marketplace settlement). Where the first POS (OD-006b, Tabit) already owns payment, Beerolog may inject the order and let the bar's existing POS payment settle it — no separate Beerolog gateway needed. **Routing rule (to ratify):** use Grow by default; route through Tabit-owned payment only when the venue's ordering runs on Tabit's POS; in **both** paths the bar is merchant of record and funds never enter Beerolog's custody. The provider is not ratified until this routing contract is signed off.
 
-**(b) Legal structure — Blocked on counsel (narrowed).** As pure SaaS where the licensed bar is the seller and merchant of record, Beerolog's alcohol-regulatory exposure is low. The counsel job is to **confirm the structure holds** — that Beerolog carries no alcohol-licensing obligation as long as funds settle to the bar and the bar is the contractual seller — and to say which enforcement duties (23:00 rule, age verification) the *software* must actively implement on the bar's behalf vs merely enable. Prepared questions: `docs/legal/counsel-brief-payments-and-data.md` §A.
+**(b) Legal structure — Blocked on counsel (narrowed).** As pure SaaS where the licensed bar is the seller and merchant of record, Beerolog's alcohol-regulatory exposure is low. The counsel job is to **confirm the structure holds** — that Beerolog carries no alcohol-licensing obligation as long as funds settle to the bar and the bar is the contractual seller — and to say which enforcement duties (23:00 rule, age verification) the *software* must actively implement on the bar's behalf vs merely enable. Prepared questions live in the counsel brief (not published with the consumer repo), §A.
 
 **ADR needed**: Payment-provider integration ADR once the provider is ratified and counsel confirms the merchant-of-record structure — not before.
 
@@ -94,7 +94,7 @@ Beerolog is a **smart menu**: software the bar uses to sell. The **bar is the se
 
 **Rationale**: ADR 0010 already mandates "aggregate, anonymised only" for bar operators (e.g. "70% of your customers prefer bitter beers tonight") but never specified the minimum cell size below which an "aggregate" can re-identify individuals. OD-007 sets that floor. K = 20 is a conservative, widely-used suppression threshold. This is an internal privacy-engineering parameter — counsel's concern is the *disclosure* (OD-008), not the number.
 
-**ADR needed**: Yes — captured in `docs/adr/0011-analytics-k-anonymity-floor.md` (follow-on to ADR 0010). Close this item once that ADR is Accepted.
+**ADR needed**: Yes — a follow-on to ADR 0010. Drafted but not published with the consumer repo; close this item once it is Accepted.
 
 ---
 
@@ -102,9 +102,9 @@ Beerolog is a **smart menu**: software the bar uses to sell. The **bar is the se
 
 **Blocks**: Phase C analytics that reuse consumer (B2C) data for B2B intelligence (C2/C3).
 
-**Status**: **Blocked on counsel.** Using B2C consumer taste data to generate B2B insights is a **new processing purpose**. ADR 0010 already enumerates what that requires: a GDPR Art 13/14 purpose disclosure, a PPL (Amendment 13) consent basis, a per-tenant DPA, and a revocation mechanism. OD-007's K-floor (aggregate-only, ≥ K distinct users) is the **baseline** technical safeguard, **not the complete one**: a suppression floor alone does not stop linkage, differencing, overlapping/repeated-query, or homogeneous-cell attacks (NIST documents these limits). Before OD-008 closes, the ADR/policy must also define query scope, composition / re-release limits, access + audit controls, and revocation behaviour — captured in ADR 0011's "Residual risks" + "Typed suppression contract" — or adopt a formal mechanism (differential privacy).
+**Status**: **Blocked on counsel.** Using B2C consumer taste data to generate B2B insights is a **new processing purpose**. ADR 0010 already enumerates what that requires: a GDPR Art 13/14 purpose disclosure, a PPL (Amendment 13) consent basis, a per-tenant DPA, and a revocation mechanism. OD-007's K-floor (aggregate-only, ≥ K distinct users) is the **baseline** technical safeguard, **not the complete one**: a suppression floor alone does not stop linkage, differencing, overlapping/repeated-query, or homogeneous-cell attacks (NIST documents these limits). Before OD-008 closes, the ADR/policy must also define query scope, composition / re-release limits, access + audit controls, and revocation behaviour, or adopt a formal mechanism (differential privacy).
 
-**Prepared for counsel**: `docs/legal/counsel-brief-payments-and-data.md` §B contains the processing-purpose analysis and a **draft privacy-policy clause**. Counsel confirms the lawful basis and whether the K-floor **plus these additional controls** are sufficient (or a formal mechanism such as differential privacy is required) and edits the clause; engineering keeps the draft banner until they sign off. Do not present OD-008 as resolved.
+**Prepared for counsel**: the counsel brief (not published with the consumer repo) §B contains the processing-purpose analysis and a **draft privacy-policy clause**. Counsel confirms the lawful basis and whether the K-floor **plus these additional controls** are sufficient (or a formal mechanism such as differential privacy is required) and edits the clause; engineering keeps the draft banner until they sign off. Do not present OD-008 as resolved.
 
 **ADR needed**: A follow-on to ADR 0010 only if the data-access model changes; the immediate output is the policy clause + counsel sign-off, not an architectural change.
 

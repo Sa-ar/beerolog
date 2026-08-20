@@ -40,14 +40,14 @@ onboarding + session flow.
       hit a route that requires Clerk without a bearer, expect
       `401` with body `{error_type: "auth", detail, request_id}`
 - [ ] Force a 503 to confirm config wiring (only in preview):
-      temporarily blank `OPENAI_API_KEY` in Railway, redeploy, confirm
+      temporarily blank `OPENAI_API_KEY` on `beerolog-api`, redeploy, confirm
       app refuses to start with `ConfigError: ... OPENAI_API_KEY missing`
 
 ## 4. Capture for release evidence
 
 Write to `docs/ops/releases/<YYYY-MM-DD>-<version>.md`:
 
-- Vercel + Railway build URLs
+- Both Vercel build URLs (`beerolog` and `beerolog-api`)
 - `GET /health/ready` JSON output
 - The 5-beer payload from step 2 (truncate `embedding` arrays)
 - Any request ids captured from typed-error tests

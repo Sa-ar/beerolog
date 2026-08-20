@@ -408,7 +408,7 @@ export const guestSubmissions = pgTable('guest_submissions', {
 
 // ---------------------------------------------------------------------------
 // White-label tenancy: markets, organizations, staff, invites, venue menus.
-// Staff Portal slice #297 (docs/prds/staff-portal.md, ADR 0009/0010).
+// See ADR 0009 (tenancy model) and ADR 0010 (tenant data governance).
 // Organizations ARE the tenants (ADR 0009 addendum); venues belong to an org
 // via venues.org_id. These tables have no consumers yet — this slice lands the
 // schema + migration only, as the foundation the portal + white-label slices
@@ -552,7 +552,7 @@ export const venueMenuItems = pgTable(
 // Staff submit a name; an LLM pre-fills a draft; a catalog.submit holder confirms.
 // The row is queued (status=pending) for operator review before it becomes a
 // canonical `beers` record — so a gap is NOT yet a venue_menu_items entry (those
-// reference canonical beers only). See docs/prds/staff-portal.md menu/catalog flow.
+// reference canonical beers only).
 export const catalogGapStatusEnum = pgEnum('catalog_gap_status', [
   'pending',
   'approved',

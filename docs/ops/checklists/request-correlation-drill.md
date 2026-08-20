@@ -2,8 +2,7 @@
 
 When an end-user reports a failure, this drill walks the operator from the
 report → the exact request → the exact log line → the failure category in
-~60 seconds. Lives here under `docs/ops/checklists/` per ADR-0001 +
-`docs/agents/issue-tracker.md`.
+~60 seconds. Lives here under `docs/ops/checklists/` per ADR-0001.
 
 ## Inputs you need from the user
 
@@ -60,7 +59,7 @@ Map by `error_type`:
 |---|---|---|---|
 | `auth` | 401 | Bearer token missing / invalid / expired Clerk session | Confirm Clerk JWKS is reachable; have the user retry from a clean sign-in |
 | `validation` | 400 | Malformed payload from the web client | Inspect the request body in the log; check `apps/web/src/lib/api.ts` for a contract drift |
-| `config` | 503 | A required env var is missing or invalid | Check `GET /health/ready`; fix env in Railway/Vercel; redeploy |
+| `config` | 503 | A required env var is missing or invalid | Check `GET /health/ready`; fix env in Vercel; redeploy |
 | `dependency` | 503 | OpenAI / Postgres / Clerk JWKS upstream failure | Check the provider status page; check the `instrument_requests` log line for the duration to narrow which dependency timed out |
 
 A generic 500 (no `error_type` in body) means an *unexpected* failure — the
