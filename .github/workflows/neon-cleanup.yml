@@ -1,16 +1,17 @@
 name: Neon branch sweep
 # Keep only the default branch (production) + a small keep-list; delete every
 # other Neon branch. The Vercel-Neon integration keeps creating preview/<branch>
-# branches per deploy and there's no toggle we can reach, so sweep on a schedule
+# branches per deploy and there's no toggle we can reach, so sweep periodically
 # to stay under the Neon branch quota. It never deletes production or a keep
-# branch. Manual runs are a DRY-RUN unless you tick `apply`; scheduled runs
-# always apply.
+# branch. Runs are a DRY-RUN unless you tick `apply`.
 #
 # Keep-list defaults to preview/staging,vercel-dev. Override with repo variable
 # NEON_KEEP_BRANCHES (comma-separated). production is always kept (it's default).
+#
+# Manual dispatch only. The 6-hourly schedule was removed because this repo
+# carries no NEON_PROJECT_ID / NEON_API_KEY, so every scheduled run failed with
+# a 400. Restore the `schedule:` trigger once those are configured.
 on:
-  schedule:
-    - cron: '0 */6 * * *'  # every 6h
   workflow_dispatch:
     inputs:
       apply:
@@ -32,8 +33,7 @@ jobs:
       - name: Sweep non-keep branches
         run: |
           set -euo pipefail
-          if [ "${{ github.event_name }}" = schedule ] || [ "${{ inputs.apply }}" = true ]; then
-            APPLY=1; else APPLY=0; fi
+          if [ "${{ inputs.apply }}" = true ]; then APPLY=1; else APPLY=0; fi
           branches=$(curl -fsS -H "Authorization: Bearer $NEON_API_KEY" "$NEON_API/branches")
           declare -A KEEPSET
           IFS=',' read -ra arr <<< "$KEEP"

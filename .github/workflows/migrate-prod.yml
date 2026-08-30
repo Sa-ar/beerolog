@@ -4,12 +4,11 @@ name: Migrate prod DB
 # migrations change on main. Prevents the prod DB drifting behind the deployed
 # code (Vercel builds don't run migrations). Keep migrations backward-compatible
 # (additive) so the brief window alongside the Vercel deploy is zero-downtime.
+#
+# Manual dispatch only. The push-to-main trigger was removed because this repo
+# has no production DATABASE_URL configured; restore the `push:` trigger (paths
+# packages/db/migrations/** and packages/db/src/schema.ts) once it is.
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'packages/db/migrations/**'
-      - 'packages/db/src/schema.ts'
   workflow_dispatch: {}
 
 permissions:

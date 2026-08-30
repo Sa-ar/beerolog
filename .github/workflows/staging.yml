@@ -5,9 +5,12 @@ name: Staging pipeline
 # deploys, then run the onboarding e2e against staging. Replaces the standalone
 # sync action; a single workflow avoids the GITHUB_TOKEN limitation where a
 # bot push to staging wouldn't trigger a separate push-triggered workflow.
+#
+# Manual dispatch only. The push-to-main trigger was removed because this repo
+# has no Vercel/Neon credentials configured; restore `push: branches: [main]`
+# once they are.
 on:
-  push:
-    branches: [main]
+  workflow_dispatch: {}
 
 permissions:
   contents: write
