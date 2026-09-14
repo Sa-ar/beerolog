@@ -2,7 +2,9 @@
  * /onboarding — adaptive taste quiz. Walks the pure question graph
  * (lib/onboarding-quiz) one question at a time via <QuizStepper>, then posts the
  * answers to POST /onboarding, which composes dials + persona + embedding and
- * persists the user's BaselineTaste. Redirects to recommendations on success.
+ * persists the user's BaselineTaste. Redirects to the signed-in home (`/`, the
+ * Want deck) on success. Taste identity (radar + persona) lives on
+ * `/account/profile`.
  */
 
 import { RedirectToSignIn, Show } from '@clerk/tanstack-react-start'

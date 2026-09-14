@@ -1,35 +1,23 @@
-import { setupClerkTestingToken } from '@clerk/testing/playwright'
 import { test, expect, type Page } from '@playwright/test'
-
-// Dev Clerk test user + target URL come from env (apps/web/.env.e2e, gitignored).
-const EMAIL = process.env.E2E_CLERK_EMAIL
-const PASSWORD = process.env.E2E_CLERK_PASSWORD
+import {
+  EMAIL,
+  PASSWORD,
+  appPath,
+  assertAppLoaded,
+  completePasswordSignIn,
+  prepareBrowser,
+} from './helpers'
 
 // /onboarding is auth-gated; signed out it bounces to our custom /signin page
 // (ClerkProvider signInUrl='/signin'). Sign in with email + password there.
 async function signIn(page: Page) {
-  await setupClerkTestingToken({ page })
-  // Skip the non-dismissible age-gate modal (it overlays the in-app /signin
-  // page and blocks the submit button). Signed-in users aren't gated anyway.
-  await page
-    .context()
-    .addCookies([
-      { name: 'age_verified', value: '1', url: process.env.E2E_BASE_URL ?? 'http://localhost:5173' },
-    ])
+  await prepareBrowser(page)
   await page.goto('/onboarding')
-  await page.locator('input[type="email"]').fill(EMAIL as string)
-  await page.locator('input[type="password"]').fill(PASSWORD as string)
-  await page.locator('form button[type="submit"]').click()
-  // New-device verification: dev Clerk emails a code; +clerk_test accepts 424242.
-  const codeInput = page.locator('input[autocomplete="one-time-code"]')
-  if (await codeInput.waitFor({ timeout: 10_000 }).then(() => true).catch(() => false)) {
-    await codeInput.fill('424242')
-    await page.locator('form button[type="submit"]').click()
-  }
+  await assertAppLoaded(page)
+  await completePasswordSignIn(page)
   // On success the page navigates to `next` (defaults to '/'); then hit onboarding.
-  await page.waitForURL((url) => !url.pathname.includes('/signin'))
   await page.goto('/onboarding')
-  await page.waitForURL((url) => url.pathname.endsWith('/onboarding'))
+  await page.waitForURL((url) => appPath(url).endsWith('/onboarding'))
 }
 
 // Each quiz option carries data-value = the wire enum value (language-agnostic).
@@ -72,11 +60,16 @@ test('signed-in user walks the adaptive quiz and gets a radar + persona', async 
   // Optional capstone flavor-cue grid → skip it.
   await page.getByTestId('quiz-skip').click()
 
-  // Finish and land back on the home profile.
+  // Finish; the signed-in home is the Want deck (page-reduction #322/#323).
+  // Taste identity (radar + persona) lives on /account/profile, not `/`.
   await page.getByTestId('quiz-submit').click()
-  await page.waitForURL((url) => !url.pathname.includes('/onboarding'))
+  await page.waitForURL((url) => {
+    const path = appPath(url)
+    return path !== '/onboarding' && !path.includes('/signin')
+  })
 
-  // Payoff: the 8-axis radar and the LLM persona render.
+  await page.goto('/account/profile')
+  await page.waitForURL((url) => appPath(url).endsWith('/account/profile'))
   await expect(page.getByTestId('taste-radar')).toBeVisible()
   await expect(page.getByTestId('persona-title')).toBeVisible()
 })
