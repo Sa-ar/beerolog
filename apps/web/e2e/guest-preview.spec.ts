@@ -1,9 +1,12 @@
-import { setupClerkTestingToken } from '@clerk/testing/playwright'
 import { test, expect, type Page } from '@playwright/test'
-
-// Dev Clerk test user + target URL come from env (apps/web/.env.e2e, gitignored).
-const EMAIL = process.env.E2E_CLERK_EMAIL
-const PASSWORD = process.env.E2E_CLERK_PASSWORD
+import {
+  EMAIL,
+  PASSWORD,
+  appPath,
+  assertAppLoaded,
+  completePasswordSignIn,
+  prepareBrowser,
+} from './helpers'
 
 // The guest funnel is unlocked-to-3 by default (server-driven via unlocked_count).
 const UNLOCKED_COUNT = 3
@@ -54,17 +57,7 @@ async function walkQuiz(page: Page) {
 // and wait to leave /signin.
 async function signInExistingUser(page: Page) {
   await page.goto('/signin/$?next=/recommendations')
-  await page.locator('input[type="email"]').fill(EMAIL as string)
-  await page.locator('input[type="password"]').fill(PASSWORD as string)
-  await page.locator('form button[type="submit"]').click()
-  // New-device verification: dev Clerk emails a code; +clerk_test accepts 424242.
-  const codeInput = page.locator('input[autocomplete="one-time-code"]')
-  if (await codeInput.waitFor({ timeout: 10_000 }).then(() => true).catch(() => false)) {
-    await codeInput.fill('424242')
-    await page.locator('form button[type="submit"]').click()
-  }
-  // On success the signin page navigates to `next` (/recommendations).
-  await page.waitForURL((url) => !url.pathname.includes('/signin'))
+  await completePasswordSignIn(page)
 }
 
 test('guest takes the quiz, hits the 3-result gate, signs in, and lands on full recommendations', async ({
@@ -77,17 +70,11 @@ test('guest takes the quiz, hits the 3-result gate, signs in, and lands on full 
     'Set the E2E_BASE_URL secret to a dev deployment (dev Clerk + dev API)',
   )
 
-  await setupClerkTestingToken({ page })
-  // Skip the non-dismissible age-gate modal that would otherwise overlay the
-  // page and block quiz / CTA interaction.
-  await page
-    .context()
-    .addCookies([
-      { name: 'age_verified', value: '1', url: process.env.E2E_BASE_URL ?? 'http://localhost:5173' },
-    ])
+  await prepareBrowser(page)
 
   // --- Guest funnel: /try, UNAUTHENTICATED, no sign-in first. ---
   await page.goto('/try')
+  await assertAppLoaded(page)
   await walkQuiz(page)
 
   // The guest results view replaces the quiz once recommendations resolve.
@@ -118,7 +105,8 @@ test('guest takes the quiz, hits the 3-result gate, signs in, and lands on full 
   await signInExistingUser(page)
 
   // Payoff: hydration lands the (returning) user on /recommendations.
-  await page.waitForURL((url) => url.pathname.endsWith('/recommendations'))
+  // Trailing-slash hosts (`/recommendations/`) used to fail endsWith().
+  await page.waitForURL((url) => appPath(url).endsWith('/recommendations'))
 
   // Full, unblurred recommendations render: the matched-results heading shows and
   // none of the guest-only locked/CTA gating is present on the authed page.

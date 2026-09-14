@@ -13,7 +13,9 @@ export default defineConfig({
   expect: { timeout: 15_000 },
   fullyParallel: false,
   retries: process.env.CI ? 1 : 0,
-  reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',
+  reporter: process.env.CI
+    ? [['github'], ['list'], ['html', { open: 'never' }]]
+    : 'list',
   use: {
     // Point at a dev deployment (dev Clerk + dev API) or a local dev server.
     baseURL: process.env.E2E_BASE_URL ?? 'http://localhost:5173',
