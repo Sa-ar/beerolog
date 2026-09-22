@@ -5,58 +5,21 @@ import {
   appPath,
   assertAppLoaded,
   completePasswordSignIn,
+  dismissAgeGate,
+  openSignIn,
   prepareBrowser,
+  walkAdaptiveQuiz,
 } from './helpers'
 
 // The guest funnel is unlocked-to-3 by default (server-driven via unlocked_count).
 const UNLOCKED_COUNT = 3
 
-// Each quiz option carries data-value = the wire enum value (language-agnostic).
-// The input is sr-only; click the enclosing label like a real user would.
-async function pick(page: Page, value: string) {
-  await page.locator(`label:has([data-value="${value}"])`).click()
-}
-
-// Walk the full adaptive quiz with the same picks the onboarding spec uses.
-// Reused verbatim so the guest path exercises the identical question graph.
-async function walkQuiz(page: Page) {
-  // Coffee "with milk" is ambiguous → the dark-chocolate confirm branch appears.
-  await pick(page, 'milk_based')
-  await pick(page, 'dark_70')
-
-  // Back revisits the previous answer (prefilled, not removed); confirming a
-  // revisit is explicit, so re-pick then Next to advance.
-  await page.getByTestId('quiz-back').click()
-  await expect(page.locator('label:has([data-value="dark_70"])')).toBeVisible()
-  await pick(page, 'dark_70')
-  await page.getByTestId('quiz-next').click()
-
-  await pick(page, 'some') // direct bitterness anchor
-  await pick(page, 'strong') // fizzy or flat → bubbles
-  await pick(page, 'rich') // sweet tooth → sweetness/body
-  await pick(page, 'neutral') // roasted flavor → roasty
-  await pick(page, 'medium') // session strength → abv_affinity
-  await pick(page, 'love') // sour → triggers the wild/funky refinement
-  await pick(page, 'bright') // sour_wild
-  await pick(page, 'okay') // smoked (no extreme avoid → no CATA)
-  await pick(page, 'high') // adventurous → novelty
-
-  // Optional capstone flavor-cue grid → skip it.
-  await page.getByTestId('quiz-skip').click()
-
-  // Finish; /try swaps the quiz for the guest results view.
-  await page.getByTestId('quiz-submit').click()
-}
-
 // Sign IN the existing +clerk_test user through our custom /signin page. The
 // e2e reuses an already-registered email (E2E_CLERK_EMAIL), so signing UP would
 // fail; the funnel still lands a returning user on /recommendations via the
-// signed-in hydration branch. Mirrors onboarding.spec's proven sign-in flow:
-// navigate to /signin with next=/recommendations, email + password, then the
-// new-device email code (424242 for +clerk_test) into the one-time-code input,
-// and wait to leave /signin.
+// signed-in hydration branch.
 async function signInExistingUser(page: Page) {
-  await page.goto('/signin/$?next=/recommendations')
+  await openSignIn(page, '/recommendations')
   await completePasswordSignIn(page)
 }
 
@@ -75,7 +38,8 @@ test('guest takes the quiz, hits the 3-result gate, signs in, and lands on full 
   // --- Guest funnel: /try, UNAUTHENTICATED, no sign-in first. ---
   await page.goto('/try')
   await assertAppLoaded(page)
-  await walkQuiz(page)
+  await dismissAgeGate(page)
+  await walkAdaptiveQuiz(page)
 
   // The guest results view replaces the quiz once recommendations resolve.
   const visible = page.getByTestId('guest-results-visible')

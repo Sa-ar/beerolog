@@ -388,7 +388,7 @@ function MultiView({
         {q.options.map((option) => {
           const on = selected.includes(option)
           return (
-            <label key={option} className={optionCardClass(on)}>
+            <label key={option} data-testid={`quiz-option-${option}`} className={optionCardClass(on)}>
               <input
                 type="checkbox"
                 data-value={option}
