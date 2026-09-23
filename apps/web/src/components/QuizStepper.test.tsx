@@ -149,6 +149,15 @@ describe('QuizStepper', () => {
     expect(screen.getByTestId('quiz-next')).toBeInTheDocument()
   })
 
+  it('auto-advances when a pointer-armed click reports detail 0 (Playwright labels)', () => {
+    renderStepper(vi.fn())
+    const option = screen.getByTestId('quiz-option-black')
+    fireEvent.pointerDown(option)
+    fireEvent.click(option, { detail: 0 })
+    expect(screen.getByLabelText(en.onboarding.questions.bitterness_direct)).toBeInTheDocument()
+    expect(screen.queryByTestId('quiz-next')).not.toBeInTheDocument()
+  })
+
   it('steps back, restoring the previous question', async () => {
     const user = userEvent.setup()
     const onComplete = vi.fn()

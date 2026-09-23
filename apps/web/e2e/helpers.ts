@@ -13,6 +13,7 @@ import {
   clerkInstanceKind,
   cookieOrigin,
   nextQuizSurfaceAction,
+  quizAdvanceAfterPick,
   readClerkPublishableKeyFromHtml,
   sessionCookies,
   shouldInstallClerkTestingToken,
@@ -50,6 +51,11 @@ export async function prepareBrowser(page: Page): Promise<void> {
       } catch {
         // private mode / quota
       }
+    }
+    try {
+      localStorage.setItem('analytics_consent', 'denied')
+    } catch {
+      // private mode / quota
     }
   }, GUEST_STORAGE_KEYS)
 }
@@ -215,6 +221,42 @@ export async function pickQuizOption(page: Page, value: string): Promise<void> {
   await option.click()
 }
 
+type QuizThereafter = { option: string } | { testId: string }
+
+function thereafterLocator(page: Page, thereafter: QuizThereafter): Locator {
+  return 'option' in thereafter
+    ? page
+        .getByTestId(`quiz-option-${thereafter.option}`)
+        .or(page.locator(`label:has([data-value="${thereafter.option}"])`))
+    : page.getByTestId(thereafter.testId)
+}
+
+/** First-pass pick: auto-advance when the pointer path fires; otherwise
+ *  commit via the explicit Next that keyboard / detail-0 clicks show. */
+export async function pickQuizOptionAndAdvance(
+  page: Page,
+  value: string,
+  thereafter: QuizThereafter,
+): Promise<void> {
+  await pickQuizOption(page, value)
+  const target = thereafterLocator(page, thereafter)
+  const next = page.getByTestId('quiz-next')
+  await Promise.race([
+    target.waitFor({ state: 'visible', timeout: 8_000 }),
+    next.waitFor({ state: 'visible', timeout: 8_000 }),
+  ]).catch(() => undefined)
+  const action = quizAdvanceAfterPick({
+    pickedStillVisible: await page
+      .getByTestId(`quiz-option-${value}`)
+      .or(page.locator(`label:has([data-value="${value}"])`))
+      .isVisible()
+      .catch(() => false),
+    nextButtonVisible: await next.isVisible().catch(() => false),
+  })
+  if (action === 'click-next') await next.click()
+  await expect(target).toBeVisible()
+}
+
 export async function ensureQuizQuestionVisible(page: Page): Promise<void> {
   const deadline = Date.now() + 20_000
   let lastAction = 'wait'
@@ -266,8 +308,9 @@ export async function walkAdaptiveQuiz(page: Page): Promise<void> {
   await ensureQuizQuestionVisible(page)
 
   // Coffee "with milk" is ambiguous → the dark-chocolate confirm branch appears.
-  await pickQuizOption(page, 'milk_based')
-  await pickQuizOption(page, 'dark_70')
+  // First-pass may auto-advance (pointer) or require Next (detail-0 click).
+  await pickQuizOptionAndAdvance(page, 'milk_based', { option: 'dark_70' })
+  await pickQuizOptionAndAdvance(page, 'dark_70', { option: 'some' })
 
   // Back revisits the previous answer (prefilled, not removed); confirming a
   // revisit is explicit, so re-pick then Next to advance.
@@ -278,16 +321,17 @@ export async function walkAdaptiveQuiz(page: Page): Promise<void> {
   await pickQuizOption(page, 'dark_70')
   await page.getByTestId('quiz-next').click()
 
-  await pickQuizOption(page, 'some') // direct bitterness anchor
-  await pickQuizOption(page, 'strong') // fizzy or flat → bubbles
-  await pickQuizOption(page, 'rich') // sweet tooth → sweetness/body
-  await pickQuizOption(page, 'neutral') // roasted flavor → roasty
-  await pickQuizOption(page, 'medium') // session strength → abv_affinity
-  await pickQuizOption(page, 'love') // sour → triggers the wild/funky refinement
-  await pickQuizOption(page, 'bright') // sour_wild
-  await pickQuizOption(page, 'okay') // smoked (no extreme avoid → no CATA)
-  await pickQuizOption(page, 'high') // adventurous → novelty
+  await pickQuizOptionAndAdvance(page, 'some', { option: 'strong' })
+  await pickQuizOptionAndAdvance(page, 'strong', { option: 'rich' })
+  await pickQuizOptionAndAdvance(page, 'rich', { option: 'neutral' })
+  await pickQuizOptionAndAdvance(page, 'neutral', { option: 'medium' })
+  await pickQuizOptionAndAdvance(page, 'medium', { option: 'love' })
+  await pickQuizOptionAndAdvance(page, 'love', { option: 'bright' })
+  await pickQuizOptionAndAdvance(page, 'bright', { option: 'okay' })
+  await pickQuizOptionAndAdvance(page, 'okay', { option: 'high' })
+  await pickQuizOptionAndAdvance(page, 'high', { testId: 'quiz-skip' })
 
   await page.getByTestId('quiz-skip').click()
+  await expect(page.getByTestId('quiz-submit')).toBeVisible()
   await page.getByTestId('quiz-submit').click()
 }

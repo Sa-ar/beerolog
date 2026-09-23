@@ -10,7 +10,11 @@ export const CONTINUE_OR_SIGN_IN_NAME = /^(Continue|Sign in|המשך|התחבר�
 export const AGE_CONFIRM_NAME = /I am 18|אני בן/
 export const OTP_FIELD_NAME = /verification code|one-time|קוד אימות/i
 
-export const GUEST_STORAGE_KEYS = ['beerolog:guest_answers', 'beerolog_try_quiz'] as const
+export const GUEST_STORAGE_KEYS = [
+  'beerolog:guest_answers',
+  'beerolog_try_quiz',
+  'beerolog_onboarding_quiz',
+] as const
 
 /** Short budget: never let clerk.loaded eat the 90s Playwright test timeout. */
 export const CLERK_LOADED_BUDGET_MS = 8_000
@@ -113,6 +117,18 @@ export function shouldInstallClerkTestingToken(opts: {
 }): boolean {
   if (opts.baseUrl && hostLooksLikeProductionClerk(opts.baseUrl)) return false
   return shouldUseClerkTestingHelpers({ setupKey: opts.setupKey })
+}
+
+export type QuizAdvanceAfterPick = 'click-next' | 'already-advanced'
+
+/** First-pass pointer auto-advances (option leaves). Keyboard / detail-0
+ *  clicks only select and show Next — the e2e must click it. */
+export function quizAdvanceAfterPick(state: {
+  pickedStillVisible: boolean
+  nextButtonVisible: boolean
+}): QuizAdvanceAfterPick {
+  if (state.pickedStillVisible && state.nextButtonVisible) return 'click-next'
+  return 'already-advanced'
 }
 
 export type QuizSurfaceAction = 'blocked' | 'dismiss-age-gate' | 'retake' | 'ready' | 'wait'

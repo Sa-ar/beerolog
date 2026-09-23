@@ -9,6 +9,7 @@ import {
   cookieOrigin,
   hostLooksLikeProductionClerk,
   nextQuizSurfaceAction,
+  quizAdvanceAfterPick,
   readClerkPublishableKeyFromHtml,
   sessionCookies,
   shouldInstallClerkTestingToken,
@@ -121,6 +122,23 @@ describe('shouldInstallClerkTestingToken', () => {
         baseUrl: 'https://beerolog-git-staging-saarstudio.vercel.app',
       }),
     ).toBe(true)
+  })
+})
+
+describe('quizAdvanceAfterPick', () => {
+  it('clicks Next when the pick stayed on the same question (no auto-advance)', () => {
+    expect(
+      quizAdvanceAfterPick({ pickedStillVisible: true, nextButtonVisible: true }),
+    ).toBe('click-next')
+  })
+
+  it('does not click Next after a pointer auto-advance remounts the question', () => {
+    expect(
+      quizAdvanceAfterPick({ pickedStillVisible: false, nextButtonVisible: false }),
+    ).toBe('already-advanced')
+    expect(
+      quizAdvanceAfterPick({ pickedStillVisible: false, nextButtonVisible: true }),
+    ).toBe('already-advanced')
   })
 })
 

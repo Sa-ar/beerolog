@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import { Heading } from '@beerolog/ui'
 import { useTranslation } from 'react-i18next'
 import { QuizIcon } from './quiz-icons'
@@ -64,6 +65,11 @@ export function QuizChips<T extends string>({
   onPointerPick?: ((v: T) => void) | undefined
 }) {
   const { t } = useTranslation()
+  // Playwright (and some assistive tools) activate a <label> via a click
+  // whose `detail` is 0. Keyboard arrows also fire detail-0 clicks — those
+  // must NOT auto-advance. Arm on pointerdown so a real tap/mouse still
+  // commits when the trailing click reports detail 0.
+  const pointerArmed = useRef<T | null>(null)
   return (
     <div role="radiogroup" aria-label={title} data-testid="quiz-question" className="mt-6">
       <Heading level={2} className={`${subtitle ? 'mb-1' : 'mb-3'} font-display text-xl font-semibold uppercase tracking-wide text-neutral-900`}>
@@ -86,12 +92,17 @@ export function QuizChips<T extends string>({
               key={opt}
               data-testid={`quiz-option-${opt}`}
               className={optionCardClass(selected)}
-              // Auto-advance on real pointer clicks only. A keyboard arrow that
-              // changes the radio also fires `click`, but with detail 0; real
-              // taps/clicks have detail >= 1. Committing here (on the current
-              // card) also avoids the pointerup -> remount -> trailing-click race.
+              onPointerDown={() => {
+                pointerArmed.current = opt
+              }}
+              // Auto-advance on pointer/tap only. A keyboard arrow that
+              // changes the radio also fires `click` with detail 0 and no
+              // pointerdown. Playwright label clicks often have detail 0
+              // but still dispatch pointerdown — those must advance.
               onClick={(e) => {
-                if (onPointerPick && e.detail > 0) onPointerPick(opt)
+                const fromPointer = e.detail > 0 || pointerArmed.current === opt
+                pointerArmed.current = null
+                if (onPointerPick && fromPointer) onPointerPick(opt)
               }}
             >
               <input

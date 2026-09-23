@@ -42,7 +42,21 @@ test('guest takes the quiz, hits the 3-result gate, signs in, and lands on full 
   await walkAdaptiveQuiz(page)
 
   // The guest results view replaces the quiz once recommendations resolve.
+  // A CORS/API miss renders the retry alert instead of the cards — fail on
+  // that explicitly so the next red run names the request, not a missing testid.
   const visible = page.getByTestId('guest-results-visible')
+  const retry = page.getByRole('alert')
+  await Promise.race([
+    visible.waitFor({ state: 'visible' }),
+    retry.waitFor({ state: 'visible' }),
+  ]).catch(() => undefined)
+  if ((await retry.isVisible().catch(() => false)) && !(await visible.isVisible().catch(() => false))) {
+    throw new Error(
+      `guest recommendations request failed (${await retry.innerText()}); ` +
+        'POST /guest-recommendations never painted guest-results-visible ' +
+        `(url=${page.url()})`,
+    )
+  }
   await expect(visible).toBeVisible()
 
   // Gate: exactly `unlocked_count` fully-visible/interactive result cards.
