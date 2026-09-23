@@ -84,6 +84,7 @@ export function QuizChips<T extends string>({
             // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events
             <label
               key={opt}
+              data-testid={`quiz-option-${opt}`}
               className={optionCardClass(selected)}
               // Auto-advance on real pointer clicks only. A keyboard arrow that
               // changes the radio also fires `click`, but with detail 0; real

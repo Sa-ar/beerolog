@@ -11,9 +11,14 @@ export function AgeVerificationGate({ initialVerified }: { initialVerified: bool
   const { isLoaded, isSignedIn } = useAuth()
   const { t } = useTranslation()
 
-  // Signed-in users verified their age at sign-up; don't gate them.
-  // Hide while auth is still loading to avoid a flash of the dialog.
-  if (!mounted || !isLoaded || isSignedIn) {
+  // Cookie already verified — never mount.
+  // Signed-in users skip once Clerk knows they are signed in. Do NOT hide the
+  // gate while Clerk is still loading: that left guests with no confirm button
+  // and, once Clerk hydrated, an inert dialog over quiz-question.
+  if (!mounted) {
+    return null
+  }
+  if (isLoaded && isSignedIn) {
     return null
   }
 
@@ -30,7 +35,11 @@ export function AgeVerificationGate({ initialVerified }: { initialVerified: bool
 
   return (
     <Dialog open={gateOpen} dismissible={false} onOpenChangeComplete={handleOpenChangeComplete}>
-      <DialogContent aria-labelledby="age-gate-title" aria-describedby="age-gate-description">
+      <DialogContent
+        data-testid="age-gate"
+        aria-labelledby="age-gate-title"
+        aria-describedby="age-gate-description"
+      >
         {denied ? (
           <>
             <DialogTitle id="age-gate-title">{t('ageGate.deniedTitle')}</DialogTitle>
@@ -42,13 +51,19 @@ export function AgeVerificationGate({ initialVerified }: { initialVerified: bool
             <DialogDescription id="age-gate-description">{t('ageGate.body')}</DialogDescription>
             <p dir="auto" className="mt-3 text-sm font-medium text-amber-900">{t('footer.alcoholWarning')}</p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row-reverse">
-              <Button type="button" className="w-full sm:w-auto" onClick={handleConfirm}>
+              <Button
+                type="button"
+                className="w-full sm:w-auto"
+                data-testid="age-gate-confirm"
+                onClick={handleConfirm}
+              >
                 {t('ageGate.confirm')}
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 className="w-full sm:w-auto"
+                data-testid="age-gate-deny"
                 onClick={() => setDenied(true)}
               >
                 {t('ageGate.deny')}
