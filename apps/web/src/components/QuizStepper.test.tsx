@@ -56,6 +56,8 @@ describe('QuizStepper', () => {
     const user = userEvent.setup()
     const onComplete = vi.fn()
     renderStepper(onComplete)
+    expect(screen.getByTestId('quiz-question')).toBeVisible()
+    expect(screen.getByTestId('quiz-option-milk_based')).toBeInTheDocument()
 
     // Unambiguous core path (coffee=black skips chocolate; sour=okay skips
     // sour_wild; no extreme avoid skips the CATA).

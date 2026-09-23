@@ -299,18 +299,21 @@ function SingleView({
   const { t } = useTranslation()
   const [pending, setPending] = useState<string | null>(initial)
   return (
-    <div className="space-y-5 animate-[fadeIn_200ms_ease-out]">
-      <QuizChips<string>
-        title={t(`onboarding.questions.${q.id}`)}
-        subtitle={t(`onboarding.subtitles.${q.id}`, { defaultValue: '' }) || undefined}
-        group={q.group}
-        options={q.options}
-        value={pending}
-        onChange={setPending}
-        // First pass: a pointer tap auto-advances; keyboard selection only sets
-        // the value and surfaces an explicit Next. Revisits never auto-advance.
-        onPointerPick={revisit ? undefined : (v) => onFrontierCommit(v as Value)}
-      />
+    // quiz-question stays outside the fade so opacity:0 cannot hide the testid.
+    <div data-testid="quiz-step" className="space-y-5">
+      <div className="animate-[fadeIn_200ms_ease-out]">
+        <QuizChips<string>
+          title={t(`onboarding.questions.${q.id}`)}
+          subtitle={t(`onboarding.subtitles.${q.id}`, { defaultValue: '' }) || undefined}
+          group={q.group}
+          options={q.options}
+          value={pending}
+          onChange={setPending}
+          // First pass: a pointer tap auto-advances; keyboard selection only sets
+          // the value and surfaces an explicit Next. Revisits never auto-advance.
+          onPointerPick={revisit ? undefined : (v) => onFrontierCommit(v as Value)}
+        />
+      </div>
       {revisit ? (
         <NavRow
           hasPrev={hasPrev}
@@ -388,7 +391,7 @@ function MultiView({
         {q.options.map((option) => {
           const on = selected.includes(option)
           return (
-            <label key={option} className={optionCardClass(on)}>
+            <label key={option} data-testid={`quiz-option-${option}`} className={optionCardClass(on)}>
               <input
                 type="checkbox"
                 data-value={option}

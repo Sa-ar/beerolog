@@ -133,4 +133,18 @@ describe('/try guest preview', () => {
     await waitFor(() => expect(apiFetchMock).toHaveBeenCalledTimes(1))
     expect(await screen.findByTestId('try-results')).toBeInTheDocument()
   })
+
+  it('reveals quiz-question after retake so a stored guest session can walk again', async () => {
+    localStorage.setItem(
+      GUEST_ANSWERS_KEY,
+      JSON.stringify({ coffee: 'black', water: 'strong' }),
+    )
+    const user = userEvent.setup()
+    renderTry()
+
+    expect(screen.queryByTestId('quiz-question')).not.toBeInTheDocument()
+    await user.click(screen.getByTestId('try-retake'))
+    expect(screen.getByTestId('quiz-question')).toBeInTheDocument()
+    expect(screen.getByTestId('quiz-option-milk_based')).toBeInTheDocument()
+  })
 })

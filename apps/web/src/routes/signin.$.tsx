@@ -165,6 +165,7 @@ function SignInForm() {
           label={t('auth.email')}
           type="email"
           autoComplete="email"
+          data-testid="auth-email"
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -173,6 +174,7 @@ function SignInForm() {
           label={t('auth.password')}
           type="password"
           autoComplete="current-password"
+          data-testid="auth-password"
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}

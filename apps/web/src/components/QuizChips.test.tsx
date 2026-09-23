@@ -17,6 +17,9 @@ describe('QuizChips', () => {
       'en',
     )
     expect(screen.getByRole('radiogroup', { name: /coffee/i })).toBeInTheDocument()
+    expect(screen.getByTestId('quiz-question')).toBeInTheDocument()
+    expect(screen.getByTestId('quiz-option-black')).toBeInTheDocument()
+    expect(screen.getByTestId('quiz-option-milk')).toBeInTheDocument()
     const radios = screen.getAllByRole('radio')
     expect(radios).toHaveLength(2)
     expect(screen.getByRole('radio', { checked: true })).toBe(radios[0])

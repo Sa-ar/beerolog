@@ -54,6 +54,20 @@ describe('AgeVerificationGate', () => {
     expect(container).toBeEmptyDOMElement()
   })
 
+  it('still hides when the cookie already verified even if Clerk has not loaded', () => {
+    useAuthMock.mockReturnValue({ isLoaded: false, isSignedIn: false })
+    const { container } = renderGate(true)
+    expect(container).toBeEmptyDOMElement()
+  })
+
+  it('shows the age gate while Clerk is still loading so e2e can dismiss it', () => {
+    useAuthMock.mockReturnValue({ isLoaded: false, isSignedIn: false })
+    renderGate(false)
+    expect(screen.getByTestId('age-gate')).toBeInTheDocument()
+    expect(screen.getByTestId('age-gate-confirm')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: en.ageGate.confirm })).toBeInTheDocument()
+  })
+
   it('shows the age gate when unverified', () => {
     renderGate(false)
     expect(screen.getByRole('dialog')).toBeInTheDocument()
