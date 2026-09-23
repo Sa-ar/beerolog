@@ -4,10 +4,16 @@ from typing import Literal
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-# Vercel preview URLs for the beerolog web project (team slug
-# saars-projects-d2973f9d), e.g.
-# https://beerolog-git-<branch>-<hash>-saars-projects-d2973f9d.vercel.app
-VERCEL_PREVIEW_ORIGIN_REGEX = r"^https://beerolog-[a-z0-9-]+-saars-projects-d2973f9d\.vercel\.app$"
+# Vercel preview URLs for the beerolog web project. The app moved from the
+# personal team (`saars-projects-d2973f9d`) to `saarstudio`; keep both so
+# leftover personal-team aliases and the live staging host
+# `https://beerolog-git-staging-saarstudio.vercel.app` pass CORS + Clerk azp.
+# Deployment URLs look like:
+#   https://beerolog-git-<branch>-saarstudio.vercel.app
+#   https://beerolog-git-<branch>-<hash>-saars-projects-d2973f9d.vercel.app
+VERCEL_PREVIEW_ORIGIN_REGEX = (
+    r"^https://beerolog-[a-z0-9-]+-(?:saarstudio|saars-projects-d2973f9d)\.vercel\.app$"
+)
 
 
 class Settings(BaseSettings):

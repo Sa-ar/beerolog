@@ -23,17 +23,21 @@ def test_cors_origins_split_from_csv() -> None:
 
 
 def test_project_preview_origins_allowed_in_every_env() -> None:
+    personal = "https://beerolog-git-tech-debt-react-que-deaf43-saars-projects-d2973f9d.vercel.app"
+    studio = "https://beerolog-git-staging-saarstudio.vercel.app"
     for env in ("development", "preview", "production"):
         s = Settings(app_env=env)  # type: ignore[arg-type]
-        assert re.match(
-            s.effective_cors_origin_regex,
-            "https://beerolog-git-tech-debt-react-que-deaf43-saars-projects-d2973f9d.vercel.app",
-        ), env
+        assert re.match(s.effective_cors_origin_regex, personal), env
+        assert re.match(s.effective_cors_origin_regex, studio), env
 
 
 def test_preview_regex_rejects_foreign_origin() -> None:
     s = Settings(app_env="production")  # type: ignore[arg-type]
     assert not re.match(s.effective_cors_origin_regex, "https://evil.example.com")
+    assert not re.match(
+        s.effective_cors_origin_regex,
+        "https://beerolog-git-staging-evil-team.vercel.app",
+    )
 
 
 def test_explicit_origin_regex_overrides_default() -> None:

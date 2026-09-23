@@ -48,6 +48,7 @@ Set in the `beerolog-api` project for **Production** (and Preview if needed):
 | `CLERK_PUBLISHABLE_KEY` | Clerk publishable key |
 | `API_SECRET` | `openssl rand -hex 32` — must not be `dev-secret` |
 | `CORS_ALLOWED_ORIGINS` | `https://beerolog.vercel.app,http://localhost:3000` (comma-separated) |
+| `CORS_ALLOWED_ORIGIN_REGEX` | optional override of the built-in preview regex (`saarstudio` + legacy `saars-projects-d2973f9d` hosts). Leave unset unless you need a tighter allowlist. |
 | `LOG_LEVEL` | `INFO` (optional) |
 
 Startup checks in `app/startup_checks.py` **fail fast** in production if secrets are missing, `API_SECRET` is still the dev default, or CORS origins are empty/invalid.
