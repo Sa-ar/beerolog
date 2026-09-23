@@ -97,8 +97,8 @@ export function hostLooksLikeProductionClerk(baseUrl: string): boolean {
  * is the hang that made clerk.loaded() sit for 90s.
  */
 export function shouldUseClerkTestingHelpers(opts: {
-  pageKey?: string | null
-  setupKey?: string | null
+  pageKey?: string | null | undefined
+  setupKey?: string | null | undefined
 }): boolean {
   const page = clerkInstanceKind(opts.pageKey)
   const setup = clerkInstanceKind(opts.setupKey)
@@ -108,8 +108,8 @@ export function shouldUseClerkTestingHelpers(opts: {
 }
 
 export function shouldInstallClerkTestingToken(opts: {
-  setupKey?: string | null
-  baseUrl?: string | null
+  setupKey?: string | null | undefined
+  baseUrl?: string | null | undefined
 }): boolean {
   if (opts.baseUrl && hostLooksLikeProductionClerk(opts.baseUrl)) return false
   return shouldUseClerkTestingHelpers({ setupKey: opts.setupKey })
